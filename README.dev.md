@@ -157,8 +157,8 @@ python -m build
 python -m twine upload --repository testpypi dist/*
 ```
 
-Visit
-[https://test.pypi.org/project/anatrans](https://test.pypi.org/project/anatrans)
+Visit [https://test.pypi.org/](https://test.pypi.org)
+<!-- [https://test.pypi.org/project/anatrans](https://test.pypi.org/project/anatrans) -->
 and verify that your package was uploaded successfully. Keep the terminal open, we'll need it later.
 
 In a new terminal, without an activated virtual environment or an env directory:

@@ -13,7 +13,7 @@
 | **Other best practices**           | &nbsp; |
 | Static analysis                    | [![workflow scq badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_anatrans&metric=alert_status)](https://sonarcloud.io/dashboard?id=MiBiPreT_anatrans) |
 | Coverage                           | [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_anatrans&metric=coverage)](https://sonarcloud.io/dashboard?id=MiBiPreT_anatrans) |
-| Documentation                      | [![Documentation Status](https://readthedocs.org/projects/anatrans/badge/?version=latest)](https://anatrans.readthedocs.io/en/latest/?badge=latest) |
+| Documentation                      | [![documentation](https://github.com/MiBiPreT/anatrans/actions/workflows/documentation.yml/badge.svg)](https://github.com/MiBiPreT/anatrans/actions/workflows/documentation.yml) |
 | **GitHub Actions**                 | &nbsp; |
 | Build                              | [![build](https://github.com/MiBiPreT/anatrans/actions/workflows/build.yml/badge.svg)](https://github.com/MiBiPreT/anatrans/actions/workflows/build.yml) |
 | Citation data consistency          | [![cffconvert](https://github.com/MiBiPreT/anatrans/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/MiBiPreT/anatrans/actions/workflows/cffconvert.yml) |

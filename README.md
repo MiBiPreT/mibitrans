@@ -7,7 +7,7 @@
 | (1/5) code repository              | [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)](https://github.com/MiBiPreT/anatrans) |
 | (2/5) license                      | [![github license badge](https://img.shields.io/github/license/MiBiPreT/anatrans)](https://github.com/MiBiPreT/anatrans) |
 | (3/5) community registry           | [![RSD](https://img.shields.io/badge/rsd-anatrans-00a3e3.svg)](https://www.research-software.nl/software/anatrans) [![workflow pypi badge](https://img.shields.io/pypi/v/anatrans.svg?colorB=blue)](https://pypi.python.org/project/anatrans/) |
-| (4/5) citation                     | [![DOI](https://zenodo.org/badge/DOI/<replace-with-created-DOI>.svg)](https://doi.org/<replace-with-created-DOI>) |
+| (4/5) citation                     | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10877886.svg)](https://doi.org/10.5281/zenodo.10877886) |
 | (5/5) checklist                    | [![workflow cii badge](https://bestpractices.coreinfrastructure.org/projects/<replace-with-created-project-identifier>/badge)](https://bestpractices.coreinfrastructure.org/projects/<replace-with-created-project-identifier>) |
 | howfairis                          | [![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu) |
 | **Other best practices**           | &nbsp; |

@@ -24,8 +24,6 @@
 
 A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
 
-The project setup is documented in [project_setup.md](project_setup.md). Feel free to remove this document (and/or the link to this document) if you don't need it.
-
 ## Installation
 
 To install anatrans from GitHub repository, do:

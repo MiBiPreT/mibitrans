@@ -1,5 +1,8 @@
 name: documentation
 
+permissions: write-all
+
+
 on:
   push:
     branches:
@@ -13,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      permissions:
-      contents: write
       - uses: actions/checkout@v3
 
       - name: Set up Python

@@ -16,7 +16,7 @@ python -m pip install .
 
 ## Documentation
 
-Include a link to your project's full documentation here.
+[See the full `anatrans` documentation here](https://mibipret.github.io/anatrans/)
 
 ## Contributing
 

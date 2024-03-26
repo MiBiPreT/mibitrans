@@ -6,7 +6,7 @@
 | :-- | :--  |
 | (1/5) code repository              | [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)](https://github.com/MiBiPreT/anatrans) |
 | (2/5) license                      | [![github license badge](https://img.shields.io/github/license/MiBiPreT/anatrans)](https://github.com/MiBiPreT/anatrans) |
-| (3/5) community registry           | To be fixed.
+| (3/5) community registry           | [![RSD](https://img.shields.io/badge/rsd-anatrans-00a3e3.svg)](https://www.research-software.nl/software/anatrans)
 | (4/5) citation                     | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10877886.svg)](https://doi.org/10.5281/zenodo.10877886) |
 | (5/5) checklist                    | [![workflow cii badge](https://bestpractices.coreinfrastructure.org/projects/8710/badge)](https://bestpractices.coreinfrastructure.org/projects/8710) |
 | howfairis                          | [![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu) |

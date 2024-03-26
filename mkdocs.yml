@@ -81,11 +81,5 @@ extra_javascript:
 
 extra:
   social:
-#    - icon: fontawesome/brands/python
-#      link: https://pypi.org/project/nanopub
     - icon: fontawesome/brands/github
-      link: https://github.com/aiproteomics
-    # - icon: fontawesome/brands/docker
-    #   link: https://github.com/orgs/fair-workflows/packages
-    # - icon: fontawesome/brands/twitter
-    #   link: https://twitter.com/
+      link: https://github.com/MiBiPreT/anatrans

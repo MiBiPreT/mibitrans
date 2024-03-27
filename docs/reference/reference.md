@@ -1,0 +1,3 @@
+# `anatrans` API reference
+
+::: anatrans

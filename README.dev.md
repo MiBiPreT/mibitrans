@@ -81,35 +81,19 @@ You can enable automatic linting with `ruff` on commit by enabling the git hook 
 git config --local core.hooksPath .githooks
 ```
 
-## Generating the API docs
+## Testing docs locally
 
+To build the documentation locally, first make sure `mkdocs` and its dependencies are installed:
 ```shell
-cd docs
-make html
+python -m pip install .[doc]
 ```
 
-The documentation will be in `docs/_build/html`
-
-If you do not have `make` use
-
+Then you can build the documentation and serve it locally with
 ```shell
-sphinx-build -b html docs docs/_build/html
+mkdocs serve
 ```
 
-To find undocumented Python objects run
-
-```shell
-cd docs
-make coverage
-cat _build/coverage/python.txt
-```
-
-To [test snippets](https://www.sphinx-doc.org/en/master/usage/extensions/doctest.html) in documentation run
-
-```shell
-cd docs
-make doctest
-```
+This will return a URL (e.g. `http://127.0.0.1:8000/anatrans/`) where the docs site can be viewed.
 
 ## Versioning
 
@@ -131,10 +115,9 @@ This section describes how to make a release in 3 parts:
 
 ### (1/3) Preparation
 
-1. Update the <CHANGELOG.md> (don't forget to update links at bottom of page)
-2. Verify that the information in [`CITATION.cff`](CITATION.cff) is correct.
-3. Make sure the [version has been updated](#versioning).
-4. Run the unit tests with `pytest -v`
+1. Verify that the information in [`CITATION.cff`](CITATION.cff) is correct.
+1. Make sure the [version has been updated](#versioning).
+1. Run the unit tests with `pytest -v`
 
 ### (2/3) PyPI
 

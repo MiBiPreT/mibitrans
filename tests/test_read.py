@@ -1,6 +1,6 @@
 """Author: Jorrit Bakker.
 
-Module handling data input in the form of a dictionary.
+Module handling testing of data input functionality
 """
 
 import pytest

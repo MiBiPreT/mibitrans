@@ -29,7 +29,7 @@ fromdict_dictionary = {
             "Do", "Do2", "O2", "oxygen", "Oxygen", "o2"],
     "dNO3" : ["dNO3", "DNO3", "dN", "dNO", "delta_nitrate", "delta_NO3", "dno3", "Dno3", "d_nitrate", "nitrate",
               "Nitrate", "NO3", "no3"],
-    "Fe2+" : ["Fe2+", "Fe2", "Fe", "ferrous_iron", "fe", "fe2", "fe2+", "iron", "Iron", "Ferrous_Iron", "ferrous_iron"],
+    "Fe2" : ["Fe2", "Fe", "ferrous_iron", "fe", "fe2", "fe2+", "iron", "Iron", "Ferrous_Iron", "ferrous_iron"],
     "dSO4" : ["dSO4", "dSO", "dS", "DSO4", "dSO42-", "sulfate", "delta_sulfate", "d_sulfate", "SO4", "so4", "SO42-",
               "delta_SO4"],
     "CH4" : ["CH4", "ch4", "methane", "Methane", "CH", "ch"],

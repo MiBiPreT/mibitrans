@@ -2,8 +2,12 @@
 
 Module handling data input in the form of a dictionary.
 """
+import sys
+
+sys.path.insert(1, "./anatrans/data")
 
 from parameter_names import fromdict_dictionary
+
 
 def from_dict(dictionary: dict,
               check_input: bool = True,

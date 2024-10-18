@@ -1,8 +1,9 @@
 """Author: Jorrit Bakker.
 
-File containing valid parameter names for input in the form of a dictionary.
+File containing various dictionaries used for evaluation of names, value types and units of input data.
 """
 
+# Dictionary with possible input variable names as value and the variable name used in the package as key.
 key_dictionary = {
     "v" : ["v", "V", "velocity", "vel", "velo"],
     "k" : ["k", "K", "hydraulic conductivity", "conductivity", "hydraulic_conductivity"],
@@ -37,13 +38,17 @@ key_dictionary = {
     "CH4" : ["CH4", "ch4", "methane", "Methane", "CH", "ch"],
 }
 
+# Dictionary representing which data types are allowed for each variable.
 datatype_dictionary = {
+    # Following parameters may be either floats or integers
     "int_float" : ["v", "k", "i", "n", "alpha_x", "alpha_y", "alpha_z", "lp", "R", "rho",
                       "Koc", "foc", "mu", "t_half", "l_model","w_model", "t_model", "d_source",
                       "m_total", "dO", "dNO3", "Fe2", "dSO4", "CH4"],
+    # Following parameters may be floats, integers or arrays
     "float_array" : ["c_source"]
 }
 
+# Dictionary containing every input variable to serve as example.
 example_dictionary = {
     "v": 1,
     "k": 1,

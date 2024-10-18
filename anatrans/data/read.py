@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(1, "./anatrans/data")
 
-from parameter_names import fromdict_dictionary
+from parameter_information import key_dictionary
 
 
 def from_dict(dictionary: dict,
@@ -18,7 +18,7 @@ def from_dict(dictionary: dict,
     unknown_keys = []
     for key_input, value_input in dictionary.items():
         key_in_known_keys = False
-        for key_params, key_known in fromdict_dictionary.items():
+        for key_params, key_known in key_dictionary.items():
             if key_input in key_known:
                 params[key_params] = value_input
                 key_in_known_keys = True

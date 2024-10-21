@@ -35,8 +35,8 @@ class CheckInput:
 
         # Either retardation factor or bulk density, partition coefficient and fraction organic carbon
         # are required by the model.
-        if not("R" in self.keys or {"rho", "Koc", "foc"}.issubset(self.keys)):
-            self.missing_params.append("R or (rho, Koc and foc)")
+        if not("R" in self.keys or {"rho", "Koc", "foc", "n"}.issubset(self.keys)):
+            self.missing_params.append("R or (rho, Koc, foc and n)")
 
         # Source thickness is required by the model.
         if "d_source" not in self.keys:

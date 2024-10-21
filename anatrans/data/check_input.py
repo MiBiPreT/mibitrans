@@ -50,7 +50,7 @@ class CheckInput:
         if "m_total" not in self.keys:
             self.missing_params.append("m_total")
 
-        # Either decay coefficient or solute half-life is required for the linear_decay model.
+        # Either decay coefficient or solute half-life is required for the linear decay model.
         if self.mode == "linear_decay":
             if not("mu" in self.keys or "t_half" in self.keys):
                 self.missing_params.append("mu or t_half")

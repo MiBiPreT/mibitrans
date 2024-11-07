@@ -115,7 +115,7 @@ class CheckInput:
             success_flag = True
             if self.verbose:
                 print("All parameters are of the correct type and value.")
-        return(success_flag)
+        return success_flag
 
     def check_units(self):
         print("c")

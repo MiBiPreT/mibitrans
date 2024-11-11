@@ -79,12 +79,12 @@ class Transport:
         erf_z = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
                  - erf(-self.pars["d_source"] / (2 * np.sqrt(self.ay * self.xxx))))
 
-
         cxty = 1/8 * self.ccc0 * erfc_x * erf_y * erf_z
 
         return cxty, self.x, self.y, self.t
 
     def visualize_initial(self):
+        """Temporary function to check if initial condition is correct."""
         plt.plot(self.y, self.c0)
 
 def calculate_retardation(pars):

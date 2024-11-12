@@ -63,35 +63,18 @@ class Transport:
             print("initial method is unknown, defaulting to direct")
             self.initial_direct()
 
-
-        # Center y dimension on the centerline of the plume
-        # self.y = np.zeros(2 * len(self.source_y) - 1)
-        # self.y[0:len(self.source_y)] = -self.source_y[::-1]
-        # self.y[len(self.source_y) - 1:] = self.source_y
-        #
-        # self.c0 = np.zeros(2 * len(self.source_c) - 1)
-        # self.c0[0:len(self.source_c)] = self.source_c[::-1]
-        # self.c0[len(self.source_c) - 1:] = self.source_c
-
-        #self.y = np.arange(0, self.width, self.dy) - (self.width / 2)
-        self.t = np.arange(0.00001, parameters["t_model"] + 0.00001 + self.dt, self.dt)
-        #self.t[0] = self.t[0] + 0.9
-        print(self.t[0] + 0.9)
+        self.t = np.arange(self.dt, parameters["t_model"] + self.dt, self.dt)
         self.xxx = np.tile(self.x, (len(self.t), len(self.y), 1))
         self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
-
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
 
         if self.c0.ndim == 2:
             self.ccc0_list = [0] * len(self.c0[0,:])
-            print(len(self.ccc0_list))
-            print(self.c0[:,0])
             for i in range(len(self.ccc0_list)):
                 ccc0 = np.tile(self.c0[:, i][:, None], (len(self.t), 1, len(self.x)))
                 self.ccc0_list[i] = ccc0
-            print(ccc0.shape)
+
         elif self.c0.ndim == 1:
-            self.width = np.tile(self.source_y)
             self.ccc0 = np.tile(self.c0[:, None], (len(self.t), 1, len(self.x)))
         else:
             print("something went very wrong")
@@ -118,7 +101,7 @@ class Transport:
                 ccc0_source_list[i] = self.ccc0_list[i] * exp_source
                 cxyt = 1 / 8 * ccc0_source_list[i] * erfc_x * erf_y * erf_z
                 self.cxyt += cxyt
-            ccc0_array = np.asarray(ccc0_source_list)
+
         elif self.c0.ndim == 1:
             erf_y = (erf((self.yyy / 2) / (2 * np.sqrt(self.ay * self.xxx)))
                      - erf((self.yyy / 2) / (2 * np.sqrt(self.ay * self.xxx))))

@@ -91,6 +91,7 @@ class Transport:
                 self.ccc0_list[i] = ccc0
             print(ccc0.shape)
         elif self.c0.ndim == 1:
+            self.width = np.tile(self.source_y)
             self.ccc0 = np.tile(self.c0[:, None], (len(self.t), 1, len(self.x)))
         else:
             print("something went very wrong")
@@ -111,16 +112,16 @@ class Transport:
         if self.c0.ndim == 2:
             ccc0_source_list = [0] * len(self.ccc0_list)
             for i in range(len(self.c0[0,:])):
-                erf_y = (erf(((self.source_y[i+1] * 2) / 2) / (2 * np.sqrt(self.ay * self.xxx)))
-                         - erf((-(self.source_y[i+1] * 2) / 2) / (2 * np.sqrt(self.ay * self.xxx))))
+                erf_y = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
+                         - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
 
                 ccc0_source_list[i] = self.ccc0_list[i] * exp_source
                 cxyt = 1 / 8 * ccc0_source_list[i] * erfc_x * erf_y * erf_z
                 self.cxyt += cxyt
             ccc0_array = np.asarray(ccc0_source_list)
         elif self.c0.ndim == 1:
-            erf_y = (erf((self.yyy + self.width / 2) / (2 * np.sqrt(self.ay * self.xxx)))
-                     - erf((self.yyy - self.width / 2) / (2 * np.sqrt(self.ay * self.xxx))))
+            erf_y = (erf((self.yyy / 2) / (2 * np.sqrt(self.ay * self.xxx)))
+                     - erf((self.yyy / 2) / (2 * np.sqrt(self.ay * self.xxx))))
             self.cxyt = 1 / 8 * self.ccc0 * exp_source * erfc_x * erf_y * erf_z
 
         else:
@@ -136,11 +137,8 @@ class Transport:
 
         self.c0 = np.zeros((len(self.y), len(self.source_c) - 1))
         for i in range(len(self.source_c) - 1):
-            y_value = self.source_y[i + 1]
             con_value = self.source_c[i] - self.source_c[i+1]
-            y_pos_up = (np.abs(self.y - y_value)).argmin()
-            y_pos_down = (np.abs(self.y + y_value)).argmin()
-            self.c0[y_pos_down:y_pos_up+1, i] = con_value
+            self.c0[:, i] = con_value
 
     def initial_direct(self):
         """Function that calculates initial condition as a plume with varying concentration across its width."""

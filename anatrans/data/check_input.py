@@ -118,4 +118,5 @@ class CheckInput:
         return success_flag
 
     def check_units(self):
+        """Placeholder function that will check units for input parameters."""
         print("c")

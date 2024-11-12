@@ -3,7 +3,6 @@
 Module calculating the solution to the Domenico (1987) analytical model for different scenarios.
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import erf
 from scipy.special import erfc
@@ -73,7 +72,6 @@ class Transport:
 
     def no_decay(self):
         """Calculate the Domenico analytical model without decay."""
-
         inf_erfc_x = (self.xxx - self.v * self.ttt) / (2 * np.sqrt(self.ax * self.v * self.ttt))
         erfc_x = erfc(inf_erfc_x)
 

@@ -38,6 +38,10 @@ class CheckInput:
         if not("R" in self.keys or {"rho", "Koc", "foc", "n"}.issubset(self.keys)):
             self.missing_params.append("R or (rho, Koc, foc and n)")
 
+        # Porosity is required by the model.
+        if "n" not in self.keys:
+            self.missing_params.append("n")
+
         # Source thickness is required by the model.
         if "d_source" not in self.keys:
             self.missing_params.append("d_source")
@@ -118,4 +122,5 @@ class CheckInput:
         return success_flag
 
     def check_units(self):
+        """Placeholder function that will check units for input parameters."""
         print("c")

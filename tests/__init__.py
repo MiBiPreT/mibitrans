@@ -1,1 +1,1 @@
-""" Test """
+"""Test scripts for anatrans."""

@@ -9,6 +9,7 @@ from scipy.special import erf
 from scipy.special import erfc
 from anatrans.analysis.parameter_calculations import calculate_dispersivity
 from anatrans.analysis.parameter_calculations import calculate_flow_velocity
+from anatrans.analysis.parameter_calculations import calculate_linear_decay
 from anatrans.analysis.parameter_calculations import calculate_retardation
 from anatrans.analysis.parameter_calculations import calculate_source_decay
 from anatrans.data.check_input import CheckInput
@@ -18,19 +19,20 @@ class Transport:
     """Calculate analytical solution from variations of the Domenico analytical model."""
     def __init__(self,
                  parameters : dict,
+                 mode : str = None,
                  dx : float = None,
                  dy : float = None,
                  dt : float = None,
-                 initial : str = "direct",
                  verbose : bool = True
                  ) -> None:
         """Initialise the class, set up dimensions and output array."""
         self.pars = parameters
         self.verbose = verbose
         self.keys = self.pars.keys()
+        self.mode = mode
 
         # Ensure that every parameter required for calculations is present in pars
-        self.ck = CheckInput(self.pars)
+        self.ck = CheckInput(self.pars, self.mode)
         par_success = self.ck.check_parameter()
         if not par_success:
             raise ValueError("Not all required input parameters are given.")
@@ -40,10 +42,13 @@ class Transport:
         if not val_success:
             raise ValueError("Not all required input values are of the expected value or data type.")
 
-        self.R = calculate_retardation(self.pars)
         v = calculate_flow_velocity(self.pars)
+        self.R = calculate_retardation(self.pars)
         self.k_source = calculate_source_decay(self.pars)
         self.ax, self.ay, self.az = calculate_dispersivity(self.pars)
+
+        if self.mode == "linear_decay":
+            mu = calculate_linear_decay(self.pars)
 
         # For the rest of the calculation, retarded flow velocity is used.
         self.v = v / self.R
@@ -71,8 +76,10 @@ class Transport:
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
         self.cxyt = np.zeros(self.xxx.shape)
 
-    def no_decay(self):
+    def domenico(self):
         """Calculate the Domenico analytical model without decay."""
+
+
 
         inf_erfc_x = (self.xxx - self.v * self.ttt) / (2 * np.sqrt(self.ax * self.v * self.ttt))
         erfc_x = erfc(inf_erfc_x)

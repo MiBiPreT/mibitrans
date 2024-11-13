@@ -43,6 +43,14 @@ def calculate_dispersivity(pars):
 
     return ax, ay, az
 
+def calculate_linear_decay(pars):
+    """Give 1st order decay coefficient depending on input parameters."""
+    if "mu" in pars.keys():
+        mu = pars["mu"]
+    else:
+        mu = np.log(2) / pars["t_half"]
+    return mu
+
 def calculate_source_decay(pars):
     """Function that calculates the source zone decay constant."""
     source_y = pars["c_source"][:, 0]

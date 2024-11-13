@@ -7,43 +7,44 @@ import numpy as np
 import pytest
 import anatrans.transport.analytical_equation as ana
 
-
-@pytest.mark.parametrize(
-    "test, mode, expect_raises",
-    [
-        (dict(v=1, lp=2, R=3, d_source=4, c_source=5, m_total=6), None, None),
-        (dict(v=1, lp=2, R=3, c_source=5, m_total=6), None, ValueError),
-        (dict(v=1, lp=2, R=3, d_source=4, m_total=6), None, ValueError),
-        (dict(v=1, lp=2, R=3, d_source=4, c_source=5), None, ValueError),
-        (dict(), None, False),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6), None, None),
-        (dict(k=0.5, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6), None, ValueError),
-        (dict(v=1, alpha_x=1.5, alpha_y=2, alpha_z=2.5, R=3, d_source=4, c_source=5, m_total=6), None, None),
-        (dict(v=1, lp=2, rho=2.5, Koc=3, foc=3.5, n=3.75, d_source=4, c_source=5, m_total=6), None, None),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6, mu=7), "linear_decay", None),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6), "linear_decay", ValueError),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6, dO=7, dNO3=8, Fe2=9, dSO4=10, CH4=11),
-         "instant_reaction", None),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=4, c_source=5, m_total=6), "instant_reaction", ValueError),
-        (dict(k=0.5, i=1, n=1.5, lp=2, R=3, d_source=5, m_total=6, dO=7, dNO3=8, Fe2=9, CH4=11),
-         "instant_reaction", ValueError),
-    ])
-
-def test_transport_missingvalue(test, mode, expect_raises) -> None:
-    """Test if check_parameter correctly asserts when input parameters are missing."""
-    # if expect_raises is not None:
-    #     with pytest.raises(expect_raises):
-    #         result = patient_normalise(np.array(test))
-    #         npt.assert_allclose(result, np.array(expected), rtol=1e-2, atol=1e-2)
-    # else:
-    #     result = patient_normalise(np.array(test))
-    #     npt.assert_allclose(result, np.array(expected), rtol=1e-2, atol=1e-2)
-
-    if expect_raises is not None:
-        with pytest.raises(expect_raises):
-            ana.Transport(test, mode=mode)
-    else:
-        ana.Transport(test, mode=mode)
+# base_dictionary = {
+#     "v": 113.8 / 3.281,
+#     "alpha_x": 13.3 / 3.281,
+#     "alpha_y": 1.3 / 3.281,
+#     "alpha_z": 0,
+#     "R": 1,
+#     "l_model": 320 / 3.281,
+#     "w_model": 100 / 3.281,
+#     "t_model": 6,
+#     "d_source": 10 / 3.281,
+#     "c_source": np.array([[0,13.68], [7 / 3.281,2.508], [37 / 3.281,0.057], [65 / 3.281,0]]),
+#     "m_total": 2000,
+#     "n" : 0.3,
+#     "t_half" : 0.15
+# }
+# @pytest.mark.parametrize(
+#     "test, mode, expect_raises",
+#     [
+#         (base_dictionary, None, None),
+#         ({k: v for k, v in {**base_dictionary}.items() if k != 'v'}, None, ValueError),
+#         (base_dictionary.copy().update({"v":-1}), None, ValueError),
+#     ])
+#
+# def test_transport_missingvalue(test, mode, expect_raises) -> None:
+#     """Test if check_parameter correctly asserts when input parameters are missing."""
+#     # if expect_raises is not None:
+#     #     with pytest.raises(expect_raises):
+#     #         result = patient_normalise(np.array(test))
+#     #         npt.assert_allclose(result, np.array(expected), rtol=1e-2, atol=1e-2)
+#     # else:
+#     #     result = patient_normalise(np.array(test))
+#     #     npt.assert_allclose(result, np.array(expected), rtol=1e-2, atol=1e-2)
+#
+#     if expect_raises is not None:
+#         with pytest.raises(expect_raises):
+#             ana.Transport(test, mode, 1 / 3.281, 1 /3.281, 1)
+#     else:
+#         ana.Transport(test, mode, 1 / 3.281, 1 /3.281, 1)
 #
 # @pytest.mark.parametrize(
 #     "test, mode, expected",

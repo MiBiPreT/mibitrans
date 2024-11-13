@@ -50,36 +50,37 @@ datatype_dictionary = {
 
 # Dictionary containing every input variable to serve as example.
 example_dictionary = {
-    "v": 1,
-    "k": 1,
-    "i": 1,
-    "n": 1,
-    "alpha_x": 1,
-    "alpha_y": 1,
-    "alpha_z": 1,
-    "lp": 1,
-    "R": 1,
-    "rho": 1,
-    "Koc": 1,
-    "foc": 1,
-    "mu": 1,
-    "t_half": 1,
-    "l_model": 1,
-    "w_model": 1,
-    "t_model": 1,
-    "d_source": 1,
-    "c_source": 1,
-    "m_total": 1,
-    "dO": 1,
-    "dNO3": 1,
-    "Fe2": 1,
-    "dSO4": 1,
-    "CH4": 1,
+    "v": 1, # [m/d]
+    "k": 1, # [m/d]
+    "i": 1, # [m/m]
+    "n": 1, # [-]
+    "alpha_x": 1, #[m]
+    "alpha_y": 1, #[m]
+    "alpha_z": 1, #[m]
+    "lp": 1, #[m]
+    "R": 1, #[-]
+    "rho": 1, #[kg/m3]
+    "Koc": 1, #[m3/kg]
+    "foc": 1, #[-]
+    "mu": 1, #[/d]
+    "t_half": 1, #[d]
+    "l_model": 1, #[m]
+    "w_model": 1, #[m]
+    "t_model": 1, #[d]
+    "d_source": 1, #[m]
+    "c_source": 1, #[mg/L]
+    "m_total": 1, #[kg]
+    "dO": 1, #[mg/L]
+    "dNO3": 1, #[mg/L]
+    "Fe2": 1, #[mg/L]
+    "dSO4": 1, #[mg/L]
+    "CH4": 1, #[mg/L]
 }
 
-# unit_dictionary = {
-#     "distance" : ["km", "m", "dm", "cm", "mm"],
-#     "large_mass" : ["kg", "g"],
-#     "small_mass" : ["g", "mg", "ug"],
-#     "time" :
-# }
+unit_dictionary = {
+    "distance" : ["km", "m", "dm", "cm", "mm"],
+    "large_mass" : ["kg", "g"],
+    "concentration" : ["mg/L", "g/m3"],
+    "time" : ["y", "d"]
+
+}

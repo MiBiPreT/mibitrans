@@ -110,4 +110,4 @@ class Transport:
             cxyt = 1 / 8 * ccc0_source_list[i] * decay_exp * erfc_x * erf_y * erf_z
             self.cxyt += cxyt
 
-        return self.cxyt, self.x, self.y, self.t, erfc_x
+        return self.cxyt, self.x, self.y, self.t

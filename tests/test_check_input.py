@@ -49,6 +49,11 @@ def test_check_parameter(test, mode, expected) -> None:
         (dict(c_source=np.array([[10, 2, 1], [20, 3, 1], [10, 2, 1]])), None, False),
         (dict(c_source=np.array([20, 10])), None, False),
         (dict(c_source=np.array([[-1, 2], [20, 3], [10, 2]])), None, False),
+        (dict(R=1), None, True),
+        (dict(R=0.5), None, False),
+        (dict(n=0.5), None, True),
+        (dict(n=-1), None, False),
+        (dict(n=1.5), None, False),
     ])
 
 def test_check_values(test, mode, expected):

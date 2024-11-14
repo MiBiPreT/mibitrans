@@ -79,35 +79,38 @@ class Transport:
         # terms for linear decay are calculated, terms are 1 for no decay and instant_reaction modes.
         if self.mode == "linear_decay":
             decay_sqrt = np.sqrt(1 + 4 * self.mu * self.ax / self.v)
-            decay_exp = np.exp(self.xxx * (1 - decay_sqrt) / (self.ax * 2))
+            decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.ax * 2))
         elif self.mode == "instant_reaction":
             decay_sqrt = 1
-            decay_exp = 1
+            decay_term = 1
         else:
             decay_sqrt = 1
-            decay_exp = 1
+            decay_term = 1
 
-        # Advection term and dispersion in the x direction
-        erfc_x = erfc((self.xxx - self.v * self.ttt * decay_sqrt) / (2 * np.sqrt(self.ax * self.v * self.ttt)))
-
+        # Advection and dispersion term in the x direction
+        x_term = erfc((self.xxx - self.v * self.ttt * decay_sqrt) / (2 * np.sqrt(self.ax * self.v * self.ttt)))
+        # Advection and dispersion term in x direction for small times
+        additional_x = (np.exp(self.xxx * self.v / (self.ax * self.v))
+                        * erfc(self.xxx + self.v * self.ttt / (2 * np.sqrt(self.ax * self.v * self.ttt))))
+        x_term += additional_x
         # Dispersion term in the z direction
-        erf_z = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
+        z_term = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
                  - erf(-self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx))))
 
         # Source decay term
-        exp_source = np.exp(-self.k_source * (self.ttt - self.xxx / self.v))
+        sourcedecay_term = np.exp(-self.k_source * (self.ttt - self.xxx / self.v))
         # Term can be max 1; can not have 'generation' of solute ahead of advection
-        exp_source = np.where(exp_source > 1, 1, exp_source)
+        sourcedecay_term = np.where(sourcedecay_term > 1, 1, sourcedecay_term)
 
         # Superposition algorithm; calculate plume for each source zone separately, then add together.
         ccc0_source_list = [0] * len(self.c0)
         for i in range(len(self.c0)):
             # Dispersion term in the y direction
-            erf_y = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
+            y_term = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
                      - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
 
-            ccc0_source_list[i] = self.c0[i] * exp_source
-            cxyt = 1 / 8 * ccc0_source_list[i] * decay_exp * erfc_x * erf_y * erf_z
+            ccc0_source_list[i] = self.c0[i] * sourcedecay_term
+            cxyt = 1 / 8 * ccc0_source_list[i] * decay_term * x_term * y_term * z_term
             self.cxyt += cxyt
 
         return self.cxyt, self.x, self.y, self.t

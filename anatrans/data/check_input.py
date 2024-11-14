@@ -26,8 +26,8 @@ class CheckInput:
     def check_parameter(self) -> bool:
         """Check if all required parameters are present for a specific mode."""
         # Either the flow velocity or hydraulic conductivity, hydraulic gradient and porosity are required by the model.
-        if not("v" in self.keys or {"k", "i", "n"}.issubset(self.keys)):
-            self.missing_params.append("v or (k, i and n)")
+        if not("v" in self.keys or {"k", "i"}.issubset(self.keys)):
+            self.missing_params.append("v or (k and i)")
 
         # Either plume length or dispersivity in all directions are required by the model.
         if not("lp" in self.keys or {"alpha_x", "alpha_y", "alpha_z"}.issubset(self.keys)):
@@ -35,8 +35,8 @@ class CheckInput:
 
         # Either retardation factor or bulk density, partition coefficient and fraction organic carbon
         # are required by the model.
-        if not("R" in self.keys or {"rho", "Koc", "foc", "n"}.issubset(self.keys)):
-            self.missing_params.append("R or (rho, Koc, foc and n)")
+        if not("R" in self.keys or {"rho", "Koc", "foc"}.issubset(self.keys)):
+            self.missing_params.append("R or (rho, Koc and foc)")
 
         # Porosity is required by the model.
         if "n" not in self.keys:
@@ -89,6 +89,14 @@ class CheckInput:
                 if not isinstance(value, int) and not isinstance(value, float):
                     self.wrong_type.append(key)
                 # Parameters designated as float or int can not have negative values
+                elif key == "n" and (value <= 0 or value > 1):
+                    if self.verbose:
+                        self.wrong_value.append(key)
+                        print("Porosity should have a value between 0 and 1")
+                elif key == "R" and (value < 1):
+                    if self.verbose:
+                        self.wrong_value.append(key)
+                        print("Retardation factor should be a value equal or larger than 1.")
                 elif value < 0:
                     self.wrong_value.append(key)
 
@@ -113,7 +121,7 @@ class CheckInput:
             success_flag = False
             if self.verbose:
                 print("The following parameters are of the wrong type:", self.wrong_type)
-                print("The following parameters have a value that is smaller than 0:", self.wrong_value)
+                print("The following parameters have an invalid value:", self.wrong_value)
 
         else:
             success_flag = True

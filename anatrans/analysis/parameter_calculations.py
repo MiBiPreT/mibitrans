@@ -29,7 +29,7 @@ def calculate_dispersivity(pars):
         ay = pars["alpha_y"]
         az = pars["alpha_z"]
     else:
-        # Implement conversion from plume length to alpha x, y and z
+        # Conversion from plume length to alpha x, y and z
         ax = 0.83 * np.log10(pars["lp"])**2.414
         ay = ax / 10
         az = ax / 100
@@ -41,7 +41,7 @@ def calculate_dispersivity(pars):
     if az < 1e-10:
         az = 1e-10
 
-    return ax, ay, az
+    return (ax, ay, az)
 
 def calculate_linear_decay(pars):
     """Give 1st order decay coefficient depending on input parameters."""
@@ -57,6 +57,7 @@ def calculate_source_decay(pars):
     source_c = pars["c_source"][:, 1]
     Q = pars["v"] * pars["n"] * pars["d_source"] * np.max(source_y) * 2 * 1000
 
+    # Calculate weighted average concentration of source zone plume
     C0_avg = 0
     for i in range(len(source_y) - 1):
         if i == 0:
@@ -66,6 +67,7 @@ def calculate_source_decay(pars):
         C0_avg += yc
     C0_avg = C0_avg / (np.max(source_y) * 2)
 
+    # Multiply by 1e6 to convert soluable mass to kg
     k_source = Q * C0_avg / (pars["m_total"] * 1e6)
 
     return(k_source)

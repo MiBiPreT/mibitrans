@@ -2,6 +2,7 @@
 
 File containing various dictionaries used for evaluation of names, value types and units of input data.
 """
+import numpy as np
 
 # Dictionary with possible input variable names as value and the variable name used in the package as key.
 key_dictionary = {
@@ -49,7 +50,7 @@ datatype_dictionary = {
 }
 
 # Dictionary containing every input variable to serve as example.
-example_dictionary = {
+full_dictionary = {
     "v": 1, # [m/d]
     "k": 1, # [m/d]
     "i": 1, # [m/m]
@@ -75,6 +76,22 @@ example_dictionary = {
     "Fe2": 1, #[mg/L]
     "dSO4": 1, #[mg/L]
     "CH4": 1, #[mg/L]
+}
+
+example_dictionary = {
+    "v": 113.8 / 3.281,
+    "alpha_x": 13.3 / 3.281,
+    "alpha_y": 1.3 / 3.281,
+    "alpha_z": 0,
+    "R": 1,
+    "l_model": 320 / 3.281,
+    "w_model": 100 / 3.281,
+    "t_model": 6,
+    "d_source": 10 / 3.281,
+    "c_source": np.array([[0,13.68], [7 / 3.281,2.508], [37 / 3.281,0.057], [65 / 3.281,0]]),
+    "m_total": 2000,
+    "n" : 0.3,
+    "t_half" : 0.15
 }
 
 unit_dictionary = {

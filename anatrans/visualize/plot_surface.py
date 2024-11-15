@@ -24,7 +24,8 @@ class Plume():
         ax.plot_surface(self.xxx[time_pos,:,:],
                         self.yyy[time_pos,:,:],
                         self.cxyt[time_pos,:,:],
-                        cmap = "plasma")
+                        **kwargs
+                        )
 
         ax.view_init(elev=30, azim=310)
         ax.set_xlabel("Distance from source (m)")
@@ -39,7 +40,12 @@ class Plume():
         else:
             time_pos = self.t[-1]
 
-        plt.pcolormesh(self.x, self.y, self.cxyt[time_pos,:,:], cmap = "plasma")
+        plt.pcolormesh(self.x,
+                       self.y,
+                       self.cxyt[time_pos,:,:],
+                       **kwargs
+                       )
+
         plt.xlabel("Distance from source (m)")
         plt.ylabel("Distance from plume center (m)")
         plt.colorbar(label = "Concentration (mg/L)")

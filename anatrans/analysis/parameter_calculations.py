@@ -4,6 +4,7 @@ Module containing various methods that takes a dictionary of parameters as input
 can be used in transport equations.
 """
 import numpy as np
+from anatrans.data.parameter_information import acceptor_utilization_dictionary
 
 
 def calculate_retardation(pars):
@@ -55,7 +56,7 @@ def calculate_source_decay(pars):
     """Function that calculates the source zone decay constant."""
     source_y = pars["c_source"][:, 0]
     source_c = pars["c_source"][:, 1]
-    Q = pars["v"] * pars["n"] * pars["d_source"] * np.max(source_y) * 2 * 1000
+    Q = pars["v"] * pars["n"] * pars["d_source"] * np.max(source_y) * 2
 
     # Calculate weighted average concentration of source zone plume
     C0_avg = 0
@@ -67,7 +68,37 @@ def calculate_source_decay(pars):
         C0_avg += yc
     C0_avg = C0_avg / (np.max(source_y) * 2)
 
-    # Multiply by 1e6 to convert soluable mass to kg
-    k_source = Q * C0_avg / (pars["m_total"] * 1e6)
+    # Multiply by 1e3 to convert soluble mass to kg
+    k_source = Q * C0_avg / (pars["m_total"] * 1e3)
 
     return(k_source)
+
+def calculate_source_decay_instant(pars, biodeg_cap):
+    """Function that calculates the source zone decay constant."""
+    source_y = pars["c_source"][:, 0]
+    source_c = pars["c_source"][:, 1]
+    Q = pars["v"] * pars["n"] * pars["d_source"] * np.max(source_y) * 2
+
+    # Calculate weighted average concentration of source zone plume
+    C0_avg = 0
+    for i in range(len(source_y) - 1):
+        if i == 0:
+            yc = source_y[i + 1] * source_c[i] * 2
+        else:
+            yc = (source_y[i+1] - source_y[i]) * source_c[i] * 2
+        C0_avg += yc
+    C0_avg = (C0_avg / (np.max(source_y) * 2)) + biodeg_cap
+
+    # Multiply by 1e3 to convert soluble mass to g
+    k_source = Q * C0_avg / (pars["m_total"] * 1e3)
+
+    return(k_source)
+
+def calculate_biodegradation_capacity(pars):
+    """Function that calculates biodegradation capacity based on utilization factors for BTEX."""
+    biodeg_cap = 0
+
+    for key, item in acceptor_utilization_dictionary.items():
+        biodeg_cap += pars[key] / item
+
+    return(biodeg_cap)

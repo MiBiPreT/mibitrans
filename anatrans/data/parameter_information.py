@@ -69,13 +69,13 @@ full_dictionary = {
     "w_model": 1, #[m]
     "t_model": 1, #[d]
     "d_source": 1, #[m]
-    "c_source": 1, #[mg/L]
+    "c_source": 1, #[g/m3]
     "m_total": 1, #[kg]
-    "dO": 1, #[mg/L]
-    "dNO3": 1, #[mg/L]
-    "Fe2": 1, #[mg/L]
-    "dSO4": 1, #[mg/L]
-    "CH4": 1, #[mg/L]
+    "dO": 1, #[g/m3]
+    "dNO3": 1, #[g/m3]
+    "Fe2": 1, #[g/m3]
+    "dSO4": 1, #[g/m3]
+    "CH4": 1, #[g/m3]
 }
 
 example_dictionary = {
@@ -91,7 +91,12 @@ example_dictionary = {
     "c_source": np.array([[0,13.68], [7 / 3.281,2.508], [37 / 3.281,0.057], [65 / 3.281,0]]),
     "m_total": 2000,
     "n" : 0.3,
-    "t_half" : 0.15
+    "t_half" : 0.15,
+    "dO": 1.65,
+    "dNO3": 0.7,
+    "Fe2": 16.6,
+    "dSO4": 22.4,
+    "CH4": 6.6,
 }
 
 unit_dictionary = {
@@ -99,5 +104,13 @@ unit_dictionary = {
     "large_mass" : ["kg", "g"],
     "concentration" : ["mg/L", "g/m3"],
     "time" : ["y", "d"]
+}
 
+# Utilization factors of electron donors for combined BTEX constituents.
+acceptor_utilization_dictionary = {
+    "dO" : 3.14,
+    "dNO3" : 4.9,
+    "Fe2" : 21.8,
+    "dSO4" : 4.7,
+    "CH4" : 0.78,
 }

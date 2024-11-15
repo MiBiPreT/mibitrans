@@ -17,13 +17,29 @@ class Lineplot():
         self.t = t
 
     def centerline(self, time = None, y_pos = None, **kwargs):
-        """Plot center of contaminant plume as a line, at a specified time and, optionally, y position."""
+        """Plot center of contaminant plume as a line, at a specified time and, optionally, y position.
+
+        Args:
+            time : Point of time for the plot. By default, last point in time is plotted.
+            y_pos : y-position across the plume for the plot. By default, the center of the plume is plotted.
+            **kwargs : Arguments to be passed to plt.plot().
+
+        Returns a line plot of the input plume as object.
+        """
         if time is not None:
             time_pos = np.argmin(abs(self.t - time))
         else:
             time_pos = self.t[-1]
-        plot_array = self.cxyt[time_pos,len(self.y)//2,:]
-        plt.plot(self.x, plot_array, **kwargs)
+
+        if y_pos is not None:
+            y_pos = np.argmin(abs(self.y - y_pos))
+        else:
+            y_pos = len(self.y) // 2
+
+        plot_array = self.cxyt[time_pos,y_pos,:]
+        plt.plot(self.x,
+                 plot_array,
+                 **kwargs)
         plt.ylim((0,np.max(plot_array) + 1/8*np.max(plot_array)))
         plt.xlabel("Distance from source [m]")
         plt.ylabel("Concentration [mg/L]")

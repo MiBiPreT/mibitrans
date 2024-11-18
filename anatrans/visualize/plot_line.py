@@ -37,6 +37,7 @@ class Lineplot():
             y_pos = len(self.y) // 2
 
         plot_array = self.cxyt[time_pos,y_pos,:]
+
         plt.plot(self.x,
                  plot_array,
                  **kwargs)

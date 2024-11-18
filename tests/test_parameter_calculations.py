@@ -4,11 +4,13 @@ File testing functionality of parameter_calculations module.
 """
 import numpy as np
 import pytest
+from anatrans.analysis.parameter_calculations import calculate_biodegradation_capacity
 from anatrans.analysis.parameter_calculations import calculate_dispersivity
 from anatrans.analysis.parameter_calculations import calculate_flow_velocity
 from anatrans.analysis.parameter_calculations import calculate_linear_decay
 from anatrans.analysis.parameter_calculations import calculate_retardation
 from anatrans.analysis.parameter_calculations import calculate_source_decay
+from anatrans.analysis.parameter_calculations import calculate_source_decay_instant
 
 
 @pytest.mark.parametrize(
@@ -67,5 +69,27 @@ def test_calculate_linear_decay(test, expected):
     ])
 
 def test_calculate_source_decay(test, expected):
-    """Test calculation of linear decay coefficient."""
+    """Test calculation of source decay coefficient."""
     assert calculate_source_decay(test) == pytest.approx(expected)
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        (dict(dO=1.65, dNO3=0.7, Fe2=16.6, dSO4=22.4, CH4=6.6, c_source=np.array([[0,10], [10,5], [30,2], [50,0]]),
+              v=1, n=0.5, d_source=10, m_total=100), 0.0972864932405937),
+    ])
+
+def test_calculate_source_decay_instant(test, expected):
+    """Test calculation of source decay coefficient for instant reaction model."""
+    biodeg_cap = calculate_biodegradation_capacity(test)
+    assert calculate_source_decay_instant(test, biodeg_cap) == pytest.approx(expected)
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        (dict(dO=1.65, dNO3=0.7, Fe2=16.6, dSO4=22.4, CH4=6.6), 14.657298648118742),
+    ])
+
+def test_calculate_biodegradation_capacity(test, expected):
+    """Test calculation of biodegradation capacity."""
+    assert calculate_biodegradation_capacity(test) == pytest.approx(expected)

@@ -7,7 +7,7 @@ import numpy as np
 
 class CheckInput:
     """Evaluates if input dictionary contains all required parameters and if they have the correct data type."""
-    def __init__(self, dictionary, mode = None, verbose = True) -> None:
+    def __init__(self, dictionary, mode = None, verbose = False) -> None:
         """Initialize parameters.
 
         Args:

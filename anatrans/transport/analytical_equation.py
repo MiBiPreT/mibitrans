@@ -21,9 +21,9 @@ class Transport:
     def __init__(self,
                  parameters : dict,
                  mode : str = None,
-                 dx : float = None,
-                 dy : float = None,
-                 dt : float = None
+                 dx : float = 0,
+                 dy : float = 0,
+                 dt : float = 0
                  ) -> None:
         """Initialise the class, set up dimensions and output array.
 
@@ -74,11 +74,11 @@ class Transport:
         self.dt = dt
 
         # If dx, dy or dt are not given, determine a proper value based on modeled area dimensions.
-        if dx is None:
-            self.dx = self.pars["l_model"] / 1000
-        if dy is None:
-            self.dy = self.pars["w_model"] / 100
-        if dt is None:
+        if not isinstance(dx, (float, int)) or (dx <= 0.0):
+            self.dx = self.pars["l_model"] / 100
+        if not isinstance(dy, (float, int)) or (dy <= 0.0):
+            self.dy = self.pars["w_model"] / 50
+        if not isinstance(dt, (float, int)) or (dt <= 0.0):
             self.dt = self.pars["t_model"] / 10
 
         self.source_y = self.pars["c_source"][:,0]
@@ -117,44 +117,45 @@ class Transport:
             y (np.ndarray) : Array with values representing positions along the y-direction.
             t (np.ndarray) : Array with values representing points in time.
         """
-        # terms for linear decay are calculated, terms are 1 for no decay and instant_reaction modes.
-        decay_sqrt = np.sqrt(1 + 4 * self.mu * self.ax / self.v)
-        decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.ax * 2))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            # terms for linear decay are calculated, terms are 1 for no decay and instant_reaction modes.
+            decay_sqrt = np.sqrt(1 + 4 * self.mu * self.ax / self.v)
+            decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.ax * 2))
 
-        # Advection and dispersion term in the x direction
-        x_term = erfc((self.xxx - self.v * self.ttt * decay_sqrt) / (2 * np.sqrt(self.ax * self.v * self.ttt)))
+            # Advection and dispersion term in the x direction
+            x_term = erfc((self.xxx - self.v * self.ttt * decay_sqrt) / (2 * np.sqrt(self.ax * self.v * self.ttt)))
 
-        # Additional advection and dispersion term in x direction for small times, when there is no linear decay
-        if self.mode != "linear_decay":
-            additional_x = (np.exp(self.xxx * self.v / (self.ax * self.v))
-                            * erfc(self.xxx + self.v * self.ttt / (2 * np.sqrt(self.ax * self.v * self.ttt))))
-            x_term += additional_x
+            # Additional advection and dispersion term in x direction for small times, when there is no linear decay
+            if self.mode != "linear_decay":
+                additional_x = (np.exp(self.xxx * self.v / (self.ax * self.v))
+                                * erfc(self.xxx + self.v * self.ttt / (2 * np.sqrt(self.ax * self.v * self.ttt))))
+                x_term += additional_x
 
-        # Dispersion term in the z direction
-        z_term = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
-                 - erf(-self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx))))
+            # Dispersion term in the z direction
+            z_term = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
+                     - erf(-self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx))))
 
-        if self.mode == "instant_reaction":
-            sourcedecay_term = np.exp(-self.k_source_instant * (self.ttt - self.xxx / self.v))
-        else:
-            # Source decay term
-            sourcedecay_term = np.exp(-self.k_source * (self.ttt - self.xxx / self.v))
-        # Term can be max 1; can not have 'generation' of solute ahead of advection
-        sourcedecay_term = np.where(sourcedecay_term > 1, 1, sourcedecay_term)
+            if self.mode == "instant_reaction":
+                sourcedecay_term = np.exp(-self.k_source_instant * (self.ttt - self.xxx / self.v))
+            else:
+                # Source decay term
+                sourcedecay_term = np.exp(-self.k_source * (self.ttt - self.xxx / self.v))
+            # Term can be max 1; can not have 'generation' of solute ahead of advection
+            sourcedecay_term = np.where(sourcedecay_term > 1, 1, sourcedecay_term)
 
-        # Superposition algorithm; calculate plume for each source zone separately, then add together.
-        ccc0_source_list = [0] * len(self.c0)
-        for i in range(len(self.c0)):
-            # Dispersion term in the y direction
-            y_term = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
-                     - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
-            y_term[np.isnan(y_term)] = 0
+            # Superposition algorithm; calculate plume for each source zone separately, then add together.
+            ccc0_source_list = [0] * len(self.c0)
+            for i in range(len(self.c0)):
+                # Dispersion term in the y direction
+                y_term = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
+                         - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
+                y_term[np.isnan(y_term)] = 0
 
-            ccc0_source_list[i] = self.c0[i] * sourcedecay_term
+                ccc0_source_list[i] = self.c0[i] * sourcedecay_term
 
-            cxyt = 1 / 8 * ccc0_source_list[i] * decay_term * x_term * y_term * z_term
+                cxyt = 1 / 8 * ccc0_source_list[i] * decay_term * x_term * y_term * z_term
 
-            self.cxyt += cxyt
+                self.cxyt += cxyt
 
         # Substract biodegradation capacity, this can cause low concentration areas to become < 0. Therefore, set
         # negative values to 0.

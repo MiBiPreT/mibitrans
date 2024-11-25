@@ -16,7 +16,7 @@ from tests.test_example_results import testingdata_nodecay
     "input, stepsize",
     [
         (testing_dictionary, (10,5,1)),
-        (testing_dictionary, (None, None, None)),
+        (testing_dictionary, (0, 0, 0)),
     ])
 
 def test_transport_grid(input, stepsize) -> None:
@@ -26,11 +26,11 @@ def test_transport_grid(input, stepsize) -> None:
 
     source_y = input["c_source"][:, 0]
 
-    if dx is None:
-        dx = input["l_model"] / 1000
-    if dy is None:
-        dy = input["w_model"] / 100
-    if dt is None:
+    if not isinstance(dx, (float, int)) or (dx <= 0):
+        dx = input["l_model"] / 100
+    if not isinstance(dx, (float, int)) or (dy <= 0):
+        dy = input["w_model"] / 50
+    if not isinstance(dx, (float, int)) or (dt <= 0):
         dt = input["t_model"] / 10
 
     x = np.arange(0, input["l_model"] + dx, dx)

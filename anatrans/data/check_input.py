@@ -7,7 +7,7 @@ import numpy as np
 
 class CheckInput:
     """Evaluates if input dictionary contains all required parameters and if they have the correct data type."""
-    def __init__(self, dictionary, mode = None, verbose = False) -> None:
+    def __init__(self, dictionary, mode = None, verbose = True) -> None:
         """Initialize parameters.
 
         Args:
@@ -90,12 +90,12 @@ class CheckInput:
                     self.wrong_type.append(key)
                 # Parameters designated as float or int can not have negative values
                 elif key == "n" and (value <= 0 or value > 1):
+                    self.wrong_value.append(key)
                     if self.verbose:
-                        self.wrong_value.append(key)
                         print("Porosity should have a value between 0 and 1")
                 elif key == "R" and (value < 1):
+                    self.wrong_value.append(key)
                     if self.verbose:
-                        self.wrong_value.append(key)
                         print("Retardation factor should be a value equal or larger than 1.")
                 elif value < 0:
                     self.wrong_value.append(key)

@@ -23,7 +23,8 @@ class Transport:
                  mode : str = None,
                  dx : float = 0,
                  dy : float = 0,
-                 dt : float = 0
+                 dt : float = 0,
+                 verbose : bool = False
                  ) -> None:
         """Initialise the class, set up dimensions and output array.
 
@@ -36,6 +37,7 @@ class Transport:
             reasonable value will be calculated based on modeled area width. Default is None.
             dt (float) : Model step size for time. If left empty,
             reasonable value will be calculated based on simulation time. Default is None.
+            verbose (bool, optional): Verbose mode. Defaults to False.
 
         Raises:
             ValueError : If input parameters are incomplete or of incorrect datatype/value.
@@ -43,9 +45,10 @@ class Transport:
         """
         self.pars = parameters
         self.mode = mode
+        self.verbose = verbose
 
         # Ensure that every parameter required for calculations is present in pars
-        self.ck = CheckInput(self.pars, self.mode)
+        self.ck = CheckInput(self.pars, self.mode, verbose = self.verbose)
         par_success = self.ck.check_parameter()
         if not par_success:
             raise ValueError("Not all required input parameters are given.")

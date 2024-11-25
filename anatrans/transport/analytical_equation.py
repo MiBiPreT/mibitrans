@@ -69,11 +69,17 @@ class Transport:
         # For the rest of the calculation, retarded flow velocity is used.
         self.v = v / self.R
 
-        # If dx, dy or dt are not given, determine a proper value based on modeled area dimensions.
-        # If modeled area dimensions are not given, determine acceptable value based on flow velocity and retardation.
         self.dx = dx
         self.dy = dy
         self.dt = dt
+
+        # If dx, dy or dt are not given, determine a proper value based on modeled area dimensions.
+        if dx is None:
+            self.dx = self.pars["l_model"] / 1000
+        if dy is None:
+            self.dy = self.pars["w_model"] / 100
+        if dt is None:
+            self.dt = self.pars["t_model"] / 10
 
         self.source_y = self.pars["c_source"][:,0]
         self.source_c = self.pars["c_source"][:,1]
@@ -91,7 +97,7 @@ class Transport:
             self.biodeg_cap = 0
 
         # Initialize space and time arrays
-        self.x = np.arange(0, parameters["l_model"], self.dx)
+        self.x = np.arange(0, parameters["l_model"] + self.dx, self.dx)
         self.y = np.arange(-self.source_y[-1], self.source_y[-1] + self.dy, self.dy)
         self.t = np.arange(self.dt, parameters["t_model"] + self.dt, self.dt)
 
@@ -142,6 +148,7 @@ class Transport:
             # Dispersion term in the y direction
             y_term = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
                      - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
+            y_term[np.isnan(y_term)] = 0
 
             ccc0_source_list[i] = self.c0[i] * sourcedecay_term
 
@@ -150,8 +157,8 @@ class Transport:
             self.cxyt += cxyt
 
         # Substract biodegradation capacity, this can cause low concentration areas to become < 0. Therefore, set
-        # their values to 0.
+        # negative values to 0.
         self.cxyt -= self.biodeg_cap
-        self.cxyt = np.where(self.cxyt > 0, self.cxyt, 0)
+        self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
 
         return self.cxyt, self.x, self.y, self.t

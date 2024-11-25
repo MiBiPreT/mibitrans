@@ -114,3 +114,24 @@ acceptor_utilization_dictionary = {
     "dSO4" : 4.7,
     "CH4" : 0.78,
 }
+
+testing_dictionary = {
+    "v": 10,
+    "alpha_x": 10,
+    "alpha_y": 1,
+    "alpha_z": 0.1,
+    "R": 1,
+    "l_model": 50,
+    "w_model": 15,
+    "t_model": 3,
+    "d_source": 10,
+    "c_source": np.array([[0,10], [5,5], [10,2], [15,0]]),
+    "m_total": 1000,
+    "n" : 0.25,
+    "t_half" : 0.1,
+    "dO": 0.5,
+    "dNO3": 0.5,
+    "Fe2": 0.5,
+    "dSO4": 0.5,
+    "CH4": 0.5,
+}

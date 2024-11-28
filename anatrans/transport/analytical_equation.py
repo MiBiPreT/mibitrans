@@ -20,7 +20,7 @@ class Transport:
     """Calculate analytical solution from variations of the Domenico analytical model."""
     def __init__(self,
                  parameters : dict,
-                 mode : str = None,
+                 mode : str = "no_decay",
                  dx : float = 0,
                  dy : float = 0,
                  dt : float = 0,
@@ -47,6 +47,20 @@ class Transport:
         self.mode = mode
         self.verbose = verbose
 
+        if verbose:
+            if self.mode == "no_decay":
+                print("Initializing parameters for the no decay model.")
+            elif self.mode == "linear_decay":
+                print("Initializing parameters for the linear decay model.")
+            elif self.mode == "instant_reaction":
+                print("Initializing parameters for the instantaneous reaction model.")
+            else:
+                print("Mode name is not recognized, initializing decay model as default. Valid model names are:",
+                      " 'no_decay', 'linear_decay', 'instant_reaction'.")
+
+        if verbose:
+            print("Checking input parameters...")
+
         # Ensure that every parameter required for calculations is present in pars
         self.ck = CheckInput(self.pars, self.mode, verbose = self.verbose)
         par_success = self.ck.check_parameter()
@@ -57,6 +71,9 @@ class Transport:
         val_success = self.ck.check_values()
         if not val_success:
             raise ValueError("Not all required input values are of the expected value or data type.")
+
+        if verbose:
+            print("Calculating transport parameters...")
 
         self.R = calculate_retardation(self.pars)
         v = calculate_flow_velocity(self.pars)
@@ -79,10 +96,16 @@ class Transport:
         # If dx, dy or dt are not given, determine a proper value based on modeled area dimensions.
         if not isinstance(dx, (float, int)) or (dx <= 0.0):
             self.dx = self.pars["l_model"] / 100
+            if verbose:
+                print("dx was not given or of wrong type/value, taken as fraction of model length instead.")
         if not isinstance(dy, (float, int)) or (dy <= 0.0):
             self.dy = self.pars["w_model"] / 50
+            if verbose:
+                print("dy was not given or of wrong type/value, taken as fraction of model width instead.")
         if not isinstance(dt, (float, int)) or (dt <= 0.0):
             self.dt = self.pars["t_model"] / 10
+            if verbose:
+                print("dt was not given or of wrong type/value, taken as fraction of model time instead.")
 
         self.source_y = self.pars["c_source"][:,0]
         self.source_c = self.pars["c_source"][:,1]
@@ -99,6 +122,9 @@ class Transport:
         else:
             self.biodeg_cap = 0
 
+        if verbose:
+            print("Setting up dimensional grids...")
+
         # Initialize space and time arrays
         self.x = np.arange(0, parameters["l_model"] + self.dx, self.dx)
         self.y = np.arange(-self.source_y[-1], self.source_y[-1] + self.dy, self.dy)
@@ -109,6 +135,9 @@ class Transport:
         self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
         self.cxyt = np.zeros(self.xxx.shape)
+
+        if verbose:
+            print("Done with initializing!")
 
     def domenico(self):
         """Calculate the Domenico analytical model.

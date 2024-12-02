@@ -127,7 +127,12 @@ class Transport:
 
         # Initialize space and time arrays
         self.x = np.arange(0, parameters["l_model"] + self.dx, self.dx)
-        self.y = np.arange(-self.source_y[-1], self.source_y[-1] + self.dy, self.dy)
+
+        if parameters["w_model"] > 2 * self.source_y[-1]:
+            self.y = np.arange(-parameters["w_model"] // 2, parameters["w_model"] // 2, self.dy)
+        else:
+            self.y = np.arange(-self.source_y[-1], self.source_y[-1] + self.dy, self.dy)
+
         self.t = np.arange(self.dt, parameters["t_model"] + self.dt, self.dt)
 
         # To allow array calculations, set space and time as a 3-dimensional array.
@@ -135,6 +140,8 @@ class Transport:
         self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
         self.cxyt = np.zeros(self.xxx.shape)
+
+        self.cxyt_noBC = 0
 
         if verbose:
             print("Done with initializing!")
@@ -149,8 +156,9 @@ class Transport:
             y (np.ndarray) : Array with values representing positions along the y-direction.
             t (np.ndarray) : Array with values representing points in time.
         """
+        # Ignore divide by zero warnings; they are a result of working with x and y positions of 0.
         with np.errstate(divide="ignore", invalid="ignore"):
-            # terms for linear decay are calculated, terms are 1 for no decay and instant_reaction modes.
+            # terms for linear decay are calculated, terms are 1 for no decay and instant_reaction modes, as mu = 0.
             decay_sqrt = np.sqrt(1 + 4 * self.mu * self.ax / self.v)
             decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.ax * 2))
 
@@ -183,6 +191,7 @@ class Transport:
                          - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
                 y_term[np.isnan(y_term)] = 0
 
+                # Correct source zone concentrations for source decay
                 ccc0_source_list[i] = self.c0[i] * sourcedecay_term
 
                 cxyt = 1 / 8 * ccc0_source_list[i] * decay_term * x_term * y_term * z_term
@@ -191,7 +200,10 @@ class Transport:
 
         # Substract biodegradation capacity, this can cause low concentration areas to become < 0. Therefore, set
         # negative values to 0.
+        self.cxyt_noBC = self.cxyt.copy()
         self.cxyt -= self.biodeg_cap
         self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
 
         return self.cxyt, self.x, self.y, self.t
+
+

@@ -102,3 +102,19 @@ def calculate_biodegradation_capacity(pars):
         biodeg_cap += pars[key] / item
 
     return(biodeg_cap)
+
+def calculate_acceptor_utilization(pars):
+    """Function that calculates relative use of electron acceptors in biodegradation of BTEX."""
+    biodeg_array = np.zeros(len(list(acceptor_utilization_dictionary.keys())))
+    util_array = np.zeros(len(biodeg_array))
+
+    for i, (key, item) in enumerate(acceptor_utilization_dictionary.items()):
+        biodeg_array[i] = pars[key] / item
+        util_array[i] = item
+
+    biodegradation_capacity = np.sum(biodeg_array)
+    fraction_total = biodeg_array / biodegradation_capacity
+    mass_fraction = fraction_total * util_array
+
+    return(mass_fraction)
+

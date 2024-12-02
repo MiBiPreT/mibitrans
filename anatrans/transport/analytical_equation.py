@@ -205,5 +205,3 @@ class Transport:
         self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
 
         return self.cxyt, self.x, self.y, self.t
-
-

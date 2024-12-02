@@ -5,6 +5,7 @@ Module calculating the mass balance based on base parameters.
 
 import numpy as np
 import anatrans.transport.analytical_equation as eq
+from anatrans.analysis.parameter_calculations import calculate_acceptor_utilization
 from anatrans.analysis.parameter_calculations import calculate_biodegradation_capacity
 from anatrans.analysis.parameter_calculations import calculate_source_decay
 from anatrans.analysis.parameter_calculations import calculate_source_decay_instant
@@ -106,5 +107,12 @@ class MassBalance:
             # instant degradation model with biodegradation is caused by degradation.
             degraded_mass = plume_mass_nodecay - plume_mass_inst
             self.mass_balance_dict["plume_mass_degraded_instant"] = degraded_mass
+
+            # Weight fraction of electron acceptor used for degradation and degraded contaminant
+            mass_fraction_electron_acceptor = calculate_acceptor_utilization(self.pars)
+
+            # Change in total mass of each electron acceptor
+            electron_acceptor_mass_change = mass_fraction_electron_acceptor * degraded_mass
+            self.mass_balance_dict["electron_acceptor_mass_change"] = electron_acceptor_mass_change
 
         return(self.mass_balance_dict)

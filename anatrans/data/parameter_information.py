@@ -135,3 +135,20 @@ testing_dictionary = {
     "dSO4": 0.5,
     "CH4": 0.5,
 }
+
+mass_balance_renaming_dictionary = {
+    "source_mass_0" : "mass t = 0",
+    "source_mass_t" : "mass t = ",
+    "source_mass_change" : "delta mass",
+    "plume_mass_no_decay" : "plume mass",
+    "transport_outside_extent_nodecay" : "mass transported outside model extent",
+    "plume_mass_linear_decay" : "plume mass",
+    "transport_outside_extent_lineardecay" : "mass transported outside model extent",
+    "plume_mass_degraded_linear" : "plume mass degraded",
+    "source_mass_instant_t" : "source mass t = ",
+    "source_mass_instant_change" : "delta source mass",
+    "plume_mass_no_decay_instant_reaction" : "plume mass before decay",
+    "plume_mass_instant_reaction" : "plume mass after decay",
+    "plume_mass_degraded_instant" : "plume mass degraded",
+    "electron_acceptor_mass_change" : "change electron acceptor"
+}

@@ -37,6 +37,8 @@ class MassBalance:
         else:
             time_pos = t[-1]
 
+        self.mass_balance_dict["time"] = t[time_pos]
+
         ksource = calculate_source_decay(self.pars)
 
         # Total source mass at t=0
@@ -61,20 +63,30 @@ class MassBalance:
         # Difference between current plume mass and change in source mass must have been transported outside of model
         # extent for no decay scenarios; preservation of mass.
         if M_source_delta - plume_mass_nodecay < 0:
-            self.mass_balance_dict["transport_outside_extent"] = 0
+            transport_outside_extent_nodecay = 0
+            self.mass_balance_dict["transport_outside_extent"] = transport_outside_extent_nodecay
         else:
-            self.mass_balance_dict["transport_outside_extent"] = M_source_delta - plume_mass_nodecay
+            transport_outside_extent_nodecay = M_source_delta - plume_mass_nodecay
+            self.mass_balance_dict["transport_outside_extent_nodecay"] = transport_outside_extent_nodecay
 
         if self.mode == "linear_decay":
             obj_decay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "linear_decay")
             cxyt_dec, x, y, t = obj_decay.domenico()
 
             # Plume mass of linear decay model
-            plume_mass_decay = np.sum(cxyt_dec[time_pos, :, 1:] * cellsize * self.pars["n"])
-            self.mass_balance_dict["plume_mass_linear_decay"] = plume_mass_decay
+            plume_mass_lindecay = np.sum(cxyt_dec[time_pos, :, 1:] * cellsize * self.pars["n"])
+            self.mass_balance_dict["plume_mass_linear_decay"] = plume_mass_lindecay
 
-            # Assumption: all mass difference between no decay and linear decay model is caused by degradation
-            degraded_mass = plume_mass_nodecay - plume_mass_decay
+            # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay
+            # model, scaled by ratio between no decay and linear decay plume mass.
+            transport_outside_extent_lindecay = (transport_outside_extent_nodecay * plume_mass_lindecay
+                                                 / plume_mass_nodecay)
+            self.mass_balance_dict["transport_outside_extent_lineardecay"] = transport_outside_extent_lindecay
+
+            # Contaminant mass degraded by linear decay is diffrence plume mass no and linear decay plus difference in
+            # mass transported outside model extent by no and linear decay.
+            degraded_mass = (plume_mass_nodecay - plume_mass_lindecay + transport_outside_extent_nodecay
+                               - transport_outside_extent_lindecay)
             self.mass_balance_dict["plume_mass_degraded_linear"] = degraded_mass
 
         elif self.mode == "instant_reaction":

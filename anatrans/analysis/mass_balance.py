@@ -52,12 +52,15 @@ class MassBalance:
         obj_nodecay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "no_decay")
         cxyt_nd, x, y, t = obj_nodecay.domenico()
 
+        # If time point is specified, closest point in time array t is taken.
+        # If not specified, defaults to last time point.
         if time is not None:
+            print(time)
             time_pos = np.argmin(abs(t - time))
+            self.mass_balance_dict["time"] = t[time_pos]
         else:
-            time_pos = t[-1]
-
-        self.mass_balance_dict["time"] = t[time_pos]
+            time_pos = -1
+            self.mass_balance_dict["time"] = t[time_pos]
 
         ksource = calculate_source_decay(self.pars)
 
@@ -93,7 +96,7 @@ class MassBalance:
             obj_decay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "linear_decay")
             cxyt_dec, x, y, t = obj_decay.domenico()
 
-            # Plume mass of linear decay model
+            # Plume mass of linear decay model.
             plume_mass_lindecay = np.sum(cxyt_dec[time_pos, :, 1:] * cellsize * self.pars["n"])
             self.mass_balance_dict["plume_mass_linear_decay"] = plume_mass_lindecay
 
@@ -113,7 +116,7 @@ class MassBalance:
             obj_inst = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "instant_reaction")
             cxyt_inst, x, y, t = obj_inst.domenico()
 
-            # Matrix with concentration values before substraction of biodegradation capacity
+            # Matrix with concentration values before subtraction of biodegradation capacity
             cxyt_noBC = obj_inst.cxyt_noBC
 
             BC = calculate_biodegradation_capacity(self.pars)

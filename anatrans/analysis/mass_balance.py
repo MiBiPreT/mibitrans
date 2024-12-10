@@ -12,13 +12,27 @@ from anatrans.analysis.parameter_calculations import calculate_source_decay_inst
 
 
 class MassBalance:
+    """Calculate contaminant mass balance across model compartments."""
     def __init__(self,
                  parameters : dict,
+                 mode: str = "no_decay",
                  dx : float = None,
                  dy : float = None,
                  dt : float = None,
-                 mode : str = "no_decay",
-                 ):
+                 ) -> None:
+        """Initialise the class and internal variables.
+
+        Args:
+            parameters (dict) : Dictionary with transport parameters.
+            mode (str) : Type of analytical model to be used. Default is no decay model.
+            dx (float) : Model step size in x direction. If left empty,
+            reasonable value will be calculated based on modeled area length. Default is None.
+            dy (float) : Model step size in y direction. If left empty,
+            reasonable value will be calculated based on modeled area width. Default is None.
+            dt (float) : Model step size for time. If left empty,
+            reasonable value will be calculated based on simulation time. Default is None.
+
+        """
         self.pars = parameters
         self.mode = mode
         self.dx = dx
@@ -28,7 +42,13 @@ class MassBalance:
         }
 
 
-    def balance(self, time = None):
+    def balance(self, time = None) -> dict:
+        """Calculates mass balance at a certain time point using the analytical equation for specified model type.
+
+        Returns:
+            mass_balance_dict (dict) : Dictionary containing mass for each mass balance component
+            relevant to the model type.
+        """
         obj_nodecay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "no_decay")
         cxyt_nd, x, y, t = obj_nodecay.domenico()
 
@@ -127,4 +147,4 @@ class MassBalance:
             electron_acceptor_mass_change = mass_fraction_electron_acceptor * degraded_mass
             self.mass_balance_dict["electron_acceptor_mass_change"] = electron_acceptor_mass_change
 
-        return(self.mass_balance_dict)
+        return self.mass_balance_dict

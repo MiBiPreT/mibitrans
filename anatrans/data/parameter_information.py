@@ -150,5 +150,5 @@ mass_balance_renaming_dictionary = {
     "plume_mass_no_decay_instant_reaction" : "plume mass before decay",
     "plume_mass_instant_reaction" : "plume mass after decay",
     "plume_mass_degraded_instant" : "plume mass degraded",
-    "electron_acceptor_mass_change" : "change electron acceptor"
+    "electron_acceptor_mass_change" : "change in mass (kg)"
 }

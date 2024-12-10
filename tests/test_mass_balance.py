@@ -24,7 +24,7 @@ def test_balance_time(input : dict, time, dt, expected) -> None:
     """Tests time point determination of balance function."""
     obj_mb = mb.MassBalance(input, dx=None, dy=None, dt=dt, mode="no_decay")
     output = obj_mb.balance(time=time)
-    assert output["time"] == expected
+    assert output["time"] == pytest.approx(expected)
 
 @pytest.mark.parametrize(
     "input, stepsize, time, mode, expected",

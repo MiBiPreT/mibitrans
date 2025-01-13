@@ -78,7 +78,12 @@ class Transport:
         self.R = calculate_retardation(self.pars)
         v = calculate_flow_velocity(self.pars)
         self.pars["v"] = v
-        self.k_source = calculate_source_decay(self.pars)
+
+        # No source decay occurs when source mass is infinite
+        if self.pars["m_total"] in ["inf", "infinite"]:
+            self.k_source = 0
+        else:
+            self.k_source = calculate_source_decay(self.pars)
         self.ax, self.ay, self.az = calculate_dispersivity(self.pars)
 
         if mode == "linear_decay":
@@ -116,8 +121,13 @@ class Transport:
         # Calculate and add biodegradation capacity to the outer plume
         if mode == "instant_reaction":
             self.biodeg_cap = calculate_biodegradation_capacity(self.pars)
-            self.k_source_instant = calculate_source_decay_instant(self.pars, self.biodeg_cap)
             self.c0[-1] += self.biodeg_cap
+
+            # No source decay occurs when source mass is infinite
+            if self.pars["m_total"] in ["inf", "infinite"]:
+                self.k_source_instant = 0
+            else:
+                self.k_source_instant = calculate_source_decay_instant(self.pars, self.biodeg_cap)
 
         else:
             self.biodeg_cap = 0

@@ -87,7 +87,9 @@ class CheckInput:
         for key, value in self.dict.items():
             if key in datatype_dictionary["int_float"]:
                 if not isinstance(value, int) and not isinstance(value, float):
-                    self.wrong_type.append(key)
+                    # Allow total source mass to be set to infinite
+                    if key != "m_total" or (value not in ["inf", "infinite"]):
+                        self.wrong_type.append(key)
                 # Parameters designated as float or int can not have negative values
                 elif key == "n" and (value <= 0 or value > 1):
                     self.wrong_value.append(key)

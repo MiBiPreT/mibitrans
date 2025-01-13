@@ -55,7 +55,6 @@ class MassBalance:
         # If time point is specified, closest point in time array t is taken.
         # If not specified, defaults to last time point.
         if time is not None:
-            print(time)
             time_pos = np.argmin(abs(t - time))
             self.mass_balance_dict["time"] = t[time_pos]
         else:

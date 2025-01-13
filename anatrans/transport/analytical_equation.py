@@ -117,7 +117,7 @@ class Transport:
         if mode == "instant_reaction":
             self.biodeg_cap = calculate_biodegradation_capacity(self.pars)
             self.k_source_instant = calculate_source_decay_instant(self.pars, self.biodeg_cap)
-            self.c0[-1] = self.biodeg_cap
+            self.c0[-1] += self.biodeg_cap
 
         else:
             self.biodeg_cap = 0

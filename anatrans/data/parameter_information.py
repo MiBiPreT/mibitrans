@@ -6,7 +6,7 @@ import numpy as np
 
 # Dictionary with possible input variable names as value and the variable name used in the package as key.
 key_dictionary = {
-    "v" : ["v", "V", "velocity", "vel", "velo"],
+    "v" : ["v", "V", "velocity", "vel", "velo", "flow velocity", "flow_velocity"],
     "k" : ["k", "K", "hydraulic conductivity", "conductivity", "hydraulic_conductivity"],
     "i" : ["i", "I", "gradient", "hydraulic gradient", "hydraulic_gradient"],
     "n" : ["n", "N", "porosity", "por", "theta"],
@@ -15,7 +15,7 @@ key_dictionary = {
     "alpha_z" : ["alpha_z", "a_z", "dispersivity_z", "alpha_v", "vertical_dispersivity"],
     "lp" : ["lp", "Lp", "plume_length", "plume length", "p_length", "pl", "Pl"],
     "R" : ["R", "r", "retention_factor", "adsorption_factor", "retention_rate", "adsorption_rate",
-           "ret_factor", "ret_rate"],
+           "ret_factor", "ret_rate", "retardation_factor"],
     "rho" : ["rho", "Rho", "density", "bulk_density", "soil_density", "soil_bulk_density"],
     "Koc" : ["Koc", "koc", "partition_coefficient", "partition_coeff", "partition_coef"],
     "foc" : ["foc", "Foc", "organic_carbon", "fraction_organic_carbon", "fraction_organic"],
@@ -28,7 +28,8 @@ key_dictionary = {
     "d_source" : ["d_source", "source_thickness", "thickness_source"],
     "c_source" : ["c_source", "concentration_source", "conc_source", "source_c", "source_concentration", "source_conc",
                   "source_data", "initial_conc", "c_initial", "conc_initial", "initial_concentration"],
-    "m_total" : ["m_total", "total_m", "total_mass", "mass_total", "soluble_mass", "soluble_m", "m_soluble"],
+    "m_total" : ["m_total", "total_m", "total_mass", "mass_total", "soluble_mass", "soluble_m",
+                 "m_soluble", "source_mass"],
     "dO" : ["dO", "dO2", "DO", "DO2", "delta_O", "delta_oxygen", "d_oxygen", "delta_O2", "do", "do2",
             "Do", "Do2", "O2", "oxygen", "Oxygen", "o2"],
     "dNO3" : ["dNO3", "DNO3", "dN", "dNO", "delta_nitrate", "delta_NO3", "dno3", "Dno3", "d_nitrate", "nitrate",

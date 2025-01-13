@@ -2,11 +2,11 @@
 
 Module handling data input in the form of a dictionary.
 """
-import sys
+#import sys
 
-sys.path.insert(1, "./anatrans/data")
+#sys.path.insert(1, "./anatrans/data")
 
-from parameter_information import key_dictionary
+from anatrans.data.parameter_information import key_dictionary
 
 
 def from_dict(dictionary: dict,

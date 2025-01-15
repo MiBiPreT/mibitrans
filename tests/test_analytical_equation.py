@@ -37,7 +37,6 @@ def test_transport_grid(input, stepsize) -> None:
     y = np.arange(-source_y[-1], source_y[-1] + dy, dy)
     t = np.arange(dt, input["t_model"] + dt, dt)
 
-    # To allow array calculations, set space and time as a 3-dimensional array.
     test_xxx = np.tile(x, (len(t), len(y), 1))
     test_yyy = np.tile(y[:, None], (len(t), 1, len(x)))
     test_ttt = np.tile(t[:, None, None], (1, len(y), len(x)))
@@ -64,13 +63,16 @@ def test_transport_grid(input, stepsize) -> None:
 
 def test_transport_domenico(input, stepsize, mode) -> None:
     """Test if Transport class domenico model is correctly calculated."""
-    obj = ana.Transport(testing_dictionary, mode, 10, 5, 1)
+    dx, dy, dt = stepsize
+    print(dx, dy, dt)
+    obj = ana.Transport(testing_dictionary, mode, dx, dy, dt)
     out_cxyt, x, y, t = obj.domenico()
     if mode == "no_decay":
         test_cxyt = testingdata_nodecay
     elif mode == "linear_decay":
         test_cxyt = testingdata_lineardecay
     elif mode == "instant_reaction":
+        print(out_cxyt)
         test_cxyt = testingdata_instantreaction
     else:
         test_cxyt = None

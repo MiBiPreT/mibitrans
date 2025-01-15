@@ -2,10 +2,6 @@
 
 Module handling data input in the form of a dictionary.
 """
-#import sys
-
-#sys.path.insert(1, "./anatrans/data")
-
 from anatrans.data.parameter_information import key_dictionary
 
 

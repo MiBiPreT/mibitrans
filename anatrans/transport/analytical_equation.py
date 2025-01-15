@@ -139,7 +139,7 @@ class Transport:
         self.x = np.arange(0, parameters["l_model"] + self.dx, self.dx)
 
         if parameters["w_model"] > 2 * self.source_y[-1]:
-            self.y = np.arange(-parameters["w_model"] // 2, parameters["w_model"] // 2, self.dy)
+            self.y = np.arange(-parameters["w_model"] / 2, parameters["w_model"] / 2, self.dy)
         else:
             self.y = np.arange(-self.source_y[-1], self.source_y[-1] + self.dy, self.dy)
 

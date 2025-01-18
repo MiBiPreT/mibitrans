@@ -35,6 +35,7 @@ def calculate_dispersivity(pars):
         ay = ax / 10
         az = ax / 100
 
+    # Dispersivity values of 0 may give issues in analytical equation, therefore are set to small non-zero value
     if ax < 1e-10:
         ax = 1e-10
     if ay < 1e-10:

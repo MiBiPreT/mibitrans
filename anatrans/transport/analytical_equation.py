@@ -179,7 +179,7 @@ class Transport:
             if self.mode != "linear_decay":
                 additional_x = (np.exp(self.xxx * self.v / (self.ax * self.v))
                                 * erfc(self.xxx + self.v * self.ttt / (2 * np.sqrt(self.ax * self.v * self.ttt))))
-                x_term += additional_x
+                #x_term += additional_x
 
             # Dispersion term in the z direction
             z_term = (erf(self.pars["d_source"] / (2 * np.sqrt(self.az * self.xxx)))
@@ -199,6 +199,7 @@ class Transport:
                 # Dispersion term in the y direction
                 y_term = (erf((self.yyy + self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx)))
                          - erf((self.yyy - self.source_y[i+1]) / (2 * np.sqrt(self.ay * self.xxx))))
+
                 y_term[np.isnan(y_term)] = 0
 
                 # Correct source zone concentrations for source decay

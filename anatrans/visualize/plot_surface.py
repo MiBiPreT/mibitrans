@@ -30,7 +30,8 @@ class Plume():
         ax.view_init(elev=30, azim=310)
         ax.set_xlabel("Distance from source (m)")
         ax.set_ylabel("Distance from plume center (m)")
-        ax.set_zlabel("Concentration (mg/L)")
+        ax.set_zlabel(r"Concentration [$g/m^{-3}$]")
+
         return(ax)
 
     def flat(self, time = None, **kwargs):

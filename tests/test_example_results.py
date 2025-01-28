@@ -90,14 +90,13 @@ testingdata_instantreaction = np.array([[
     [0., 0.50587302, 0.55671969, 0.33985742, 0., 0.]
 ]])
 
-testing_massbalance_nodecay = {
-    'time': np.int64(3),
-    'source_mass_0': 1000000,
-    'source_mass_t': np.float64(987330.9369029925),
-    'source_mass_change': np.float64(12669.063097007456),
-    'plume_mass_no_decay': np.float64(10884.801775892505),
-    'transport_outside_extent_nodecay': np.float64(1784.261321114951)
-}
+testing_massbalance_nodecay = {'time': np.int64(3),
+                               'source_mass_0': 1000000,
+                               'source_mass_t': np.float64(987330.9369029925),
+                               'source_mass_change': np.float64(12669.063097007456),
+                               'plume_mass_no_decay': np.float64(10884.801775892505),
+                               'transport_outside_extent_nodecay': np.float64(1784.261321114951)
+                               }
 
 testing_massbalance_lindecay = {'time': np.int64(3),
                                 'source_mass_0': 1000000,
@@ -108,7 +107,7 @@ testing_massbalance_lindecay = {'time': np.int64(3),
                                 'plume_mass_linear_decay': np.float64(1682.1452404554184),
                                 'transport_outside_extent_lineardecay': np.float64(275.74105168269006),
                                 'plume_mass_degraded_linear': np.float64(10711.176804869348)
-}
+                                }
 
 testing_massbalance_instant = {'time': np.int64(3),
                                'source_mass_0': 1000000,
@@ -121,8 +120,11 @@ testing_massbalance_instant = {'time': np.int64(3),
                                'plume_mass_no_decay_instant_reaction': np.float64(12672.723731642844),
                                'plume_mass_instant_reaction': np.float64(8702.610542371283),
                                'plume_mass_degraded_instant': np.float64(3970.1131892715603),
-                               'electron_acceptor_mass_change': np.array([1924.21133006, 1924.21133006, 1924.21133006,
-                                                                          1924.21133006, 1924.21133006])
-}
+                               'electron_acceptor_mass_change': np.array([1924.21133006,
+                                                                          1924.21133006,
+                                                                          1924.21133006,
+                                                                          1924.21133006,
+                                                                          1924.21133006])
+                               }
 
 

@@ -172,4 +172,6 @@ python -m twine upload dist/*
 
 ### (3/3) GitHub
 
-Don't forget to also make a [release on GitHub](https://github.com/MiBiPreT/anatrans/releases/new). If your repository uses the GitHub-Zenodo integration this will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.
+Also make a [release on GitHub](https://github.com/MiBiPreT/anatrans/releases/new). If your repository uses the GitHub-Zenodo integration this will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.
+
+Github provides detailed documentation on how to [generate a release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release). Here you can also automatically generate the release notes which can serve as a changelog based on the merged pull requests since the previous release. 

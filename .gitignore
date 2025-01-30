@@ -29,9 +29,3 @@ env
 env3
 venv
 venv3
-
-# local files
-/anatrans/base_plots_example.py
-/anatrans/centerline_comparison.py
-/anatrans/klad.py
-/anatrans/constructed_wetland.py

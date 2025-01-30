@@ -24,7 +24,29 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = [
+    "contourpy",
+    "cycler",
+    "fonttools",
+    "iniconfig",
+    "kiwisolver",
+    "matplotlib",
+    "numpy",
+    "packaging",
+    "pandas",
+    "pillow",
+    "pluggy",
+    "prettytable",
+    "pyparsing",
+    "pytest",
+    "python-dateutil",
+    "pytz",
+    "ruff",
+    "scipy",
+    "six",
+    "tzdata",
+    "wcwidth",
+]
 description = "A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena"
 keywords = [
     "groundwater",
@@ -46,6 +68,7 @@ dev = [
     "ruff",
     "tox",
 ]
+
 publishing = [
     "build",
     "twine",

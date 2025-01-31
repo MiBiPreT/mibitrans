@@ -4,15 +4,25 @@
 
 A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
 
-## Installation
+## Installation of stable release
 
-To install anatrans from GitHub repository, do:
+Use `pip` to install the most recent stable release of `anatrans` as follows:
+
+```console
+pip install anatrans
+```
+
+## Installation of most recent development version
+
+To install anatrans from the GitHub repository directly, do:
 
 ```console
 git clone git@github.com:MiBiPreT/anatrans.git
 cd anatrans
 python -m pip install .
 ```
+
+Note that this is the (possibly unstable) development version from the `main` branch. If you want a stable release, use the pip installation method instead.
 
 ## Documentation
 

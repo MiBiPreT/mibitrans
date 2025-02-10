@@ -4,6 +4,10 @@ cff-version: "1.2.0"
 title: "anatrans"
 authors:
   -
+    family-names: Bakker
+    given-names: Jorrit Yvo
+    orcid: "https://orcid.org/0009-0005-1842-8093"
+  -
     family-names: Zech
     given-names: Alraune
     orcid: "https://orcid.org/0000-0002-8783-6198"   
@@ -19,10 +23,6 @@ authors:
     family-names: Camphuijsen
     given-names: Jaro
     orcid: "https://orcid.org/0000-0002-8928-7831"
-  -
-    family-names: Bakker
-    given-names: Jorrit Yvo
-    orcid: "https://orcid.org/0009-0005-1842-8093"
 
 date-released: 2024-03-26
 doi: 10.5281/zenodo.10877886

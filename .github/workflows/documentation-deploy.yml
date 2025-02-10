@@ -4,7 +4,7 @@ permissions: write-all
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   build-docs-and-deploy:

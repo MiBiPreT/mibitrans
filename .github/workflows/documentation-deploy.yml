@@ -9,7 +9,6 @@ on:
 jobs:
   build-docs-and-deploy:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')  # only deploy docs on tag release
     steps:
       - uses: actions/checkout@v3
 

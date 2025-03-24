@@ -1,15 +1,15 @@
-# Documention for `anatrans` python package
+# Documention for `mibitrans` python package
 
-## How to use anatrans
+## How to use mibitrans
 
 A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
 
 ## Installation
 
-To install anatrans from GitHub repository, do:
+To install mibitrans from GitHub repository, do:
 
 ```console
-git clone git@github.com:MiBiPreT/anatrans.git
-cd anatrans
+git clone git@github.com:MiBiPreT/mibitrans.git
+cd mibitrans
 python -m pip install .
 ```

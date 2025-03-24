@@ -81,7 +81,7 @@ class CheckInput:
 
     def check_values(self):
         """Check if value and value types are as expected."""
-        from anatrans.data.parameter_information import datatype_dictionary
+        from mibitrans.data.parameter_information import datatype_dictionary
 
         # To prevent incorrect datatypes, input data types are compared to allowed data types for each parameter.
         for key, value in self.dict.items():

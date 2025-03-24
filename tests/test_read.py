@@ -4,8 +4,8 @@ Module handling testing of data input functionality
 """
 
 import pytest
-import anatrans.data.read as rd
-from anatrans.data.parameter_information import key_dictionary as k_dict
+import mibitrans.data.read as rd
+from mibitrans.data.parameter_information import key_dictionary as k_dict
 
 
 @pytest.mark.parametrize(

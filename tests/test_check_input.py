@@ -5,7 +5,7 @@ Module handling data input in the form of a dictionary.
 
 import numpy as np
 import pytest
-import anatrans.data.check_input as ci
+import mibitrans.data.check_input as ci
 
 
 @pytest.mark.parametrize(

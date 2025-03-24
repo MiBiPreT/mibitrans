@@ -2,7 +2,7 @@
 
 Module handling data input in the form of a dictionary.
 """
-from anatrans.data.parameter_information import key_dictionary
+from mibitrans.data.parameter_information import key_dictionary
 
 
 def from_dict(dictionary: dict,

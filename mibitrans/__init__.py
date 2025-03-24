@@ -1,4 +1,4 @@
-"""Documentation about anatrans."""
+"""Documentation about mibitrans."""
 import logging
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

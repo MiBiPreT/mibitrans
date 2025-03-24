@@ -13,13 +13,13 @@ The sections below outline the steps in each case.
 
 ## You have a question
 
-1. use the search functionality [here](https://github.com/MiBiPreT/anatrans/issues) to see if someone already filed the same issue;
+1. use the search functionality [here](https://github.com/MiBiPreT/mibitrans/issues) to see if someone already filed the same issue;
 2. if your issue search did not yield any relevant results, make a new issue;
 3. apply the "Question" label; apply other labels when relevant.
 
 ## You think you may have found a bug
 
-1. use the search functionality [here](https://github.com/MiBiPreT/anatrans/issues) to see if someone already filed the same issue;
+1. use the search functionality [here](https://github.com/MiBiPreT/mibitrans/issues) to see if someone already filed the same issue;
 1. if your issue search did not yield any relevant results, make a new issue, making sure to provide enough information to the rest of the community to understand the cause and context of the problem. Depending on the issue, you may want to include:
     - the [SHA hashcode](https://help.github.com/articles/autolinked-references-and-urls/#commit-shas) of the commit that is causing your problem;
     - some identifying information (name and version number) for dependencies you're using;
@@ -36,7 +36,7 @@ The sections below outline the steps in each case.
 1. add your own tests (if necessary);
 1. update or expand the documentation;
 1. update the `CHANGELOG.md` file with your change;
-1. [push](http://rogerdudler.github.io/git-guide/) your feature branch to (your fork of) the anatrans repository on GitHub;
+1. [push](http://rogerdudler.github.io/git-guide/) your feature branch to (your fork of) the mibitrans repository on GitHub;
 1. create the pull request, e.g. following the instructions [here](https://help.github.com/articles/creating-a-pull-request/).
 
 In case you feel like you've made a valuable contribution, but you don't know how to write or run tests for it, or how to generate the documentation: don't let this discourage you from making the pull request; we can help you! Just go ahead and submit the pull request, but keep in mind that you might be asked to append additional commits to your pull request.
@@ -46,23 +46,11 @@ In case you feel like you've made a valuable contribution, but you don't know ho
 To create a release you need write permission on the repository.
 
 1. Check the author list in [`CITATION.cff`](CITATION.cff)
-1. Bump the version using `bump-my-version bump <major|minor|patch>`. For example, `bump-my-version bump major` will increase major version numbers everywhere it's needed (code, meta, etc.) in the repo. Alternatively the version can be manually changed in anatrans/__init__.py, pyproject.toml, CITATION.cff and docs/conf.py (and other places it was possibly added).
+1. Bump the version using `bump-my-version bump <major|minor|patch>`. For example, `bump-my-version bump major` will increase major version numbers everywhere it's needed (code, meta, etc.) in the repo. Alternatively the version can be manually changed in mibitrans/__init__.py, pyproject.toml, CITATION.cff and docs/conf.py (and other places it was possibly added).
 1. Update the `CHANGELOG.md` to include changes made
-1. Go to the [GitHub release page](https://github.com/MiBiPreT/anatrans/releases)
+1. Go to the [GitHub release page](https://github.com/MiBiPreT/mibitrans/releases)
 1. Press draft a new release button
 1. Fill version, title and description field
 1. Press the Publish Release button
-<!--
-For projects that automatically publish to PyPI using a release or publish workflow, something like the following could be useful to add (make sure to replace the names and links):
-
-1. Wait until [PyPi publish workflow](https://github.com/MiBiPreT/anatrans/actions/workflows/publish.yml) has completed
-1. Verify new release is on [PyPi](https://pypi.org/project/matchms/#history)
--->
-<!--
-For projects that also build conda packages, e.g. on conda-forge or Bioconda, something like the following could be useful to add (example taken from matchms, make sure to replace the names and links):
-
-1. Wait until new release is also on Bioconda (https://anaconda.org/bioconda/anatrans) via a automaticly created PR on [bioconda recipes repo](https://github.com/bioconda/bioconda-recipes/pulls?q=is%3Apr+is%3Aopen+anatrans)
-1. Test anatrans from bioconda by manually running [Conda verify](https://github.com/MiBiPreT/anatrans/actions/workflows/conda_verify.yml) workflow
--->
 
 Also a Zenodo entry will be made for the release with its own DOI.

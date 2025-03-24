@@ -1,3 +1,3 @@
-# `anatrans` API reference
+# `mibitrans` API reference
 
-::: anatrans
+::: mibitrans

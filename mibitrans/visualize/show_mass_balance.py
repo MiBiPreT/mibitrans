@@ -5,7 +5,7 @@ Module calculating methods for mass balance visualization.
 
 import numpy as np
 from prettytable import PrettyTable
-from anatrans.data.parameter_information import mass_balance_renaming_dictionary as rename_dict
+from mibitrans.data.parameter_information import mass_balance_renaming_dictionary as rename_dict
 
 
 def generate_mass_balance_tables(mass_dict):

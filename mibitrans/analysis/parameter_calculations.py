@@ -4,7 +4,7 @@ Module containing various methods that takes a dictionary of parameters as input
 can be used in transport equations.
 """
 import numpy as np
-from anatrans.data.parameter_information import acceptor_utilization_dictionary
+from mibitrans.data.parameter_information import acceptor_utilization_dictionary
 
 
 def calculate_retardation(pars):

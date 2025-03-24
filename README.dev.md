@@ -1,1 +1,1 @@
-Developer documentation can be found [here](https://github.com/MiBiPreT/anatrans/blob/main/docs/getting-started/development.md).  
+Developer documentation can be found [here](https://github.com/MiBiPreT/mibitrans/blob/main/docs/getting-started/development.md).  

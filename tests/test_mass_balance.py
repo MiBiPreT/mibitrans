@@ -4,8 +4,8 @@ File testing functionality of mass_balance module.
 """
 
 import pytest
-import anatrans.analysis.mass_balance as mb
-from anatrans.data.parameter_information import testing_dictionary
+import mibitrans.analysis.mass_balance as mb
+from mibitrans.data.parameter_information import testing_dictionary
 from tests.test_example_results import testing_massbalance_instant
 from tests.test_example_results import testing_massbalance_lindecay
 from tests.test_example_results import testing_massbalance_nodecay

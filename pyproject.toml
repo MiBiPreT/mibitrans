@@ -57,7 +57,7 @@ keywords = [
     "contaminant transport",
 ]
 license = {file = "LICENSE"}
-name = "anatrans"
+name = "mibitrans"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
 version = "0.2.2"
@@ -87,29 +87,29 @@ doc = [
 ]
 
 [project.urls]
-Repository = "https://github.com/MiBiPreT/anatrans"
-Issues = "https://github.com/MiBiPreT/anatrans/issues"
-Changelog = "https://github.com/MiBiPreT/anatrans/CHANGELOG.md"
+Repository = "https://github.com/MiBiPreT/mibitrans"
+Issues = "https://github.com/MiBiPreT/mibitrans/issues"
+Changelog = "https://github.com/MiBiPreT/mibitrans/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["anatrans"]
+source = ["mibitrans"]
 command_line = "-m pytest"
 
 [tool.isort]
 lines_after_imports = 2
 force_single_line = 1
 no_lines_before = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-known_first_party = "anatrans"
-src_paths = ["anatrans", "tests"]
+known_first_party = "mibitrans"
+src_paths = ["mibitrans", "tests"]
 line_length = 120
 
 # For completeness, until we move to an src-based layout
 [tool.setuptools.packages.find]
-include = ["anatrans*"]
+include = ["mibitrans*"]
 exclude = ["tests*"]
 
 [tool.tox]
@@ -193,7 +193,7 @@ target-version = "py39"
 line-length = 120
 
 [tool.ruff.lint.isort]
-known-first-party = ["anatrans"]
+known-first-party = ["mibitrans"]
 force-single-line = true
 no-lines-before = ["future","standard-library","third-party","first-party","local-folder"]
 
@@ -201,7 +201,7 @@ no-lines-before = ["future","standard-library","third-party","first-party","loca
 current_version = "0.2.2"
 
 [[tool.bumpversion.files]]
-filename = "anatrans/__init__.py"
+filename = "mibitrans/__init__.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"

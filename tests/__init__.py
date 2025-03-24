@@ -1,1 +1,1 @@
-"""Test scripts for anatrans."""
+"""Test scripts for mibitrans."""

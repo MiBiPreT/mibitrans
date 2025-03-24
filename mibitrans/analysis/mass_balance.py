@@ -4,11 +4,11 @@ Module calculating the mass balance based on base parameters.
 """
 
 import numpy as np
-import anatrans.transport.analytical_equation as eq
-from anatrans.analysis.parameter_calculations import calculate_acceptor_utilization
-from anatrans.analysis.parameter_calculations import calculate_biodegradation_capacity
-from anatrans.analysis.parameter_calculations import calculate_source_decay
-from anatrans.analysis.parameter_calculations import calculate_source_decay_instant
+import mibitrans.transport.analytical_equation as eq
+from mibitrans.analysis.parameter_calculations import calculate_acceptor_utilization
+from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_source_decay
+from mibitrans.analysis.parameter_calculations import calculate_source_decay_instant
 
 
 class MassBalance:

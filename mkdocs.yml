@@ -1,9 +1,9 @@
-site_name: anatrans
+site_name: mibitrans
 site_description: A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
 site_author: Alraune Zech, Sona Aseyednezhad, Robin Richardson, Jaro Camphuijsen 
-site_url: https://MiBiPreT.github.io/anatrans
-repo_name: MiBiPreT/anatrans 
-repo_url: https://github.com/MiBiPreT/anatrans/ 
+site_url: https://MiBiPreT.github.io/mibitrans
+repo_name: MiBiPreT/mibitrans 
+repo_url: https://github.com/MiBiPreT/mibitrans/ 
 edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2024 Alraune Zech, Sona Aseyednezhad, Robin Richardson, Jaro Camphuijsen
 
@@ -89,4 +89,4 @@ extra_javascript:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/MiBiPreT/anatrans
+      link: https://github.com/MiBiPreT/mibitrans

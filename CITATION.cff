@@ -1,7 +1,7 @@
 # YAML 1.2
 ---
 cff-version: "1.2.0"
-title: "anatrans"
+title: "mibitrans"
 authors:
   -
     family-names: Bakker
@@ -27,7 +27,7 @@ authors:
 date-released: 2024-03-26
 doi: 10.5281/zenodo.10877886
 version: "0.2.2"
-repository-code: "https://github.com/MiBiPreT/anatrans"
+repository-code: "https://github.com/MiBiPreT/mibitrans"
 keywords:
   - groundwater
   - contaminant transport

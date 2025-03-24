@@ -6,14 +6,14 @@ Module calculating the solution to the Domenico (1987) analytical model for diff
 import numpy as np
 from scipy.special import erf
 from scipy.special import erfc
-from anatrans.analysis.parameter_calculations import calculate_biodegradation_capacity
-from anatrans.analysis.parameter_calculations import calculate_dispersivity
-from anatrans.analysis.parameter_calculations import calculate_flow_velocity
-from anatrans.analysis.parameter_calculations import calculate_linear_decay
-from anatrans.analysis.parameter_calculations import calculate_retardation
-from anatrans.analysis.parameter_calculations import calculate_source_decay
-from anatrans.analysis.parameter_calculations import calculate_source_decay_instant
-from anatrans.data.check_input import CheckInput
+from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_dispersivity
+from mibitrans.analysis.parameter_calculations import calculate_flow_velocity
+from mibitrans.analysis.parameter_calculations import calculate_linear_decay
+from mibitrans.analysis.parameter_calculations import calculate_retardation
+from mibitrans.analysis.parameter_calculations import calculate_source_decay
+from mibitrans.analysis.parameter_calculations import calculate_source_decay_instant
+from mibitrans.data.check_input import CheckInput
 
 
 class Transport:

@@ -183,8 +183,7 @@ exclude = [
     ".venv",
     "scripts",
 ]
-lint.per-file-ignores = {}
-
+lint.per-file-ignores = {"mibitrans/__init__.py"=["F401","I001"]}
 
 # Allow unused variables when underscore-prefixed.
 lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"

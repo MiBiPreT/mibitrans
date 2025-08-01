@@ -1,18 +1,21 @@
 site_name: mibitrans
 site_description: A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
-site_author: Alraune Zech, Sona Aseyednezhad, Robin Richardson, Jaro Camphuijsen 
+site_author: Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen 
 site_url: https://MiBiPreT.github.io/mibitrans
 repo_name: MiBiPreT/mibitrans 
 repo_url: https://github.com/MiBiPreT/mibitrans/ 
 edit_uri: "edit/main/docs/"
-copyright: Copyright &copy; 2024 Alraune Zech, Sona Aseyednezhad, Robin Richardson, Jaro Camphuijsen
+copyright: Copyright &copy; 2024 Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen
 
 nav:
-  - Getting started:
-    - Getting started: index.md
-    - Development: getting-started/development.md
+  - Home: index.md
+  - Introduction: introduction/introduction.md
+  - Development: development/development.md
   - API Reference:
-    - Reference: reference/reference.md
+    - Data: reference/reference_data.md
+    - Transport: reference/reference_transport.md
+    - Analysis: reference/reference_analysis.md
+    - Visualize: reference/reference_visualize.md
 
 theme:
   name: "material"

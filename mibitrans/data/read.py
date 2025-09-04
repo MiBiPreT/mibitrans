@@ -133,6 +133,19 @@ class ModelParameters:
             if error and (value is not None):
                 raise error
 
+        if self.model_length and self.dx:
+            if self.model_length / self.dx < 1:
+                warnings.warn("Step size is larger than model length, dx will be set to length of model.", UserWarning)
+                self.dx = self.model_length
+        if self.model_width and self.dy:
+            if self.model_width / self.dy < 1:
+                warnings.warn("Step size is larger than model width, dy will be set to width of model.", UserWarning)
+                self.dy = self.model_width
+        if self.model_time and self.dt:
+            if self.model_time / self.dt < 1:
+                warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
+                self.dt = self.model_time
+
 @dataclass
 class SourceParameters:
     """Dataclass handling source parameters."""
@@ -161,7 +174,7 @@ class SourceParameters:
             if parameter == "verbose":
                 continue
             elif parameter == "source_zone_boundary" or parameter == "source_zone_concentration":
-                error = _check_array_float_positive("source_zone_boundary", self.source_zone_boundary)
+                error = _check_array_float_positive(parameter, value)
             # Total source mass can be a positive float or a string denoting that source mass is infinite
             # Therefore, it is checked separately
             elif parameter == "total_mass":
@@ -172,9 +185,19 @@ class SourceParameters:
             if error and (value is not None):
                 raise error
 
+        # If total mass is any type of string, it is assumed the user's intention is to have it be infinite
+        if isinstance(self.total_mass, str):
+            self.total_mass = "infinite"
+
         # Ensure boundary and concentration have same data type
-        self.source_zone_boundary = np.array(self.source_zone_boundary)
-        self.source_zone_concentration = np.array(self.source_zone_concentration)
+        if isinstance(self.source_zone_boundary, (float, int)):
+            self.source_zone_boundary = np.array([self.source_zone_boundary])
+        else:
+            self.source_zone_boundary = np.array(self.source_zone_boundary)
+        if isinstance(self.source_zone_concentration, (float, int)):
+            self.source_zone_concentration = np.array([self.source_zone_concentration])
+        else:
+            self.source_zone_concentration = np.array(self.source_zone_concentration)
 
         # Each given source zone boundary should have a given concentration, and vice versa
         if self.source_zone_boundary.shape != self.source_zone_concentration.shape:
@@ -305,5 +328,3 @@ def from_dict(dictionary: dict,
         print("All keys were recognized")
 
     return params
-
-

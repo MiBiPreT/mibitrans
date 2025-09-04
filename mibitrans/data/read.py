@@ -33,7 +33,6 @@ class HydrologicalParameters:
 
         if self.velocity is None and (self.h_gradient is None or self.h_conductivity is None):
             raise ValueError(f"HydrologicalParameters missing required arguments: either velocity or both h_gradient and h_conductivity.")
-        print(self.__dict__)
 
         # All input parameters should be positive floats, raise appropriate error if not
         for parameter, value in self.__dict__.items():
@@ -109,6 +108,7 @@ class AdsorptionDegradationParameters:
         # Come back to later
         return None
 
+@dataclass
 class ModelParameters:
     """Dataclass handling model discretization parameters."""
     model_length : float = None
@@ -122,6 +122,7 @@ class ModelParameters:
     def __post_init__(self):
         # No single argument is required, so no presence check is performed.
 
+        # Check input value and data type
         for parameter, value in self.__dict__.items():
             # Specific check and error for porosity, which has domain [0,1]
             if parameter == "verbose":
@@ -132,21 +133,65 @@ class ModelParameters:
             if error and (value is not None):
                 raise error
 
-
-
-
+@dataclass
 class SourceParameters:
     """Dataclass handling source parameters."""
-    source_zone_boundary : float | np.ndarray = None
-    source_zone_concentration : float | np.ndarray  = None
+    source_zone_boundary : float | list | np.ndarray = None
+    source_zone_concentration : float | list | np.ndarray = None
     depth : float = None
-    total_mass : float | str = None
+    total_mass : float | str = "infinite"
+    verbose : bool = False
 
     def __post_init__(self):
-        return None
+
+        # Check if all required arguments are present
+        missing_arguments = []
+        if self.source_zone_boundary is None:
+            missing_arguments.append("source_zone_boundary")
+        if self.source_zone_concentration is None:
+            missing_arguments.append("source_zone_concentration")
+        if self.depth is None:
+            missing_arguments.append("depth")
+
+        if len(missing_arguments) > 0:
+            raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
+
+        # Check input value and data type
+        for parameter, value in self.__dict__.items():
+            if parameter == "verbose":
+                continue
+            elif parameter == "source_zone_boundary" or parameter == "source_zone_concentration":
+                error = _check_array_float_positive("source_zone_boundary", self.source_zone_boundary)
+            # Total source mass can be a positive float or a string denoting that source mass is infinite
+            # Therefore, it is checked separately
+            elif parameter == "total_mass":
+                error = _check_total_mass(parameter, self.total_mass)
+            else:
+                error = _check_float_positive(parameter, value)
+
+            if error and (value is not None):
+                raise error
+
+        # Ensure boundary and concentration have same data type
+        self.source_zone_boundary = np.array(self.source_zone_boundary)
+        self.source_zone_concentration = np.array(self.source_zone_concentration)
+
+        # Each given source zone boundary should have a given concentration, and vice versa
+        if self.source_zone_boundary.shape != self.source_zone_concentration.shape:
+            raise ValueError(f"Length of source zone boundary ({len(self.source_zone_boundary)}) and source zone concentration ({len(self.source_zone_concentration)}) do not match. Make sure they are of equal length.")
+
+        # Reorder source zone locations if they are not given in order from close to far from source zone center
+        if len(self.source_zone_boundary) > 1:
+            if not all(self.source_zone_boundary[:-1] <= self.source_zone_boundary[1:]):
+                sort_location = np.argsort(self.source_zone_boundary)
+                self.source_zone_boundary.sort()
+                self.source_zone_concentration = self.source_zone_concentration[sort_location]
+
+                warnings.warn(f"Source zone boundary locations should be ordered by distance from source zone center. Zone boundaries and concentrations have consequently been reordered.")
 
     def interpolate(self, n_zones, method):
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""
+        # Come back later
         return None
 
 def _check_float_positive(parameter : str, value):
@@ -178,6 +223,49 @@ def _check_float_retardation(parameter : str, value):
             return ValueError(f"{parameter} must be 1 or larger.")
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
+
+def _check_array_float_positive(parameter : str, value):
+    """Check if variable is numpy array, list, or float, if it is positive and if an array is 1-dimensional"""
+    if isinstance(value, np.ndarray):
+        if len(value.shape) == 1:
+            if all(value >= 0):
+                return None
+            else:
+                return ValueError(f"All values in {parameter} should be >= 0.")
+        else:
+            return ValueError(f"{parameter} should be a float, list or a 1-dimensional array.")
+
+    elif isinstance(value, list):
+        if all(isinstance(element, (float, int)) for element in value):
+            if all(element >= 0 for element in value):
+                return None
+            else:
+                return ValueError(f"All values in {parameter} should be >= 0.")
+        else:
+            return TypeError(f"All elements of {parameter} should be a float.")
+
+    elif isinstance(value, (float, int)):
+        if value >= 0:
+            return None
+        else:
+            return ValueError(f"{parameter} must be >= 0")
+
+    else:
+        return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
+
+def _check_total_mass(parameter : str, value):
+    """Check variable properties of total source mass specifically."""
+    if isinstance(value, (float, int)):
+        if value >= 0:
+            return None
+        else:
+            return ValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
+    elif isinstance(value, str):
+        if value not in ["infinite", "inf", "INF", "Infinite"]:
+            warnings.warn(f"{value} is not understood, total source mass is set to infinite.")
+        return None
+    else:
+        return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 
 ##################
 ##### Legacy #####

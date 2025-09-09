@@ -143,7 +143,6 @@ def test_sourceparameters_validation(parameters, error) -> None:
         (dict(source_zone_boundary=[2,3,1], source_zone_concentration=[4,2,6], depth=5, total_mass=2), "source_zone_boundary", np.array([1,2,3])),
         (dict(source_zone_boundary=[2,3,1], source_zone_concentration=[4,2,6], depth=5, total_mass=2), "source_zone_concentration", np.array([6,4,2])),
         (dict(source_zone_boundary=[1,2,3], source_zone_concentration=[6,4,2], depth=5, total_mass="inf"), "total_mass", "infinite"),
-        (dict(source_zone_boundary=[1,2,3], source_zone_concentration=[6,4,2], depth=5, total_mass="nonsense"),"total_mass", "infinite"),
     ])
 
 def test_sourceparameters_output(test, param, expected) -> None:

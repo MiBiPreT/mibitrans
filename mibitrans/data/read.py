@@ -103,48 +103,15 @@ class AdsorptionDegradationParameters:
             else:
                 self.decay_rate = decay_rate
 
+    def calculate_retardation(self, porosity : float):
+
+        if self.retardation is None:
+            self.retardation = 1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
+
     def utilization_factor(self):
         """Introduce custom utilization factors for each electron donor/acceptor species."""
         # Come back to later
         return None
-
-@dataclass
-class ModelParameters:
-    """Dataclass handling model discretization parameters."""
-    model_length : float = None
-    model_width : float = None
-    model_time : float = None
-    dx : float = None
-    dy : float = None
-    dt : float = None
-    verbose : bool = False
-
-    def __post_init__(self):
-        # No single argument is required, so no presence check is performed.
-
-        # Check input value and data type
-        for parameter, value in self.__dict__.items():
-            # Specific check and error for porosity, which has domain [0,1]
-            if parameter == "verbose":
-                continue
-            else:
-                error = _check_float_positive(parameter, value)
-
-            if error and (value is not None):
-                raise error
-
-        if self.model_length and self.dx:
-            if self.model_length / self.dx < 1:
-                warnings.warn("Step size is larger than model length, dx will be set to length of model.", UserWarning)
-                self.dx = self.model_length
-        if self.model_width and self.dy:
-            if self.model_width / self.dy < 1:
-                warnings.warn("Step size is larger than model width, dy will be set to width of model.", UserWarning)
-                self.dy = self.model_width
-        if self.model_time and self.dt:
-            if self.model_time / self.dt < 1:
-                warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
-                self.dt = self.model_time
 
 @dataclass
 class SourceParameters:
@@ -216,6 +183,46 @@ class SourceParameters:
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""
         # Come back later
         return None
+
+
+@dataclass
+class ModelParameters:
+    """Dataclass handling model discretization parameters."""
+    model_length : float = None
+    model_width : float = None
+    model_time : float = None
+    dx : float = None
+    dy : float = None
+    dt : float = None
+    verbose : bool = False
+
+    def __post_init__(self):
+        # No single argument is required, so no presence check is performed.
+
+        # Check input value and data type
+        for parameter, value in self.__dict__.items():
+            # Specific check and error for porosity, which has domain [0,1]
+            if parameter == "verbose":
+                continue
+            else:
+                error = _check_float_positive(parameter, value)
+
+            if error and (value is not None):
+                raise error
+
+        if self.model_length and self.dx:
+            if self.model_length / self.dx < 1:
+                warnings.warn("Step size is larger than model length, dx will be set to length of model.", UserWarning)
+                self.dx = self.model_length
+        if self.model_width and self.dy:
+            if self.model_width / self.dy < 1:
+                warnings.warn("Step size is larger than model width, dy will be set to width of model.", UserWarning)
+                self.dy = self.model_width
+        if self.model_time and self.dt:
+            if self.model_time / self.dt < 1:
+                warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
+                self.dt = self.model_time
+
 
 def _check_float_positive(parameter : str, value):
     """Check if a variable is a float and if it is positive."""

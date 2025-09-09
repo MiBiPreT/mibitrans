@@ -137,8 +137,8 @@ class DegradationParameters:
 @dataclass
 class SourceParameters:
     """Dataclass handling source parameters."""
-    source_zone_boundary : float | list | np.ndarray = None
-    source_zone_concentration : float | list | np.ndarray = None
+    source_zone_boundary : np.ndarray = None
+    source_zone_concentration : np.ndarray = None
     depth : float = None
     total_mass : float | str = "infinite"
     verbose : bool = False
@@ -312,9 +312,11 @@ def _check_total_mass(parameter : str, value):
         else:
             return ValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
     elif isinstance(value, str):
-        if value not in ["infinite", "inf", "INF", "Infinite"]:
-            warnings.warn(f"{value} is not understood, total source mass is set to infinite.")
-        return None
+        if value not in ["infinite", "inf", "INF", "Infinite", "Inf"]:
+            return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'inf'.")
+        else:
+            return None
+
     else:
         return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 

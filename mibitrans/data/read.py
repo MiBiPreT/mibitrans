@@ -54,31 +54,22 @@ class HydrologicalParameters:
                 warnings.warn("Both velocity and h_gradient & h_conductivity are defined. Value for velocity will be overridden.", UserWarning)
             self.velocity = self.h_gradient * self.h_conductivity / self.porosity
 
-
 @dataclass
-class AdsorptionDegradationParameters:
-    """Dataclass handling adsorption degradation parameters."""
+class AdsorptionParameters:
+    """Dataclass handling adsorption parameters."""
     retardation : float = None
     bulk_density : float = None
     partition_coefficient : float = None
     fraction_organic_carbon : float = None
-    decay_rate : float = None
-    half_life : float = None
-    delta_oxygen : float = None
-    delta_nitrate : float = None
-    ferrous_iron : float = None
-    delta_sulfate : float = None
-    methane : float = None
-    verbose : bool = False
 
     def __post_init__(self):
         if self.retardation is None and (self.bulk_density is None
                                          or self.bulk_density is None
                                          or self.partition_coefficient is None
                                          or self.fraction_organic_carbon is None):
-            raise ValueError("AdsorptionDegradationParameters missing required arguments: either retardation or (bulk_density, partition_coefficient and fraction_organic_carbon).")
+            raise ValueError("AdsorptionParameters missing required arguments: either retardation or (bulk_density, partition_coefficient and fraction_organic_carbon).")
+            # All input parameters should be positive floats, raise appropriate error if not
 
-        # All input parameters should be positive floats, raise appropriate error if not
         for parameter, value in self.__dict__.items():
             # Retardation and fraction_organic_carbon have specific domains and are checked separately
             if parameter == "retardation":
@@ -93,8 +84,43 @@ class AdsorptionDegradationParameters:
             if error and (value is not None):
                 raise error
 
-        # Retardation factor is not calculated from bulk density, partition coefficient and fraction organic carbon
-        # in this dataclass, since porosity is required as well, which is defined in the HydrologicalParameters class.
+    # Retardation factor is not calculated from bulk density, partition coefficient and fraction organic carbon
+    # in this dataclass, since porosity is required as well, which is defined in the HydrologicalParameters class.
+
+    def calculate_retardation(self, porosity : float):
+        if self.retardation is None:
+            self.retardation = 1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
+
+
+@dataclass
+class DegradationParameters:
+    """Dataclass handling degradation parameters."""
+    decay_rate : float = None
+    half_life : float = None
+    delta_oxygen : float = None
+    delta_nitrate : float = None
+    ferrous_iron : float = None
+    delta_sulfate : float = None
+    methane : float = None
+    verbose : bool = False
+
+    def __post_init__(self):
+        if (self.decay_rate is None and self.half_life is None) and (self.delta_oxygen is None
+                                                                     or self.delta_nitrate is None
+                                                                     or self.ferrous_iron is None
+                                                                     or self.delta_sulfate is None
+                                                                     or self.methane is None):
+            raise ValueError("DegradationParameters missing missing required arguments: either decay rate or half life, or electron acceptor/donor concentrations.")
+
+        # All input parameters should be positive floats, raise appropriate error if not
+        for parameter, value in self.__dict__.items():
+            if parameter == "verbose":
+                continue
+            else:
+                error = _check_float_positive(parameter, value)
+
+            if error and (value is not None):
+                raise error
 
         if self.half_life:
             decay_rate = np.log(2) / self.half_life
@@ -102,11 +128,6 @@ class AdsorptionDegradationParameters:
                 warnings.warn("Both contaminant decay rate constant and half life are defined, but are not equal. Only value for decay rate constant will be used in calculations.", UserWarning)
             else:
                 self.decay_rate = decay_rate
-
-    def calculate_retardation(self, porosity : float):
-
-        if self.retardation is None:
-            self.retardation = 1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
 
     def utilization_factor(self):
         """Introduce custom utilization factors for each electron donor/acceptor species."""

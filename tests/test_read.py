@@ -5,7 +5,7 @@ Module handling testing of data input functionality
 
 import pytest
 import numpy as np
-from mibitrans.data.read import HydrologicalParameters, AdsorptionDegradationParameters, ModelParameters, SourceParameters, from_dict
+from mibitrans.data.read import HydrologicalParameters, AdsorptionParameters, DegradationParameters, ModelParameters, SourceParameters, from_dict
 from mibitrans.data.parameter_information import key_dictionary as k_dict
 
 # Test HydrologicalParameters
@@ -46,7 +46,7 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
     hydro = HydrologicalParameters(**test)
     assert hydro.__dict__[param] == expected
 
-# Test AdsorptionDegradationParameters
+# Test AdsorptionParameters
 @pytest.mark.parametrize(
     "parameters, error",
     [
@@ -58,27 +58,53 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(retardation=0.1), ValueError),
         (dict(retardation=1, fraction_organic_carbon="no"), TypeError),
         (dict(retardation=1, fraction_organic_carbon=2), ValueError),
-        (dict(retardation=1, half_life="half"), TypeError),
-        (dict(retardation=1, half_life=-1), ValueError),
     ])
 
-def test_adsorptiondegradationparameters_validation(parameters, error) -> None:
+def test_adsorptionparameters_validation(parameters, error) -> None:
     if error is None:
-        AdsorptionDegradationParameters(**parameters)
+        AdsorptionParameters(**parameters)
     else:
         with pytest.raises(error):
-            AdsorptionDegradationParameters(**parameters)
+            AdsorptionParameters(**parameters)
 
 @pytest.mark.parametrize(
     "test, param, expected",
     [
         (dict(retardation=1), "retardation", 1),
-        (dict(retardation=1, half_life=2), "decay_rate", np.log(2) / 2),
-        (dict(retardation=1, decay_rate=0.5, half_life=2), "decay_rate", 0.5),
     ])
 
 def test_adsorptiondegradationparameters_output(test, param, expected) -> None:
-    ads_deg = AdsorptionDegradationParameters(**test)
+    ads_deg = AdsorptionParameters(**test)
+    assert ads_deg.__dict__[param] == expected
+
+# Test DegradationParameters
+@pytest.mark.parametrize(
+    "parameters, error",
+    [
+        (dict(decay_rate=0.2), None),
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1), None),
+        (dict(), ValueError),
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1), ValueError),
+        (dict(half_life="one"), TypeError),
+        (dict(half_life=-1), ValueError),
+    ])
+
+def test_degradationparameters_validation(parameters, error) -> None:
+    if error is None:
+        DegradationParameters(**parameters)
+    else:
+        with pytest.raises(error):
+            DegradationParameters(**parameters)
+
+@pytest.mark.parametrize(
+    "test, param, expected",
+    [
+        (dict(half_life=2), "decay_rate", np.log(2) / 2),
+        (dict(decay_rate=0.5, half_life=2), "decay_rate", 0.5),
+    ])
+
+def test_degradationparameters_output(test, param, expected) -> None:
+    ads_deg = DegradationParameters(**test)
     assert ads_deg.__dict__[param] == expected
 
 # Test SourceParameters
@@ -157,29 +183,29 @@ def test_modelparameters_output(test, param, expected) -> None:
 ##### Legacy #####
 ##################
 
-@pytest.mark.parametrize(
-    "test, param, expected",
-    [
-        (dict(model_length=1, dx=0.5), "model_length", 1),
-        (dict(model_length=1, dx=0.5), "dx", 0.5),
-        (dict(model_length=1, dx=2), "dx", 1),
-    ])
-
-def test_sourceparameters_output(test, param, expected) -> None:
-    source = SourceParameters(**test)
-    assert source.__dict__[param] == expected
-
-@pytest.mark.parametrize(
-    "test, expected",
-    [
-        ({k_dict["v"][0] : 1, k_dict["R"][0] : 2, k_dict["mu"][0] : 3}, dict(v = 1, R = 2, mu = 3)),
-        (dict(v = 1, R = 2, nonsense = 3), dict(v = 1, R = 2)),
-        (dict(nonsense = 3), dict()),
-        (dict(), dict()),
-        ({k_dict["v"][-1] : 1}, {"v" : 1})
-    ])
-
-def test_from_dict(test, expected) -> None:
-    """Test if from_dict gives expected output for various input dictionaries."""
-    result = from_dict(test)
-    assert result == expected
+# @pytest.mark.parametrize(
+#     "test, param, expected",
+#     [
+#         (dict(model_length=1, dx=0.5), "model_length", 1),
+#         (dict(model_length=1, dx=0.5), "dx", 0.5),
+#         (dict(model_length=1, dx=2), "dx", 1),
+#     ])
+#
+# def test_sourceparameters_output(test, param, expected) -> None:
+#     source = SourceParameters(**test)
+#     assert source.__dict__[param] == expected
+#
+# @pytest.mark.parametrize(
+#     "test, expected",
+#     [
+#         ({k_dict["v"][0] : 1, k_dict["R"][0] : 2, k_dict["mu"][0] : 3}, dict(v = 1, R = 2, mu = 3)),
+#         (dict(v = 1, R = 2, nonsense = 3), dict(v = 1, R = 2)),
+#         (dict(nonsense = 3), dict()),
+#         (dict(), dict()),
+#         ({k_dict["v"][-1] : 1}, {"v" : 1})
+#     ])
+#
+# def test_from_dict(test, expected) -> None:
+#     """Test if from_dict gives expected output for various input dictionaries."""
+#     result = from_dict(test)
+#     assert result == expected

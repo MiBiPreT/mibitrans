@@ -7,6 +7,7 @@ import numpy as np
 from mibitrans.data.parameter_information import acceptor_utilization_dictionary
 
 
+
 def calculate_retardation(pars):
     """Give retardation factor depending on input parameters."""
     if "R" in pars.keys():

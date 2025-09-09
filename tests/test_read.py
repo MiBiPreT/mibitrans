@@ -5,7 +5,7 @@ Module handling testing of data input functionality
 
 import pytest
 import numpy as np
-from mibitrans.data.read import HydrologicalParameters, AdsorptionDegradationParameters, ModelParameters, SourceParameters
+from mibitrans.data.read import HydrologicalParameters, AdsorptionDegradationParameters, ModelParameters, SourceParameters, from_dict
 from mibitrans.data.parameter_information import key_dictionary as k_dict
 
 # Test HydrologicalParameters
@@ -81,35 +81,6 @@ def test_adsorptiondegradationparameters_output(test, param, expected) -> None:
     ads_deg = AdsorptionDegradationParameters(**test)
     assert ads_deg.__dict__[param] == expected
 
-# Test ModelParameters
-@pytest.mark.parametrize(
-    "parameters, error",
-    [
-        (dict(), None),
-        (dict(model_length=1, model_width=1, model_time=1, dx=1, dy=1, dt=1), None),
-        (dict(model_length="one"), TypeError),
-        (dict(model_length=-2), ValueError),
-    ])
-
-def test_modelparameters_validation(parameters, error) -> None:
-    if error is None:
-        ModelParameters(**parameters)
-    else:
-        with pytest.raises(error):
-            ModelParameters(**parameters)
-
-@pytest.mark.parametrize(
-    "test, param, expected",
-    [
-        (dict(model_length=1, dx=0.5), "model_length", 1),
-        (dict(model_length=1, dx=0.5), "dx", 0.5),
-        (dict(model_length=1, dx=2), "dx", 1),
-    ])
-
-def test_modelparameters_output(test, param, expected) -> None:
-    model = ModelParameters(**test)
-    assert model.__dict__[param] == expected
-
 # Test SourceParameters
 @pytest.mark.parametrize(
     "parameters, error",
@@ -153,6 +124,35 @@ def test_sourceparameters_output(test, param, expected) -> None:
     source = SourceParameters(**test)
     assert source.__dict__[param] == pytest.approx(expected)
 
+# Test ModelParameters
+@pytest.mark.parametrize(
+    "parameters, error",
+    [
+        (dict(), None),
+        (dict(model_length=1, model_width=1, model_time=1, dx=1, dy=1, dt=1), None),
+        (dict(model_length="one"), TypeError),
+        (dict(model_length=-2), ValueError),
+    ])
+
+def test_modelparameters_validation(parameters, error) -> None:
+    if error is None:
+        ModelParameters(**parameters)
+    else:
+        with pytest.raises(error):
+            ModelParameters(**parameters)
+
+@pytest.mark.parametrize(
+    "test, param, expected",
+    [
+        (dict(model_length=1, dx=0.5), "model_length", 1),
+        (dict(model_length=1, dx=0.5), "dx", 0.5),
+        (dict(model_length=1, dx=2), "dx", 1),
+    ])
+
+def test_modelparameters_output(test, param, expected) -> None:
+    model = ModelParameters(**test)
+    assert model.__dict__[param] == expected
+
 ##################
 ##### Legacy #####
 ##################
@@ -181,5 +181,5 @@ def test_sourceparameters_output(test, param, expected) -> None:
 
 def test_from_dict(test, expected) -> None:
     """Test if from_dict gives expected output for various input dictionaries."""
-    result = rd.from_dict(test)
+    result = from_dict(test)
     assert result == expected

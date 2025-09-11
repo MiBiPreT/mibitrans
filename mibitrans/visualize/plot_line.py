@@ -5,7 +5,32 @@ Module plotting a 3D matrix of contaminant plume concentrations as a line.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
+from mibitrans.data.check_input import _time_check, _y_check
 
+
+def centerline(model,
+               time = None,
+               y_position = 0,
+               **kwargs
+               ):
+    t_pos = _time_check(model, time)
+    y_pos = _y_check(model, y_position)
+    plot_array = model.cxyt[t_pos, y_pos, :]
+
+    plt.plot(model.x,
+             plot_array,
+             **kwargs
+             )
+
+    plt.ylim((0, np.max(plot_array) + 1 / 10 * np.max(plot_array)))
+    plt.xlabel("Distance from source [m]")
+    plt.ylabel(r"Concentration [g/$m^{-3}$]")
+    plt.grid(True)
+
+##################
+##### Legacy #####
+##################
 
 class Lineplot():
     """Line plotting of contaminant plume."""

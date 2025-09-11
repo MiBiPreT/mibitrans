@@ -4,7 +4,9 @@ Module handling data input in the form of a dictionary.
 """
 import warnings
 import numpy as np
-from mibitrans.data.parameter_information import key_dictionary
+from mibitrans.data.parameter_information import key_dictionary, electron_acceptor_utilization
+from mibitrans.data.check_input import (_check_float_positive, _check_float_fraction, _check_float_retardation,
+                                        _check_array_float_positive, _check_total_mass)
 from dataclasses import dataclass
 
 @dataclass
@@ -129,10 +131,43 @@ class DegradationParameters:
             else:
                 self.decay_rate = decay_rate
 
-    def utilization_factor(self):
+        self.electron_acceptor_utilization = electron_acceptor_utilization
+
+    def require_electron_acceptor(self):
+        missing_ea = []
+        if self.delta_oxygen is None:
+            missing_ea.append("delta_oxygen")
+        if self.delta_nitrate is None:
+            missing_ea.append("delta_nitrate")
+        if self.ferrous_iron is None:
+            missing_ea.append("ferrous_iron")
+        if self.delta_sulfate is None:
+            missing_ea.append("delta_sulfate")
+        if self.methane is None:
+            missing_ea.append("methane")
+
+        if len(missing_ea) > 0:
+            raise ValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
+
+    def require_linear_decay(self):
+        if self.decay_rate is None and self.half_life is None:
+            raise ValueError("Linear reaction model requires decay rate or half life.")
+
+    def utilization_factor(self,
+                           util_oxygen : float = None,
+                           util_nitrate : float = None,
+                           util_ferrous_iron : float = None,
+                           util_sulfate : float = None,
+                           util_methane : float = None
+                           ):
         """Introduce custom utilization factors for each electron donor/acceptor species."""
-        # Come back to later
-        return None
+        utils = locals()
+        for parameter, value in utils.items():
+            if parameter != "self" and value is not None:
+                error = _check_float_positive(parameter, value)
+                if error:
+                    raise error
+                self.electron_acceptor_utilization[parameter] = value
 
 @dataclass
 class SourceParameters:
@@ -244,81 +279,6 @@ class ModelParameters:
                 warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
                 self.dt = self.model_time
 
-
-def _check_float_positive(parameter : str, value):
-    """Check if a variable is a float and if it is positive."""
-    if isinstance(value, (float, int)):
-        if value >= 0:
-            return None
-        else:
-            return ValueError(f"{parameter} must be >= 0")
-    else:
-        return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
-
-def _check_float_fraction(parameter : str, value):
-    """Check if a variable is a float and if it is between 0 and 1."""
-    if isinstance(value, (float, int)):
-        if 0 <= value <= 1:
-            return None
-        else:
-            return ValueError(f"{parameter} must be between 0 and 1")
-    else:
-        return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
-
-def _check_float_retardation(parameter : str, value):
-    """Check if a variable is a float and if it is 1 or larger."""
-    if isinstance(value, (float, int)):
-        if value >= 1:
-            return None
-        else:
-            return ValueError(f"{parameter} must be 1 or larger.")
-    else:
-        return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
-
-def _check_array_float_positive(parameter : str, value):
-    """Check if variable is numpy array, list, or float, if it is positive and if an array is 1-dimensional"""
-    if isinstance(value, np.ndarray):
-        if len(value.shape) == 1:
-            if all(value >= 0):
-                return None
-            else:
-                return ValueError(f"All values in {parameter} should be >= 0.")
-        else:
-            return ValueError(f"{parameter} should be a float, list or a 1-dimensional array.")
-
-    elif isinstance(value, list):
-        if all(isinstance(element, (float, int)) for element in value):
-            if all(element >= 0 for element in value):
-                return None
-            else:
-                return ValueError(f"All values in {parameter} should be >= 0.")
-        else:
-            return TypeError(f"All elements of {parameter} should be a float.")
-
-    elif isinstance(value, (float, int)):
-        if value >= 0:
-            return None
-        else:
-            return ValueError(f"{parameter} must be >= 0")
-
-    else:
-        return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
-
-def _check_total_mass(parameter : str, value):
-    """Check variable properties of total source mass specifically."""
-    if isinstance(value, (float, int)):
-        if value >= 0:
-            return None
-        else:
-            return ValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
-    elif isinstance(value, str):
-        if value not in ["infinite", "inf", "INF", "Infinite", "Inf"]:
-            return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'inf'.")
-        else:
-            return None
-
-    else:
-        return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 
 ##################
 ##### Legacy #####

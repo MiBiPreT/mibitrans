@@ -107,14 +107,36 @@ unit_dictionary = {
     "time" : ["y", "d"]
 }
 
+
+
+#################### Redundant after finalizing refactoring #####################
+acceptor_utilization_dictionary = {                                             #
+    "dO" : 3.14,                                                                #
+    "dNO3" : 4.9,                                                               #
+    "Fe2" : 21.8,                                                               #
+    "dSO4" : 4.7,                                                               #
+    "CH4" : 0.78,                                                               #
+}                                                                               #
+#################################################################################
+
 # Utilization factors of electron donors for combined BTEX constituents.
-acceptor_utilization_dictionary = {
-    "dO" : 3.14,
-    "dNO3" : 4.9,
-    "Fe2" : 21.8,
-    "dSO4" : 4.7,
-    "CH4" : 0.78,
+electron_acceptor_utilization = {
+    "util_oxygen" : 3.14,
+    "util_nitrate" : 4.9,
+    "util_ferrous_iron" : 21.8,
+    "util_sulfate" : 4.7,
+    "util_methane" : 0.78,
 }
+
+util_to_conc_name = {
+    "util_oxygen" : "delta_oxygen",
+    "util_nitrate" : "delta_nitrate",
+    "util_ferrous_iron" : "ferrous_iron",
+    "util_sulfate" : "delta_sulfate",
+    "util_methane" : "methane",
+}
+
+
 
 testing_dictionary = {
     "v": 10,

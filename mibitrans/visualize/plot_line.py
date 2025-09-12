@@ -5,7 +5,6 @@ Module plotting a 3D matrix of contaminant plume concentrations as a line.
 
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 from mibitrans.data.check_input import _time_check, _y_check
 
 

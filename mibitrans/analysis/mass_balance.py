@@ -60,7 +60,7 @@ def mass_balance(model, time=None):
 
     if mode == "linear_decay":
         # Plume mass of linear decay model.
-        plume_mass_lindecay = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.pars["n"])
+        plume_mass_lindecay = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)
         mass_balance_dict["plume_mass_linear_decay"] = plume_mass_lindecay
 
         # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay

@@ -3,6 +3,13 @@
 File containing results from testing data for the transport model.
 """
 import numpy as np
+from mibitrans.data.read import HydrologicalParameters, AdsorptionParameters, DegradationParameters, SourceParameters, ModelParameters
+
+test_hydro_pars = HydrologicalParameters(velocity=10 / 365, porosity=0.25, alpha_x=10, alpha_y=1, alpha_z=0.1)
+test_ads_pars = AdsorptionParameters(retardation=1)
+test_deg_pars = DegradationParameters(half_life=0.1 * 365, delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5)
+test_source_pars = SourceParameters(source_zone_boundary=np.array([5, 10, 15]), source_zone_concentration=np.array([10, 5, 2]), depth=10, total_mass=1000000)
+test_model_pars = ModelParameters(model_length=50, model_width=15, model_time=3 * 365, dx=10, dy=5, dt=1 * 365)
 
 testingdata_nodecay = np.array([
     [
@@ -90,7 +97,9 @@ testingdata_instantreaction = np.array([[
     [0., 0.50587302, 0.55671969, 0.33985742, 0., 0.]
 ]])
 
-testing_massbalance_nodecay = {'time': np.int64(3),
+
+
+testing_massbalance_nodecay = {'time': np.int64(1095),
                                'source_mass_0': 1000000,
                                'source_mass_t': np.float64(987330.9369029925),
                                'source_mass_change': np.float64(12669.063097007456),
@@ -98,7 +107,7 @@ testing_massbalance_nodecay = {'time': np.int64(3),
                                'transport_outside_extent_nodecay': np.float64(1784.261321114951)
                                }
 
-testing_massbalance_lindecay = {'time': np.int64(3),
+testing_massbalance_lindecay = {'time': np.int64(1095),
                                 'source_mass_0': 1000000,
                                 'source_mass_t': np.float64(987330.9369029925),
                                 'source_mass_change': np.float64(12669.063097007456),
@@ -109,7 +118,7 @@ testing_massbalance_lindecay = {'time': np.int64(3),
                                 'plume_mass_degraded_linear': np.float64(10711.176804869348)
                                 }
 
-testing_massbalance_instant = {'time': np.int64(3),
+testing_massbalance_instant = {'time': np.int64(1095),
                                'source_mass_0': 1000000,
                                'source_mass_t': np.float64(987330.9369029925),
                                'source_mass_change': np.float64(12669.063097007456),
@@ -126,5 +135,3 @@ testing_massbalance_instant = {'time': np.int64(3),
                                                                           1924.21133006,
                                                                           1924.21133006])
                                }
-
-

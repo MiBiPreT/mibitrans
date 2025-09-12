@@ -5,10 +5,33 @@ File testing functionality of mass_balance module.
 
 import pytest
 import mibitrans.analysis.mass_balance as mb
+from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.parameter_information import testing_dictionary
-from tests.test_example_results import testing_massbalance_instant
-from tests.test_example_results import testing_massbalance_lindecay
-from tests.test_example_results import testing_massbalance_nodecay
+from mibitrans.transport.domenico import no_decay, linear_decay, instant_reaction
+from tests.test_example_data import testing_massbalance_nodecay, testing_massbalance_lindecay, testing_massbalance_instant
+from tests.test_example_data import test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars
+
+test_model_pars.dx = 1
+test_model_pars.dy = 1
+test_model_pars.dt = 1
+
+@pytest.mark.parametrize(
+    "model, expected",
+    [
+        (no_decay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testing_massbalance_nodecay),
+        (linear_decay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars), testing_massbalance_lindecay),
+        (instant_reaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars), testing_massbalance_instant)
+    ])
+
+def test_balance_numerical(model, expected) -> None:
+    """Test if mass balance is correctly calculated by comparing to precomputed results."""
+    dictionary = mass_balance(model, time=3*365)
+    for key, output_item in dictionary.items():
+        assert expected[key] == pytest.approx(output_item)
+
+############################### Old tests #######################################
+                                                                                #
+                                                                                #
 
 
 @pytest.mark.parametrize(
@@ -36,6 +59,7 @@ def test_balance_time(input : dict, time, dt, expected) -> None:
 
 def test_balance_results(input : dict, stepsize, time, mode : str, expected) -> None:
     """Test if mass balance is correctly calculated by comparing to precomputed results."""
+    expected["time"] = expected["time"] / 365
     dx, dy, dt = stepsize
     obj_mb = mb.MassBalance(input, dx=dx, dy=dy, dt=dt, mode=mode)
     output = obj_mb.balance(time=time)

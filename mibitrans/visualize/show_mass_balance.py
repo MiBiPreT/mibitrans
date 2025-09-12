@@ -77,16 +77,16 @@ def generate_mass_balance_tables(mass_dict):
                 print_electron = True
                 oxy, no, fe, so, ch = round_item
                 # Oxygen, Nitrate and Sulfate are electron acceptors and thus consumed (negative change),
-                # Iron2+ and Methane are byproducts from electron acceptors and thus generated (postive change).
+                # Iron2+ and Methane are byproducts from electron acceptors and thus generated (positive change).
                 table_electron.add_row([rename_key, -oxy, -no, f"+{fe}", -so, f"+{ch}"])
 
-    # If mass_balance components were not present in mass balance dictionary, table get set to false,
+    # If mass_balance components were not present in mass balance dictionary, table get set to None,
     # preventing returning tables with only headers.
-    table_source = table_source if print_source else False
-    table_nodecay = table_nodecay if print_nodecay else False
-    table_lindecay = table_lindecay if print_lindecay else False
-    table_instant = table_instant if print_instant else False
-    table_electron = table_electron if print_electron else False
+    table_source = table_source if print_source else None
+    table_nodecay = table_nodecay if print_nodecay else None
+    table_lindecay = table_lindecay if print_lindecay else None
+    table_instant = table_instant if print_instant else None
+    table_electron = table_electron if print_electron else None
 
     return table_source, table_nodecay, table_lindecay, table_instant, table_electron
 
@@ -103,15 +103,15 @@ def visualize_mass_balance(mass_dict) -> None:
 
     print(f"MASS BALANCE FOR t = {mass_dict['time']}")
 
-    # If a table contained no entries, it is set to false by generating function, allowing this function to only print
+    # If a table contained no entries, it is set to None by generating function, allowing this function to only print
     # filled tables.
-    if table_source is not False:
+    if table_source is not None:
         print(table_source)
-    if table_nodecay is not False:
+    if table_nodecay is not None:
         print(table_nodecay)
-    if table_lindecay is not False:
+    if table_lindecay is not None:
         print(table_lindecay)
-    if table_instant is not False:
+    if table_instant is not None:
         print(table_instant)
-    if table_electron is not False:
+    if table_electron is not None:
         print(table_electron)

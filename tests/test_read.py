@@ -182,29 +182,17 @@ def test_modelparameters_output(test, param, expected) -> None:
 ##### Legacy #####
 ##################
 
-# @pytest.mark.parametrize(
-#     "test, param, expected",
-#     [
-#         (dict(model_length=1, dx=0.5), "model_length", 1),
-#         (dict(model_length=1, dx=0.5), "dx", 0.5),
-#         (dict(model_length=1, dx=2), "dx", 1),
-#     ])
-#
-# def test_sourceparameters_output(test, param, expected) -> None:
-#     source = SourceParameters(**test)
-#     assert source.__dict__[param] == expected
-#
-# @pytest.mark.parametrize(
-#     "test, expected",
-#     [
-#         ({k_dict["v"][0] : 1, k_dict["R"][0] : 2, k_dict["mu"][0] : 3}, dict(v = 1, R = 2, mu = 3)),
-#         (dict(v = 1, R = 2, nonsense = 3), dict(v = 1, R = 2)),
-#         (dict(nonsense = 3), dict()),
-#         (dict(), dict()),
-#         ({k_dict["v"][-1] : 1}, {"v" : 1})
-#     ])
-#
-# def test_from_dict(test, expected) -> None:
-#     """Test if from_dict gives expected output for various input dictionaries."""
-#     result = from_dict(test)
-#     assert result == expected
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        ({k_dict["v"][0] : 1, k_dict["R"][0] : 2, k_dict["mu"][0] : 3}, dict(v = 1, R = 2, mu = 3)),
+        (dict(v = 1, R = 2, nonsense = 3), dict(v = 1, R = 2)),
+        (dict(nonsense = 3), dict()),
+        (dict(), dict()),
+        ({k_dict["v"][-1] : 1}, {"v" : 1})
+    ])
+
+def test_from_dict(test, expected) -> None:
+    """Test if from_dict gives expected output for various input dictionaries."""
+    result = from_dict(test)
+    assert result == expected

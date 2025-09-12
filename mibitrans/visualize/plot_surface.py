@@ -34,7 +34,7 @@ def plume_3d(model,
     ax.set_ylabel("Distance from plume center (m)")
     ax.set_zlabel(r"Concentration [$g/m^{-3}$]")
 
-    return (ax)
+    return ax
 
 ##################
 ##### Legacy #####

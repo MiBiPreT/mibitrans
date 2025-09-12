@@ -26,7 +26,7 @@ class Domenico:
         # One-dimensional model domain arrays
         self.x = np.arange(0, self.mod_pars.model_length + self.mod_pars.dx, self.mod_pars.dx)
         self.y = self._calculate_y()
-        self.t = np.arange(0, self.mod_pars.model_time + self.mod_pars.dt, self.mod_pars.dt)
+        self.t = np.arange(self.mod_pars.dt, self.mod_pars.model_time + self.mod_pars.dt, self.mod_pars.dt)
 
         # Three-dimensional model domain arrays
         self.xxx = np.tile(self.x, (len(self.t), len(self.y), 1))
@@ -67,7 +67,6 @@ class Domenico:
                 weighted_conc[i] = (y_src[i+1] - y_src[i]) * c_src[i]
 
             c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
-            print("c0_avg", c0_avg)
             k_source = Q * c0_avg / self.src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
         else:

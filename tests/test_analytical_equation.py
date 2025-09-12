@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 import mibitrans.transport.analytical_equation as ana
 from mibitrans.data.parameter_information import testing_dictionary
-from tests.test_example_results import testingdata_instantreaction
-from tests.test_example_results import testingdata_lineardecay
-from tests.test_example_results import testingdata_nodecay
+from tests.test_example_data import testingdata_instantreaction
+from tests.test_example_data import testingdata_lineardecay
+from tests.test_example_data import testingdata_nodecay
 
 
 @pytest.mark.parametrize(

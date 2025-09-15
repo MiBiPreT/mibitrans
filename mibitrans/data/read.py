@@ -9,16 +9,32 @@ from mibitrans.data.check_input import (_check_float_positive, _check_float_frac
                                         _check_array_float_positive, _check_total_mass)
 from dataclasses import dataclass
 
+
 @dataclass
 class HydrologicalParameters:
-    """Dataclass handling hydrological parameters."""
+    """Dataclass handling input of hydrological parameters.
+
+    Args:
+        velocity (float) : Flow velocity in the direction of the groundwater gradient, in [m/d]. Optional if h_gradient and h_conductivity are specified.
+        h_gradient (float) : Hydraulic gradient of the groundwater, in [m/m]. Optional if velocity is specified.
+        h_conductivity (float) : Hydraulic conductivity of the aquifer, in [m/d]. Optional if velocity is specified.
+        porosity (float) : Effective soil porosity [-]
+        alpha_x (float) : The dispersivity in the x (longitudinal) direction in [m]
+        alpha_y (float) : The dispersivity in the y (transverse-horizontal) direction in [m]
+        alpha_z (float, optional) : The dispersivity in the z (transverse-vertical) direction in [m]. Defaults to 1e-10
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+    """
     velocity : float = None
+    h_gradient : float = None
+    h_conductivity : float = None
     porosity : float = None
     alpha_x : float = None
     alpha_y : float = None
-    alpha_z : float = 0
-    h_gradient : float = None
-    h_conductivity : float = None
+    alpha_z : float = 1e-10
     verbose : bool = False
 
     def __post_init__(self):
@@ -36,6 +52,9 @@ class HydrologicalParameters:
         if self.velocity is None and (self.h_gradient is None or self.h_conductivity is None):
             raise ValueError(f"HydrologicalParameters missing required arguments: either velocity or both h_gradient and h_conductivity.")
 
+        if self.verbose:
+            print("All required hydrological input arguments are present.")
+
         # All input parameters should be positive floats, raise appropriate error if not
         for parameter, value in self.__dict__.items():
             # Specific check and error for porosity, which has domain [0,1]
@@ -49,20 +68,46 @@ class HydrologicalParameters:
             if error and (value is not None):
                 raise error
 
+        if self.verbose:
+            print("All hydrological input arguments are valid.")
+
         # Velocity is calculated from hydraulic gradient and conductivity when both are given.
         if self.h_gradient and self.h_conductivity:
             # Giving h_gradient and h_conductivity is more specific than giving velocity. So input velocity will be overridden.
             if self.velocity is not None:
                 warnings.warn("Both velocity and h_gradient & h_conductivity are defined. Value for velocity will be overridden.", UserWarning)
             self.velocity = self.h_gradient * self.h_conductivity / self.porosity
+            if self.verbose:
+                print(f"Groundwater flow velocity has been calculated to be {self.velocity} m/d.")
 
 @dataclass
 class AdsorptionParameters:
-    """Dataclass handling adsorption parameters."""
+    """Dataclass handling adsorption parameters.
+
+    Args:
+        retardation (float) : Retardation factor for transported contaminant [-]. Optional if bulk_density,
+            partition_coefficient and fraction_organic_carbon are specified.
+        bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
+        partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
+            in [m^3/g]. Optional if retardation is specified.
+        fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
+            Optional if retardation is specified.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Methods:
+        calculate_retardation : Calculate retardation factor from bulk density, partition coefficient and
+            fraction organic carbon when given porosity [-]
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+
+    """
     retardation : float = None
     bulk_density : float = None
     partition_coefficient : float = None
     fraction_organic_carbon : float = None
+    verbose : bool = False
 
     def __post_init__(self):
         if self.retardation is None and (self.bulk_density is None
@@ -70,8 +115,11 @@ class AdsorptionParameters:
                                          or self.partition_coefficient is None
                                          or self.fraction_organic_carbon is None):
             raise ValueError("AdsorptionParameters missing required arguments: either retardation or (bulk_density, partition_coefficient and fraction_organic_carbon).")
-            # All input parameters should be positive floats, raise appropriate error if not
 
+        if self.verbose:
+            print("All required adsorption input arguments are present.")
+
+        # All input parameters should be positive floats, raise appropriate error if not
         for parameter, value in self.__dict__.items():
             # Retardation and fraction_organic_carbon have specific domains and are checked separately
             if parameter == "retardation":
@@ -86,17 +134,57 @@ class AdsorptionParameters:
             if error and (value is not None):
                 raise error
 
+        if self.verbose:
+            print("All adsorption input arguments are valid.")
+
     # Retardation factor is not calculated from bulk density, partition coefficient and fraction organic carbon
     # in this dataclass, since porosity is required as well, which is defined in the HydrologicalParameters class.
 
     def calculate_retardation(self, porosity : float):
+        """Calculate retardation factor from other input if not given"""
         if self.retardation is None:
             self.retardation = 1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
+            if self.verbose:
+                print(f"Retardation factor has been calculated to be {self.retardation}.")
 
+# Model extent in the x direction (length) in [m]
+# Model extent in the y direction (width) in [m]
+# Model end time in [years]
+# Thickness (z-direction, depth) of source zone in [m]
+# Concentration in the source zone as array with [y-location, concentration] in [[m], [g/m^3]]
+# Mass of contaminant source in [kg], or "inf" for infinite source.
 
 @dataclass
 class DegradationParameters:
-    """Dataclass handling degradation parameters."""
+    """Dataclass handling degradation parameters.
+
+    Args:
+        decay_rate (float) : First order (linear) decay coefficient in [1/day]. Only required for linear decay models.
+            Optional if half_life is specified.
+        half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
+            linear decay models. Optional if half_life is specified.
+        delta_oxygen (float) : Difference between background oxygen and plume oxygen concentrations, in [g/m^3].
+            Only required for instant reaction models.
+        delta_nitrate (float) : Difference between background nitrate and contaminant plume nitrate concentrations,
+            in [g/m^3]. Only required for instant reaction models.
+        ferrous_iron (float) : Ferrous iron concentration in contaminant plume, in [g/m^3]. Only required for
+            instant reaction models.
+        delta_sulfate (float) : Difference between background sulfate and plume sulfate concentrations, in [g/m^3].
+            Only required for instant reaction models.
+        methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
+            instant reaction models.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Methods:
+        utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor utilization
+            factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995), see
+            electron_acceptor_utilization in mibitrans.data.parameter_information.
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+
+    """
     decay_rate : float = None
     half_life : float = None
     delta_oxygen : float = None
@@ -160,7 +248,20 @@ class DegradationParameters:
                            util_sulfate : float = None,
                            util_methane : float = None
                            ):
-        """Introduce custom utilization factors for each electron donor/acceptor species."""
+        """Introduce custom utilization factors for each electron donor/acceptor species. By default, utilization factors for mix of BTEX are used.
+
+        Args:
+            util_oxygen (float) : utilization factor of oxygen, as mass of oxygen consumed per mass of biodegradated contaminant [g/g].
+            util_nitrate (float) : utilization factor of nitrate, as mass of nitrate consumed per mass of biodegrated contaminant [g/g].
+            util_ferrous_iron (float) : utilization factor of ferrous iron, as mass of ferrous iron generated per mass of biodegradated contaminant [g/g].
+            util_sulfate (float) : utilization factor of sulfate, as mass of sulfate consumed per mass of biodegradated contaminant [g/g].
+            util_methane (float) : utilization factor of methane, as mass of methane generated per mass of biodegrated contaminant [g/g].
+
+        Raises:
+            ValueError : If input parameters are incomplete or outside the valid domain.
+            TypeError : If input parameters of incorrect datatype.
+
+        """
         utils = locals()
         for parameter, value in utils.items():
             if parameter != "self" and value is not None:
@@ -171,7 +272,25 @@ class DegradationParameters:
 
 @dataclass
 class SourceParameters:
-    """Dataclass handling source parameters."""
+    """Dataclass handling source parameters. Specifying concentrations and extent of source zone.
+
+    Args:
+        source_zone_boundary (np.ndarray) : Outer boundary of each source zone, in transverse horizontal direction (y-coordiante) [m].
+            y=0 is at the middle of the contaminant source. Input as numpy array of length equal to the amount of source zone.
+            Last value in the array is the limit of the source. For a source with a single source zone, only one value is required.
+            Source is symmetrical in the x-axis.
+        source_zone_concentration (np.ndarray) : Contaminant concentration in each source zone [g/m^3]. Input as numpy
+            array in the same order and of the same length as specified in source_zone_boundary.
+        depth (float) : Depth (transeverse vertical or z-dimension) of the source zone in [m].
+        total_mass (float | str) : Mass of contaminant present in source zone, either expressed in [g], or set to 'infinite'.
+            The latter meaning that the source mass and therefore, the source zone concentrations do not diminish over time.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+    """
+
     source_zone_boundary : np.ndarray = None
     source_zone_concentration : np.ndarray = None
     depth : float = None
@@ -243,7 +362,22 @@ class SourceParameters:
 
 @dataclass
 class ModelParameters:
-    """Dataclass handling model discretization parameters."""
+    """Dataclass handling model discretization parameters.
+
+    Args:
+        model_length (float) : Model extent in the longitudinal (x) direction in [m].
+        model_width (float) : Model extent in the transverse horizontal (y) direction in [m].
+        model_time (float) : Model duration in [days].
+        dx (float) : Model grid discretization step size in the longitudinal (x) direction, in [m].
+        dy (float) : Model grid discretization step size in the transverse horizontal (y) direction, in [m].
+        dt (float) : Model time discretization step size, in [days]
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+
+    """
     model_length : float = None
     model_width : float = None
     model_time : float = None

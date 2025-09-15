@@ -99,6 +99,28 @@ class Domenico:
 
 
 class no_decay(Domenico):
+    """Class that calculates contaminant transport using the Domenico (1987) analytical model under conservative (no contaminant degradation) conditions.
+
+    Args:
+        hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing hydrological parameters from HydrologicalParameters.
+        adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption parameters from AdsorptionParameters.
+        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters from SourceParameters.
+        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from ModelParameters.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Attributes:
+        cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+        x (np.ndarray) : Discretized model x-dimension, in [m].
+        y (np.ndarray) : Discretized model y-dimension, in [y].
+        t (np.ndarray) : Discretized model t-dimension, in [days].
+        c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
+        vr (float) : Retarded groundwater flow velocity, in [m/d].
+        k_source (float) : Source zone decay rate, in [1/days]
+
+    Raises:
+        TypeError : If input is not of the correct Dataclass.
+
+    """
     def __init__(self,
                  hydrological_parameters,
                  adsorption_parameters,
@@ -123,6 +145,29 @@ class no_decay(Domenico):
 
 
 class linear_decay(Domenico):
+    """Class that calculates contaminant transport using the Domenico (1987) analytical model with a linear decay isotherm.
+
+    Args:
+        hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing hydrological parameters from HydrologicalParameters.
+        adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption parameters from AdsorptionParameters.
+        degradation_parameters (mibitrans.data.read.DegradationParameters) : Dataclass object containing degradation parameters from DegradationParameters.
+        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters from SourceParameters.
+        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from ModelParameters.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Attributes:
+        cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+        x (np.ndarray) : Discretized model x-dimension, in [m].
+        y (np.ndarray) : Discretized model y-dimension, in [y].
+        t (np.ndarray) : Discretized model t-dimension, in [days].
+        c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
+        vr (float) : Retarded groundwater flow velocity, in [m/d].
+        k_source (float) : Source zone decay rate, in [1/days]
+
+    Raises:
+        TypeError : If input is not of the correct Dataclass.
+
+    """
     def __init__(self,
                  hydrological_parameters,
                  adsorption_parameters,
@@ -150,6 +195,31 @@ class linear_decay(Domenico):
 
 
 class instant_reaction(Domenico):
+    """Class that calculates contaminant transport using the Domenico (1987) analytical model with biodegradation modelled as instant reaction.
+
+    Args:
+        hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing hydrological parameters from HydrologicalParameters.
+        adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption parameters from AdsorptionParameters.
+        degradation_parameters (mibitrans.data.read.DegradationParameters) : Dataclass object containing degradation parameters from DegradationParameters.
+        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters from SourceParameters.
+        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from ModelParameters.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Attributes:
+        cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+        x (np.ndarray) : Discretized model x-dimension, in [m].
+        y (np.ndarray) : Discretized model y-dimension, in [y].
+        t (np.ndarray) : Discretized model t-dimension, in [days].
+        c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
+        vr (float) : Retarded groundwater flow velocity, in [m/d].
+        k_source (float) : Source zone decay rate, in [1/days]
+        biodegradation_capacity (float) : Maximum capacity of contaminant degradation based on electron acceptor/donor concentrations, in [g/m^3].
+        cxyt_noBC (np.ndarray) : Concentration array in same shape as cxyt, before subtracting biodegration_capacity.
+
+    Raises:
+        TypeError : If input is not of the correct Dataclass.
+
+    """
     def __init__(self,
                  hydrological_parameters,
                  adsorption_parameters,

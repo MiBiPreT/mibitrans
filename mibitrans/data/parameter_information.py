@@ -1,6 +1,7 @@
 """Author: Jorrit Bakker.
 
 File containing various dictionaries used for evaluation of names, value types and units of input data.
+
 """
 import numpy as np
 
@@ -100,25 +101,6 @@ example_dictionary = {
     "CH4": 6.6,
 }
 
-unit_dictionary = {
-    "distance" : ["km", "m", "dm", "cm", "mm"],
-    "large_mass" : ["kg", "g"],
-    "concentration" : ["mg/L", "g/m3"],
-    "time" : ["y", "d"]
-}
-
-
-
-#################### Redundant after finalizing refactoring #####################
-acceptor_utilization_dictionary = {                                             #
-    "dO" : 3.14,                                                                #
-    "dNO3" : 4.9,                                                               #
-    "Fe2" : 21.8,                                                               #
-    "dSO4" : 4.7,                                                               #
-    "CH4" : 0.78,                                                               #
-}                                                                               #
-#################################################################################
-
 # Utilization factors of electron donors for combined BTEX constituents.
 electron_acceptor_utilization = {
     "util_oxygen" : 3.14,
@@ -128,35 +110,13 @@ electron_acceptor_utilization = {
     "util_methane" : 0.78,
 }
 
+# Couples utilization factors to electron acceptors/donors
 util_to_conc_name = {
     "util_oxygen" : "delta_oxygen",
     "util_nitrate" : "delta_nitrate",
     "util_ferrous_iron" : "ferrous_iron",
     "util_sulfate" : "delta_sulfate",
     "util_methane" : "methane",
-}
-
-
-
-testing_dictionary = {
-    "v": 10,
-    "alpha_x": 10,
-    "alpha_y": 1,
-    "alpha_z": 0.1,
-    "R": 1,
-    "l_model": 50,
-    "w_model": 15,
-    "t_model": 3,
-    "d_source": 10,
-    "c_source": np.array([[0,10], [5,5], [10,2], [15,0]]),
-    "m_total": 1000,
-    "n" : 0.25,
-    "t_half" : 0.1,
-    "dO": 0.5,
-    "dNO3": 0.5,
-    "Fe2": 0.5,
-    "dSO4": 0.5,
-    "CH4": 0.5,
 }
 
 mass_balance_renaming_dictionary = {
@@ -175,3 +135,34 @@ mass_balance_renaming_dictionary = {
     "plume_mass_degraded_instant" : "plume mass degraded",
     "electron_acceptor_mass_change" : "change in mass (kg)"
 }
+
+#################### Redundant after finalizing refactoring #####################
+acceptor_utilization_dictionary = {                                             #
+    "dO" : 3.14,                                                                #
+    "dNO3" : 4.9,                                                               #
+    "Fe2" : 21.8,                                                               #
+    "dSO4" : 4.7,                                                               #
+    "CH4" : 0.78,
+}
+
+testing_dictionary = {
+    "v": 10,
+    "alpha_x": 10,
+    "alpha_y": 1,
+    "alpha_z": 0.1,
+    "R": 1,
+    "l_model": 50,
+    "w_model": 15,
+    "t_model": 3,
+    "d_source": 10,
+    "c_source": np.array([[0,10], [5,5], [10,2], [15,0]]),
+    "m_total": 1000,
+    "n" : 0.25,
+    "t_half" : 0.1,
+    "dO": 0.5,
+    "dNO3": 0.5,                                                                #
+    "Fe2": 0.5,                                                                 #
+    "dSO4": 0.5,                                                                #
+    "CH4": 0.5,                                                                 #
+}                                                                               #
+#################################################################################

@@ -6,6 +6,15 @@ def plume_2d(model,
              time = None,
              **kwargs
              ):
+    """Plot contaminant plume as a 2D colormesh, at a specified time.
+
+    Args:
+        model : Model object from mibitrans.transport.
+        time (float): Point of time for the plot. By default, last point in time is plotted.
+        **kwargs : Arguments to be passed to plt.pcolormesh().
+
+    Returns a matrix plot of the input plume as object.
+    """
     t_pos = _time_check(model, time)
     plt.pcolormesh(model.x,
                    model.y,
@@ -20,6 +29,16 @@ def plume_2d(model,
 def plume_3d(model,
              time = None,
              **kwargs):
+    """Plot contaminant plume as a 3D surface, at a specified time.
+
+    Args:
+        model : Model object from mibitrans.transport.
+        time (float): Point of time for the plot. By default, last point in time is plotted.
+
+    Returns:
+        ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
+    """
+
     t_pos = _time_check(model, time)
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})

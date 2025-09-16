@@ -5,21 +5,18 @@ Module calculating the mass balance based on base parameters.
 
 import numpy as np
 import mibitrans.transport.analytical_equation as eq
-from mibitrans.transport.domenico import no_decay
+from mibitrans.transport.domenico import Domenico, no_decay
 from mibitrans.data.check_input import _check_model_type, _time_check
 from mibitrans.analysis.parameter_calculations import calculate_acceptor_utilization, calculate_utilization
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
 from mibitrans.analysis.parameter_calculations import calculate_source_decay
 from mibitrans.analysis.parameter_calculations import calculate_source_decay_instant
-import mibitrans.transport
-
-model_types = (mibitrans.transport.domenico.no_decay, mibitrans.transport.domenico.linear_decay, mibitrans.transport.domenico.instant_reaction)
 
 
 def mass_balance(model, time=None):
     """Calculate contaminant mass balance across model compartments."""
 
-    _check_model_type(model, model_types)
+    _check_model_type(model, Domenico)
     time_pos = _time_check(model, time)
     mass_balance_dict = {}
 

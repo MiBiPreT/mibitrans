@@ -13,6 +13,7 @@ from tests.test_example_data import test_hydro_pars, test_ads_pars, test_deg_par
 model_no_decay = no_decay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
 model_linear_decay = linear_decay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
 model_instant_reaction = instant_reaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
+
 def test_centerline():
     centerline(model_no_decay)
     assert isinstance(plt.gca(), plt.Axes)

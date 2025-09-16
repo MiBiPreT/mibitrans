@@ -12,6 +12,9 @@ from mibitrans.analysis.parameter_calculations import calculate_retardation
 from mibitrans.analysis.parameter_calculations import calculate_source_decay
 from mibitrans.analysis.parameter_calculations import calculate_source_decay_instant
 
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
 
 @pytest.mark.parametrize(
     "test, expected",

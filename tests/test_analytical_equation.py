@@ -11,6 +11,9 @@ from tests.test_example_data import testingdata_instantreaction
 from tests.test_example_data import testingdata_lineardecay
 from tests.test_example_data import testingdata_nodecay
 
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
 
 @pytest.mark.parametrize(
     "input, stepsize",

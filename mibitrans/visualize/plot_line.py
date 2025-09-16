@@ -5,47 +5,45 @@ Module plotting a 3D matrix of contaminant plume concentrations as a line.
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+from mibitrans.data.check_input import _check_model_type
+from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import _y_check
 from mibitrans.transport.domenico import Domenico
-from mibitrans.data.check_input import _check_model_type, _time_check, _y_check
 
-def centerline(model,
-               time = None,
-               y_position = 0,
-               **kwargs
-               ):
+
+def centerline(model, time=None, y_position=0, **kwargs):
     """Plot center of contaminant plume as a line, at a specified time and, optionally, y position.
 
     Args:
         model : Model object from mibitrans.transport.
         time (float): Point of time for the plot. By default, last point in time is plotted.
-        y_position : y-position across the plume (transverse horizontal direction) for the plot. By default, the center of the plume at y=0 is plotted.
+        y_position : y-position across the plume (transverse horizontal direction) for the plot.
+            By default, the center of the plume at y=0 is plotted.
         **kwargs : Arguments to be passed to plt.plot().
 
     Returns a line plot of the input plume as object.
     """
-
     _check_model_type(model, Domenico)
     t_pos = _time_check(model, time)
     y_pos = _y_check(model, y_position)
     plot_array = model.cxyt[t_pos, y_pos, :]
 
-    plt.plot(model.x,
-             plot_array,
-             **kwargs
-             )
+    plt.plot(model.x, plot_array, **kwargs)
 
     plt.ylim((0, np.max(plot_array) + 1 / 10 * np.max(plot_array)))
     plt.xlabel("Distance from source [m]")
     plt.ylabel(r"Concentration [g/$m^{3}$]")
     plt.grid(True)
 
-##################
-##### Legacy #####
-##################
 
-class Lineplot():
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
+
+
+class Lineplot:
     """Line plotting of contaminant plume."""
+
     def __init__(self, cxyt, x, y, t):
         """Initialize parameters."""
         self.cxyt = cxyt
@@ -53,7 +51,7 @@ class Lineplot():
         self.y = y
         self.t = t
 
-    def centerline(self, time = None, y_pos = 0, **kwargs):
+    def centerline(self, time=None, y_pos=0, **kwargs):
         """Plot center of contaminant plume as a line, at a specified time and, optionally, y position.
 
         Args:
@@ -73,21 +71,18 @@ class Lineplot():
         else:
             y_pos = np.argmin(abs(self.y - 0))
 
-        plot_array = self.cxyt[time_pos,y_pos,:]
+        plot_array = self.cxyt[time_pos, y_pos, :]
 
-        plt.plot(self.x,
-                 plot_array,
-                 **kwargs)
-        plt.ylim((0,np.max(plot_array) + 1/8*np.max(plot_array)))
+        plt.plot(self.x, plot_array, **kwargs)
+        plt.ylim((0, np.max(plot_array) + 1 / 8 * np.max(plot_array)))
         plt.xlabel("Distance from source [m]")
         plt.ylabel("Concentration [mg/L]")
         plt.grid(True)
 
-
-    def transverse(self, time = None, x_pos = None):
+    def transverse(self, time=None, x_pos=None):
         """Plot across the contaminant plume as a line, at a specified time and x position ."""
         print("placeholder")
 
-    def breakthrough(self, x_pos = None, y_pos = None):
+    def breakthrough(self, x_pos=None, y_pos=None):
         """Plot breakthrough curve of contaminant plume at a specified x and y position."""
         print("placeholder")

@@ -3,6 +3,10 @@
 Module calculating the solution to the Domenico (1987) analytical model for different scenarios.
 """
 
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
+
 import numpy as np
 from scipy.special import erf
 from scipy.special import erfc

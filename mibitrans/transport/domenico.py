@@ -2,6 +2,7 @@
 
 Module calculating the solution to the Domenico (1987) analytical model adapted in BIOSCREEN, for different scenarios.
 """
+
 import warnings
 import numpy as np
 from scipy.special import erf, erfc
@@ -17,6 +18,7 @@ class Domenico:
                  model_parameters,
                  verbose = False
                  ):
+
         self.hyd_pars = hydrological_parameters
         self.ads_pars = adsorption_parameters
         self.src_pars = source_parameters

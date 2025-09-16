@@ -5,7 +5,6 @@ Module evaluating if a dictionary contains all required (correct) parameters for
 import numpy as np
 import warnings
 
-
 def _check_float(parameter : str, value):
     """Check if a variable is a float and if it is positive."""
     if isinstance(value, (float, int)):
@@ -93,9 +92,8 @@ def _check_dictionary(value):
         raise TypeError(f"Input must be a dict, but is {type(value)} instead.")
 
 def _check_model_type(parameter, allowed_model_types):
-    print("NO")
     if not isinstance(parameter, allowed_model_types):
-        raise TypeError(f"Input argument model should be in {allowed_model_types}, but is {type(parameter)} instead.")
+        raise TypeError(f"Input argument model should be in {allowed_model_types.__subclasses__()}, but is {type(parameter)} instead.")
 
 def _time_check(model, time):
     if time is not None:

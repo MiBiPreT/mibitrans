@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import _check_model_type, _time_check
+import mibitrans.transport
+
+model_types = (mibitrans.transport.domenico.no_decay, mibitrans.transport.domenico.linear_decay, mibitrans.transport.domenico.instant_reaction)
+
 
 def plume_2d(model,
              time = None,
@@ -15,6 +19,8 @@ def plume_2d(model,
 
     Returns a matrix plot of the input plume as object.
     """
+
+    _check_model_type(model, model_types)
     t_pos = _time_check(model, time)
     plt.pcolormesh(model.x,
                    model.y,
@@ -39,6 +45,7 @@ def plume_3d(model,
         ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
     """
 
+    _check_model_type(model, model_types)
     t_pos = _time_check(model, time)
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})

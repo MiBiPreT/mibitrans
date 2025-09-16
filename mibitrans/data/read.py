@@ -146,13 +146,6 @@ class AdsorptionParameters:
             if self.verbose:
                 print(f"Retardation factor has been calculated to be {self.retardation}.")
 
-# Model extent in the x direction (length) in [m]
-# Model extent in the y direction (width) in [m]
-# Model end time in [years]
-# Thickness (z-direction, depth) of source zone in [m]
-# Concentration in the source zone as array with [y-location, concentration] in [[m], [g/m^3]]
-# Mass of contaminant source in [kg], or "inf" for infinite source.
-
 @dataclass
 class DegradationParameters:
     """Dataclass handling degradation parameters.

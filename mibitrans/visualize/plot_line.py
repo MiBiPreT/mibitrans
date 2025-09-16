@@ -37,7 +37,7 @@ def centerline(model,
 
     plt.ylim((0, np.max(plot_array) + 1 / 10 * np.max(plot_array)))
     plt.xlabel("Distance from source [m]")
-    plt.ylabel(r"Concentration [g/$m^{-3}$]")
+    plt.ylabel(r"Concentration [g/$m^{3}$]")
     plt.grid(True)
 
 ##################

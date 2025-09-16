@@ -27,7 +27,7 @@ def plume_2d(model,
 
     plt.xlabel("Distance from source (m)")
     plt.ylabel("Distance from plume center (m)")
-    plt.colorbar(label=r"Concentration (g/$m^{-3}$)")
+    plt.colorbar(label=r"Concentration (g/$m^{3}$)")
 
 def plume_3d(model,
              time = None,
@@ -55,7 +55,7 @@ def plume_3d(model,
     ax.view_init(elev=30, azim=310)
     ax.set_xlabel("Distance from source (m)")
     ax.set_ylabel("Distance from plume center (m)")
-    ax.set_zlabel(r"Concentration [$g/m^{-3}$]")
+    ax.set_zlabel(r"Concentration [$g/m^{3}$]")
 
     return ax
 

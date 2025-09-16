@@ -211,7 +211,7 @@ class DegradationParameters:
             else:
                 self.decay_rate = decay_rate
 
-        self.electron_acceptor_utilization = electron_acceptor_utilization
+        self.electron_acceptor_utilization = electron_acceptor_utilization.copy()
 
     def require_electron_acceptor(self):
         missing_ea = []
@@ -261,6 +261,9 @@ class DegradationParameters:
                 if error:
                     raise error
                 self.electron_acceptor_utilization[parameter] = value
+            # If utilization factor is not provided, it is set back to default instead
+            elif parameter != "self" and value is None:
+                self.electron_acceptor_utilization[parameter] = electron_acceptor_utilization[parameter]
 
 @dataclass
 class SourceParameters:

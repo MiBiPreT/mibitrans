@@ -204,7 +204,7 @@ class no_decay(Domenico):
 
 
 class linear_decay(Domenico):
-    """Class that calculates contaminant transport using the Domenico (1987) analytical model with a linear decay isotherm."""
+    """Calculate contaminant transport using the Domenico (1987) analytical model with a linear decay isotherm."""
 
     def __init__(
         self,
@@ -263,7 +263,7 @@ class linear_decay(Domenico):
 
 
 class instant_reaction(Domenico):
-    """Class that calculates contaminant transport using the Domenico (1987) analytical model with biodegradation modelled as instant reaction."""
+    """Calculate contaminant transport using the Domenico (1987) analytical model instant reaction biodegradation ."""
 
     def __init__(
         self,

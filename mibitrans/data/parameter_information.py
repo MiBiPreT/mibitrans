@@ -5,6 +5,45 @@ File containing various dictionaries used for evaluation of names, value types a
 """
 import numpy as np
 
+# Utilization factors of electron donors for combined BTEX constituents.
+electron_acceptor_utilization = {
+    "util_oxygen" : 3.14,
+    "util_nitrate" : 4.9,
+    "util_ferrous_iron" : 21.8,
+    "util_sulfate" : 4.7,
+    "util_methane" : 0.78,
+}
+
+# Couples utilization factors to electron acceptors/donors
+util_to_conc_name = {
+    "util_oxygen" : "delta_oxygen",
+    "util_nitrate" : "delta_nitrate",
+    "util_ferrous_iron" : "ferrous_iron",
+    "util_sulfate" : "delta_sulfate",
+    "util_methane" : "methane",
+}
+
+mass_balance_renaming_dictionary = {
+    "source_mass_0" : "mass t = 0",
+    "source_mass_t" : "mass t = ",
+    "source_mass_change" : "delta mass",
+    "plume_mass_no_decay" : "plume mass",
+    "transport_outside_extent_nodecay" : "mass transported outside model extent",
+    "plume_mass_linear_decay" : "plume mass",
+    "transport_outside_extent_lineardecay" : "mass transported outside model extent",
+    "plume_mass_degraded_linear" : "plume mass degraded",
+    "source_mass_instant_t" : "source mass t = ",
+    "source_mass_instant_change" : "delta source mass",
+    "plume_mass_no_decay_instant_reaction" : "plume mass before decay",
+    "plume_mass_instant_reaction" : "plume mass after decay",
+    "plume_mass_degraded_instant" : "plume mass degraded",
+    "electron_acceptor_mass_change" : "change in mass (kg)"
+}
+
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
+
 # Dictionary with possible input variable names as value and the variable name used in the package as key.
 key_dictionary = {
     "v" : ["v", "V", "velocity", "vel", "velo", "flow velocity", "flow_velocity"],
@@ -101,47 +140,12 @@ example_dictionary = {
     "CH4": 6.6,
 }
 
-# Utilization factors of electron donors for combined BTEX constituents.
-electron_acceptor_utilization = {
-    "util_oxygen" : 3.14,
-    "util_nitrate" : 4.9,
-    "util_ferrous_iron" : 21.8,
-    "util_sulfate" : 4.7,
-    "util_methane" : 0.78,
-}
 
-# Couples utilization factors to electron acceptors/donors
-util_to_conc_name = {
-    "util_oxygen" : "delta_oxygen",
-    "util_nitrate" : "delta_nitrate",
-    "util_ferrous_iron" : "ferrous_iron",
-    "util_sulfate" : "delta_sulfate",
-    "util_methane" : "methane",
-}
-
-mass_balance_renaming_dictionary = {
-    "source_mass_0" : "mass t = 0",
-    "source_mass_t" : "mass t = ",
-    "source_mass_change" : "delta mass",
-    "plume_mass_no_decay" : "plume mass",
-    "transport_outside_extent_nodecay" : "mass transported outside model extent",
-    "plume_mass_linear_decay" : "plume mass",
-    "transport_outside_extent_lineardecay" : "mass transported outside model extent",
-    "plume_mass_degraded_linear" : "plume mass degraded",
-    "source_mass_instant_t" : "source mass t = ",
-    "source_mass_instant_change" : "delta source mass",
-    "plume_mass_no_decay_instant_reaction" : "plume mass before decay",
-    "plume_mass_instant_reaction" : "plume mass after decay",
-    "plume_mass_degraded_instant" : "plume mass degraded",
-    "electron_acceptor_mass_change" : "change in mass (kg)"
-}
-
-#################### Redundant after finalizing refactoring #####################
-acceptor_utilization_dictionary = {                                             #
-    "dO" : 3.14,                                                                #
-    "dNO3" : 4.9,                                                               #
-    "Fe2" : 21.8,                                                               #
-    "dSO4" : 4.7,                                                               #
+acceptor_utilization_dictionary = {
+    "dO" : 3.14,
+    "dNO3" : 4.9,
+    "Fe2" : 21.8,
+    "dSO4" : 4.7,
     "CH4" : 0.78,
 }
 
@@ -160,9 +164,9 @@ testing_dictionary = {
     "n" : 0.25,
     "t_half" : 0.1,
     "dO": 0.5,
-    "dNO3": 0.5,                                                                #
-    "Fe2": 0.5,                                                                 #
-    "dSO4": 0.5,                                                                #
-    "CH4": 0.5,                                                                 #
-}                                                                               #
-#################################################################################
+    "dNO3": 0.5,
+    "Fe2": 0.5,
+    "dSO4": 0.5,
+    "CH4": 0.5,
+}
+

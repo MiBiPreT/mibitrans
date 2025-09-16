@@ -5,17 +5,27 @@ Module calculating the mass balance based on base parameters.
 
 import numpy as np
 import mibitrans.transport.analytical_equation as eq
-from mibitrans.transport.domenico import Domenico, no_decay
-from mibitrans.data.check_input import _check_model_type, _time_check
-from mibitrans.analysis.parameter_calculations import calculate_acceptor_utilization, calculate_utilization
+from mibitrans.analysis.parameter_calculations import calculate_acceptor_utilization
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
 from mibitrans.analysis.parameter_calculations import calculate_source_decay
 from mibitrans.analysis.parameter_calculations import calculate_source_decay_instant
+from mibitrans.analysis.parameter_calculations import calculate_utilization
+from mibitrans.data.check_input import _check_model_type
+from mibitrans.data.check_input import _time_check
+from mibitrans.transport.domenico import Domenico
+from mibitrans.transport.domenico import no_decay
 
 
-def mass_balance(model, time=None):
-    """Calculate contaminant mass balance across model compartments."""
+def mass_balance(model, time=None) -> dict:
+    """Calculate contaminant mass balance across model compartments.
 
+    Args:
+        model (mibitrans.transport.domenico.Domenico) : Domenico transport model object.
+        time (float) : Time at which to calculate mass balance. Default is the last time step.
+
+    Returns:
+        mass_balance_dict : Dictionary containing the mass balance elements of the given model.
+    """
     _check_model_type(model, Domenico)
     time_pos = _time_check(model, time)
     mass_balance_dict = {}
@@ -67,14 +77,17 @@ def mass_balance(model, time=None):
 
         # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay
         # model, scaled by ratio between no decay and linear decay plume mass.
-        transport_outside_extent_lindecay = (transport_outside_extent_nodecay * plume_mass_lindecay
-                                             / plume_mass_nodecay)
+        transport_outside_extent_lindecay = transport_outside_extent_nodecay * plume_mass_lindecay / plume_mass_nodecay
         mass_balance_dict["transport_outside_extent_lineardecay"] = transport_outside_extent_lindecay
 
         # Contaminant mass degraded by linear decay is diffrence plume mass no and linear decay plus difference in
         # mass transported outside model extent by no and linear decay.
-        degraded_mass = (plume_mass_nodecay - plume_mass_lindecay + transport_outside_extent_nodecay
-                           - transport_outside_extent_lindecay)
+        degraded_mass = (
+            plume_mass_nodecay
+            - plume_mass_lindecay
+            + transport_outside_extent_nodecay
+            - transport_outside_extent_lindecay
+        )
         mass_balance_dict["plume_mass_degraded_linear"] = degraded_mass
 
     elif mode == "instant_reaction":
@@ -108,15 +121,23 @@ def mass_balance(model, time=None):
 
     return mass_balance_dict
 
+
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
+
+
 class MassBalance:
     """Calculate contaminant mass balance across model compartments."""
-    def __init__(self,
-                 parameters : dict,
-                 mode: str = "no_decay",
-                 dx : float = None,
-                 dy : float = None,
-                 dt : float = None,
-                 ) -> None:
+
+    def __init__(
+        self,
+        parameters: dict,
+        mode: str = "no_decay",
+        dx: float = None,
+        dy: float = None,
+        dt: float = None,
+    ) -> None:
         """Initialise the class and internal variables.
 
         Args:
@@ -135,18 +156,16 @@ class MassBalance:
         self.dx = dx
         self.dy = dy
         self.dt = dt
-        self.mass_balance_dict = {
-        }
+        self.mass_balance_dict = {}
 
-
-    def balance(self, time = None) -> dict:
+    def balance(self, time=None) -> dict:
         """Calculates mass balance at a certain time point using the analytical equation for specified model type.
 
         Returns:
             mass_balance_dict (dict) : Dictionary containing mass for each mass balance component
             relevant to the model type.
         """
-        obj_nodecay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "no_decay")
+        obj_nodecay = eq.Transport(self.pars, dx=self.dx, dy=self.dy, dt=self.dt, mode="no_decay")
         cxyt_nd, x, y, t = obj_nodecay.domenico()
 
         # If time point is specified, closest point in time array t is taken.
@@ -189,7 +208,7 @@ class MassBalance:
             self.mass_balance_dict["transport_outside_extent_nodecay"] = transport_outside_extent_nodecay
 
         if self.mode == "linear_decay":
-            obj_decay = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "linear_decay")
+            obj_decay = eq.Transport(self.pars, dx=self.dx, dy=self.dy, dt=self.dt, mode="linear_decay")
             cxyt_dec, x, y, t = obj_decay.domenico()
 
             # Plume mass of linear decay model.
@@ -198,18 +217,23 @@ class MassBalance:
 
             # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay
             # model, scaled by ratio between no decay and linear decay plume mass.
-            transport_outside_extent_lindecay = (transport_outside_extent_nodecay * plume_mass_lindecay
-                                                 / plume_mass_nodecay)
+            transport_outside_extent_lindecay = (
+                transport_outside_extent_nodecay * plume_mass_lindecay / plume_mass_nodecay
+            )
             self.mass_balance_dict["transport_outside_extent_lineardecay"] = transport_outside_extent_lindecay
 
             # Contaminant mass degraded by linear decay is diffrence plume mass no and linear decay plus difference in
             # mass transported outside model extent by no and linear decay.
-            degraded_mass = (plume_mass_nodecay - plume_mass_lindecay + transport_outside_extent_nodecay
-                               - transport_outside_extent_lindecay)
+            degraded_mass = (
+                plume_mass_nodecay
+                - plume_mass_lindecay
+                + transport_outside_extent_nodecay
+                - transport_outside_extent_lindecay
+            )
             self.mass_balance_dict["plume_mass_degraded_linear"] = degraded_mass
 
         elif self.mode == "instant_reaction":
-            obj_inst = eq.Transport(self.pars, dx = self.dx, dy = self.dy, dt = self.dt, mode = "instant_reaction")
+            obj_inst = eq.Transport(self.pars, dx=self.dx, dy=self.dy, dt=self.dt, mode="instant_reaction")
             cxyt_inst, x, y, t = obj_inst.domenico()
 
             # Matrix with concentration values before subtraction of biodegradation capacity
@@ -247,3 +271,6 @@ class MassBalance:
             self.mass_balance_dict["electron_acceptor_mass_change"] = electron_acceptor_mass_change
 
         return self.mass_balance_dict
+
+
+########################################################################################################################

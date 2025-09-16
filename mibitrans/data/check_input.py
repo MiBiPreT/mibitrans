@@ -2,17 +2,20 @@
 
 Module evaluating if a dictionary contains all required (correct) parameters for analysis
 """
-import numpy as np
-import warnings
 
-def _check_float(parameter : str, value):
+import warnings
+import numpy as np
+
+
+def _check_float(parameter: str, value):
     """Check if a variable is a float and if it is positive."""
     if isinstance(value, (float, int)):
         return None
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
-def _check_float_positive(parameter : str, value):
+
+def _check_float_positive(parameter: str, value):
     """Check if a variable is a float and if it is positive."""
     if isinstance(value, (float, int)):
         if value >= 0:
@@ -22,7 +25,8 @@ def _check_float_positive(parameter : str, value):
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
-def _check_float_fraction(parameter : str, value):
+
+def _check_float_fraction(parameter: str, value):
     """Check if a variable is a float and if it is between 0 and 1."""
     if isinstance(value, (float, int)):
         if 0 <= value <= 1:
@@ -32,7 +36,8 @@ def _check_float_fraction(parameter : str, value):
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
-def _check_float_retardation(parameter : str, value):
+
+def _check_float_retardation(parameter: str, value):
     """Check if a variable is a float and if it is 1 or larger."""
     if isinstance(value, (float, int)):
         if value >= 1:
@@ -42,8 +47,9 @@ def _check_float_retardation(parameter : str, value):
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
-def _check_array_float_positive(parameter : str, value):
-    """Check if variable is numpy array, list, or float, if it is positive and if an array is 1-dimensional"""
+
+def _check_array_float_positive(parameter: str, value):
+    """Check if variable is numpy array, list, or float, if it is positive and if an array is 1-dimensional."""
     if isinstance(value, np.ndarray):
         if len(value.shape) == 1:
             if all(value >= 0):
@@ -71,7 +77,8 @@ def _check_array_float_positive(parameter : str, value):
     else:
         return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
 
-def _check_total_mass(parameter : str, value):
+
+def _check_total_mass(parameter: str, value):
     """Check variable properties of total source mass specifically."""
     if isinstance(value, (float, int)):
         if value >= 0:
@@ -87,13 +94,19 @@ def _check_total_mass(parameter : str, value):
     else:
         return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 
+
 def _check_dictionary(value):
     if not isinstance(value, dict):
         raise TypeError(f"Input must be a dict, but is {type(value)} instead.")
 
+
 def _check_model_type(parameter, allowed_model_types):
     if not isinstance(parameter, allowed_model_types):
-        raise TypeError(f"Input argument model should be in {allowed_model_types.__subclasses__()}, but is {type(parameter)} instead.")
+        raise TypeError(
+            f"Input argument model should be in {allowed_model_types.__subclasses__()}, "
+            f"but is {type(parameter)} instead."
+        )
+
 
 def _time_check(model, time):
     if time is not None:
@@ -102,7 +115,9 @@ def _time_check(model, time):
             raise error
         elif time > np.max(model.t):
             warnings.warn(
-                f"Desired time is larger than maximum time of model ({time} > {np.max(model.t)}). Using maximum time of model instead.")
+                f"Desired time is larger than maximum time of model ({time} > {np.max(model.t)}). Using maximum time "
+                f"of model instead."
+            )
             time_pos = -1
         else:
             time_pos = np.argmin(abs(model.t - time))
@@ -110,24 +125,30 @@ def _time_check(model, time):
         time_pos = -1
     return time_pos
 
+
 def _y_check(model, y_position):
     error = _check_float("y_position", y_position)
     if error is not None:
         raise error
     if y_position > np.max(model.y):
         warnings.warn(
-            f"Desired y position is outside of model domain (abs({y_position}) > {np.max(model.t)}). Using closest position inside model domain instead.")
+            f"Desired y position is outside of model domain (abs({y_position}) > {np.max(model.t)}). "
+            f"Using closest position inside model domain instead."
+        )
 
     y_pos = np.argmin(abs(model.y - y_position))
     return y_pos
 
-##################
-##### Legacy #####
-##################
+
+########################################################################################################################
+####################################### Pre-refactor functionalities, decrepit #########################################
+########################################################################################################################
+
 
 class CheckInput:
     """Evaluates if input dictionary contains all required parameters and if they have the correct data type."""
-    def __init__(self, dictionary, mode = None, verbose = True) -> None:
+
+    def __init__(self, dictionary, mode=None, verbose=True) -> None:
         """Initialize parameters.
 
         Args:
@@ -146,16 +167,16 @@ class CheckInput:
     def check_parameter(self) -> bool:
         """Check if all required parameters are present for a specific mode."""
         # Either the flow velocity or hydraulic conductivity, hydraulic gradient and porosity are required by the model.
-        if not("v" in self.keys or {"k", "i"}.issubset(self.keys)):
+        if not ("v" in self.keys or {"k", "i"}.issubset(self.keys)):
             self.missing_params.append("v or (k and i)")
 
         # Either plume length or dispersivity in all directions are required by the model.
-        if not("lp" in self.keys or {"alpha_x", "alpha_y", "alpha_z"}.issubset(self.keys)):
+        if not ("lp" in self.keys or {"alpha_x", "alpha_y", "alpha_z"}.issubset(self.keys)):
             self.missing_params.append("lp or (alpha_x and alpha_y and alpha_z)")
 
         # Either retardation factor or bulk density, partition coefficient and fraction organic carbon
         # are required by the model.
-        if not("R" in self.keys or {"rho", "Koc", "foc"}.issubset(self.keys)):
+        if not ("R" in self.keys or {"rho", "Koc", "foc"}.issubset(self.keys)):
             self.missing_params.append("R or (rho, Koc and foc)")
 
         # Porosity is required by the model.
@@ -176,12 +197,12 @@ class CheckInput:
 
         # Either decay coefficient or solute half-life is required for the linear decay model.
         if self.mode == "linear_decay":
-            if not("mu" in self.keys or "t_half" in self.keys):
+            if not ("mu" in self.keys or "t_half" in self.keys):
                 self.missing_params.append("mu or t_half")
 
         # Electron acceptor and donor concentrations are required for the instant reaction model.
         elif self.mode == "instant_reaction":
-            if not({"dO", "dNO3", "Fe2", "dSO4", "CH4"}.issubset(self.keys)):
+            if not ({"dO", "dNO3", "Fe2", "dSO4", "CH4"}.issubset(self.keys)):
                 self.missing_params.append("dO, dNO3, Fe2, dSO4, CH4")
 
         elif self.mode and self.mode != "no_decay":

@@ -9,7 +9,6 @@ from mibitrans.data.check_input import (_check_float_positive, _check_float_frac
                                         _check_array_float_positive, _check_total_mass)
 from dataclasses import dataclass
 
-
 @dataclass
 class HydrologicalParameters:
     """Dataclass handling input of hydrological parameters.

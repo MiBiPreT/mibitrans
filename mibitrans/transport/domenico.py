@@ -5,8 +5,8 @@ Module calculating the solution to the Domenico (1987) analytical model adapted 
 import warnings
 import numpy as np
 from scipy.special import erf, erfc
+import mibitrans.data.read
 from mibitrans.data.parameter_information import util_to_conc_name
-
 
 class Domenico:
     """Parent class that for all analytical solutions using on the Domenico analytical model."""
@@ -22,6 +22,11 @@ class Domenico:
         self.src_pars = source_parameters
         self.mod_pars = model_parameters
         self.verbose = verbose
+
+        # Check if input arguments are of the correct dataclass
+        for key in self.__dict__.keys():
+            if key != "verbose":
+                self._check_input_dataclasses(key)
 
         # One-dimensional model domain arrays
         self.x = np.arange(0, self.mod_pars.model_length + self.mod_pars.dx, self.mod_pars.dx)
@@ -46,8 +51,30 @@ class Domenico:
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
+    def _check_input_dataclasses(self, expected_class):
+        dataclass_dict = {
+            "hyd_pars" : mibitrans.data.read.HydrologicalParameters,
+            "ads_pars" : mibitrans.data.read.AdsorptionParameters,
+            "deg_pars" : mibitrans.data.read.DegradationParameters,
+            "src_pars" : mibitrans.data.read.SourceParameters,
+            "mod_pars" : mibitrans.data.read.ModelParameters,
+        }
+
+        rename_dict = {
+            "hyd_pars" : "hydrological_parameters",
+            "ads_pars" : "adsorption_parameters",
+            "deg_pars" : "degradation_parameters",
+            "src_pars" : "source_parameters",
+            "mod_pars" : "model_parameters",
+        }
+
+        if not isinstance(self.__dict__[expected_class], dataclass_dict[expected_class]):
+            raise TypeError(f"Input argument {rename_dict[expected_class]} should be {dataclass_dict[expected_class]}, but is {type(self.__dict__[expected_class],)} instead.")
+
+
     # Could be moved to general file with functions, since every solution will use this
     def _calculate_y(self):
+        """Calculate y-direction discretization."""
         if self.mod_pars.model_width > 2 * self.src_pars.source_zone_boundary[-1]:
             y = np.arange(-self.mod_pars.model_width / 2, self.mod_pars.model_width / 2, self.mod_pars.dy)
         else:
@@ -178,6 +205,7 @@ class linear_decay(Domenico):
                  ):
         super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
         self.deg_pars = degradation_parameters
+        self._check_input_dataclasses("deg_pars")
         self.deg_pars.require_linear_decay()
         self._calculate()
 
@@ -220,6 +248,7 @@ class instant_reaction(Domenico):
         TypeError : If input is not of the correct Dataclass.
 
     """
+
     def __init__(self,
                  hydrological_parameters,
                  adsorption_parameters,
@@ -230,6 +259,7 @@ class instant_reaction(Domenico):
                  ):
         super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
         self.deg_pars = degradation_parameters
+        self._check_input_dataclasses("deg_pars")
         self.deg_pars.require_electron_acceptor()
         self.biodegradation_capacity = self._calculate_biodegradation_capacity()
         self.k_source = self.calculate_source_decay(self.biodegradation_capacity)

@@ -6,23 +6,31 @@ from tests.test_example_data import testingdata_nodecay, testingdata_lineardecay
 from tests.test_example_data import test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars
 
 @pytest.mark.parametrize(
-    "hydro, ads, source, model",
+    "hydro, ads, source, model, error",
     [
-        (test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars),
+        (test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars, None),
+        (1, test_ads_pars, test_source_pars, test_model_pars, TypeError),
+        (test_hydro_pars, test_hydro_pars, test_source_pars, test_model_pars, TypeError),
+        (test_hydro_pars, test_ads_pars, "wrong", test_model_pars, TypeError),
+        (test_hydro_pars, test_ads_pars, test_source_pars, test_deg_pars, TypeError),
     ])
 
-def test_domenico_parent(hydro, ads, source, model) -> None:
-    parent = Domenico(hydro, ads, source, model)
-    shape_arrays = (len(parent.t), len(parent.y), len(parent.x))
-    # Source zone concentrations adapted for superposition should still have the same length as those in input
-    assert (len(parent.c_source) == len(source.source_zone_concentration)) and (len(parent.c_source) == len(source.source_zone_boundary))
-    # Extent of y-domain should be at least the size of
-    assert (np.max(parent.y) + abs(np.min(parent.y))) >= (np.max(source.source_zone_boundary) * 2)
-    assert parent.xxx.shape == shape_arrays
-    assert parent.yyy.shape == shape_arrays
-    assert parent.ttt.shape == shape_arrays
-    assert parent.ads_pars.retardation is not None
-    assert hydro.velocity / parent.ads_pars.retardation == parent.rv
+def test_domenico_parent(hydro, ads, source, model, error) -> None:
+    if error is None:
+        parent = Domenico(hydro, ads, source, model)
+        shape_arrays = (len(parent.t), len(parent.y), len(parent.x))
+        # Source zone concentrations adapted for superposition should still have the same length as those in input
+        assert (len(parent.c_source) == len(source.source_zone_concentration)) and (len(parent.c_source) == len(source.source_zone_boundary))
+        # Extent of y-domain should be at least the size of
+        assert (np.max(parent.y) + abs(np.min(parent.y))) >= (np.max(source.source_zone_boundary) * 2)
+        assert parent.xxx.shape == shape_arrays
+        assert parent.yyy.shape == shape_arrays
+        assert parent.ttt.shape == shape_arrays
+        assert parent.ads_pars.retardation is not None
+        assert hydro.velocity / parent.ads_pars.retardation == parent.rv
+    else:
+        with pytest.raises(error):
+            parent = Domenico(hydro, ads, source, model)
 
 @pytest.mark.parametrize(
     "model, expected",

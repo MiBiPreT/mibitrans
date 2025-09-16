@@ -20,14 +20,19 @@ test_model_pars.dt = 1
     [
         (no_decay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testing_massbalance_nodecay),
         (linear_decay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars), testing_massbalance_lindecay),
-        (instant_reaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars), testing_massbalance_instant)
+        (instant_reaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars), testing_massbalance_instant),
+        (test_hydro_pars, TypeError),
     ])
 
 def test_balance_numerical(model, expected) -> None:
     """Test if mass balance is correctly calculated by comparing to precomputed results."""
-    dictionary = mass_balance(model, time=3*365)
-    for key, output_item in dictionary.items():
-        assert expected[key] == pytest.approx(output_item)
+    if isinstance(expected, dict):
+        dictionary = mass_balance(model, time=3*365)
+        for key, output_item in dictionary.items():
+            assert expected[key] == pytest.approx(output_item)
+    else:
+        with pytest.raises(expected):
+            mass_balance(model, time=3*365)
 
 ############################### Old tests #######################################
                                                                                 #

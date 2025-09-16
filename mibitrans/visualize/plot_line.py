@@ -5,8 +5,10 @@ Module plotting a 3D matrix of contaminant plume concentrations as a line.
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mibitrans.data.check_input import _time_check, _y_check
+from mibitrans.data.check_input import _check_model_type, _time_check, _y_check
+import mibitrans.transport
 
+model_types = (mibitrans.transport.domenico.no_decay, mibitrans.transport.domenico.linear_decay, mibitrans.transport.domenico.instant_reaction)
 
 def centerline(model,
                time = None,
@@ -18,12 +20,13 @@ def centerline(model,
     Args:
         model : Model object from mibitrans.transport.
         time (float): Point of time for the plot. By default, last point in time is plotted.
-        y_pos : y-position across the plume (transverse horizontal direction) for the plot. By default, the center of the plume at y=0 is plotted.
+        y_position : y-position across the plume (transverse horizontal direction) for the plot. By default, the center of the plume at y=0 is plotted.
         **kwargs : Arguments to be passed to plt.plot().
 
     Returns a line plot of the input plume as object.
     """
 
+    _check_model_type(model, model_types)
     t_pos = _time_check(model, time)
     y_pos = _y_check(model, y_position)
     plot_array = model.cxyt[t_pos, y_pos, :]

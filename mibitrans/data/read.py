@@ -275,7 +275,7 @@ class DegradationParameters:
         util_sulfate: float = None,
         util_methane: float = None,
     ):
-        """Introduce custom utilization factors for each electron donor/acceptor species. By default, utilization factors for mix of BTEX are used.
+        """Change utilization factors for each electron donor/acceptor species.
 
         Args:
             util_oxygen (float) : utilization factor of oxygen, as mass of oxygen consumed

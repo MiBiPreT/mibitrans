@@ -5,13 +5,11 @@ Module handling testing of data input functionality
 
 import numpy as np
 import pytest
-from mibitrans.data.parameter_information import key_dictionary as k_dict
 from mibitrans.data.read import AdsorptionParameters
 from mibitrans.data.read import DegradationParameters
 from mibitrans.data.read import HydrologicalParameters
 from mibitrans.data.read import ModelParameters
 from mibitrans.data.read import SourceParameters
-from mibitrans.data.read import from_dict
 
 
 # Test HydrologicalParameters
@@ -224,24 +222,3 @@ def test_modelparameters_output(test, param, expected) -> None:
     """Test output of ModelParameters dataclass."""
     model = ModelParameters(**test)
     assert model.__dict__[param] == expected
-
-
-########################################################################################################################
-####################################### Pre-refactor functionalities, decrepit #########################################
-########################################################################################################################
-
-
-@pytest.mark.parametrize(
-    "test, expected",
-    [
-        ({k_dict["v"][0]: 1, k_dict["R"][0]: 2, k_dict["mu"][0]: 3}, dict(v=1, R=2, mu=3)),
-        (dict(v=1, R=2, nonsense=3), dict(v=1, R=2)),
-        (dict(nonsense=3), dict()),
-        (dict(), dict()),
-        ({k_dict["v"][-1]: 1}, {"v": 1}),
-    ],
-)
-def test_from_dict(test, expected) -> None:
-    """Test if from_dict gives expected output for various input dictionaries."""
-    result = from_dict(test)
-    assert result == expected

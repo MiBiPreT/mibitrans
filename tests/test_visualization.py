@@ -4,9 +4,9 @@ import mpl_toolkits.mplot3d
 import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
-from mibitrans.transport.domenico import instant_reaction
-from mibitrans.transport.domenico import linear_decay
-from mibitrans.transport.domenico import no_decay
+from mibitrans.transport.domenico import InstantReaction
+from mibitrans.transport.domenico import LinearDecay
+from mibitrans.transport.domenico import NoDecay
 from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
@@ -17,9 +17,9 @@ from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
 from tests.test_example_data import test_source_pars
 
-model_no_decay = no_decay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
-model_linear_decay = linear_decay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
-model_instant_reaction = instant_reaction(
+model_no_decay = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
+model_linear_decay = LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
+model_instant_reaction = InstantReaction(
     test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars
 )
 

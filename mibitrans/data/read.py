@@ -6,12 +6,8 @@ Module handling data input in the form of a dictionary.
 import warnings
 from dataclasses import dataclass
 import numpy as np
-from mibitrans.data.check_input import _check_array_float_positive
-from mibitrans.data.check_input import _check_float_fraction
-from mibitrans.data.check_input import _check_float_positive
-from mibitrans.data.check_input import _check_float_retardation
-from mibitrans.data.check_input import _check_total_mass
-from mibitrans.data.parameter_information import electron_acceptor_utilization
+from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameter_information import key_dictionary
 
 
@@ -44,8 +40,28 @@ class HydrologicalParameters:
     alpha_z: float = 1e-10
     verbose: bool = False
 
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)
+
     def __post_init__(self):
         """Check argument presence, types and domain. Calculate velocity if not given."""
+        self._validate_input_presence()
+
+        # Velocity is calculated from hydraulic gradient and conductivity when both are given.
+        if self.h_gradient and self.h_conductivity:
+            # Giving h_gradient & h_conductivity more specific than giving velocity. Input velocity will be overridden.
+            if self.velocity is not None:
+                warnings.warn(
+                    "Both velocity and h_gradient & h_conductivity are defined. Value for velocity will be overridden.",
+                    UserWarning,
+                )
+            self.velocity = self.h_gradient * self.h_conductivity / self.porosity
+            if self.verbose:
+                print(f"Groundwater flow velocity has been calculated to be {self.velocity} m/d.")
+
+    def _validate_input_presence(self):
         missing_arguments = []
         if self.porosity is None:
             missing_arguments.append("porosity")
@@ -65,34 +81,6 @@ class HydrologicalParameters:
 
         if self.verbose:
             print("All required hydrological input arguments are present.")
-
-        # All input parameters should be positive floats, raise appropriate error if not
-        for parameter, value in self.__dict__.items():
-            # Specific check and error for porosity, which has domain [0,1]
-            if parameter == "porosity":
-                error = _check_float_fraction(parameter, value)
-            elif parameter == "verbose":
-                continue
-            else:
-                error = _check_float_positive(parameter, value)
-
-            if error and (value is not None):
-                raise error
-
-        if self.verbose:
-            print("All hydrological input arguments are valid.")
-
-        # Velocity is calculated from hydraulic gradient and conductivity when both are given.
-        if self.h_gradient and self.h_conductivity:
-            # Giving h_gradient & h_conductivity more specific than giving velocity. Input velocity will be overridden.
-            if self.velocity is not None:
-                warnings.warn(
-                    "Both velocity and h_gradient & h_conductivity are defined. Value for velocity will be overridden.",
-                    UserWarning,
-                )
-            self.velocity = self.h_gradient * self.h_conductivity / self.porosity
-            if self.verbose:
-                print(f"Groundwater flow velocity has been calculated to be {self.velocity} m/d.")
 
 
 @dataclass
@@ -125,39 +113,17 @@ class AdsorptionParameters:
     fraction_organic_carbon: float = None
     verbose: bool = False
 
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)
+
     def __post_init__(self):
         """Check argument presence, types and domain."""
-        if self.retardation is None and (
-            self.bulk_density is None or self.partition_coefficient is None or self.fraction_organic_carbon is None
-        ):
-            raise ValueError(
-                "AdsorptionParameters missing required arguments: either retardation or "
-                "(bulk_density, partition_coefficient and fraction_organic_carbon)."
-            )
+        self._validate_input_presence()
 
         if self.verbose:
-            print("All required adsorption input arguments are present.")
-
-        # All input parameters should be positive floats, raise appropriate error if not
-        for parameter, value in self.__dict__.items():
-            # Retardation and fraction_organic_carbon have specific domains and are checked separately
-            if parameter == "retardation":
-                error = _check_float_retardation(parameter, value)
-            elif parameter == "fraction_organic_carbon":
-                error = _check_float_fraction(parameter, value)
-            elif parameter == "verbose":
-                continue
-            else:
-                error = _check_float_positive(parameter, value)
-
-            if error and (value is not None):
-                raise error
-
-        if self.verbose:
-            print("All adsorption input arguments are valid.")
-
-    # Retardation factor is not calculated from bulk density, partition coefficient and fraction organic carbon
-    # in this dataclass, since porosity is required as well, which is defined in the HydrologicalParameters class.
+            print("All adsorption input arguments are present and valid.")
 
     def calculate_retardation(self, porosity: float):
         """Calculate retardation factor from other input if not given."""
@@ -167,6 +133,15 @@ class AdsorptionParameters:
             )
             if self.verbose:
                 print(f"Retardation factor has been calculated to be {self.retardation}.")
+
+    def _validate_input_presence(self):
+        if self.retardation is None and (
+            self.bulk_density is None or self.partition_coefficient is None or self.fraction_organic_carbon is None
+        ):
+            raise ValueError(
+                "AdsorptionParameters missing required arguments: either retardation or "
+                "(bulk_density, partition_coefficient and fraction_organic_carbon)."
+            )
 
 
 @dataclass
@@ -210,8 +185,66 @@ class DegradationParameters:
     methane: float = None
     verbose: bool = False
 
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)
+
     def __post_init__(self):
         """Check argument presence, types and domain."""
+        self._validate_input_presence()
+        if self.half_life:
+            decay_rate = np.log(2) / self.half_life
+            if self.verbose:
+                print(f"Decay rate has been calculate to be {decay_rate} days.")
+            if self.decay_rate and (self.decay_rate != decay_rate):
+                warnings.warn(
+                    "Both contaminant decay rate constant and half life are defined, but are not equal. "
+                    "Only value for decay rate constant will be used in calculations.",
+                    UserWarning,
+                )
+            else:
+                self.decay_rate = decay_rate
+
+        self.utilization_factor = self.set_utilization_factor()
+        if self.verbose:
+            print(
+                f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
+                "To adapt them, use set_utilization_factor() method of DegradationParameters."
+            )
+
+    def set_utilization_factor(
+        self,
+        util_oxygen: float = 3.14,
+        util_nitrate: float = 4.9,
+        util_ferrous_iron: float = 21.8,
+        util_sulfate: float = 4.7,
+        util_methane: float = 0.78,
+    ):
+        """Change utilization factors for each electron donor/acceptor species.
+
+        Args:
+            util_oxygen (float, optional) : utilization factor of oxygen, as mass of oxygen consumed
+                per mass of biodegraded contaminant [g/g]. Default is 3.14
+            util_nitrate (float, optional) : utilization factor of nitrate, as mass of nitrate consumed
+                per mass of biodegraded contaminant [g/g]. Default is 4.9
+            util_ferrous_iron (float, optional) : utilization factor of ferrous iron, as mass of ferrous iron generated
+                per mass of biodegraded contaminant [g/g]. Default is 21.8
+            util_sulfate (float, optional) : utilization factor of sulfate, as mass of sulfate consumed
+                per mass of biodegraded contaminant [g/g]. Default is 4.7
+            util_methane (float, optional) : utilization factor of methane, as mass of methane generated
+                per mass of biodegraded contaminant [g/g]. Default is 0.78
+
+        Raises:
+            ValueError : If input parameters are incomplete or outside the valid domain.
+            TypeError : If input parameters of incorrect datatype.
+
+        """
+        if self.verbose:
+            print("Setting utilization factors...")
+        return UtilizationFactor(util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane)
+
+    def _validate_input_presence(self):
         if (self.decay_rate is None and self.half_life is None) and (
             self.delta_oxygen is None
             or self.delta_nitrate is None
@@ -223,29 +256,6 @@ class DegradationParameters:
                 "DegradationParameters missing missing required arguments: either decay rate or half life,"
                 "or electron acceptor/donor concentrations."
             )
-
-        # All input parameters should be positive floats, raise appropriate error if not
-        for parameter, value in self.__dict__.items():
-            if parameter == "verbose":
-                continue
-            else:
-                error = _check_float_positive(parameter, value)
-
-            if error and (value is not None):
-                raise error
-
-        if self.half_life:
-            decay_rate = np.log(2) / self.half_life
-            if self.decay_rate and (self.decay_rate != decay_rate):
-                warnings.warn(
-                    "Both contaminant decay rate constant and half life are defined, but are not equal. "
-                    "Only value for decay rate constant will be used in calculations.",
-                    UserWarning,
-                )
-            else:
-                self.decay_rate = decay_rate
-
-        self.electron_acceptor_utilization = electron_acceptor_utilization.copy()
 
     def _require_electron_acceptor(self):
         missing_ea = []
@@ -266,44 +276,6 @@ class DegradationParameters:
     def _require_linear_decay(self):
         if self.decay_rate is None and self.half_life is None:
             raise ValueError("Linear reaction model requires decay rate or half life.")
-
-    def utilization_factor(
-        self,
-        util_oxygen: float = None,
-        util_nitrate: float = None,
-        util_ferrous_iron: float = None,
-        util_sulfate: float = None,
-        util_methane: float = None,
-    ):
-        """Change utilization factors for each electron donor/acceptor species.
-
-        Args:
-            util_oxygen (float) : utilization factor of oxygen, as mass of oxygen consumed
-                per mass of biodegradated contaminant [g/g].
-            util_nitrate (float) : utilization factor of nitrate, as mass of nitrate consumed
-                per mass of biodegrated contaminant [g/g].
-            util_ferrous_iron (float) : utilization factor of ferrous iron, as mass of ferrous iron generated
-                per mass of biodegradated contaminant [g/g].
-            util_sulfate (float) : utilization factor of sulfate, as mass of sulfate consumed
-                per mass of biodegradated contaminant [g/g].
-            util_methane (float) : utilization factor of methane, as mass of methane generated
-                per mass of biodegrated contaminant [g/g].
-
-        Raises:
-            ValueError : If input parameters are incomplete or outside the valid domain.
-            TypeError : If input parameters of incorrect datatype.
-
-        """
-        utils = locals()
-        for parameter, value in utils.items():
-            if parameter != "self" and value is not None:
-                error = _check_float_positive(parameter, value)
-                if error:
-                    raise error
-                self.electron_acceptor_utilization[parameter] = value
-            # If utilization factor is not provided, it is set back to default instead
-            elif parameter != "self" and value is None:
-                self.electron_acceptor_utilization[parameter] = electron_acceptor_utilization[parameter]
 
 
 @dataclass
@@ -334,46 +306,26 @@ class SourceParameters:
     total_mass: float | str = "infinite"
     verbose: bool = False
 
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)
+
     def __post_init__(self):
         """Check argument presence, types and domain."""
-        # Check if all required arguments are present
-        missing_arguments = []
-        if self.source_zone_boundary is None:
-            missing_arguments.append("source_zone_boundary")
-        if self.source_zone_concentration is None:
-            missing_arguments.append("source_zone_concentration")
-        if self.depth is None:
-            missing_arguments.append("depth")
+        self._validate_input_presence()
 
-        if len(missing_arguments) > 0:
-            raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
-
-        # Check input value and data type
-        for parameter, value in self.__dict__.items():
-            if parameter == "verbose":
-                continue
-            elif parameter == "source_zone_boundary" or parameter == "source_zone_concentration":
-                error = _check_array_float_positive(parameter, value)
-            # Total source mass can be a positive float or a string denoting that source mass is infinite
-            # Therefore, it is checked separately
-            elif parameter == "total_mass":
-                error = _check_total_mass(parameter, self.total_mass)
-            else:
-                error = _check_float_positive(parameter, value)
-
-            if error and (value is not None):
-                raise error
-
-        # If total mass is any type of string, it is assumed the user's intention is to have it be infinite
+        # Make sure naming for infinite source mass is consistent from this point onward
         if isinstance(self.total_mass, str):
             self.total_mass = "infinite"
 
-        # Ensure boundary and concentration have same data type
-        if isinstance(self.source_zone_boundary, (float, int)):
+        # Ensure boundary and concentration are numpy arrays
+        if isinstance(self.source_zone_boundary, (float, int, np.floating)):
             self.source_zone_boundary = np.array([self.source_zone_boundary])
         else:
             self.source_zone_boundary = np.array(self.source_zone_boundary)
-        if isinstance(self.source_zone_concentration, (float, int)):
+
+        if isinstance(self.source_zone_concentration, (float, int, np.floating)):
             self.source_zone_concentration = np.array([self.source_zone_concentration])
         else:
             self.source_zone_concentration = np.array(self.source_zone_concentration)
@@ -399,8 +351,21 @@ class SourceParameters:
 
     def interpolate(self, n_zones, method):
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""
-        # Come back later
+        warnings.warn("This functionality is not implemented yet. Apologies")
         return None
+
+    def _validate_input_presence(self):
+        # Check if all required arguments are present
+        missing_arguments = []
+        if self.source_zone_boundary is None:
+            missing_arguments.append("source_zone_boundary")
+        if self.source_zone_concentration is None:
+            missing_arguments.append("source_zone_concentration")
+        if self.depth is None:
+            missing_arguments.append("depth")
+
+        if len(missing_arguments) > 0:
+            raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
 
 
 @dataclass
@@ -430,31 +395,31 @@ class ModelParameters:
     dt: float = None
     verbose: bool = False
 
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        if parameter in ["dx", "dy", "dt"]:
+            parameter, value = self._validate_stepsize(parameter, value)
+        super().__setattr__(parameter, value)
+
     def __post_init__(self):
         """Check argument presence, types and domain. Calculate velocity if not given."""
-        # Check input value and data type
-        for parameter, value in self.__dict__.items():
-            # Specific check and error for porosity, which has domain [0,1]
-            if parameter == "verbose":
-                continue
-            else:
-                error = _check_float_positive(parameter, value)
 
-            if error and (value is not None):
-                raise error
-
-        if self.model_length and self.dx:
-            if self.model_length / self.dx < 1:
+    def _validate_stepsize(self, parameter, value):
+        if parameter == "dx" and self.model_length is not None:
+            if self.model_length / value < 1:
                 warnings.warn("Step size is larger than model length, dx will be set to length of model.", UserWarning)
-                self.dx = self.model_length
-        if self.model_width and self.dy:
-            if self.model_width / self.dy < 1:
+                value = self.model_length
+        if parameter == "dy" and self.model_width is not None:
+            if self.model_width / value < 1:
                 warnings.warn("Step size is larger than model width, dy will be set to width of model.", UserWarning)
-                self.dy = self.model_width
-        if self.model_time and self.dt:
-            if self.model_time / self.dt < 1:
+                value = self.model_width
+        if parameter == "dt" and self.model_time is not None:
+            if self.model_time / value < 1:
                 warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
-                self.dt = self.model_time
+                value = self.model_time
+
+        return parameter, value
 
 
 ########################################################################################################################

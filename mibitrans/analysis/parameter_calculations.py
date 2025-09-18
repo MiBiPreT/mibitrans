@@ -6,17 +6,17 @@ can be used in transport equations.
 
 import numpy as np
 from mibitrans.data.parameter_information import acceptor_utilization_dictionary
-from mibitrans.data.parameter_information import electron_acceptor_utilization
 from mibitrans.data.parameter_information import util_to_conc_name
 
 
 def calculate_utilization(model):
     """Function that calculates relative use of electron acceptors in biodegradation of BTEX."""
-    biodeg_array = np.zeros(len(list(electron_acceptor_utilization.keys())))
+    util_factor = model.deg_pars.utilization_factor.dictionary
+    biodeg_array = np.zeros(len(list(util_factor.keys())))
     util_array = np.zeros(len(biodeg_array))
 
-    for i, (key, value) in enumerate(electron_acceptor_utilization.items()):
-        biodeg_array[i] = model.deg_pars.__dict__[util_to_conc_name[key]] / value
+    for i, (key, value) in enumerate(util_factor.items()):
+        biodeg_array[i] = getattr(model.deg_pars, util_to_conc_name[key]) / value
         util_array[i] = value
 
     biodegradation_capacity = np.sum(biodeg_array)
@@ -24,6 +24,22 @@ def calculate_utilization(model):
     mass_fraction = fraction_total * util_array
 
     return mass_fraction
+
+
+# def calculate_utilization(model):
+#     """Function that calculates relative use of electron acceptors in biodegradation of BTEX."""
+#     biodeg_array = np.zeros(len(list(electron_acceptor_utilization.keys())))
+#     util_array = np.zeros(len(biodeg_array))
+#
+#     for i, (key, value) in enumerate(electron_acceptor_utilization.items()):
+#         biodeg_array[i] = model.deg_pars.__dict__[util_to_conc_name[key]] / value
+#         util_array[i] = value
+#
+#     biodegradation_capacity = np.sum(biodeg_array)
+#     fraction_total = biodeg_array / biodegradation_capacity
+#     mass_fraction = fraction_total * util_array
+#
+#     return mass_fraction
 
 
 ########################################################################################################################

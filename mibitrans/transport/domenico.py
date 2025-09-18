@@ -1,6 +1,9 @@
 """Author: Jorrit Bakker.
 
 Module calculating the solution to the Domenico (1987) analytical model adapted in BIOSCREEN, for different scenarios.
+
+Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
+Journal of Hydrology, 91(1-2), 49-58.
 """
 
 import warnings
@@ -12,7 +15,11 @@ from mibitrans.data.parameter_information import util_to_conc_name
 
 
 class Domenico:
-    """Parent class that for all analytical solutions using on the Domenico analytical model."""
+    """Parent class that for all analytical solutions using on the Domenico (1987) analytical model.
+
+    Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
+    Journal of Hydrology, 91(1-2), 49-58.
+    """
 
     def __init__(
         self, hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose=False
@@ -65,6 +72,7 @@ class Domenico:
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
     def _check_input_dataclasses(self, expected_class):
+        """Check if input parameters are the correct dataclasses. Raise an error if not."""
         dataclass_dict = {
             "hyd_pars": mibitrans.data.read.HydrologicalParameters,
             "ads_pars": mibitrans.data.read.AdsorptionParameters,
@@ -155,7 +163,7 @@ class Domenico:
         return term
 
 
-class no_decay(Domenico):
+class NoDecay(Domenico):
     """Calculate contaminant transport using the Domenico (1987) analytical model without degradation."""
 
     def __init__(
@@ -203,7 +211,7 @@ class no_decay(Domenico):
                 self.cxyt += cxyt
 
 
-class linear_decay(Domenico):
+class LinearDecay(Domenico):
     """Calculate contaminant transport using the Domenico (1987) analytical model with a linear decay isotherm."""
 
     def __init__(
@@ -262,7 +270,7 @@ class linear_decay(Domenico):
                 self.cxyt += cxyt
 
 
-class instant_reaction(Domenico):
+class InstantReaction(Domenico):
     """Calculate contaminant transport using the Domenico (1987) analytical model instant reaction biodegradation ."""
 
     def __init__(
@@ -320,9 +328,9 @@ class instant_reaction(Domenico):
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
-
-        for key, item in self.deg_pars.electron_acceptor_utilization.items():
-            biodegradation_capacity += self.deg_pars.__dict__[util_to_conc_name[key]] / item
+        utilization_factor = getattr(self.deg_pars, "utilization_factor").dictionary
+        for key, item in utilization_factor.items():
+            biodegradation_capacity += getattr(self.deg_pars, util_to_conc_name[key]) / item
 
         return biodegradation_capacity
 

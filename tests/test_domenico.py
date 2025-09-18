@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 from mibitrans.transport.domenico import Domenico
-from mibitrans.transport.domenico import instant_reaction
-from mibitrans.transport.domenico import linear_decay
-from mibitrans.transport.domenico import no_decay
+from mibitrans.transport.domenico import InstantReaction
+from mibitrans.transport.domenico import LinearDecay
+from mibitrans.transport.domenico import NoDecay
 from tests.test_example_data import test_ads_pars
 from tests.test_example_data import test_deg_pars
 from tests.test_example_data import test_hydro_pars
@@ -48,13 +48,13 @@ def test_domenico_parent(hydro, ads, source, model, error) -> None:
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (no_decay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testingdata_nodecay),
+        (NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testingdata_nodecay),
         (
-            linear_decay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
             testingdata_lineardecay,
         ),
         (
-            instant_reaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            InstantReaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
             testingdata_instantreaction,
         ),
     ],

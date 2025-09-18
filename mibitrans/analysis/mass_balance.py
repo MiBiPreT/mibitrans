@@ -13,7 +13,7 @@ from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
 from mibitrans.transport.domenico import Domenico
-from mibitrans.transport.domenico import no_decay
+from mibitrans.transport.domenico import NoDecay
 
 
 def mass_balance(model, time=None) -> dict:
@@ -32,9 +32,9 @@ def mass_balance(model, time=None) -> dict:
 
     mass_balance_dict["time"] = model.t[time_pos]
 
-    if "deg_pars" in model.__dict__.keys():
-        no_decay_model = no_decay(model.hyd_pars, model.ads_pars, model.src_pars, model.mod_pars)
-        if "biodegradation_capacity" in model.__dict__.keys():
+    if hasattr(model, "deg_pars"):
+        no_decay_model = NoDecay(model.hyd_pars, model.ads_pars, model.src_pars, model.mod_pars)
+        if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:
             mode = "linear_decay"
@@ -55,7 +55,7 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict["source_mass_change"] = M_source_delta
 
     # Volume of single cell, as dx * dy * source thickness
-    cellsize = abs(model.x[1] - model.x[2]) * abs(model.y[1] - model.y[2]) * model.src_pars.depth
+    cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.src_pars.depth
 
     # Plume mass of no decay model; concentration is converted to mass by multiplying by cellsize and pore space.
     plume_mass_nodecay = np.sum(no_decay_model.cxyt[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)

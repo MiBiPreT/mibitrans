@@ -42,6 +42,24 @@ def test_hyrologicalparameters_validation(parameters, error) -> None:
 
 
 @pytest.mark.parametrize(
+    "parameters, value, error",
+    [
+        (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1), 2, None),
+        (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1), "no", TypeError),
+        (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1), -1, ValueError),
+    ],
+)
+def test_hydrologicalparameters_setattribute(parameters, value, error) -> None:
+    """Test validation of parameters after initialization."""
+    hydro = HydrologicalParameters(**parameters)
+    if error is None:
+        hydro.alpha_x = value
+    else:
+        with pytest.raises(error):
+            hydro.alpha_x = value
+
+
+@pytest.mark.parametrize(
     "test, param, expected",
     [
         (dict(velocity=1, porosity=0.5, alpha_x=2, alpha_y=3), "velocity", 1),
@@ -51,7 +69,7 @@ def test_hyrologicalparameters_validation(parameters, error) -> None:
 def test_hyrologicalparameters_output(test, param, expected) -> None:
     """Test output of HydrologicalParameters dataclass."""
     hydro = HydrologicalParameters(**test)
-    assert hydro.__dict__[param] == expected
+    assert getattr(hydro, param) == expected
 
 
 # Test AdsorptionParameters
@@ -78,15 +96,33 @@ def test_adsorptionparameters_validation(parameters, error) -> None:
 
 
 @pytest.mark.parametrize(
+    "parameters, value, error",
+    [
+        (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), 0.01, None),
+        (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), {}, TypeError),
+        (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), 2, ValueError),
+    ],
+)
+def test_adsorptionparameters_setattribute(parameters, value, error) -> None:
+    """Test validation of parameters after initialization."""
+    ads = AdsorptionParameters(**parameters)
+    if error is None:
+        ads.fraction_organic_carbon = value
+    else:
+        with pytest.raises(error):
+            ads.fraction_organic_carbon = value
+
+
+@pytest.mark.parametrize(
     "test, param, expected",
     [
         (dict(retardation=1), "retardation", 1),
     ],
 )
-def test_adsorptiondegradationparameters_output(test, param, expected) -> None:
-    """Test output of AdsorptionDegradationParameters dataclass."""
-    ads_deg = AdsorptionParameters(**test)
-    assert ads_deg.__dict__[param] == expected
+def test_adsorptionparameters_output(test, param, expected) -> None:
+    """Test output of AdsorptionParameters dataclass."""
+    ads = AdsorptionParameters(**test)
+    assert getattr(ads, param) == expected
 
 
 # Test DegradationParameters
@@ -111,6 +147,24 @@ def test_degradationparameters_validation(parameters, error) -> None:
 
 
 @pytest.mark.parametrize(
+    "parameters, value, error",
+    [
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1), 2, None),
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1), "dont", TypeError),
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1), -1, ValueError),
+    ],
+)
+def test_degradationparameters_setattribute(parameters, value, error) -> None:
+    """Test validation of parameters after initialization."""
+    deg = DegradationParameters(**parameters)
+    if error is None:
+        deg.delta_oxygen = value
+    else:
+        with pytest.raises(error):
+            deg.delta_oxygen = value
+
+
+@pytest.mark.parametrize(
     "test, param, expected",
     [
         (dict(half_life=2), "decay_rate", np.log(2) / 2),
@@ -119,8 +173,35 @@ def test_degradationparameters_validation(parameters, error) -> None:
 )
 def test_degradationparameters_output(test, param, expected) -> None:
     """Test output of DegradationParameters dataclass."""
-    ads_deg = DegradationParameters(**test)
-    assert ads_deg.__dict__[param] == expected
+    deg = DegradationParameters(**test)
+    assert getattr(deg, param) == expected
+
+
+deg_test_object = DegradationParameters(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1)
+
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        (dict(util_oxygen=1, util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), None),
+        (dict(util_oxygen="1", util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), TypeError),
+        (dict(util_oxygen=-1, util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), ValueError),
+    ],
+)
+def test_degradationparameters_utilization(test, expected) -> None:
+    """Test set_utilization_factor method of DegradationParameters dataclass."""
+    if expected is None:
+        deg_test_object.set_utilization_factor(**test)
+    else:
+        with pytest.raises(expected):
+            deg_test_object.set_utilization_factor(**test)
+
+
+def test_degradationparameters_utilization_setattr() -> None:
+    """Test attribute setting of utilization_factor of DegradationParameters dataclass."""
+    deg_test_object.utilization_factor = deg_test_object.utilization_factor
+    with pytest.raises(TypeError):
+        deg_test_object.utilization_factor = "not a dataclass"
 
 
 # Test SourceParameters
@@ -142,6 +223,7 @@ def test_degradationparameters_output(test, param, expected) -> None:
             dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([-3, 2]), depth=5, total_mass=2),
             ValueError,
         ),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[2, 3], depth=5, total_mass=2), ValueError),
         (dict(source_zone_boundary=[-1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), ValueError),
         (dict(source_zone_boundary=-1, source_zone_concentration=3), ValueError),
         (dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[3, 2], depth=5, total_mass=2), ValueError),
@@ -158,6 +240,31 @@ def test_sourceparameters_validation(parameters, error) -> None:
     else:
         with pytest.raises(error):
             SourceParameters(**parameters)
+
+
+# Test SourceParameters
+@pytest.mark.parametrize(
+    "parameter, value, error",
+    [
+        ("source_zone_boundary", [1, 2, 3], None),
+        ("source_zone_concentration", [3, 2, 1], None),
+        ("total_mass", 1000, None),
+        ("source_zone_concentration", [1, 2, 3], ValueError),
+        ("source_zone_concentration", 1, ValueError),
+        ("source_zone_concentration", "No", TypeError),
+        ("source_zone_boundary", [3, 2, 1], ValueError),
+    ],
+)
+def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
+    """Test validation check of SourceParameters dataclass. when setting attributes."""
+    src = SourceParameters(
+        source_zone_boundary=np.array([1, 2, 3]), source_zone_concentration=np.array([3, 2, 1]), depth=5
+    )
+    if error is None:
+        setattr(src, parameter, value)
+    else:
+        with pytest.raises(error):
+            setattr(src, parameter, value)
 
 
 @pytest.mark.parametrize(
@@ -199,6 +306,9 @@ def test_sourceparameters_output(test, param, expected) -> None:
         (dict(model_length=1, model_width=1, model_time=1, dx=1, dy=1, dt=1), None),
         (dict(model_length="one"), TypeError),
         (dict(model_length=-2), ValueError),
+        (dict(model_length=1, dx=2), ValueError),
+        (dict(model_width=1, dy=2), ValueError),
+        (dict(model_time=1, dt=2), ValueError),
     ],
 )
 def test_modelparameters_validation(parameters, error) -> None:
@@ -211,11 +321,37 @@ def test_modelparameters_validation(parameters, error) -> None:
 
 
 @pytest.mark.parametrize(
+    "parameter, value, error",
+    [
+        ("model_length", 3, None),
+        ("dy", 0.2, None),
+        ("model_time", 3, None),
+        ("model_length", "nonsense", TypeError),
+        ("model_length", 0.1, ValueError),
+        ("dx", 2, ValueError),
+        ("model_width", "nonsense", TypeError),
+        ("model_width", 0.1, ValueError),
+        ("dy", 2, ValueError),
+        ("model_time", "nonsense", TypeError),
+        ("model_time", 0.1, ValueError),
+        ("dt", 2, ValueError),
+    ],
+)
+def test_modelparameters_validation_setattr(parameter, value, error) -> None:
+    """Test validation check of ModelParameters dataclass when setting attributes."""
+    mod = ModelParameters(model_length=1, model_width=1, model_time=1, dx=0.5, dy=0.5, dt=0.5)
+    if error is None:
+        setattr(mod, parameter, value)
+    else:
+        with pytest.raises(error):
+            setattr(mod, parameter, value)
+
+
+@pytest.mark.parametrize(
     "test, param, expected",
     [
         (dict(model_length=1, dx=0.5), "model_length", 1),
         (dict(model_length=1, dx=0.5), "dx", 0.5),
-        (dict(model_length=1, dx=2), "dx", 1),
     ],
 )
 def test_modelparameters_output(test, param, expected) -> None:

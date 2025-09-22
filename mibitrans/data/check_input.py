@@ -82,6 +82,47 @@ def _check_array_float_positive(parameter: str, value):
         return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
 
 
+def validate_source_zones(boundary, concentration):
+    """Validate and adapt input of source_zone_boundary and source_zone_concentration arrays."""
+    # Ensure boundary and concentration are numpy arrays
+    if isinstance(boundary, (float, int, np.floating)):
+        boundary = np.array([boundary])
+    else:
+        boundary = np.array(boundary)
+
+    if isinstance(concentration, (float, int, np.floating)):
+        concentration = np.array([concentration])
+    else:
+        concentration = np.array(concentration)
+
+    # Each given source zone boundary should have a given concentration, and vice versa
+    if boundary.shape != concentration.shape:
+        raise ValueError(
+            f"Length of source zone boundary ({len(boundary)}) and source zone concentration "
+            f"({len(concentration)}) do not match. Make sure they are of equal length."
+        )
+
+    # Reorder source zone locations if they are not given in order from close to far from source zone center
+    if len(boundary) > 1:
+        if not all(boundary[:-1] <= boundary[1:]):
+            sort_location = np.argsort(boundary)
+            boundary.sort()
+            concentration = concentration[sort_location]
+            warnings.warn(
+                "Source zone boundary locations should be ordered by distance from source zone center. "
+                "Zone boundaries and concentrations have consequently been reordered as follows:"
+                f"Source zone boundaries: {boundary}"
+                f"Source zone concentrations: {concentration}"
+            )
+        # Superposition method only works if the zone closer to the center has higher concentration than outer zones
+        if not all(concentration[:-1] > concentration[1:]):
+            raise ValueError(
+                "Source zone concentrations should be in descending order; no source zone can have a concentration "
+                "higher than the concentration of a zone closer to source center, due to the superposition method."
+            )
+    return boundary, concentration
+
+
 def _check_total_mass(parameter: str, value):
     """Check variable properties of total source mass specifically."""
     if _check_float(parameter, value) is None:
@@ -177,7 +218,7 @@ def validate_input_values(parameter, value):
         # Parameters which are input as single values, lists or numpy arrays
         case "source_zone_boundary" | "source_zone_concentration":
             error = _check_array_float_positive(parameter, value)
-        # All other values are floats on positive domain
+        # All other parameters are checked as floats on positive domain
         case _:
             error = _check_float_positive(parameter, value)
 

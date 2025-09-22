@@ -7,6 +7,7 @@ import warnings
 from dataclasses import dataclass
 import numpy as np
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.check_input import validate_source_zones
 from mibitrans.data.parameter_information import UtilizationFactor
 
 
@@ -309,6 +310,13 @@ class SourceParameters:
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
         super().__setattr__(parameter, value)
+        # When setting source zone boundary or concentration, and both present, check validity in respect to each other.
+        if parameter in ["source_zone_boundary", "source_zone_concentration"] and (
+            self.source_zone_boundary is not None and self.source_zone_concentration is not None
+        ):
+            boundary, concentration = validate_source_zones(self.source_zone_boundary, self.source_zone_concentration)
+            super().__setattr__("source_zone_boundary", boundary)
+            super().__setattr__("source_zone_concentration", concentration)
 
     def __post_init__(self):
         """Check argument presence, types and domain."""
@@ -318,39 +326,9 @@ class SourceParameters:
         if isinstance(self.total_mass, str):
             self.total_mass = "infinite"
 
-        # Ensure boundary and concentration are numpy arrays
-        if isinstance(self.source_zone_boundary, (float, int, np.floating)):
-            self.source_zone_boundary = np.array([self.source_zone_boundary])
-        else:
-            self.source_zone_boundary = np.array(self.source_zone_boundary)
-
-        if isinstance(self.source_zone_concentration, (float, int, np.floating)):
-            self.source_zone_concentration = np.array([self.source_zone_concentration])
-        else:
-            self.source_zone_concentration = np.array(self.source_zone_concentration)
-
-        # Each given source zone boundary should have a given concentration, and vice versa
-        if self.source_zone_boundary.shape != self.source_zone_concentration.shape:
-            raise ValueError(
-                f"Length of source zone boundary ({len(self.source_zone_boundary)}) and source zone concentration "
-                f"({len(self.source_zone_concentration)}) do not match. Make sure they are of equal length."
-            )
-
-        # Reorder source zone locations if they are not given in order from close to far from source zone center
-        if len(self.source_zone_boundary) > 1:
-            if not all(self.source_zone_boundary[:-1] <= self.source_zone_boundary[1:]):
-                sort_location = np.argsort(self.source_zone_boundary)
-                self.source_zone_boundary.sort()
-                self.source_zone_concentration = self.source_zone_concentration[sort_location]
-
-                warnings.warn(
-                    "Source zone boundary locations should be ordered by distance from source zone center. "
-                    "Zone boundaries and concentrations have consequently been reordered."
-                )
-
     def interpolate(self, n_zones, method):
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""
-        warnings.warn("This functionality is not implemented yet. Apologies")
+        warnings.warn("This functionality is not implemented yet. Try again later.")
         return None
 
     def _validate_input_presence(self):
@@ -382,6 +360,7 @@ class ModelParameters:
 
     Raises:
         ValueError : If input parameters are incomplete or outside the valid domain.
+        ValueError : If model dimensions are smaller than their given step size.
         TypeError : If input parameters of incorrect datatype.
 
     """
@@ -397,25 +376,30 @@ class ModelParameters:
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
-        if parameter in ["dx", "dy", "dt"]:
-            parameter, value = self._validate_stepsize(parameter, value)
         super().__setattr__(parameter, value)
+        self._validate_stepsize(parameter)
 
-    def __post_init__(self):
-        """Check argument presence, types and domain. Calculate velocity if not given."""
-
-    def _validate_stepsize(self, parameter, value):
-        if parameter == "dx" and self.model_length is not None:
-            if self.model_length / value < 1:
-                warnings.warn("Step size is larger than model length, dx will be set to length of model.", UserWarning)
-                value = self.model_length
-        if parameter == "dy" and self.model_width is not None:
-            if self.model_width / value < 1:
-                warnings.warn("Step size is larger than model width, dy will be set to width of model.", UserWarning)
-                value = self.model_width
-        if parameter == "dt" and self.model_time is not None:
-            if self.model_time / value < 1:
-                warnings.warn("Step size is larger than model time, dt will be set to time of model.", UserWarning)
-                value = self.model_time
-
-        return parameter, value
+    def _validate_stepsize(self, parameter):
+        """Validate if model step size is not larger than the corresponding model dimension."""
+        match parameter:
+            case "dx" | "model_length":
+                if self.dx is not None and self.model_length is not None:
+                    if self.dx > self.model_length:
+                        raise ValueError(
+                            f"Model x-direction step size ({self.dx}) "
+                            f"is greater than the model length ({self.model_length})."
+                        )
+            case "dy" | "model_width":
+                if self.dy is not None and self.model_width is not None:
+                    if self.dy > self.model_width:
+                        raise ValueError(
+                            f"Model y-direction step size ({self.dy}) "
+                            f"is greater than the model width ({self.model_width})."
+                        )
+            case "dt" | "model_time":
+                if self.dt is not None and self.model_time is not None:
+                    if self.dt > self.model_time:
+                        raise ValueError(
+                            f"Model time step size ({self.dt}) "
+                            f"is greater than the total model time ({self.model_time})."
+                        )

@@ -80,4 +80,17 @@ def test_show_mass_balance(model, expected):
             assert isinstance(table, expected[i])
     else:
         with pytest.raises(expected):
-            mass_balance(model)
+            generate_mass_balance_tables(model)
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        model_linear_decay,
+        model_instant_reaction,
+    ],
+)
+def test_print_mass_balance(model):
+    """Test if print_mass_balance runs without error."""
+    mb = mass_balance(model)
+    generate_mass_balance_tables(mb)

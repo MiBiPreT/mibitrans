@@ -60,8 +60,9 @@ class Domenico:
         # cxyt is concentration output array
         self.cxyt = np.zeros(self.xxx.shape)
 
-        # Calculate retardation (if not already specified in adsorption_parameters)
-        self.ads_pars.calculate_retardation(self.hyd_pars.porosity)
+        # Calculate retardation if not already specified in adsorption_parameters
+        if self.ads_pars.retardation is None:
+            self.ads_pars.calculate_retardation(self.hyd_pars.porosity)
         # Calculate retarded velocity
         self.rv = self.hyd_pars.velocity / self.ads_pars.retardation
 

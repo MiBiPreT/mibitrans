@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+from mibitrans.data.read import AdsorptionParameters
+from mibitrans.data.read import DegradationParameters
 from mibitrans.transport.domenico import Domenico
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
@@ -43,6 +45,79 @@ def test_domenico_parent(hydro, ads, source, model, error) -> None:
     else:
         with pytest.raises(error):
             parent = Domenico(hydro, ads, source, model)
+
+
+@pytest.mark.parametrize(
+    "ads, expected",
+    [
+        (AdsorptionParameters(retardation=1), 1),
+        (AdsorptionParameters(bulk_density=2, partition_coefficient=10, fraction_organic_carbon=0.03), 3.4),
+    ],
+)
+def test_retardation_calculation(ads, expected):
+    """Test if retardation is calculated correctly when Domenico class is initialized."""
+    parent = Domenico(test_hydro_pars, ads, test_source_pars, test_model_pars)
+    assert parent.ads_pars.retardation == expected
+
+
+@pytest.mark.parametrize(
+    "deg, error",
+    [
+        (DegradationParameters(decay_rate=1), None),
+        (DegradationParameters(half_life=1), None),
+        (
+            DegradationParameters(
+                half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+            ),
+            None,
+        ),
+        (
+            DegradationParameters(
+                delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+            ),
+            ValueError,
+        ),
+    ],
+)
+def test_require_degradation_linear(deg, error):
+    """Test if LinearDecay class correctly raises error when correct degradation parameters are missing."""
+    if error is None:
+        LinearDecay(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+    else:
+        with pytest.raises(error):
+            LinearDecay(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+
+
+@pytest.mark.parametrize(
+    "deg, error",
+    [
+        (
+            DegradationParameters(
+                half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+            ),
+            None,
+        ),
+        (
+            DegradationParameters(
+                delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+            ),
+            None,
+        ),
+        (DegradationParameters(decay_rate=1), ValueError),
+        (DegradationParameters(half_life=1), ValueError),
+        (
+            DegradationParameters(half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, methane=6.6),
+            ValueError,
+        ),
+    ],
+)
+def test_require_degradation_instant(deg, error):
+    """Test if InstantReaction class correctly raises error when correct degradation parameters are missing."""
+    if error is None:
+        InstantReaction(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+    else:
+        with pytest.raises(error):
+            InstantReaction(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(

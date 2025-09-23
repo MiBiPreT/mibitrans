@@ -126,13 +126,12 @@ class AdsorptionParameters:
             print("All adsorption input arguments are present and valid.")
 
     def calculate_retardation(self, porosity: float):
-        """Calculate retardation factor from other input if not given."""
-        if self.retardation is None:
-            self.retardation = (
-                1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
-            )
-            if self.verbose:
-                print(f"Retardation factor has been calculated to be {self.retardation}.")
+        """Calculate retardation factor from soil adsorption parametrers and porosity."""
+        self.retardation = (
+            1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
+        )
+        if self.verbose:
+            print(f"Retardation factor has been calculated to be {self.retardation}.")
 
     def _validate_input_presence(self):
         if self.retardation is None and (

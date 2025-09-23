@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from mibitrans.data.read import AdsorptionParameters
 from mibitrans.data.read import DegradationParameters
+from mibitrans.data.read import ModelParameters
 from mibitrans.transport.domenico import Domenico
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
@@ -15,6 +16,9 @@ from tests.test_example_data import testingdata_instantreaction
 from tests.test_example_data import testingdata_lineardecay
 from tests.test_example_data import testingdata_nodecay
 
+short_width_model_pars = ModelParameters(model_length=50, model_width=30, model_time=3 * 365, dx=10, dy=5, dt=1 * 365)
+short_width_model_pars.model_width = test_source_pars.source_zone_boundary[-1] - 1
+
 
 @pytest.mark.parametrize(
     "hydro, ads, source, model, error",
@@ -24,8 +28,10 @@ from tests.test_example_data import testingdata_nodecay
         (test_hydro_pars, test_hydro_pars, test_source_pars, test_model_pars, TypeError),
         (test_hydro_pars, test_ads_pars, "wrong", test_model_pars, TypeError),
         (test_hydro_pars, test_ads_pars, test_source_pars, test_deg_pars, TypeError),
+        (test_hydro_pars, test_ads_pars, test_source_pars, short_width_model_pars, UserWarning),
     ],
 )
+@pytest.mark.filterwarnings("ignore:UserWarning")
 def test_domenico_parent(hydro, ads, source, model, error) -> None:
     """Test functionality, results and errors of Domenico parent class."""
     if error is None:
@@ -42,9 +48,14 @@ def test_domenico_parent(hydro, ads, source, model, error) -> None:
         assert parent.ttt.shape == shape_arrays
         assert parent.ads_pars.retardation is not None
         assert hydro.velocity / parent.ads_pars.retardation == parent.rv
-    else:
-        with pytest.raises(error):
+    elif error is UserWarning:
+        with pytest.warns(UserWarning):
             parent = Domenico(hydro, ads, source, model)
+            range_y = abs(parent.y[0]) + abs(parent.y[-1])
+            assert range_y >= parent.src_pars.source_zone_boundary[-1] * 2
+    elif error is TypeError:
+        with pytest.raises(error):
+            Domenico(hydro, ads, source, model)
 
 
 @pytest.mark.parametrize(

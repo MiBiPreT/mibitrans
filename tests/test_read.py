@@ -68,7 +68,11 @@ def test_hydrologicalparameters_setattribute(parameters, value, error) -> None:
 )
 def test_hyrologicalparameters_output(test, param, expected) -> None:
     """Test output of HydrologicalParameters dataclass."""
-    hydro = HydrologicalParameters(**test)
+    if "velocity" in test.keys() and "h_gradient" in test.keys():
+        with pytest.warns(UserWarning):
+            hydro = HydrologicalParameters(**test)
+    else:
+        hydro = HydrologicalParameters(**test)
     assert getattr(hydro, param) == expected
 
 
@@ -173,7 +177,11 @@ def test_degradationparameters_setattribute(parameters, value, error) -> None:
 )
 def test_degradationparameters_output(test, param, expected) -> None:
     """Test output of DegradationParameters dataclass."""
-    deg = DegradationParameters(**test)
+    if "half_life" in test.keys() and "decay_rate" in test.keys():
+        with pytest.warns(UserWarning):
+            deg = DegradationParameters(**test)
+    else:
+        deg = DegradationParameters(**test)
     assert getattr(deg, param) == expected
 
 
@@ -252,7 +260,6 @@ def test_sourceparameters_validation(parameters, error) -> None:
         ("source_zone_concentration", [1, 2, 3], ValueError),
         ("source_zone_concentration", 1, ValueError),
         ("source_zone_concentration", "No", TypeError),
-        ("source_zone_boundary", [3, 2, 1], ValueError),
     ],
 )
 def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
@@ -294,7 +301,12 @@ def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
 )
 def test_sourceparameters_output(test, param, expected) -> None:
     """Test output of SourceParameters dataclass."""
-    source = SourceParameters(**test)
+    unordered = np.array(test["source_zone_boundary"]) < test["source_zone_boundary"][0]
+    if True in unordered:
+        with pytest.warns(UserWarning):
+            source = SourceParameters(**test)
+    else:
+        source = SourceParameters(**test)
     assert source.__dict__[param] == pytest.approx(expected)
 
 

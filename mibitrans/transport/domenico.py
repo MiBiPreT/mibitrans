@@ -99,8 +99,10 @@ class Domenico:
     # Could be moved to general file with functions, since every solution will use this
     def _calculate_y(self):
         """Calculate y-direction discretization."""
-        if self.mod_pars.model_width > 2 * self.src_pars.source_zone_boundary[-1]:
-            y = np.arange(-self.mod_pars.model_width / 2, self.mod_pars.model_width / 2, self.mod_pars.dy)
+        if self.mod_pars.model_width >= 2 * self.src_pars.source_zone_boundary[-1]:
+            y = np.arange(
+                -self.mod_pars.model_width / 2, self.mod_pars.model_width / 2 + self.mod_pars.dy, self.mod_pars.dy
+            )
         else:
             y = np.arange(
                 -self.src_pars.source_zone_boundary[-1],

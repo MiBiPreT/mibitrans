@@ -10,7 +10,7 @@ import mibitrans.data.parameter_information
 
 def _check_float(parameter: str, value):
     """Check if a variable is a float and if it is positive."""
-    if isinstance(value, (float, int, np.floating)):
+    if isinstance(value, (float, int, np.floating, np.integer)):
         return None
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
@@ -64,7 +64,7 @@ def _check_array_float_positive(parameter: str, value):
             return ValueError(f"{parameter} should be a float, list or a 1-dimensional array.")
 
     elif isinstance(value, list):
-        if all(isinstance(element, (float, int, np.floating)) for element in value):
+        if all(isinstance(element, (float, int, np.floating, np.integer)) for element in value):
             if all(element >= 0 for element in value):
                 return None
             else:
@@ -72,7 +72,7 @@ def _check_array_float_positive(parameter: str, value):
         else:
             return TypeError(f"All elements of {parameter} should be a float.")
 
-    elif isinstance(value, (float, int)):
+    elif isinstance(value, (float, int, np.floating)):
         if value >= 0:
             return None
         else:
@@ -85,12 +85,12 @@ def _check_array_float_positive(parameter: str, value):
 def validate_source_zones(boundary, concentration):
     """Validate and adapt input of source_zone_boundary and source_zone_concentration arrays."""
     # Ensure boundary and concentration are numpy arrays
-    if isinstance(boundary, (float, int, np.floating)):
+    if isinstance(boundary, (float, int, np.floating, np.integer)):
         boundary = np.array([boundary])
     else:
         boundary = np.array(boundary)
 
-    if isinstance(concentration, (float, int, np.floating)):
+    if isinstance(concentration, (float, int, np.floating, np.integer)):
         concentration = np.array([concentration])
     else:
         concentration = np.array(concentration)

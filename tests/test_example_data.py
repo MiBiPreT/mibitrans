@@ -25,7 +25,7 @@ test_source_pars = SourceParameters(
     total_mass=1000000,
 )
 
-test_model_pars = ModelParameters(model_length=50, model_width=15, model_time=3 * 365, dx=10, dy=5, dt=1 * 365)
+test_model_pars = ModelParameters(model_length=50, model_width=30, model_time=3 * 365, dx=10, dy=5, dt=1 * 365)
 
 testingdata_nodecay = np.array(
     [

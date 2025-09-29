@@ -317,6 +317,11 @@ def test_sourceparameters_output(test, param, expected) -> None:
         source = SourceParameters(**test)
     assert source.__dict__[param] == pytest.approx(expected)
 
+def test_sourceparameters_visualize():
+    """Test if source zone visualization creates a plot."""
+    source = SourceParameters(np.array([1,2,3]), np.array([3,2,1]), 10, 1000)
+    source.visualize()
+    assert isinstance(plt.gca(), plt.Axes)
 
 def test_sourceparameters_visualize():
     """Test if source zone visualization creates a plot."""

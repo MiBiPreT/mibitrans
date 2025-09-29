@@ -9,6 +9,7 @@ import numpy as np
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
 from mibitrans.data.parameter_information import UtilizationFactor
+from mibitrans.visualize._show_conditions import source_zone
 
 
 @dataclass
@@ -166,8 +167,7 @@ class DegradationParameters:
 
     Methods:
         utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor utilization
-            factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995), see
-            electron_acceptor_utilization in mibitrans.data.parameter_information.
+            factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995)
 
     Raises:
         ValueError : If input parameters are incomplete or outside the valid domain.
@@ -205,7 +205,9 @@ class DegradationParameters:
             else:
                 self.decay_rate = decay_rate
 
-        self.utilization_factor = self.set_utilization_factor()
+        self.utilization_factor = None
+        self.set_utilization_factor()
+
         if self.verbose:
             print(
                 f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
@@ -221,6 +223,9 @@ class DegradationParameters:
         util_methane: float = 0.78,
     ):
         """Change utilization factors for each electron donor/acceptor species.
+
+        By default, electron acceptor utilization factors for a BTEX mixture are used,
+        based on values from Wiedemeier et al. (1995)
 
         Args:
             util_oxygen (float, optional) : utilization factor of oxygen, as mass of oxygen consumed
@@ -241,7 +246,9 @@ class DegradationParameters:
         """
         if self.verbose:
             print("Setting utilization factors...")
-        return UtilizationFactor(util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane)
+        self.utilization_factor = UtilizationFactor(
+            util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane
+        )
 
     def _validate_input_presence(self):
         if (self.decay_rate is None and self.half_life is None) and (
@@ -342,6 +349,9 @@ class SourceParameters:
 
         if len(missing_arguments) > 0:
             raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
+
+    def visualize(self):
+        source_zone(self)
 
 
 @dataclass

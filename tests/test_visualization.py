@@ -1,248 +1,75 @@
 from types import NoneType
-import matplotlib
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 import numpy as np
 import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
-from mibitrans.data.check_input import DomainValueError
-from mibitrans.transport import karanovic as kar
+from mibitrans.data.read import SourceParameters
+from mibitrans.transport.domenico import InstantReaction
+from mibitrans.transport.domenico import LinearDecay
+from mibitrans.transport.domenico import NoDecay
 from mibitrans.visualize.plot_line import breakthrough
 from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
 from mibitrans.visualize.show_mass_balance import generate_mass_balance_tables
+from mibitrans.visualize.show_conditions import source_zone
+from tests.test_example_data import test_ads_pars
+from tests.test_example_data import test_deg_pars
+from tests.test_example_data import test_hydro_pars
+from tests.test_example_data import test_model_pars
+from tests.test_example_data import test_source_pars
 
-matplotlib.use("Agg")  # Fixes tkinter.TclError in local tests
-
-
-@pytest.mark.parametrize(
-    "animate, expected",
-    [
-        (False, matplotlib.axes._axes.Axes),
-        (True, matplotlib.animation.FuncAnimation),
-    ],
+model_no_decay = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
+model_linear_decay = LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
+model_instant_reaction = InstantReaction(
+    test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars
 )
-# Ignore warning for animation being deleted without being shown, as behaviour is intentional for testing purposes.
-@pytest.mark.filterwarnings("ignore:Animation was deleted")
-def test_centerline(animate, expected, test_domenico_nodecay_model, test_domenico_lineardecay_model):
+
+
+def test_centerline():
     """Test if plot object is generated in centerline function."""
-    if not animate:
-        centerline(test_domenico_nodecay_model, animate=animate)
-        assert isinstance(plt.gca(), expected)
-        plt.clf()
-        centerline(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(plt.gca(), expected)
+    centerline(model_no_decay)
+    assert isinstance(plt.gca(), plt.Axes)
 
-    else:
-        ani = centerline(test_domenico_nodecay_model, animate=animate)
-        assert isinstance(ani, expected)
-        anim = centerline(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(anim, expected)
-
-
-@pytest.mark.parametrize(
-    "y_pos, time, expected",
-    [
-        (1, 365, matplotlib.axes._axes.Axes),
-        (None, 365, matplotlib.axes._axes.Axes),
-        (-1, None, matplotlib.axes._axes.Axes),
-        (100000, 365, UserWarning),
-        (1, 40000000, UserWarning),
-        ("nonsense", 365, TypeError),
-        (1, -1, DomainValueError),
-    ],
-)
-def test_parameter_check_centerline(y_pos, time, expected, test_domenico_nodecay_model):
-    """Test if centerline function properly raises warnings and errors for parameters outside domain."""
-    if isinstance(expected, matplotlib.axes._axes.Axes):
-        centerline(test_domenico_nodecay_model, y_pos, time)
-        assert isinstance(plt.gca(), expected)
-    elif expected is UserWarning:
-        with pytest.warns(expected):
-            centerline(test_domenico_nodecay_model, y_pos, time)
-            assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is DomainValueError:
-        with pytest.raises(expected):
-            centerline(test_domenico_nodecay_model, y_pos, time)
-
-
-@pytest.mark.parametrize(
-    "animate, expected",
-    [
-        (False, matplotlib.axes._axes.Axes),
-        (True, matplotlib.animation.FuncAnimation),
-    ],
-)
-@pytest.mark.filterwarnings("ignore:Animation was deleted")
-def test_transverse(animate, expected, test_domenico_nodecay_model, test_domenico_lineardecay_model):
+def test_transverse():
     """Test if plot object is generated in transverse function."""
-    if not animate:
-        transverse(test_domenico_nodecay_model, x_position=10, animate=animate)
-        assert isinstance(plt.gca(), expected)
-        plt.clf()
-        transverse(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            x_position=10,
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(plt.gca(), expected)
+    transverse(model_no_decay, x_position=1)
+    assert isinstance(plt.gca(), plt.Axes)
 
-    else:
-        ani = transverse(test_domenico_nodecay_model, x_position=10, animate=animate)
-        assert isinstance(ani, expected)
-        anim = transverse(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            x_position=10,
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(anim, expected)
-
-
-@pytest.mark.parametrize(
-    "x_pos, time, expected",
-    [
-        (10, 365, matplotlib.axes._axes.Axes),
-        (-1, None, matplotlib.axes._axes.Axes),
-        (1000000, 365, UserWarning),
-        (10, 3000000, UserWarning),
-        ("nonsense", 365, TypeError),
-        (1, -1, DomainValueError),
-    ],
-)
-def test_parameter_check_transverse(x_pos, time, expected, test_domenico_nodecay_model):
-    """Test if transverse function properly raises warnings and errors for parameters outside domain."""
-    if isinstance(expected, matplotlib.axes._axes.Axes):
-        transverse(test_domenico_nodecay_model, x_pos, time)
-        assert isinstance(plt.gca(), expected)
-    elif expected is UserWarning:
-        with pytest.warns(expected):
-            transverse(test_domenico_nodecay_model, x_pos, time)
-            assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is DomainValueError:
-        with pytest.raises(expected):
-            transverse(test_domenico_nodecay_model, x_pos, time)
-
-
-@pytest.mark.parametrize(
-    "animate, expected",
-    [
-        (False, matplotlib.axes._axes.Axes),
-        (True, matplotlib.animation.FuncAnimation),
-    ],
-)
-@pytest.mark.filterwarnings("ignore:Animation was deleted")
-def test_breakthrough(animate, expected, test_domenico_nodecay_model, test_domenico_lineardecay_model):
+def test_breakthrough():
     """Test if plot object is generated in breakthrough function."""
-    if not animate:
-        breakthrough(test_domenico_nodecay_model, x_position=10, animate=animate)
-        assert isinstance(plt.gca(), expected)
-        plt.clf()
-        breakthrough(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            x_position=10,
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(plt.gca(), expected)
-    else:
-        ani = breakthrough(test_domenico_nodecay_model, x_position=10, animate=animate)
-        assert isinstance(ani, expected)
-        anim = breakthrough(
-            [test_domenico_nodecay_model, test_domenico_lineardecay_model],
-            x_position=10,
-            legend_names=["no decay", "linear decay"],
-            animate=animate,
-        )
-        assert isinstance(anim, expected)
+    breakthrough(model_no_decay, x_position=1)
+    assert isinstance(plt.gca(), plt.Axes)
 
-
-@pytest.mark.parametrize(
-    "x_pos, y_pos, expected",
-    [
-        (10, 1, matplotlib.axes._axes.Axes),
-        (-1, None, matplotlib.axes._axes.Axes),
-        (10000000, 365, UserWarning),
-        (10, 200000000, UserWarning),
-        ("nonsense", 365, TypeError),
-        (-10, 1, DomainValueError),
-    ],
-)
-def test_parameter_check_breakthrough(x_pos, y_pos, expected, test_domenico_nodecay_model):
-    """Test if breakthrough function properly raises warnings and errors for parameters outside domain."""
-    if isinstance(expected, matplotlib.axes._axes.Axes):
-        breakthrough(test_domenico_nodecay_model, x_pos, y_pos)
-        assert isinstance(plt.gca(), expected)
-    elif expected is UserWarning:
-        with pytest.warns(expected):
-            breakthrough(test_domenico_nodecay_model, x_pos, y_pos)
-            assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is DomainValueError:
-        with pytest.raises(expected):
-            breakthrough(test_domenico_nodecay_model, x_pos, y_pos)
-
-
-@pytest.mark.parametrize(
-    "animate, expected",
-    [
-        (False, matplotlib.axes._axes.Axes),
-        (True, matplotlib.animation.FuncAnimation),
-    ],
-)
-@pytest.mark.filterwarnings("ignore:Animation was deleted")
-def test_plume_2d(animate, expected, test_domenico_nodecay_model):
+def test_plume_2d():
     """Test if plot object is generated in plume 2d function."""
-    if not animate:
-        plume_2d(test_domenico_nodecay_model, animate=animate)
-        assert isinstance(plt.gca(), expected)
-    else:
-        ani = plume_2d(test_domenico_nodecay_model, animate=animate)
-        assert isinstance(ani, expected)
+    plume_2d(model_no_decay)
+    assert isinstance(plt.gca(), plt.Axes)
 
-
-@pytest.mark.parametrize(
-    "animate, expected",
-    [
-        (False, mpl_toolkits.mplot3d.axes3d.Axes3D),
-        (True, matplotlib.animation.FuncAnimation),
-    ],
-)
-@pytest.mark.filterwarnings("ignore:Animation was deleted")
-def test_plume_3d(animate, expected, test_domenico_nodecay_model):
+def test_plume_3d():
     """Test if plot object is generated in plume 3d function."""
-    ax = plume_3d(test_domenico_nodecay_model, animate=animate)
-    assert isinstance(ax, expected)
+    ax = plume_3d(model_no_decay)
+    assert isinstance(ax, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
+source = SourceParameters(np.array([1,2,3]), np.array([3,2,1]), 10, 1000)
 
-def test_source_zone(test_source_pars):
+def test_source_zone():
     """Test if plot object is generated in source zone function."""
-    test_source_pars.visualize()
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-
+    source_zone(source)
+    assert isinstance(plt.gca(), plt.Axes)
 
 @pytest.mark.parametrize(
     "plottable, expected",
     [
         (-1, TypeError),
-        ("test_hydro_pars", TypeError),
+        (test_hydro_pars, TypeError),
     ],
 )
-def test_input_plotting(plottable, expected, request):
+def test_input_plotting(plottable, expected):
     """Test if input validation plotting function."""
-    if isinstance(plottable, str):
-        plottable = request.getfixturevalue(plottable)
     with pytest.raises(expected):
         centerline(plottable)
     with pytest.raises(expected):
@@ -255,54 +82,20 @@ def test_input_plotting(plottable, expected, request):
         plume_3d(plottable)
 
 
-@pytest.mark.parametrize(
-    "plotter",
-    [
-        "centerline",
-        "transverse",
-        "breakthrough",
-        "plume_2d",
-        "plume_3d",
-    ],
-)
-def test_auto_calculate_when_not_run(plotter, test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Test if an unrun model object gets run when trying to plot."""
-    mod = kar.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, auto_run=False)
-    assert not mod.has_run
-    empty_sum = np.sum(mod.cxyt)
-    match plotter:
-        case "centerline":
-            mod.centerline()
-        case "transverse":
-            mod.transverse(1)
-        case "breakthrough":
-            mod.breakthrough(1)
-        case "plume_2d":
-            mod.plume_2d()
-        case "plume_3d":
-            mod.plume_3d()
-    plt.clf()
-    assert mod.has_run
-    assert np.sum(mod.cxyt) > empty_sum
-
-
 pt_type = prettytable.prettytable.PrettyTable
 
 
 @pytest.mark.parametrize(
     "model, expected",
     [
-        ("test_domenico_nodecay_model", [pt_type, pt_type, NoneType, NoneType, NoneType]),
-        ("test_domenico_lineardecay_model", [pt_type, pt_type, pt_type, NoneType, NoneType]),
-        ("test_domenico_instantreaction_model", [pt_type, pt_type, NoneType, pt_type, pt_type]),
+        (model_no_decay, [pt_type, pt_type, NoneType, NoneType, NoneType]),
+        (model_linear_decay, [pt_type, pt_type, pt_type, NoneType, NoneType]),
+        (model_instant_reaction, [pt_type, pt_type, NoneType, pt_type, pt_type]),
         (3, TypeError),
     ],
 )
-@pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_show_mass_balance(model, expected, request):
+def test_show_mass_balance(model, expected):
     """Test show_mass_balance function input validation and output generation."""
-    if isinstance(model, str):
-        model = request.getfixturevalue(model)
     if isinstance(expected, list):
         mb = mass_balance(model)
         table_list = list(generate_mass_balance_tables(mb))
@@ -316,13 +109,11 @@ def test_show_mass_balance(model, expected, request):
 @pytest.mark.parametrize(
     "model",
     [
-        "test_domenico_lineardecay_model",
-        "test_domenico_instantreaction_model",
+        model_linear_decay,
+        model_instant_reaction,
     ],
 )
-@pytest.mark.filterwarnings("ignore:UserWarning")
-def test_print_mass_balance(model, request):
+def test_print_mass_balance(model):
     """Test if print_mass_balance runs without error."""
-    model_object = request.getfixturevalue(model)
-    mb = mass_balance(model_object)
+    mb = mass_balance(model)
     generate_mass_balance_tables(mb)

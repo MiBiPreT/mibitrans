@@ -1,16 +1,21 @@
 from types import NoneType
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
+import numpy as np
 import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
+from mibitrans.data.read import SourceParameters
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
 from mibitrans.transport.domenico import NoDecay
+from mibitrans.visualize.plot_line import breakthrough
 from mibitrans.visualize.plot_line import centerline
+from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
 from mibitrans.visualize.show_mass_balance import generate_mass_balance_tables
+from mibitrans.visualize.show_conditions import source_zone
 from tests.test_example_data import test_ads_pars
 from tests.test_example_data import test_deg_pars
 from tests.test_example_data import test_hydro_pars
@@ -29,18 +34,32 @@ def test_centerline():
     centerline(model_no_decay)
     assert isinstance(plt.gca(), plt.Axes)
 
+def test_transverse():
+    """Test if plot object is generated in transverse function."""
+    transverse(model_no_decay, x_position=1)
+    assert isinstance(plt.gca(), plt.Axes)
+
+def test_breakthrough():
+    """Test if plot object is generated in breakthrough function."""
+    breakthrough(model_no_decay, x_position=1)
+    assert isinstance(plt.gca(), plt.Axes)
 
 def test_plume_2d():
     """Test if plot object is generated in plume 2d function."""
     plume_2d(model_no_decay)
     assert isinstance(plt.gca(), plt.Axes)
 
-
 def test_plume_3d():
     """Test if plot object is generated in plume 3d function."""
     ax = plume_3d(model_no_decay)
     assert isinstance(ax, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
+source = SourceParameters(np.array([1,2,3]), np.array([3,2,1]), 10, 1000)
+
+def test_source_zone():
+    """Test if plot object is generated in source zone function."""
+    source_zone(source)
+    assert isinstance(plt.gca(), plt.Axes)
 
 @pytest.mark.parametrize(
     "plottable, expected",
@@ -53,6 +72,10 @@ def test_input_plotting(plottable, expected):
     """Test if input validation plotting function."""
     with pytest.raises(expected):
         centerline(plottable)
+    with pytest.raises(expected):
+        transverse(plottable, x_position=1)
+    with pytest.raises(expected):
+        breakthrough(plottable, x_position=1)
     with pytest.raises(expected):
         plume_2d(plottable)
     with pytest.raises(expected):

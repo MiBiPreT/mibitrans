@@ -189,12 +189,26 @@ def _y_check(model, y_position):
         raise error
     if y_position > np.max(model.y):
         warnings.warn(
-            f"Desired y position is outside of model domain (abs({y_position}) > {np.max(model.t)}). "
+            f"Desired y position is outside of model domain (abs({y_position}) > {np.max(model.y)}). "
             f"Using closest position inside model domain instead."
         )
 
     y_pos = np.argmin(abs(model.y - y_position))
     return y_pos
+
+def _x_check(model, x_position):
+    """Check if x-position input is valid, and returns the index of nearest x position."""
+    error = _check_float_positive("x_position", x_position)
+    if error is not None:
+        raise error
+    if x_position > np.max(model.x):
+        warnings.warn(
+            f"Desired x position is outside of model domain ({x_position} > {np.max(model.x)}). "
+            f"Using closest position inside model domain instead."
+        )
+
+    x_pos = np.argmin(abs(model.x - x_position))
+    return x_pos
 
 
 def validate_input_values(parameter, value):

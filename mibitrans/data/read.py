@@ -6,7 +6,6 @@ Module handling data input in the form of a dictionary.
 import warnings
 from dataclasses import dataclass
 import numpy as np
-from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
 from mibitrans.data.parameter_information import UtilizationFactor
@@ -73,12 +72,10 @@ class HydrologicalParameters:
             missing_arguments.append("alpha_y")
 
         if len(missing_arguments) > 0:
-            raise MissingValueError(
-                f"HydrologicalParameters missing {len(missing_arguments)} arguments: {missing_arguments}."
-            )
+            raise ValueError(f"HydrologicalParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
 
         if self.velocity is None and (self.h_gradient is None or self.h_conductivity is None):
-            raise MissingValueError(
+            raise ValueError(
                 "HydrologicalParameters missing required arguments: either velocity or both h_gradient and"
                 "h_conductivity."
             )
@@ -141,7 +138,7 @@ class AdsorptionParameters:
         if self.retardation is None and (
             self.bulk_density is None or self.partition_coefficient is None or self.fraction_organic_carbon is None
         ):
-            raise MissingValueError(
+            raise ValueError(
                 "AdsorptionParameters missing required arguments: either retardation or "
                 "(bulk_density, partition_coefficient and fraction_organic_carbon)."
             )
@@ -261,7 +258,7 @@ class DegradationParameters:
             or self.delta_sulfate is None
             or self.methane is None
         ):
-            raise MissingValueError(
+            raise ValueError(
                 "DegradationParameters missing missing required arguments: either decay rate or half life,"
                 "or electron acceptor/donor concentrations."
             )
@@ -280,11 +277,11 @@ class DegradationParameters:
             missing_ea.append("methane")
 
         if len(missing_ea) > 0:
-            raise MissingValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
+            raise ValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
 
     def _require_linear_decay(self):
         if self.decay_rate is None and self.half_life is None:
-            raise MissingValueError("Linear reaction model requires decay rate or half life.")
+            raise ValueError("Linear reaction model requires decay rate or half life.")
 
 
 @dataclass
@@ -355,9 +352,9 @@ class SourceParameters:
             missing_arguments.append("depth")
 
         if len(missing_arguments) > 0:
-            raise MissingValueError(
-                f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}."
-            )
+            raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
+
+
 
 
 @dataclass

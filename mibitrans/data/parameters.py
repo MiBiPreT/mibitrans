@@ -9,7 +9,7 @@ import numpy as np
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
 from mibitrans.data.parameter_information import UtilizationFactor
-from mibitrans.visualize._show_conditions import source_zone
+from mibitrans.visualize.show_conditions import source_zone
 
 
 @dataclass
@@ -337,6 +337,10 @@ class SourceParameters:
         warnings.warn("This functionality is not implemented yet. Try again later.")
         return None
 
+    def visualize(self):
+        """Plot the source zone concentration distribution."""
+        source_zone(self)
+
     def _validate_input_presence(self):
         # Check if all required arguments are present
         missing_arguments = []
@@ -350,8 +354,7 @@ class SourceParameters:
         if len(missing_arguments) > 0:
             raise ValueError(f"SourceParameters missing {len(missing_arguments)} arguments: {missing_arguments}.")
 
-    def visualize(self):
-        source_zone(self)
+
 
 
 @dataclass

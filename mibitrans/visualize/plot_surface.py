@@ -20,15 +20,11 @@ def plume_2d(model, time=None, animate=False, **kwargs):
     """
     _check_model_type(model, Domenico)
     t_pos = _time_check(model, time)
-
-    # Non animated plot
     if not animate:
         plt.pcolormesh(model.x, model.y, model.cxyt[t_pos, :, :], **kwargs)
         plt.xlabel("Distance from source (m)")
         plt.ylabel("Distance from plume center (m)")
         plt.colorbar(label=r"Concentration (g/$m^{3}$)")
-
-    # Animated plot
     else:
         fig, ax = plt.subplots()
         mesh = ax.pcolormesh(model.x, model.y, model.cxyt[0, :, :], vmin=0, vmax=np.max(model.cxyt), **kwargs)
@@ -62,17 +58,15 @@ def plume_3d(model, time=None, animate=False, **kwargs):
     _check_model_type(model, Domenico)
     t_pos = _time_check(model, time)
 
-    # Non animated plot
     if not animate:
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        ax.plot_surface(model.xxx[t_pos, :, :], model.yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
+        surf = ax.plot_surface(model.xxx[t_pos, :, :], model.yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
         ax.view_init(elev=30, azim=310)
         ax.set_xlabel("Distance from source (m)")
         ax.set_ylabel("Distance from plume center (m)")
         ax.set_zlabel(r"Concentration [$g/m^{3}$]")
         return ax
 
-    # Animated plot
     else:
         if "cmap" not in kwargs and "color" not in kwargs:
             kwargs["color"] = "tab:blue"
@@ -91,7 +85,6 @@ def plume_3d(model, time=None, animate=False, **kwargs):
 
         # plot_surface creates a static surface; need to create new plot every time step
         def update(frame):
-            # nonlocal needed in order for the previous plot to be removed before new on is plotted
             nonlocal surface
             surface.remove()
             surface = ax.plot_surface(

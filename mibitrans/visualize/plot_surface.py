@@ -60,7 +60,7 @@ def plume_3d(model, time=None, animate=False, **kwargs):
 
     if not animate:
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        surf = ax.plot_surface(model.xxx[t_pos, :, :], model.yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
+        ax.plot_surface(model.xxx[t_pos, :, :], model.yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
         ax.view_init(elev=30, azim=310)
         ax.set_xlabel("Distance from source (m)")
         ax.set_ylabel("Distance from plume center (m)")

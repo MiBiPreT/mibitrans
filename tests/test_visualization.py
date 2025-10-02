@@ -14,8 +14,8 @@ from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
-from mibitrans.visualize.show_mass_balance import generate_mass_balance_tables
 from mibitrans.visualize.show_conditions import source_zone
+from mibitrans.visualize.show_mass_balance import generate_mass_balance_tables
 from tests.test_example_data import test_ads_pars
 from tests.test_example_data import test_deg_pars
 from tests.test_example_data import test_hydro_pars

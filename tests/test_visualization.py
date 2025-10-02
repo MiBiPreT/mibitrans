@@ -1,4 +1,5 @@
 from types import NoneType
+import matplotlib
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 import numpy as np
@@ -29,37 +30,95 @@ model_instant_reaction = InstantReaction(
 )
 
 
-def test_centerline():
+@pytest.mark.parametrize(
+    "animate, expected",
+    [
+        (False, plt.Axes),
+        (True, matplotlib.animation.FuncAnimation),
+    ],
+)
+def test_centerline(animate, expected):
     """Test if plot object is generated in centerline function."""
-    centerline(model_no_decay)
-    assert isinstance(plt.gca(), plt.Axes)
+    if not animate:
+        centerline(model_no_decay, animate=animate)
+        assert isinstance(plt.gca(), expected)
+    else:
+        ani = centerline(model_no_decay, animate=animate)
+        assert isinstance(ani, expected)
 
-def test_transverse():
+
+@pytest.mark.parametrize(
+    "animate, expected",
+    [
+        (False, plt.Axes),
+        (True, matplotlib.animation.FuncAnimation),
+    ],
+)
+def test_transverse(animate, expected):
     """Test if plot object is generated in transverse function."""
-    transverse(model_no_decay, x_position=1)
-    assert isinstance(plt.gca(), plt.Axes)
+    if not animate:
+        transverse(model_no_decay, x_position=1, animate=animate)
+        assert isinstance(plt.gca(), expected)
+    else:
+        ani = transverse(model_no_decay, x_position=1, animate=animate)
+        assert isinstance(ani, expected)
 
-def test_breakthrough():
+
+@pytest.mark.parametrize(
+    "animate, expected",
+    [
+        (False, plt.Axes),
+        (True, matplotlib.animation.FuncAnimation),
+    ],
+)
+def test_breakthrough(animate, expected):
     """Test if plot object is generated in breakthrough function."""
-    breakthrough(model_no_decay, x_position=1)
-    assert isinstance(plt.gca(), plt.Axes)
+    if not animate:
+        breakthrough(model_no_decay, x_position=1, animate=animate)
+        assert isinstance(plt.gca(), plt.Axes)
+    else:
+        ani = breakthrough(model_no_decay, x_position=1, animate=animate)
+        assert isinstance(ani, expected)
 
-def test_plume_2d():
+
+@pytest.mark.parametrize(
+    "animate, expected",
+    [
+        (False, plt.Axes),
+        (True, matplotlib.animation.FuncAnimation),
+    ],
+)
+def test_plume_2d(animate, expected):
     """Test if plot object is generated in plume 2d function."""
-    plume_2d(model_no_decay)
-    assert isinstance(plt.gca(), plt.Axes)
+    if not animate:
+        plume_2d(model_no_decay, animate=animate)
+        assert isinstance(plt.gca(), expected)
+    else:
+        ani = plume_2d(model_no_decay, animate=animate)
+        assert isinstance(ani, expected)
 
-def test_plume_3d():
+
+@pytest.mark.parametrize(
+    "animate, expected",
+    [
+        (False, mpl_toolkits.mplot3d.axes3d.Axes3D),
+        (True, matplotlib.animation.FuncAnimation),
+    ],
+)
+def test_plume_3d(animate, expected):
     """Test if plot object is generated in plume 3d function."""
-    ax = plume_3d(model_no_decay)
-    assert isinstance(ax, mpl_toolkits.mplot3d.axes3d.Axes3D)
+    ax = plume_3d(model_no_decay, animate=animate)
+    assert isinstance(ax, expected)
 
-source = SourceParameters(np.array([1,2,3]), np.array([3,2,1]), 10, 1000)
+
+source = SourceParameters(np.array([1, 2, 3]), np.array([3, 2, 1]), 10, 1000)
+
 
 def test_source_zone():
     """Test if plot object is generated in source zone function."""
     source_zone(source)
     assert isinstance(plt.gca(), plt.Axes)
+
 
 @pytest.mark.parametrize(
     "plottable, expected",

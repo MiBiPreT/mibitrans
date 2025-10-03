@@ -230,6 +230,9 @@ def validate_input_values(parameter, value):
         # Specific check for electron acceptor utilization factor, which should be UtilizationFactor dataclass
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
+        # Parameters which can be any float value
+        case "y_position":
+            error = _check_float(parameter, value)
         # Parameters which have domain [0,1]
         case "porosity" | "fraction_organic_carbon":
             error = _check_float_fraction(parameter, value)

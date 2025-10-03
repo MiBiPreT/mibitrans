@@ -11,9 +11,7 @@ import numpy as np
 from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.read
-from mibitrans.data.check_input import _time_check
-from mibitrans.data.check_input import _x_check
-from mibitrans.data.check_input import _y_check
+from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import util_to_conc_name
 
 
@@ -75,7 +73,7 @@ class Domenico:
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
-    def sample(self, x_position, y_position, time, print_exact_location=False):
+    def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time, closest as discretization allows.
 
         Args:
@@ -90,16 +88,31 @@ class Domenico:
                 discretization, exact point of sampling can be up to half of a step size off in each dimension.
 
         """
-        x_pos = _x_check(self, x_position)
-        y_pos = _y_check(self, y_position)
-        t_pos = _time_check(self, time)
-        if print_exact_location:
-            print("Sampled at:")
-            print(f"x = {np.round(self.x[x_pos], decimals=5)}m")
-            print(f"y = {np.round(self.y[y_pos], decimals=5)}m")
-            print(f"t = {np.round(self.t[t_pos], decimals=5)}days")
+        for par, value in locals().items():
+            if par != "self":
+                validate_input_values(par, value)
 
-        return self.cxyt[t_pos, y_pos, x_pos]
+        # Save original 3d model domain and concentration arrays, so it can be restored afterward
+        # Needed because _calculate uses xxx, yyy and ttt and would overwrite cxyt.
+        save_x = self.xxx.copy()
+        save_y = self.yyy.copy()
+        save_t = self.ttt.copy()
+        save_c = self.cxyt.copy()
+        if hasattr(self, "cxyt_noBC"):
+            save_c_noBC = self.cxyt_noBC.copy()
+        self.xxx = np.array([x_position])
+        self.yyy = np.array([y_position])
+        self.ttt = np.array([time])
+        self.cxyt = np.array([0.0])
+        self._calculate()
+        concentration = self.cxyt[0]
+        self.xxx = save_x
+        self.yyy = save_y
+        self.ttt = save_t
+        self.cxyt = save_c
+        if hasattr(self, "cxyt_noBC"):
+            self.cxyt_noBC = save_c_noBC
+        return concentration
 
     def _calculate_source_decay(self, biodegradation_capacity=0):
         """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""

@@ -232,6 +232,10 @@ def test_degradationparameters_utilization_setattr() -> None:
             dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([-3, 2]), depth=5, total_mass=2),
             ValueError,
         ),
+        (
+            dict(source_zone_boundary=np.array(([1, 2, 3], [4, 5, 6])), source_zone_concentration=[3, 2], depth=5),
+            ValueError,
+        ),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[2, 3], depth=5, total_mass=2), ValueError),
         (dict(source_zone_boundary=[-1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), ValueError),
         (dict(source_zone_boundary=-1, source_zone_concentration=3), ValueError),
@@ -240,6 +244,7 @@ def test_degradationparameters_utilization_setattr() -> None:
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=-5, total_mass=2), ValueError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=[2, 3]), TypeError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=-2), ValueError),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="nons"), ValueError),
     ],
 )
 def test_sourceparameters_validation(parameters, error) -> None:
@@ -310,11 +315,13 @@ def test_sourceparameters_output(test, param, expected) -> None:
         source = SourceParameters(**test)
     assert source.__dict__[param] == pytest.approx(expected)
 
+
 def test_sourceparameters_visualize():
     """Test if source zone visualization creates a plot."""
-    source = SourceParameters(np.array([1,2,3]), np.array([3,2,1]), 10, 1000)
+    source = SourceParameters(np.array([1, 2, 3]), np.array([3, 2, 1]), 10, 1000)
     source.visualize()
     assert isinstance(plt.gca(), plt.Axes)
+
 
 # Test ModelParameters
 @pytest.mark.parametrize(

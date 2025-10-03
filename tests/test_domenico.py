@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+from mibitrans.data.check_input import DomainValueError
+from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.read import AdsorptionParameters
 from mibitrans.data.read import DegradationParameters
 from mibitrans.data.read import ModelParameters
@@ -86,7 +88,7 @@ def test_retardation_calculation(ads, expected):
             DegradationParameters(
                 delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
             ),
-            ValueError,
+            MissingValueError,
         ),
     ],
 )
@@ -114,11 +116,11 @@ def test_require_degradation_linear(deg, error):
             ),
             None,
         ),
-        (DegradationParameters(decay_rate=1), ValueError),
-        (DegradationParameters(half_life=1), ValueError),
+        (DegradationParameters(decay_rate=1), MissingValueError),
+        (DegradationParameters(half_life=1), MissingValueError),
         (
             DegradationParameters(half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, methane=6.6),
-            ValueError,
+            MissingValueError,
         ),
     ],
 )
@@ -155,10 +157,10 @@ def test_transport_equations_numerical(model, expected):
     [
         (16, 0, 393, 2.83828613605873),
         (24, -5, 283, 0.5974811505254043),
-        (-16, 0, 393, ValueError),
+        (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),
-        (16, 0, -10, ValueError),
+        (16, 0, -10, DomainValueError),
         (16, 0, "nonsense", TypeError),
     ],
 )

@@ -6,6 +6,7 @@ import numpy as np
 import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
+from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.read import SourceParameters
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
@@ -64,7 +65,7 @@ def test_centerline(animate, expected):
         (test_model_pars.model_width, 365, UserWarning),
         (1, test_model_pars.model_time * 2, UserWarning),
         ("nonsense", 365, TypeError),
-        (1, -1, ValueError),
+        (1, -1, DomainValueError),
     ],
 )
 def test_parameter_check_centerline(y_pos, time, expected):
@@ -76,7 +77,7 @@ def test_parameter_check_centerline(y_pos, time, expected):
         with pytest.warns(expected):
             centerline(model_no_decay, y_pos, time)
             assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is ValueError:
+    elif expected is TypeError or expected is DomainValueError:
         with pytest.raises(expected):
             centerline(model_no_decay, y_pos, time)
 
@@ -122,7 +123,7 @@ def test_transverse(animate, expected):
         (test_model_pars.model_length * 2, 365, UserWarning),
         (10, test_model_pars.model_time * 2, UserWarning),
         ("nonsense", 365, TypeError),
-        (1, -1, ValueError),
+        (1, -1, DomainValueError),
     ],
 )
 def test_parameter_check_transverse(x_pos, time, expected):
@@ -134,7 +135,7 @@ def test_parameter_check_transverse(x_pos, time, expected):
         with pytest.warns(expected):
             transverse(model_no_decay, x_pos, time)
             assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is ValueError:
+    elif expected is TypeError or expected is DomainValueError:
         with pytest.raises(expected):
             transverse(model_no_decay, x_pos, time)
 
@@ -179,7 +180,7 @@ def test_breakthrough(animate, expected):
         (test_model_pars.model_length * 2, 365, UserWarning),
         (10, test_model_pars.model_width * 2, UserWarning),
         ("nonsense", 365, TypeError),
-        (-10, 1, ValueError),
+        (-10, 1, DomainValueError),
     ],
 )
 def test_parameter_check_breakthrough(x_pos, y_pos, expected):
@@ -191,7 +192,7 @@ def test_parameter_check_breakthrough(x_pos, y_pos, expected):
         with pytest.warns(expected):
             breakthrough(model_no_decay, x_pos, y_pos)
             assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
-    elif expected is TypeError or expected is ValueError:
+    elif expected is TypeError or expected is DomainValueError:
         with pytest.raises(expected):
             breakthrough(model_no_decay, x_pos, y_pos)
 

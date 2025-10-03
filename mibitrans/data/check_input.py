@@ -23,7 +23,7 @@ def _check_float_positive(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return ValueError(f"{parameter} must be >= 0")
+            return DomainValueError(f"{parameter} must be >= 0")
     else:
         return is_float
 
@@ -35,7 +35,7 @@ def _check_float_fraction(parameter: str, value):
         if 0 <= value <= 1:
             return None
         else:
-            return ValueError(f"{parameter} must be between 0 and 1")
+            return DomainValueError(f"{parameter} must be between 0 and 1")
     else:
         return is_float
 
@@ -47,7 +47,7 @@ def _check_float_retardation(parameter: str, value):
         if value >= 1:
             return None
         else:
-            return ValueError(f"{parameter} must be 1 or larger.")
+            return DomainValueError(f"{parameter} must be 1 or larger.")
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
@@ -59,11 +59,11 @@ def _check_array_float_positive(parameter: str, value):
             if all(value >= 0):
                 return None
             else:
-                return ValueError(f"All values in {parameter} should be >= 0.")
+                return DomainValueError(f"All values in {parameter} should be >= 0.")
         else:
             return ValueError(
-                f"{parameter} should be a float, list or a 1-dimensional array."
-                f"Input array is {len(value.shape)}-dimensional."
+                f"{parameter} should be a float, list or a 1-dimensional array,"
+                f"but input array is {len(value.shape)}-dimensional."
             )
 
     elif isinstance(value, list):
@@ -71,7 +71,7 @@ def _check_array_float_positive(parameter: str, value):
             if all(element >= 0 for element in value):
                 return None
             else:
-                return ValueError(f"All values in {parameter} should be >= 0.")
+                return DomainValueError(f"All values in {parameter} should be >= 0.")
         else:
             return TypeError(f"All elements of {parameter} should be a float.")
 
@@ -79,7 +79,7 @@ def _check_array_float_positive(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return ValueError(f"{parameter} must be >= 0")
+            return DomainValueError(f"{parameter} must be >= 0")
 
     else:
         return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
@@ -132,7 +132,7 @@ def _check_total_mass(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return ValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
+            return DomainValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
     elif isinstance(value, str):
         if value not in ["infinite", "inf", "INF", "Infinite", "Inf"]:
             return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'inf'.")
@@ -245,3 +245,29 @@ def validate_input_values(parameter, value):
 
     if error and (value is not None):
         raise error
+
+
+class DomainValueError(Exception):
+    """Exception raised for values that are outside their possible domain.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        """Initialize error class."""
+        self.message = message
+        super().__init__(self.message)
+
+
+class MissingValueError(Exception):
+    """Exception raised when one or more required parameters are missing.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        """Initialize error class."""
+        self.message = message
+        super().__init__(self.message)

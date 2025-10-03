@@ -153,10 +153,13 @@ def test_transport_equations_numerical(model, expected):
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (10, 0, 365, 4.302301598612161),
-        (-10, 0, 365, ValueError),
-        (10, "nonsense", 365, TypeError),
-        (10, 0, 10 * 365, [UserWarning, 6.764774615806404]),
+        (16, 0, 393, 2.83828613605873),
+        (24, -5, 283, 0.5974811505254043),
+        (-16, 0, 393, ValueError),
+        ("nonsense", 0, 393, TypeError),
+        (16, "nonsense", 393, TypeError),
+        (16, 0, -10, ValueError),
+        (16, 0, "nonsense", TypeError),
     ],
 )
 def test_domenico_sample(x, y, t, expected):

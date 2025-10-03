@@ -11,6 +11,9 @@ import numpy as np
 from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.read
+from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import _x_check
+from mibitrans.data.check_input import _y_check
 from mibitrans.data.parameter_information import util_to_conc_name
 
 
@@ -27,15 +30,15 @@ class Domenico:
         """Initialize parent class object.
 
         Args:
-        hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing hydrological
-            parameters from HydrologicalParameters.
-        adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption
-            parameters from AdsorptionParameters.
-        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
-            from SourceParameters.
-        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
-            ModelParameters.
-        verbose (bool, optional): Verbose mode. Defaults to False.
+            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+                hydrological parameters from HydrologicalParameters.
+            adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing
+                adsorption parameters from AdsorptionParameters.
+            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+                from SourceParameters.
+            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+                ModelParameters.
+            verbose (bool, optional): Verbose mode. Defaults to False.
         """
         self.hyd_pars = hydrological_parameters
         self.ads_pars = adsorption_parameters
@@ -66,11 +69,57 @@ class Domenico:
         # Calculate retarded velocity
         self.rv = self.hyd_pars.velocity / self.ads_pars.retardation
 
-        self.k_source = self.calculate_source_decay()
+        self.k_source = self._calculate_source_decay()
         self.y_source = self.src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
+    def sample(self, x_position, y_position, time, print_exact_location=False):
+        """Give concentration at any given position and point in time, closest as discretization allows.
+
+        Args:
+            x_position (float): x position in domain extent [m].
+            y_position (float): y position in domain extent [m].
+            time (float): time for which concentration is sampled [days].
+            print_exact_location (bool, optional): If set to True, will print out exact location for which the
+                concentration was determined. Defaults to False.
+
+        Returns:
+            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
+                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+
+        """
+        x_pos = _x_check(self, x_position)
+        y_pos = _y_check(self, y_position)
+        t_pos = _time_check(self, time)
+        if print_exact_location:
+            print("Sampled at:")
+            print(f"x = {np.round(self.x[x_pos], decimals=5)}m")
+            print(f"y = {np.round(self.y[y_pos], decimals=5)}m")
+            print(f"t = {np.round(self.t[t_pos], decimals=5)}days")
+
+        return self.cxyt[t_pos, y_pos, x_pos]
+
+    def _calculate_source_decay(self, biodegradation_capacity=0):
+        """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
+        if isinstance(self.src_pars.total_mass, (float, int)):
+            y_src = np.zeros(len(self.src_pars.source_zone_boundary) + 1)
+            y_src[1:] = self.src_pars.source_zone_boundary
+            c_src = self.src_pars.source_zone_concentration
+            Q = self.hyd_pars.velocity * self.hyd_pars.porosity * self.src_pars.depth * np.max(y_src) * 2
+
+            weighted_conc = np.zeros(len(self.src_pars.source_zone_boundary))
+            for i in range(len(self.src_pars.source_zone_boundary)):
+                weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
+
+            c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+            k_source = Q * c0_avg / self.src_pars.total_mass
+        # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
+        else:
+            k_source = 0
+
+        return k_source
 
     def _check_input_dataclasses(self, expected_class):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -113,26 +162,6 @@ class Domenico:
                 "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
             )
         return y
-
-    def calculate_source_decay(self, biodegradation_capacity=0):
-        """Calculate source decay, for instant_reaction, biodegradation_capacity is requried."""
-        if isinstance(self.src_pars.total_mass, (float, int)):
-            y_src = np.zeros(len(self.src_pars.source_zone_boundary) + 1)
-            y_src[1:] = self.src_pars.source_zone_boundary
-            c_src = self.src_pars.source_zone_concentration
-            Q = self.hyd_pars.velocity * self.hyd_pars.porosity * self.src_pars.depth * np.max(y_src) * 2
-
-            weighted_conc = np.zeros(len(self.src_pars.source_zone_boundary))
-            for i in range(len(self.src_pars.source_zone_boundary)):
-                weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
-
-            c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
-            k_source = Q * c0_avg / self.src_pars.total_mass
-        # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
-        else:
-            k_source = 0
-
-        return k_source
 
     def _eq_x_term(self, decay_sqrt=1):
         return erfc(
@@ -194,6 +223,9 @@ class NoDecay(Domenico):
             vr (float) : Retarded groundwater flow velocity, in [m/d].
             k_source (float) : Source zone decay rate, in [1/days]
 
+        Methods:
+            sample : Give concentration at any given position and point in time, closest as discretization allows.
+
         Raises:
             TypeError : If input is not of the correct Dataclass.
 
@@ -249,6 +281,9 @@ class LinearDecay(Domenico):
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
             k_source (float) : Source zone decay rate, in [1/days]
+
+        Methods:
+            sample : Give concentration at any given position and point in time, closest as discretization allows.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -313,6 +348,9 @@ class InstantReaction(Domenico):
             cxyt_noBC (np.ndarray) : Concentration array in same shape as cxyt, before subtracting
                 biodegration_capacity.
 
+        Methods:
+            sample : Give concentration at any given position and point in time, closest as discretization allows.
+
         Raises:
             TypeError : If input is not of the correct Dataclass.
 
@@ -322,7 +360,7 @@ class InstantReaction(Domenico):
         self._check_input_dataclasses("deg_pars")
         self.deg_pars._require_electron_acceptor()
         self.biodegradation_capacity = self._calculate_biodegradation_capacity()
-        self.k_source = self.calculate_source_decay(self.biodegradation_capacity)
+        self.k_source = self._calculate_source_decay(self.biodegradation_capacity)
         # Source decay calculation uses self.c_source, therefore, addition of biodegradation_capacity to
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity

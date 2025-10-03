@@ -61,7 +61,10 @@ def _check_array_float_positive(parameter: str, value):
             else:
                 return ValueError(f"All values in {parameter} should be >= 0.")
         else:
-            return ValueError(f"{parameter} should be a float, list or a 1-dimensional array.")
+            return ValueError(
+                f"{parameter} should be a float, list or a 1-dimensional array."
+                f"Input array is {len(value.shape)}-dimensional."
+            )
 
     elif isinstance(value, list):
         if all(isinstance(element, (float, int, np.floating, np.integer)) for element in value):
@@ -195,6 +198,7 @@ def _y_check(model, y_position):
 
     y_pos = np.argmin(abs(model.y - y_position))
     return y_pos
+
 
 def _x_check(model, x_position):
     """Check if x-position input is valid, and returns the index of nearest x position."""

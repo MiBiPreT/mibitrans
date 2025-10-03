@@ -148,3 +148,25 @@ def test_require_degradation_instant(deg, error):
 def test_transport_equations_numerical(model, expected):
     """Test numerical output of transport equation child classes of Domenico."""
     assert model.cxyt == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "x, y, t, expected",
+    [
+        (10, 0, 365, 4.302301598612161),
+        (-10, 0, 365, ValueError),
+        (10, "nonsense", 365, TypeError),
+        (10, 0, 10 * 365, [UserWarning, 6.764774615806404]),
+    ],
+)
+def test_domenico_sample(x, y, t, expected):
+    """Tests if sample method from Domenico class works correctly."""
+    model = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
+    if isinstance(expected, float):
+        assert model.sample(x, y, t) == pytest.approx(expected)
+    elif expected is ValueError or expected is TypeError:
+        with pytest.raises(expected):
+            model.sample(x, y, t)
+    elif isinstance(expected, list):
+        with pytest.warns(expected[0]):
+            assert model.sample(x, y, t) == pytest.approx(expected[1])

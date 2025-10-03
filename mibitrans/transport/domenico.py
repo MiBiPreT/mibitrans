@@ -11,7 +11,9 @@ import numpy as np
 from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.read
-from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import _x_check
+from mibitrans.data.check_input import _y_check
 from mibitrans.data.parameter_information import util_to_conc_name
 
 
@@ -73,32 +75,31 @@ class Domenico:
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
-    def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time.
+    def sample(self, x_position, y_position, time, print_exact_location=False):
+        """Give concentration at any given position and point in time, closest as discretization allows.
 
         Args:
             x_position (float): x position in domain extent [m].
             y_position (float): y position in domain extent [m].
             time (float): time for which concentration is sampled [days].
+            print_exact_location (bool, optional): If set to True, will print out exact location for which the
+                concentration was determined. Defaults to False.
 
         Returns:
             concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
                 discretization, exact point of sampling can be up to half of a step size off in each dimension.
 
         """
-        for par, value in locals().items():
-            if par != "self":
-                validate_input_values(par, value)
+        x_pos = _x_check(self, x_position)
+        y_pos = _y_check(self, y_position)
+        t_pos = _time_check(self, time)
+        if print_exact_location:
+            print("Sampled at:")
+            print(f"x = {np.round(self.x[x_pos], decimals=5)}m")
+            print(f"y = {np.round(self.y[y_pos], decimals=5)}m")
+            print(f"t = {np.round(self.t[t_pos], decimals=5)}days")
 
-        if hasattr(self, "cxyt_noBC"):
-            save_c_noBC = self.cxyt_noBC.copy()
-        x = np.array([x_position])
-        y = np.array([y_position])
-        t = np.array([time])
-        concentration = self._calculate_cxyt(x, y, t)[0]
-        if hasattr(self, "cxyt_noBC"):
-            self.cxyt_noBC = save_c_noBC
-        return concentration
+        return self.cxyt[t_pos, y_pos, x_pos]
 
     def _calculate_source_decay(self, biodegradation_capacity=0):
         """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
@@ -162,31 +163,34 @@ class Domenico:
             )
         return y
 
-    def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
+    def _eq_x_term(self, decay_sqrt=1):
         return erfc(
-            (xxx - self.hyd_pars.velocity * ttt * decay_sqrt)
-            / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
+            (self.xxx - self.hyd_pars.velocity * self.ttt * decay_sqrt)
+            / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * self.ttt))
         )
 
-    def _eq_additional_x(self, xxx, ttt):
-        return np.exp(xxx * self.hyd_pars.velocity / (self.hyd_pars.alpha_x * self.hyd_pars.velocity)) * (
+    def _eq_additional_x(self):
+        return np.exp(self.xxx * self.hyd_pars.velocity / (self.hyd_pars.alpha_x * self.hyd_pars.velocity)) * (
             erfc(
-                xxx + self.hyd_pars.velocity * ttt / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
+                self.xxx
+                + self.hyd_pars.velocity
+                * self.ttt
+                / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * self.ttt))
             )
         )
 
-    def _eq_z_term(self, xxx):
-        inner_term = self.src_pars.depth / (2 * np.sqrt(self.hyd_pars.alpha_z * xxx))
+    def _eq_z_term(self):
+        inner_term = self.src_pars.depth / (2 * np.sqrt(self.hyd_pars.alpha_z * self.xxx))
         return erf(inner_term) - erf(-inner_term)
 
-    def _eq_source_decay(self, xxx, ttt):
-        term = np.exp(-self.k_source * (ttt - xxx / self.hyd_pars.velocity))
+    def _eq_source_decay(self):
+        term = np.exp(-self.k_source * (self.ttt - self.xxx / self.hyd_pars.velocity))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 
-    def _eq_y_term(self, i, xxx, yyy):
-        div_term = 2 * np.sqrt(self.hyd_pars.alpha_y * xxx)
-        term = erf((yyy + self.y_source[i]) / div_term) - erf((yyy - self.y_source[i]) / div_term)
+    def _eq_y_term(self, i):
+        div_term = 2 * np.sqrt(self.hyd_pars.alpha_y * self.xxx)
+        term = erf((self.yyy + self.y_source[i]) / div_term) - erf((self.yyy - self.y_source[i]) / div_term)
         term[np.isnan(term)] = 0
         return term
 
@@ -228,20 +232,18 @@ class NoDecay(Domenico):
         """
         super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
 
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        self._calculate()
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
-        cxyt = 0
+    def _calculate(self):
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term(xxx, ttt)
-            additional_x = self._eq_additional_x(xxx, ttt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
+            x_term = self._eq_x_term()
+            additional_x = self._eq_additional_x()
+            z_term = self._eq_z_term()
+            source_decay = self._eq_source_decay()
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
-                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
-                cxyt += cxyt_step
-        return cxyt
+                y_term = self._eq_y_term(i)
+                cxyt = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+                self.cxyt += cxyt
 
 
 class LinearDecay(Domenico):
@@ -291,21 +293,19 @@ class LinearDecay(Domenico):
         self.deg_pars = degradation_parameters
         self._check_input_dataclasses("deg_pars")
         self.deg_pars._require_linear_decay()
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        self._calculate()
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
-        cxyt = 0
+    def _calculate(self):
         with np.errstate(divide="ignore", invalid="ignore"):
             decay_sqrt = np.sqrt(1 + 4 * self.deg_pars.decay_rate * self.hyd_pars.alpha_x / self.hyd_pars.velocity)
-            decay_term = np.exp(xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
-            x_term = self._eq_x_term(xxx, ttt, decay_sqrt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
+            decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
+            x_term = self._eq_x_term(decay_sqrt)
+            z_term = self._eq_z_term()
+            source_decay = self._eq_source_decay()
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
-                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
-                cxyt += cxyt_step
-        return cxyt
+                y_term = self._eq_y_term(i)
+                cxyt = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
+                self.cxyt += cxyt
 
 
 class InstantReaction(Domenico):
@@ -365,7 +365,7 @@ class InstantReaction(Domenico):
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        self._calculate()
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
@@ -375,19 +375,18 @@ class InstantReaction(Domenico):
 
         return biodegradation_capacity
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
-        cxyt = 0
+    def _calculate(self):
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term(xxx, ttt)
-            additional_x = self._eq_additional_x(xxx, ttt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
-            for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
-                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
-                cxyt += cxyt_step
+            x_term = self._eq_x_term()
+            additional_x = self._eq_additional_x()
+            z_term = self._eq_z_term()
+            source_decay = self._eq_source_decay()
 
-            self.cxyt_noBC = cxyt.copy()
-            cxyt -= self.biodegradation_capacity
-            cxyt = np.where(cxyt < 0, 0, cxyt)
-        return cxyt
+            for i in range(len(self.c_source)):
+                y_term = self._eq_y_term(i)
+                cxyt = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+                self.cxyt += cxyt
+
+            self.cxyt_noBC = self.cxyt.copy()
+            self.cxyt -= self.biodegradation_capacity
+            self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)

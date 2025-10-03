@@ -23,7 +23,7 @@ def _check_float_positive(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return DomainValueError(f"{parameter} must be >= 0")
+            return ValueError(f"{parameter} must be >= 0")
     else:
         return is_float
 
@@ -35,7 +35,7 @@ def _check_float_fraction(parameter: str, value):
         if 0 <= value <= 1:
             return None
         else:
-            return DomainValueError(f"{parameter} must be between 0 and 1")
+            return ValueError(f"{parameter} must be between 0 and 1")
     else:
         return is_float
 
@@ -47,7 +47,7 @@ def _check_float_retardation(parameter: str, value):
         if value >= 1:
             return None
         else:
-            return DomainValueError(f"{parameter} must be 1 or larger.")
+            return ValueError(f"{parameter} must be 1 or larger.")
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
@@ -59,11 +59,11 @@ def _check_array_float_positive(parameter: str, value):
             if all(value >= 0):
                 return None
             else:
-                return DomainValueError(f"All values in {parameter} should be >= 0.")
+                return ValueError(f"All values in {parameter} should be >= 0.")
         else:
             return ValueError(
-                f"{parameter} should be a float, list or a 1-dimensional array,"
-                f"but input array is {len(value.shape)}-dimensional."
+                f"{parameter} should be a float, list or a 1-dimensional array."
+                f"Input array is {len(value.shape)}-dimensional."
             )
 
     elif isinstance(value, list):
@@ -71,7 +71,7 @@ def _check_array_float_positive(parameter: str, value):
             if all(element >= 0 for element in value):
                 return None
             else:
-                return DomainValueError(f"All values in {parameter} should be >= 0.")
+                return ValueError(f"All values in {parameter} should be >= 0.")
         else:
             return TypeError(f"All elements of {parameter} should be a float.")
 
@@ -79,7 +79,7 @@ def _check_array_float_positive(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return DomainValueError(f"{parameter} must be >= 0")
+            return ValueError(f"{parameter} must be >= 0")
 
     else:
         return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
@@ -132,7 +132,7 @@ def _check_total_mass(parameter: str, value):
         if value >= 0:
             return None
         else:
-            return DomainValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
+            return ValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
     elif isinstance(value, str):
         if value not in ["infinite", "inf", "INF", "Infinite", "Inf"]:
             return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'inf'.")
@@ -199,20 +199,6 @@ def _y_check(model, y_position):
     y_pos = np.argmin(abs(model.y - y_position))
     return y_pos
 
-def _x_check(model, x_position):
-    """Check if x-position input is valid, and returns the index of nearest x position."""
-    error = _check_float_positive("x_position", x_position)
-    if error is not None:
-        raise error
-    if x_position > np.max(model.x):
-        warnings.warn(
-            f"Desired x position is outside of model domain ({x_position} > {np.max(model.x)}). "
-            f"Using closest position inside model domain instead."
-        )
-
-    x_pos = np.argmin(abs(model.x - x_position))
-    return x_pos
-
 
 def _x_check(model, x_position):
     """Check if x-position input is valid, and returns the index of nearest x position."""
@@ -244,9 +230,6 @@ def validate_input_values(parameter, value):
         # Specific check for electron acceptor utilization factor, which should be UtilizationFactor dataclass
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
-        # Parameters which can be any float value
-        case "y_position":
-            error = _check_float(parameter, value)
         # Parameters which have domain [0,1]
         case "porosity" | "fraction_organic_carbon":
             error = _check_float_fraction(parameter, value)
@@ -259,29 +242,3 @@ def validate_input_values(parameter, value):
 
     if error and (value is not None):
         raise error
-
-
-class DomainValueError(Exception):
-    """Exception raised for values that are outside their possible domain.
-
-    Attributes:
-        message -- explanation of the error
-    """
-
-    def __init__(self, message):
-        """Initialize error class."""
-        self.message = message
-        super().__init__(self.message)
-
-
-class MissingValueError(Exception):
-    """Exception raised when one or more required parameters are missing.
-
-    Attributes:
-        message -- explanation of the error
-    """
-
-    def __init__(self, message):
-        """Initialize error class."""
-        self.message = message
-        super().__init__(self.message)

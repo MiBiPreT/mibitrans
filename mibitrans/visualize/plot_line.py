@@ -46,6 +46,7 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         else:
             plot_array_list.append(mod.cxyt[t_pos, y_pos, :])
 
+    # Non-animated plot
     if not animate:
         for i, mod in enumerate(model):
             if legend_names is not None:
@@ -59,6 +60,7 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         if legend_names is not None:
             plt.legend()
 
+    # Animated plot
     else:
         fig, ax = plt.subplots()
         plot_bin = []
@@ -185,6 +187,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         y_pos = _y_check(mod, y_position)
         plot_array_list.append(mod.cxyt[:, y_pos, x_pos])
 
+    # Non animated plot
     if not animate:
         for i, mod in enumerate(model):
             if legend_names is not None:
@@ -198,6 +201,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         if legend_names is not None:
             plt.legend()
 
+    # Animated plot
     else:
         fig, ax = plt.subplots()
         plot_bin = []
@@ -208,6 +212,9 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
                 line = ax.plot(mod.t[0], plot_array_list[i][0], label=legend_names[i])[0]
             else:
                 line = ax.plot(mod.t[0], plot_array_list[i][0], **kwargs)[0]
+
+            # As plot extent is decided by first initiation of plot, ensure that axis concentration and time limits
+            # are corresponding with their maximum values
             if mod.t[-1] > max_time:
                 max_time = mod.t[-1]
             if np.max(plot_array_list[i]) > max_conc:

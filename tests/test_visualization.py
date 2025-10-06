@@ -24,6 +24,8 @@ from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
 from tests.test_example_data import test_source_pars
 
+matplotlib.use("Agg")  # Fixes tkinter.TclError in local tests
+
 model_no_decay = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
 model_linear_decay = LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
 model_instant_reaction = InstantReaction(
@@ -38,6 +40,8 @@ model_instant_reaction = InstantReaction(
         (True, matplotlib.animation.FuncAnimation),
     ],
 )
+# Ignore warning for animation being deleted without being shown, as behaviour is intentional for testing purposes.
+@pytest.mark.filterwarnings("ignore:Animation was deleted")
 def test_centerline(animate, expected):
     """Test if plot object is generated in centerline function."""
     if not animate:
@@ -89,6 +93,7 @@ def test_parameter_check_centerline(y_pos, time, expected):
         (True, matplotlib.animation.FuncAnimation),
     ],
 )
+@pytest.mark.filterwarnings("ignore:Animation was deleted")
 def test_transverse(animate, expected):
     """Test if plot object is generated in transverse function."""
     if not animate:
@@ -147,6 +152,7 @@ def test_parameter_check_transverse(x_pos, time, expected):
         (True, matplotlib.animation.FuncAnimation),
     ],
 )
+@pytest.mark.filterwarnings("ignore:Animation was deleted")
 def test_breakthrough(animate, expected):
     """Test if plot object is generated in breakthrough function."""
     if not animate:
@@ -204,6 +210,7 @@ def test_parameter_check_breakthrough(x_pos, y_pos, expected):
         (True, matplotlib.animation.FuncAnimation),
     ],
 )
+@pytest.mark.filterwarnings("ignore:Animation was deleted")
 def test_plume_2d(animate, expected):
     """Test if plot object is generated in plume 2d function."""
     if not animate:
@@ -221,6 +228,7 @@ def test_plume_2d(animate, expected):
         (True, matplotlib.animation.FuncAnimation),
     ],
 )
+@pytest.mark.filterwarnings("ignore:Animation was deleted")
 def test_plume_3d(animate, expected):
     """Test if plot object is generated in plume 3d function."""
     ax = plume_3d(model_no_decay, animate=animate)

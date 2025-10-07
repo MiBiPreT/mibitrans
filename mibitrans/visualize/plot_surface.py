@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import animation
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
-from mibitrans.transport.domenico import Domenico
+from mibitrans.transport.model_parent import Transport3D
 
 
 def plume_2d(model, time=None, animate=False, **kwargs):
@@ -18,7 +18,7 @@ def plume_2d(model, time=None, animate=False, **kwargs):
 
     Returns a matrix plot of the input plume as object.
     """
-    _check_model_type(model, Domenico)
+    _check_model_type(model, Transport3D)
     t_pos = _time_check(model, time)
 
     # Non animated plot
@@ -59,7 +59,7 @@ def plume_3d(model, time=None, animate=False, **kwargs):
     Returns:
         ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
     """
-    _check_model_type(model, Domenico)
+    _check_model_type(model, Transport3D)
     t_pos = _time_check(model, time)
 
     # Non animated plot

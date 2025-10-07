@@ -247,8 +247,8 @@ class Karanovic(Transport3D):
         self.disp_y = self.hyd_pars.alpha_y * self.rv
         self.disp_z = self.hyd_pars.alpha_z * self.rv
 
-    def _eq_integrand(self, t):
-        term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t) * self._eq_z_term(t)
+    def _eq_integrand(self, t, sz):
+        term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t, sz) * self._eq_z_term(t)
         term[np.isnan(term)] = 0
         return term
 
@@ -257,27 +257,29 @@ class Karanovic(Transport3D):
         term[np.isnan(term)] = 0
         return term
 
-    def _eq_y_term(self, t):
+    def _eq_y_term(self, t, sz):
         div_term = 2 * np.sqrt(self.disp_y * t)
-        term = erfc((self.yyy[0, :, 1:] - self.y_source[0]) / div_term) - erfc(
-            (self.yyy[0, :, 1:] + self.y_source[0]) / div_term
+        term = erfc((self.yyy[0, :, 1:] - self.y_source[sz]) / div_term) - erfc(
+            (self.yyy[0, :, 1:] + self.y_source[sz]) / div_term
         )
         term[np.isnan(term)] = 0
         return term
 
     def _eq_z_term(self, t):
-        inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
-        if inner_term == np.inf:
+        if t == 0:
             inner_term = 2
+        else:
+            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
         return erfc(-inner_term) - erfc(inner_term)
 
-    def _eq_source_term(self):
+    def _eq_source_term(self, sz):
         return (
-            self.c_source[0]
+            self.c_source[sz]
             * self.xxx[:, :, 1:]
             / (8 * np.sqrt(np.pi * self.disp_x))
             * np.exp(-self.k_source * self.ttt[:, :, 1:])
         )
 
-    def _eq_source_zero(self):
-        return self.c_source[0] * np.exp(-self.k_source * self.ttt[:, :, 0])
+    def _eq_source_zero(self, sz):
+        zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
+        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])

@@ -42,28 +42,22 @@ class NoDecay(Karanovic):
         self._calculate()
 
     def _calculate(self):
-        with np.errstate(divide="ignore", invalid="ignore"):
-            for i, time in enumerate(self.t):
+        # with np.errstate(divide="ignore", invalid="ignore"):
+        for sz in range(len(self.c_source)):
+            if self.verbose:
+                print("integrating for source zone ", sz)
+            for j in range(len(self.t)):
                 if self.verbose:
-                    print("integrating for t =", time, "days")
-                self.integral_term, self.error_size[i] = quad_vec(self._eq_integrand, 0, time)
-            source_term = self._eq_source_term()
-            self.cxyt[:, :, 1:] += self.integral_term * source_term
-            self.cxyt[:, :, 0] = self._eq_source_zero()
-
-    # def point(self, t, y, x):
-    #     def integrand(t, y, x):
-    #         x_part = np.exp(self.k_source * t - (x - self.rv * t) ** 2 / (4 * self.disp_x * t))
-    #         div_term = 2 * np.sqrt(self.disp_y * t)
-    #         y_part = erfc((y - self.y_source[0]) / div_term) - erfc((y + self.y_source[0]) / div_term)
-    #         inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
-    #         z_part = erfc(-inner_term) - erfc(inner_term)
-    #         term = 1 / (t ** (3 / 2)) * x_part * y_part * z_part
-    #         return term
-    #
-    #     inter, _ = quad_vec(integrand, 0, t, args=(y, x))
-    #     print(inter)
-    #     src = self.c_source[0] * x / (8 * np.sqrt(np.pi * self.disp_x)) * np.exp(-self.k_source * self.t)
-    #     print(src)
-    #     c = inter * src
-    #     return c
+                    print("integrating for t =", self.t[j], "days")
+                if j == 0:
+                    lower_bound = 0
+                else:
+                    lower_bound = self.t[j - 1]
+                upper_bound = self.t[j]
+                self.integral_term[j, :, 1:], self.error_size[j] = quad_vec(
+                    self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
+                )
+            self.integral_sum = np.cumsum(self.integral_term, axis=0)
+            source_term = self._eq_source_term(sz)
+            self.cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
+            self.cxyt[:, :, 0] += self._eq_source_zero(sz)

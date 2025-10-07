@@ -207,6 +207,8 @@ class DegradationParameters:
                 )
             else:
                 self.decay_rate = decay_rate
+        elif self.half_life == 0:
+            self.decay_rate = 0
 
         self.utilization_factor = None
         self.set_utilization_factor()

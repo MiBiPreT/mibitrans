@@ -231,7 +231,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
             for i, mod in enumerate(model):
                 plot_bin[i].set_xdata(mod.t[:frame])
                 plot_bin[i].set_ydata(plot_array_list[i][:frame])
-                ax.set_title(f"Concentration distribution at t={mod.t[frame]} days")
+                ax.set_title(f"Breakthrough curve at t={mod.t[frame]} days")
             return plot_bin
 
         ani = animation.FuncAnimation(fig=fig, func=update, frames=len(model[0].t))

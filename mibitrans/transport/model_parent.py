@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+from scipy.integrate import quad
 from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.read
@@ -50,7 +51,6 @@ class Transport3D:
         self.cxyt = np.zeros(self.xxx.shape)
 
         # Calculate retardation if not already specified in adsorption_parameters
-        # MAKE SURE THAT RETARDATION WILL BE CALCULATED IF PARAMETERS REQUIRED ARE PRESENT!
         if (
             self.att_pars.bulk_density is not None
             and self.att_pars.partition_coefficient is not None
@@ -68,7 +68,7 @@ class Transport3D:
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
     def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time, closest as discretization allows.
+        """Give concentration at any given position and point in time.
 
         Args:
             x_position (float): x position in domain extent [m].
@@ -332,3 +332,55 @@ class Karanovic(Transport3D):
     def _eq_source_zero(self, sz):
         zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
+
+    def sample(self, x_position, y_position, time):
+        """Give concentration at any given position and point in time, closest as discretization allows.
+
+        Args:
+            x_position (float): x position in domain extent [m].
+            y_position (float): y position in domain extent [m].
+            time (float): time for which concentration is sampled [days].
+            print_exact_location (bool, optional): If set to True, will print out exact location for which the
+                concentration was determined. Defaults to False.
+
+        Returns:
+            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
+                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+
+        """
+        for par, value in locals().items():
+            if par != "self":
+                validate_input_values(par, value)
+
+        def integrand(t, sz):
+            div_term = 2 * np.sqrt(self.disp_y * t)
+            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
+            integrand_results = (
+                1
+                / (t ** (3 / 2))
+                * (
+                    np.exp(
+                        (-self.k_source - self.att_pars.decay_rate) * t
+                        - (x_position - self.rv * t) ** 2 / (4 * self.disp_x * t)
+                    )
+                    * (
+                        erfc((y_position - self.y_source[sz]) / div_term)
+                        - erfc((y_position + self.y_source[sz]) / div_term)
+                    )
+                    * (erfc(-inner_term) - erfc(inner_term))
+                )
+            )
+            return integrand_results
+
+        conc_array = np.zeros(len(self.c_source))
+        error_array = np.zeros(len(self.c_source))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            for sz in range(len(self.c_source)):
+                integral_term, error = quad(integrand, 0, time, limit=10000, args=(sz,))
+                source_term = (
+                    self.c_source[sz] * x_position / (8 * np.sqrt(np.pi * self.disp_x)) * np.exp(-self.k_source * time)
+                )
+                conc_array[sz] = integral_term * source_term
+                error_array[sz] = error
+            concentration = np.sum(conc_array)
+        return concentration

@@ -120,7 +120,7 @@ class LinearDecay(Domenico):
 
 
 class InstantReaction(Domenico):
-    """Calculate contaminant transport using the Domenico (1987) analytical model instant reaction biodegradation ."""
+    """Calculate contaminant transport using the Domenico (1987) analytical model instant reaction biodegradation."""
 
     def __init__(
         self,

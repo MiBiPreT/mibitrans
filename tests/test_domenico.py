@@ -2,14 +2,13 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.read import AdsorptionParameters
-from mibitrans.data.read import DegradationParameters
+from mibitrans.data.read import AttenuationParameters
 from mibitrans.data.read import ModelParameters
 from mibitrans.transport.domenico import Domenico
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
 from mibitrans.transport.domenico import NoDecay
-from tests.test_example_data import test_ads_pars
+from tests.test_example_data import test_att_pars
 from tests.test_example_data import test_deg_pars
 from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
@@ -23,21 +22,21 @@ short_width_model_pars.model_width = test_source_pars.source_zone_boundary[-1] -
 
 
 @pytest.mark.parametrize(
-    "hydro, ads, source, model, error",
+    "hydro, att, source, model, error",
     [
-        (test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars, None),
-        (1, test_ads_pars, test_source_pars, test_model_pars, TypeError),
+        (test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, None),
+        (1, test_att_pars, test_source_pars, test_model_pars, TypeError),
         (test_hydro_pars, test_hydro_pars, test_source_pars, test_model_pars, TypeError),
-        (test_hydro_pars, test_ads_pars, "wrong", test_model_pars, TypeError),
-        (test_hydro_pars, test_ads_pars, test_source_pars, test_deg_pars, TypeError),
-        (test_hydro_pars, test_ads_pars, test_source_pars, short_width_model_pars, UserWarning),
+        (test_hydro_pars, test_att_pars, "wrong", test_model_pars, TypeError),
+        (test_hydro_pars, test_att_pars, test_source_pars, test_deg_pars, TypeError),
+        (test_hydro_pars, test_att_pars, test_source_pars, short_width_model_pars, UserWarning),
     ],
 )
 @pytest.mark.filterwarnings("ignore:UserWarning")
-def test_domenico_parent(hydro, ads, source, model, error) -> None:
+def test_domenico_parent(hydro, att, source, model, error) -> None:
     """Test functionality, results and errors of Domenico parent class."""
     if error is None:
-        parent = Domenico(hydro, ads, source, model)
+        parent = Domenico(hydro, att, source, model)
         shape_arrays = (len(parent.t), len(parent.y), len(parent.x))
         # Source zone concentrations adapted for superposition should still have the same length as those in input
         assert (len(parent.c_source) == len(source.source_zone_concentration)) and (
@@ -48,101 +47,92 @@ def test_domenico_parent(hydro, ads, source, model, error) -> None:
         assert parent.xxx.shape == shape_arrays
         assert parent.yyy.shape == shape_arrays
         assert parent.ttt.shape == shape_arrays
-        assert parent.ads_pars.retardation is not None
-        assert hydro.velocity / parent.ads_pars.retardation == parent.rv
+        assert parent.att_pars.retardation is not None
+        assert hydro.velocity / parent.att_pars.retardation == parent.rv
     elif error is UserWarning:
         with pytest.warns(UserWarning):
-            parent = Domenico(hydro, ads, source, model)
+            parent = Domenico(hydro, att, source, model)
             range_y = abs(parent.y[0]) + abs(parent.y[-1])
             assert range_y >= parent.src_pars.source_zone_boundary[-1] * 2
     elif error is TypeError:
         with pytest.raises(error):
-            Domenico(hydro, ads, source, model)
+            Domenico(hydro, att, source, model)
 
 
 @pytest.mark.parametrize(
-    "ads, expected",
+    "att, expected",
     [
-        (AdsorptionParameters(retardation=1), 1),
-        (AdsorptionParameters(bulk_density=2, partition_coefficient=10, fraction_organic_carbon=0.03), 3.4),
+        (AttenuationParameters(retardation=1), 1),
+        (AttenuationParameters(bulk_density=2, partition_coefficient=10, fraction_organic_carbon=0.03), 3.4),
     ],
 )
-def test_retardation_calculation(ads, expected):
+def test_retardation_calculation(att, expected):
     """Test if retardation is calculated correctly when Domenico class is initialized."""
-    parent = Domenico(test_hydro_pars, ads, test_source_pars, test_model_pars)
-    assert parent.ads_pars.retardation == expected
+    parent = Domenico(test_hydro_pars, att, test_source_pars, test_model_pars)
+    assert parent.att_pars.retardation == expected
 
 
 @pytest.mark.parametrize(
-    "deg, error",
+    "att, error",
     [
-        (DegradationParameters(decay_rate=1), None),
-        (DegradationParameters(half_life=1), None),
+        (AttenuationParameters(decay_rate=1), None),
+        (AttenuationParameters(half_life=1), None),
         (
-            DegradationParameters(
+            AttenuationParameters(
                 half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
             ),
             None,
         ),
-        (
-            DegradationParameters(
-                delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
-            ),
-            MissingValueError,
-        ),
     ],
 )
-def test_require_degradation_linear(deg, error):
+def test_require_degradation_linear(att, error):
     """Test if LinearDecay class correctly raises error when correct degradation parameters are missing."""
-    if error is None:
-        LinearDecay(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
-    else:
-        with pytest.raises(error):
-            LinearDecay(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+    LinearDecay(test_hydro_pars, att, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(
-    "deg, error",
+    "att, error",
     [
         (
-            DegradationParameters(
+            AttenuationParameters(
                 half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
             ),
             None,
         ),
         (
-            DegradationParameters(
+            AttenuationParameters(
                 delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
             ),
             None,
         ),
-        (DegradationParameters(decay_rate=1), MissingValueError),
-        (DegradationParameters(half_life=1), MissingValueError),
+        (AttenuationParameters(decay_rate=1), MissingValueError),
+        (AttenuationParameters(half_life=1), MissingValueError),
         (
-            DegradationParameters(half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, methane=6.6),
+            AttenuationParameters(half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, methane=6.6),
             MissingValueError,
         ),
     ],
 )
-def test_require_degradation_instant(deg, error):
-    """Test if InstantReaction class correctly raises error when correct degradation parameters are missing."""
+@pytest.mark.filterwarnings("ignore:Decay rate was set")
+def test_require_degradation_instant(att, error):
+    """Test if InstantReaction class correctly raises error when correct attenuation parameters are missing."""
     if error is None:
-        InstantReaction(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+        InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
     else:
         with pytest.raises(error):
-            InstantReaction(test_hydro_pars, test_ads_pars, deg, test_source_pars, test_model_pars)
+            InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testingdata_nodecay),
+        (NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars), testingdata_nodecay),
         (
-            LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testingdata_lineardecay,
         ),
         (
-            InstantReaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testingdata_instantreaction,
         ),
     ],
@@ -166,7 +156,7 @@ def test_transport_equations_numerical(model, expected):
 )
 def test_domenico_sample(x, y, t, expected):
     """Tests if sample method from Domenico class works correctly."""
-    model = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
+    model = NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     if isinstance(expected, float):
         assert model.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:

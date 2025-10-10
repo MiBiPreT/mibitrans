@@ -9,6 +9,7 @@ import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.read import AdsorptionParameters
+from mibitrans.data.read import AttenuationParameters
 from mibitrans.data.read import DegradationParameters
 from mibitrans.data.read import HydrologicalParameters
 from mibitrans.data.read import ModelParameters
@@ -77,6 +78,116 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
     else:
         hydro = HydrologicalParameters(**test)
     assert getattr(hydro, param) == expected
+
+
+# Test AttenuationParameters
+@pytest.mark.parametrize(
+    "parameters, error",
+    [
+        (dict(decay_rate=0.2), None),
+        (dict(half_life=2), None),
+        (dict(retardation=1), None),
+        (dict(diffusion=0.00004), None),
+        (dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1), None),
+        (dict(decay_rate=0.2, retardation=2, diffusion=0.00002), None),
+        (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
+        (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
+        (dict(), None),
+        (dict(decay_rate=1, half_life=1), UserWarning),
+        (dict(half_life="one"), TypeError),
+        (dict(half_life=-1), DomainValueError),
+        (dict(retardation="one"), TypeError),
+        (dict(retardation=0.1), DomainValueError),
+        (dict(retardation=1, fraction_organic_carbon="no"), TypeError),
+        (dict(retardation=1, fraction_organic_carbon=2), DomainValueError),
+    ],
+)
+def test_attenuationparameters_validation(parameters, error) -> None:
+    """Test validation check of AdsorptionParameters dataclass."""
+    if error is None:
+        AttenuationParameters(**parameters)
+    elif error is UserWarning:
+        with pytest.warns(error):
+            AttenuationParameters(**parameters)
+    else:
+        with pytest.raises(error):
+            AttenuationParameters(**parameters)
+
+
+@pytest.mark.parametrize(
+    "test, param, expected",
+    [
+        (dict(retardation=1), "retardation", 1),
+        (dict(decay_rate=2), "decay_rate", 2),
+        (dict(decay_rate=2), "half_life", np.log(2) / 2),
+        (dict(half_life=2), "half_life", 2),
+        (dict(half_life=2), "decay_rate", np.log(2) / 2),
+        (dict(decay_rate=2, half_life=2), "decay_rate", 2),
+        (dict(decay_rate=2, half_life=2), "half_life", np.log(2) / 2),
+    ],
+)
+@pytest.mark.filterwarnings("ignore:Both contaminant decay rate")
+def test_attenuationparameters_output(test, param, expected) -> None:
+    """Test output of AttenuationParameters dataclass."""
+    att = AttenuationParameters(**test)
+    assert getattr(att, param) == expected
+
+
+@pytest.mark.parametrize(
+    "test, parameter, value, error",
+    [
+        (dict(retardation=1), "retardation", 1, None),
+        (
+            dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1),
+            "fraction_organic_carbon",
+            {},
+            TypeError,
+        ),
+        (
+            dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1),
+            "fraction_organic_carbon",
+            2,
+            DomainValueError,
+        ),
+        (dict(half_life=3), "half_life", 0, None),
+    ],
+)
+def test_attenuationparameters_setattribute(test, value, parameter, error) -> None:
+    """Test validation of parameters after initialization."""
+    att = AttenuationParameters(**test)
+    if error is None:
+        setattr(att, parameter, value)
+        assert getattr(att, parameter) == value
+    else:
+        with pytest.raises(error):
+            setattr(att, parameter, value)
+
+
+att_test_object = AttenuationParameters(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1)
+
+
+@pytest.mark.parametrize(
+    "test, expected",
+    [
+        (dict(util_oxygen=1, util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), None),
+        (dict(util_oxygen="1", util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), TypeError),
+        (dict(util_oxygen=-1, util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), DomainValueError),
+    ],
+)
+def test_attenuationparameters_utilization(test, expected) -> None:
+    """Test set_utilization_factor method of AttenuationParameters dataclass."""
+    if expected is None:
+        att_test_object.set_utilization_factor(**test)
+    else:
+        with pytest.raises(expected):
+            att_test_object.set_utilization_factor(**test)
+
+
+def test_degradationparameters_utilization_setattr() -> None:
+    """Test attribute setting of utilization_factor of AttenuationParameters dataclass."""
+    att_test_object.utilization_factor = att_test_object.utilization_factor
+    with pytest.raises(TypeError):
+        att_test_object.utilization_factor = "not a dataclass"
 
 
 # Test AdsorptionParameters

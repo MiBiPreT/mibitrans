@@ -6,7 +6,7 @@ from mibitrans.transport.model_parent import Karanovic
 
 
 class Linear(Karanovic):
-    """Calculate contaminant transport with with linear decay or no decay using the exact analytical solution."""
+    """Calculate contaminant transport with linear decay or no decay using the exact analytical solution."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -144,3 +144,24 @@ class Instant(Karanovic):
             self.cxyt_noBC = self.cxyt.copy()
             self.cxyt -= self.biodegradation_capacity
             self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
+
+    def sample(self, x_position, y_position, time):
+        """Give concentration at any given position and point in time.
+
+        Args:
+            x_position (float): x position in domain extent [m].
+            y_position (float): y position in domain extent [m].
+            time (float): time for which concentration is sampled [days].
+            print_exact_location (bool, optional): If set to True, will print out exact location for which the
+                concentration was determined. Defaults to False.
+
+        Returns:
+            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
+                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+
+        """
+        concentration_noBC = super().sample(x_position, y_position, time)
+        concentration = concentration_noBC - self.biodegradation_capacity
+        if concentration < 0:
+            concentration = 0
+        return concentration

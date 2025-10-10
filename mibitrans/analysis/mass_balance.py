@@ -4,11 +4,12 @@ Module calculating the mass balance based on base parameters.
 """
 
 import numpy as np
+import mibitrans.transport.domenico as domenico
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
-from mibitrans.transport.domenico import Domenico
 from mibitrans.transport.domenico import NoDecay
+from mibitrans.transport.model_parent import Domenico
 
 
 def mass_balance(model, time=None) -> dict:
@@ -27,8 +28,8 @@ def mass_balance(model, time=None) -> dict:
 
     mass_balance_dict["time"] = model.t[time_pos]
 
-    if hasattr(model, "deg_pars"):
-        no_decay_model = NoDecay(model.hyd_pars, model.ads_pars, model.src_pars, model.mod_pars)
+    if isinstance(model, (domenico.InstantReaction | domenico.LinearDecay)):
+        no_decay_model = NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
         if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:

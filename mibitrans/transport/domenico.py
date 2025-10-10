@@ -15,15 +15,15 @@ class NoDecay(Domenico):
     """Calculate contaminant transport using the Domenico (1987) analytical model without degradation."""
 
     def __init__(
-        self, hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose=False
+        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
     ):
         """Initialize object and run model.
 
         Args:
             hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
-            hydrological parameters from HydrologicalParameters.
-            adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption
-                parameters from AdsorptionParameters.
+                hydrological parameters from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -46,7 +46,7 @@ class NoDecay(Domenico):
             TypeError : If input is not of the correct Dataclass.
 
         """
-        super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
         self._calculate()
 
@@ -68,8 +68,7 @@ class LinearDecay(Domenico):
     def __init__(
         self,
         hydrological_parameters,
-        adsorption_parameters,
-        degradation_parameters,
+        attenuation_parameters,
         source_parameters,
         model_parameters,
         verbose=False,
@@ -79,10 +78,8 @@ class LinearDecay(Domenico):
         Args:
             hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption
-                parameters from AdsorptionParameters.
-            degradation_parameters (mibitrans.data.read.DegradationParameters) : Dataclass object containing degradation
-                parameters from DegradationParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -105,15 +102,13 @@ class LinearDecay(Domenico):
             TypeError : If input is not of the correct Dataclass.
 
         """
-        super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
-        self.deg_pars = degradation_parameters
-        self._check_input_dataclasses("deg_pars")
-        self.deg_pars._require_linear_decay()
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        self.att_pars._require_linear_decay()
         self._calculate()
 
     def _calculate(self):
         with np.errstate(divide="ignore", invalid="ignore"):
-            decay_sqrt = np.sqrt(1 + 4 * self.deg_pars.decay_rate * self.hyd_pars.alpha_x / self.hyd_pars.velocity)
+            decay_sqrt = np.sqrt(1 + 4 * self.att_pars.decay_rate * self.hyd_pars.alpha_x / self.hyd_pars.velocity)
             decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
             x_term = self._eq_x_term(decay_sqrt)
             z_term = self._eq_z_term()
@@ -130,8 +125,7 @@ class InstantReaction(Domenico):
     def __init__(
         self,
         hydrological_parameters,
-        adsorption_parameters,
-        degradation_parameters,
+        attenuation_parameters,
         source_parameters,
         model_parameters,
         verbose=False,
@@ -141,10 +135,8 @@ class InstantReaction(Domenico):
         Args:
         hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing hydrological
             parameters from HydrologicalParameters.
-        adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption
-            parameters from AdsorptionParameters.
-        degradation_parameters (mibitrans.data.read.DegradationParameters) : Dataclass object containing degradation
-            parameters from DegradationParameters.
+        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
         source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters from
             SourceParameters.
         model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -171,10 +163,8 @@ class InstantReaction(Domenico):
             TypeError : If input is not of the correct Dataclass.
 
         """
-        super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
-        self.deg_pars = degradation_parameters
-        self._check_input_dataclasses("deg_pars")
-        self.deg_pars._require_electron_acceptor()
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        self.att_pars._require_electron_acceptor()
         self.biodegradation_capacity = self._calculate_biodegradation_capacity()
         self.k_source = self._calculate_source_decay(self.biodegradation_capacity)
         # Source decay calculation uses self.c_source, therefore, addition of biodegradation_capacity to
@@ -185,9 +175,9 @@ class InstantReaction(Domenico):
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
-        utilization_factor = getattr(self.deg_pars, "utilization_factor").dictionary
+        utilization_factor = getattr(self.att_pars, "utilization_factor").dictionary
         for key, item in utilization_factor.items():
-            biodegradation_capacity += getattr(self.deg_pars, util_to_conc_name[key]) / item
+            biodegradation_capacity += getattr(self.att_pars, util_to_conc_name[key]) / item
 
         return biodegradation_capacity
 

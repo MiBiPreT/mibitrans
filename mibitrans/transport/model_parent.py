@@ -10,15 +10,15 @@ class Transport3D:
     """Parent class that for all 3-dimensional analytical solutions."""
 
     def __init__(
-        self, hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose=False
+        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
     ):
         """Initialize parent class object.
 
         Args:
             hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing
-                adsorption parameters from AdsorptionParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -26,7 +26,7 @@ class Transport3D:
             verbose (bool, optional): Verbose mode. Defaults to False.
         """
         self.hyd_pars = hydrological_parameters
-        self.ads_pars = adsorption_parameters
+        self.att_pars = attenuation_parameters
         self.src_pars = source_parameters
         self.mod_pars = model_parameters
         self.verbose = verbose
@@ -45,14 +45,21 @@ class Transport3D:
         self.xxx = np.tile(self.x, (len(self.t), len(self.y), 1))
         self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
+
         # cxyt is concentration output array
         self.cxyt = np.zeros(self.xxx.shape)
 
         # Calculate retardation if not already specified in adsorption_parameters
-        if self.ads_pars.retardation is None:
-            self.ads_pars.calculate_retardation(self.hyd_pars.porosity)
+        # MAKE SURE THAT RETARDATION WILL BE CALCULATED IF PARAMETERS REQUIRED ARE PRESENT!
+        if (
+            self.att_pars.bulk_density is not None
+            and self.att_pars.partition_coefficient is not None
+            and self.att_pars.fraction_organic_carbon is not None
+        ):
+            self.att_pars.calculate_retardation(self.hyd_pars.porosity)
+
         # Calculate retarded velocity
-        self.rv = self.hyd_pars.velocity / self.ads_pars.retardation
+        self.rv = self.hyd_pars.velocity / self.att_pars.retardation
 
         self.k_source = self._calculate_source_decay()
         self.y_source = self.src_pars.source_zone_boundary
@@ -125,16 +132,14 @@ class Transport3D:
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
         dataclass_dict = {
             "hyd_pars": mibitrans.data.read.HydrologicalParameters,
-            "ads_pars": mibitrans.data.read.AdsorptionParameters,
-            "deg_pars": mibitrans.data.read.DegradationParameters,
+            "att_pars": mibitrans.data.read.AttenuationParameters,
             "src_pars": mibitrans.data.read.SourceParameters,
             "mod_pars": mibitrans.data.read.ModelParameters,
         }
 
         rename_dict = {
             "hyd_pars": "hydrological_parameters",
-            "ads_pars": "adsorption_parameters",
-            "deg_pars": "degradation_parameters",
+            "att_pars": "attenuation_parameters",
             "src_pars": "source_parameters",
             "mod_pars": "model_parameters",
         }
@@ -172,18 +177,12 @@ class Domenico(Transport3D):
 
     def _eq_x_term(self, decay_sqrt=1):
         return erfc(
-            (self.xxx - self.hyd_pars.velocity * self.ttt * decay_sqrt)
-            / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * self.ttt))
+            (self.xxx - self.rv * self.ttt * decay_sqrt) / (2 * np.sqrt(self.hyd_pars.alpha_x * self.rv * self.ttt))
         )
 
     def _eq_additional_x(self):
-        return np.exp(self.xxx * self.hyd_pars.velocity / (self.hyd_pars.alpha_x * self.hyd_pars.velocity)) * (
-            erfc(
-                self.xxx
-                + self.hyd_pars.velocity
-                * self.ttt
-                / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * self.ttt))
-            )
+        return np.exp(self.xxx * self.rv / (self.hyd_pars.alpha_x * self.rv)) * (
+            erfc(self.xxx + self.rv * self.ttt / (2 * np.sqrt(self.hyd_pars.alpha_x * self.rv * self.ttt)))
         )
 
     def _eq_z_term(self):
@@ -191,7 +190,7 @@ class Domenico(Transport3D):
         return erf(inner_term) - erf(-inner_term)
 
     def _eq_source_decay(self):
-        term = np.exp(-self.k_source * (self.ttt - self.xxx / self.hyd_pars.velocity))
+        term = np.exp(-self.k_source * (self.ttt - self.xxx / self.rv))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 
@@ -206,7 +205,7 @@ class Karanovic(Transport3D):
     def __init__(
         self,
         hydrological_parameters,
-        adsorption_parameters,
+        attenuation_parameters,
         source_parameters,
         model_parameters,
         verbose=False,
@@ -242,10 +241,12 @@ class Karanovic(Transport3D):
             TypeError : If input is not of the correct Dataclass.
 
         """
-        super().__init__(hydrological_parameters, adsorption_parameters, source_parameters, model_parameters, verbose)
-        self.disp_x = self.hyd_pars.alpha_x * self.rv  # Original equation also considers diffusion
-        self.disp_y = self.hyd_pars.alpha_y * self.rv
-        self.disp_z = self.hyd_pars.alpha_z * self.rv
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        self.disp_x = self.hyd_pars.alpha_x * self.rv + self.att_pars.diffusion
+        self.disp_y = self.hyd_pars.alpha_y * self.rv + self.att_pars.diffusion
+        self.disp_z = self.hyd_pars.alpha_z * self.rv + self.att_pars.diffusion
+        self.integral_term = np.zeros(self.ttt.shape)
+        self.error_size = np.zeros(len(self.t))
 
     def _eq_integrand(self, t, sz):
         term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t, sz) * self._eq_z_term(t)
@@ -253,7 +254,10 @@ class Karanovic(Transport3D):
         return term
 
     def _eq_x_exp_term(self, t):
-        term = np.exp(self.k_source * t - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t))
+        term = np.exp(
+            (-self.k_source - self.att_pars.decay_rate) * t
+            - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
+        )
         term[np.isnan(term)] = 0
         return term
 
@@ -266,7 +270,7 @@ class Karanovic(Transport3D):
         return term
 
     def _eq_z_term(self, t):
-        if t == 0:
+        if t == 0 or self.disp_z == 0:
             inner_term = 2
         else:
             inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))

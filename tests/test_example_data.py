@@ -5,6 +5,7 @@ File containing results from testing data for the transport model.
 
 import numpy as np
 from mibitrans.data.read import AdsorptionParameters
+from mibitrans.data.read import AttenuationParameters
 from mibitrans.data.read import DegradationParameters
 from mibitrans.data.read import HydrologicalParameters
 from mibitrans.data.read import ModelParameters
@@ -16,6 +17,16 @@ test_ads_pars = AdsorptionParameters(retardation=1)
 
 test_deg_pars = DegradationParameters(
     half_life=0.1 * 365, delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5
+)
+
+test_att_pars = AttenuationParameters(
+    retardation=1,
+    half_life=0.1 * 365,
+    delta_oxygen=0.5,
+    delta_nitrate=0.5,
+    ferrous_iron=0.5,
+    delta_sulfate=0.5,
+    methane=0.5,
 )
 
 test_source_pars = SourceParameters(

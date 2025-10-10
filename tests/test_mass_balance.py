@@ -8,8 +8,7 @@ from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
 from mibitrans.transport.domenico import NoDecay
-from tests.test_example_data import test_ads_pars
-from tests.test_example_data import test_deg_pars
+from tests.test_example_data import test_att_pars
 from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
 from tests.test_example_data import test_source_pars
@@ -25,13 +24,13 @@ test_model_pars.dt = 1
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars), testing_massbalance_nodecay),
+        (NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars), testing_massbalance_nodecay),
         (
-            LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testing_massbalance_lindecay,
         ),
         (
-            InstantReaction(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars),
+            InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testing_massbalance_instant,
         ),
         (test_hydro_pars, TypeError),

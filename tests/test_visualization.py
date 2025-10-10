@@ -18,19 +18,16 @@ from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
 from mibitrans.visualize.show_conditions import source_zone
 from mibitrans.visualize.show_mass_balance import generate_mass_balance_tables
-from tests.test_example_data import test_ads_pars
-from tests.test_example_data import test_deg_pars
+from tests.test_example_data import test_att_pars
 from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
 from tests.test_example_data import test_source_pars
 
 matplotlib.use("Agg")  # Fixes tkinter.TclError in local tests
 
-model_no_decay = NoDecay(test_hydro_pars, test_ads_pars, test_source_pars, test_model_pars)
-model_linear_decay = LinearDecay(test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars)
-model_instant_reaction = InstantReaction(
-    test_hydro_pars, test_ads_pars, test_deg_pars, test_source_pars, test_model_pars
-)
+model_no_decay = NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+model_linear_decay = LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+model_instant_reaction = InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(

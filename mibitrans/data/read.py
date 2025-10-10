@@ -290,6 +290,149 @@ class DegradationParameters:
 
 
 @dataclass
+class AttenuationParameters:
+    retardation: float = 1
+    decay_rate: float = 0
+    half_life: float = 0
+    diffusion: float = 0
+    bulk_density: float = None
+    partition_coefficient: float = None
+    fraction_organic_carbon: float = None
+    delta_oxygen: float = None
+    delta_nitrate: float = None
+    ferrous_iron: float = None
+    delta_sulfate: float = None
+    methane: float = None
+    verbose: bool = False
+
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        # Separate setattr for decay rate and half life because they should always be equivalent
+        if parameter == "decay_rate" or parameter == "half_life":
+            decay_rate, half_life = self._set_decay(parameter, value)
+            super().__setattr__("decay_rate", decay_rate)
+            super().__setattr__("half_life", half_life)
+        else:
+            super().__setattr__(parameter, value)
+
+    def __post_init__(self):
+        """Check argument presence, types and domain."""
+        self.initialized = True
+        self.utilization_factor = None
+        self.set_utilization_factor()
+
+        if self.verbose:
+            print(
+                f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
+                "To adapt them, use set_utilization_factor() method of DegradationParameters."
+            )
+
+    def calculate_retardation(self, porosity: float):
+        """Calculate retardation factor from soil adsorption parametrers and porosity."""
+        self.retardation = (
+            1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
+        )
+        if self.verbose:
+            print(f"Retardation factor has been calculated to be {self.retardation}.")
+
+    def set_utilization_factor(
+        self,
+        util_oxygen: float = 3.14,
+        util_nitrate: float = 4.9,
+        util_ferrous_iron: float = 21.8,
+        util_sulfate: float = 4.7,
+        util_methane: float = 0.78,
+    ):
+        """Change utilization factors for each electron donor/acceptor species.
+
+        By default, electron acceptor utilization factors for a BTEX mixture are used,
+        based on values from Wiedemeier et al. (1995)
+
+        Args:
+            util_oxygen (float, optional) : utilization factor of oxygen, as mass of oxygen consumed
+                per mass of biodegraded contaminant [g/g]. Default is 3.14
+            util_nitrate (float, optional) : utilization factor of nitrate, as mass of nitrate consumed
+                per mass of biodegraded contaminant [g/g]. Default is 4.9
+            util_ferrous_iron (float, optional) : utilization factor of ferrous iron, as mass of ferrous iron generated
+                per mass of biodegraded contaminant [g/g]. Default is 21.8
+            util_sulfate (float, optional) : utilization factor of sulfate, as mass of sulfate consumed
+                per mass of biodegraded contaminant [g/g]. Default is 4.7
+            util_methane (float, optional) : utilization factor of methane, as mass of methane generated
+                per mass of biodegraded contaminant [g/g]. Default is 0.78
+
+        Raises:
+            ValueError : If input parameters are incomplete or outside the valid domain.
+            TypeError : If input parameters of incorrect datatype.
+
+        """
+        if self.verbose:
+            print("Setting utilization factors...")
+        self.utilization_factor = UtilizationFactor(
+            util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane
+        )
+
+    def _require_electron_acceptor(self):
+        missing_ea = []
+        if self.delta_oxygen is None:
+            missing_ea.append("delta_oxygen")
+        if self.delta_nitrate is None:
+            missing_ea.append("delta_nitrate")
+        if self.ferrous_iron is None:
+            missing_ea.append("ferrous_iron")
+        if self.delta_sulfate is None:
+            missing_ea.append("delta_sulfate")
+        if self.methane is None:
+            missing_ea.append("methane")
+
+        if len(missing_ea) > 0:
+            raise MissingValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
+
+        if self.decay_rate is not None and self.decay_rate > 0.0:
+            warnings.warn(
+                "Decay rate was set to a value, but will not be used, as model uses electron acceptor concentrations."
+            )
+
+    def _require_linear_decay(self):
+        if self.decay_rate is None and self.half_life is None:
+            raise MissingValueError("Linear reaction model requires decay rate or half life.")
+
+    def _set_decay(self, parameter, value):
+        if parameter == "decay_rate" and (value != 0 or hasattr(self, "initialized")):
+            decay_rate = value
+            if value != 0:
+                half_life = np.log(2) / value
+            else:
+                half_life = 0
+        elif parameter == "half_life" and (value != 0 or hasattr(self, "initialized")):
+            half_life = value
+            if value != 0:
+                decay_rate = np.log(2) / value
+            else:
+                decay_rate = 0
+        elif parameter == "decay_rate":
+            decay_rate = value
+            half_life = 0
+        elif parameter == "half_life":
+            decay_rate = self.decay_rate
+            half_life = self.half_life
+        else:
+            decay_rate = 0
+            half_life = 0
+
+        if self.decay_rate != decay_rate and self.decay_rate != 0 and not hasattr(self, "initialized") and value != 0:
+            warnings.warn(
+                "Both contaminant decay rate and half life were defined, but are not equal. "
+                "Value for decay rate will be used.",
+                UserWarning,
+            )
+            half_life = np.log(2) / self.decay_rate
+            decay_rate = self.decay_rate
+
+        return decay_rate, half_life
+
+
+@dataclass
 class SourceParameters:
     """Dataclass handling source parameters. Specifying concentrations and extent of source zone.
 

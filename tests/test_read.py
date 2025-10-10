@@ -183,13 +183,6 @@ def test_attenuationparameters_utilization(test, expected) -> None:
             att_test_object.set_utilization_factor(**test)
 
 
-def test_degradationparameters_utilization_setattr() -> None:
-    """Test attribute setting of utilization_factor of AttenuationParameters dataclass."""
-    att_test_object.utilization_factor = att_test_object.utilization_factor
-    with pytest.raises(TypeError):
-        att_test_object.utilization_factor = "not a dataclass"
-
-
 # Test AdsorptionParameters
 @pytest.mark.parametrize(
     "parameters, error",

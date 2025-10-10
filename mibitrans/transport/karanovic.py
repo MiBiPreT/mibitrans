@@ -6,6 +6,8 @@ from mibitrans.transport.model_parent import Karanovic
 
 
 class Linear(Karanovic):
+    """Calculate contaminant transport with with linear decay or no decay using the exact analytical solution."""
+
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
     ):
@@ -64,6 +66,8 @@ class Linear(Karanovic):
 
 
 class Instant(Karanovic):
+    """Calculate contaminant transport with with instant reaction degradation using the exact analytical solution."""
+
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
     ):

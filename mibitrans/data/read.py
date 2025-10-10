@@ -291,6 +291,42 @@ class DegradationParameters:
 
 @dataclass
 class AttenuationParameters:
+    """Dataclass handling parameters related to adsorption, diffusion and degradation.
+
+    Args:
+        retardation (float) : Retardation factor for transported contaminant [-]. Default is 1.
+        decay_rate (float) : First order (linear) decay coefficient in [1/day]. Only required for linear decay models.
+            Default is 0. Also sets corresponding half life.
+        half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
+            linear decay models. Default is 0. Also sets corresponding decay_rate.
+        diffusion (float) : Molecular diffusion [m2/day]. Default is 0.
+        bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
+        partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
+            in [m^3/g]. Optional if retardation is specified.
+        fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
+            Optional if retardation is specified.
+        delta_oxygen (float) : Difference between background oxygen and plume oxygen concentrations, in [g/m^3].
+            Only required for instant reaction models.
+        delta_nitrate (float) : Difference between background nitrate and contaminant plume nitrate concentrations,
+            in [g/m^3]. Only required for instant reaction models.
+        ferrous_iron (float) : Ferrous iron concentration in contaminant plume, in [g/m^3]. Only required for
+            instant reaction models.
+        delta_sulfate (float) : Difference between background sulfate and plume sulfate concentrations, in [g/m^3].
+            Only required for instant reaction models.
+        methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
+            instant reaction models.
+        verbose (bool, optional): Verbose mode. Defaults to False.
+
+    Methods:
+        calculate_retardation : Calculate retardation factor from bulk density, partition coefficient and
+            fraction organic carbon when given porosity [-]
+        set_utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor
+        utilization factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
+
+    Raises:
+        ValueError : If input parameters are incomplete or outside the valid domain.
+        TypeError : If input parameters of incorrect datatype.
+    """
     retardation: float = 1
     decay_rate: float = 0
     half_life: float = 0

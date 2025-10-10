@@ -169,7 +169,7 @@ class Transport3D:
 
 
 class Domenico(Transport3D):
-    """Parent class that for all analytical solutions using on the Domenico (1987) analytical model.
+    """Parent class that for all analytical solutions using the Domenico (1987) analytical model.
 
     Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
     Journal of Hydrology, 91(1-2), 49-58.
@@ -202,6 +202,12 @@ class Domenico(Transport3D):
 
 
 class Karanovic(Transport3D):
+    """Parent class that for all models using the exact analytical solution described in Karanovic (2007).
+
+    Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.
+    Groundwater, 45(2), 242-245.
+    """
+
     def __init__(
         self,
         hydrological_parameters,
@@ -215,10 +221,8 @@ class Karanovic(Transport3D):
         Args:
             hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            adsorption_parameters (mibitrans.data.read.AdsorptionParameters) : Dataclass object containing adsorption
-                parameters from AdsorptionParameters.
-            degradation_parameters (mibitrans.data.read.DegradationParameters) : Dataclass object containing degradation
-                parameters from DegradationParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from

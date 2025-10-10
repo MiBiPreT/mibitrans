@@ -175,6 +175,47 @@ class Domenico(Transport3D):
     Journal of Hydrology, 91(1-2), 49-58.
     """
 
+    def __init__(
+        self,
+        hydrological_parameters,
+        attenuation_parameters,
+        source_parameters,
+        model_parameters,
+        verbose=False,
+    ):
+        """Initialize object and run model.
+
+        Args:
+            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+                hydrological parameters from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+                from SourceParameters.
+            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+                ModelParameters.
+            verbose (bool, optional): Verbose mode. Defaults to False.
+
+        Attributes:
+            cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+            x (np.ndarray) : Discretized model x-dimension, in [m].
+            y (np.ndarray) : Discretized model y-dimension, in [y].
+            t (np.ndarray) : Discretized model t-dimension, in [days].
+            c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
+            vr (float) : Retarded groundwater flow velocity, in [m/d].
+            k_source (float) : Source zone decay rate, in [1/days]
+
+        Methods:
+            sample : Give concentration at any given position and point in time, closest as discretization allows.
+
+        Raises:
+            TypeError : If input is not of the correct Dataclass.
+
+        """
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        if self.att_pars.diffusion != 0:
+            warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
+
     def _eq_x_term(self, decay_sqrt=1):
         return erfc(
             (self.xxx - self.rv * self.ttt * decay_sqrt) / (2 * np.sqrt(self.hyd_pars.alpha_x * self.rv * self.ttt))

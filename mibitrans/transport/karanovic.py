@@ -34,7 +34,7 @@ class Linear(Karanovic):
             k_source (float) : Source zone decay rate, in [1/days]
 
         Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
+            sample : Give concentration at any given position and point in time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -152,12 +152,9 @@ class Instant(Karanovic):
             x_position (float): x position in domain extent [m].
             y_position (float): y position in domain extent [m].
             time (float): time for which concentration is sampled [days].
-            print_exact_location (bool, optional): If set to True, will print out exact location for which the
-                concentration was determined. Defaults to False.
 
         Returns:
-            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
-                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+            concentration (float): concentration at given position and point in time [g/m^3].
 
         """
         concentration_noBC = super().sample(x_position, y_position, time)

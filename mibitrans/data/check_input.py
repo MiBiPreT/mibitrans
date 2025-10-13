@@ -94,9 +94,9 @@ def validate_source_zones(boundary, concentration):
         boundary = np.array(boundary)
 
     if isinstance(concentration, (float, int, np.floating, np.integer)):
-        concentration = np.array([concentration])
+        concentration = np.array([concentration], dtype=float)
     else:
-        concentration = np.array(concentration)
+        concentration = np.array(concentration, dtype=float)
 
     # Each given source zone boundary should have a given concentration, and vice versa
     if boundary.shape != concentration.shape:

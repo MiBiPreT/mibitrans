@@ -353,15 +353,15 @@ class Karanovic(Transport3D):
                 validate_input_values(par, value)
 
         def integrand(t, sz):
-            div_term = 2 * np.sqrt(self.disp_y * t)
-            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
+            div_term = 2 * np.sqrt(self.disp_y * t**4)
+            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t**4))
             integrand_results = (
                 1
-                / (t ** (3 / 2))
+                / (t**3)
                 * (
                     np.exp(
-                        (-self.k_source - self.att_pars.decay_rate) * t
-                        - (x_position - self.rv * t) ** 2 / (4 * self.disp_x * t)
+                        (-self.k_source - self.att_pars.decay_rate) * t**4
+                        - (x_position - self.rv * t**4) ** 2 / (4 * self.disp_x * t**4)
                     )
                     * (
                         erfc((y_position - self.y_source[sz]) / div_term)
@@ -374,13 +374,14 @@ class Karanovic(Transport3D):
 
         conc_array = np.zeros(len(self.c_source))
         error_array = np.zeros(len(self.c_source))
+        time = time ** (1 / 4)
         with np.errstate(divide="ignore", invalid="ignore"):
             for sz in range(len(self.c_source)):
                 integral_term, error = quad(integrand, 0, time, limit=10000, args=(sz,))
                 source_term = (
                     self.c_source[sz] * x_position / (8 * np.sqrt(np.pi * self.disp_x)) * np.exp(-self.k_source * time)
                 )
-                conc_array[sz] = integral_term * source_term
+                conc_array[sz] = 4 * integral_term * source_term
                 error_array[sz] = error
             concentration = np.sum(conc_array)
         return concentration

@@ -74,12 +74,9 @@ class Transport3D:
             x_position (float): x position in domain extent [m].
             y_position (float): y position in domain extent [m].
             time (float): time for which concentration is sampled [days].
-            print_exact_location (bool, optional): If set to True, will print out exact location for which the
-                concentration was determined. Defaults to False.
 
         Returns:
-            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
-                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+            concentration (float): concentration at given position and point in time [g/m^3].
 
         """
         for par, value in locals().items():
@@ -334,18 +331,15 @@ class Karanovic(Transport3D):
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
 
     def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time, closest as discretization allows.
+        """Give concentration at any given position and point in time.
 
         Args:
             x_position (float): x position in domain extent [m].
             y_position (float): y position in domain extent [m].
             time (float): time for which concentration is sampled [days].
-            print_exact_location (bool, optional): If set to True, will print out exact location for which the
-                concentration was determined. Defaults to False.
 
         Returns:
-            concentration (float): concentration at given position and point in time [g/m^3]. Note that due to
-                discretization, exact point of sampling can be up to half of a step size off in each dimension.
+            concentration (float): concentration at given position and point in time [g/m^3].
 
         """
         for par, value in locals().items():

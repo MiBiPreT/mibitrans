@@ -5,8 +5,8 @@ from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.transport.model_parent import Karanovic
 
 
-class Linear(Karanovic):
-    """Calculate contaminant transport with linear decay or no decay using the exact analytical solution."""
+class LinearDecay(Karanovic):
+    """Calculate contaminant transport with linear decay using the exact analytical solution."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -14,13 +14,13 @@ class Linear(Karanovic):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
             hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
@@ -41,14 +41,16 @@ class Linear(Karanovic):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        self._calculate()
+        self.cxyt = self._calculate_cxyt()
 
-    def _calculate(self):
+    def _calculate_cxyt(self):
+        cxyt = self.cxyt.copy()
         with np.errstate(divide="ignore", invalid="ignore"):
             for sz in range(len(self.c_source)):
                 if self.verbose:
                     print("integrating for source zone ", sz)
                 for j in range(len(self.t)):
+                    # Save run time by preventing re-evaluating the same domain for each time step
                     if self.verbose:
                         print("integrating for t =", self.t[j], "days")
                     if j == 0:
@@ -56,17 +58,21 @@ class Linear(Karanovic):
                     else:
                         lower_bound = self.t[j - 1]
                     upper_bound = self.t[j]
-                    self.integral_term[j, :, 1:], self.error_size[j] = quad_vec(
+                    self.integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
                         self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
                     )
+                # For each time step, resolves to cumulative sum of integral previous and current time steps.
                 self.integral_sum = np.cumsum(self.integral_term, axis=0)
+
                 source_term = self._eq_source_term(sz)
-                self.cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
-                self.cxyt[:, :, 0] += self._eq_source_zero(sz)
+                cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
+                # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
+                cxyt[:, :, 0] += self._eq_source_zero(sz)
+        return cxyt
 
 
-class Instant(Karanovic):
-    """Calculate contaminant transport with with instant reaction degradation using the exact analytical solution."""
+class NoDecay(LinearDecay):
+    """Calculate contaminant transport with no decay using the exact analytical solution."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -74,13 +80,52 @@ class Instant(Karanovic):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
             hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
+                ModelParameters.
+            verbose (bool, optional): Verbose mode. Defaults to False.
+
+        Attributes:
+            cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+            x (np.ndarray) : Discretized model x-dimension, in [m].
+            y (np.ndarray) : Discretized model y-dimension, in [y].
+            t (np.ndarray) : Discretized model t-dimension, in [days].
+            c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
+            vr (float) : Retarded groundwater flow velocity, in [m/d].
+            k_source (float) : Source zone decay rate, in [1/days]
+
+        Methods:
+            sample : Give concentration at any given position and point in time.
+
+        Raises:
+            TypeError : If input is not of the correct Dataclass.
+
+        """
+        attenuation_parameters = copy.copy(attenuation_parameters)
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+
+
+class InstantReaction(Karanovic):
+    """Calculate contaminant transport with instant reaction degradation using the exact analytical solution."""
+
+    def __init__(
+        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
+    ):
+        """Initialize object and run model.
+
+        Args:
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
+            hydrological parameters from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
+                degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
+                from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
@@ -102,8 +147,6 @@ class Instant(Karanovic):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         self.att_pars._require_electron_acceptor()
-        # Make copy so AttenuationParameter object itself does not get changed
-        self.att_pars = copy.copy(self.att_pars)
         self.att_pars.decay_rate = 0
         self.biodegradation_capacity = self._calculate_biodegradation_capacity()
         self.k_source = self._calculate_source_decay(self.biodegradation_capacity)
@@ -111,7 +154,7 @@ class Instant(Karanovic):
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        self._calculate()
+        self.cxyt = self._calculate_cxyt()
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
@@ -121,7 +164,8 @@ class Instant(Karanovic):
 
         return biodegradation_capacity
 
-    def _calculate(self):
+    def _calculate_cxyt(self):
+        cxyt = self.cxyt.copy()
         with np.errstate(divide="ignore", invalid="ignore"):
             for sz in range(len(self.c_source)):
                 if self.verbose:
@@ -134,16 +178,17 @@ class Instant(Karanovic):
                     else:
                         lower_bound = self.t[j - 1]
                     upper_bound = self.t[j]
-                    self.integral_term[j, :, 1:], self.error_size[j] = quad_vec(
+                    self.integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
                         self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
                     )
                 self.integral_sum = np.cumsum(self.integral_term, axis=0)
                 source_term = self._eq_source_term(sz)
-                self.cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
-                self.cxyt[:, :, 0] += self._eq_source_zero(sz)
-            self.cxyt_noBC = self.cxyt.copy()
-            self.cxyt -= self.biodegradation_capacity
-            self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
+                cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
+                cxyt[:, :, 0] += self._eq_source_zero(sz)
+            self.cxyt_noBC = cxyt.copy()
+            cxyt -= self.biodegradation_capacity
+            cxyt = np.where(cxyt < 0, 0, cxyt)
+        return cxyt
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.

@@ -4,12 +4,12 @@ File containing results from testing data for the transport model.
 """
 
 import numpy as np
-from mibitrans.data.read import AdsorptionParameters
-from mibitrans.data.read import AttenuationParameters
-from mibitrans.data.read import DegradationParameters
-from mibitrans.data.read import HydrologicalParameters
-from mibitrans.data.read import ModelParameters
-from mibitrans.data.read import SourceParameters
+from mibitrans.data.parameters import AdsorptionParameters
+from mibitrans.data.parameters import AttenuationParameters
+from mibitrans.data.parameters import DegradationParameters
+from mibitrans.data.parameters import HydrologicalParameters
+from mibitrans.data.parameters import ModelParameters
+from mibitrans.data.parameters import SourceParameters
 
 test_hydro_pars = HydrologicalParameters(velocity=10 / 365, porosity=0.25, alpha_x=10, alpha_y=1, alpha_z=0.1)
 

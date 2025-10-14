@@ -6,11 +6,11 @@ Module plotting a 3D matrix of contaminant plume concentrations as a line.
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+import mibitrans
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
 from mibitrans.data.check_input import _x_check
 from mibitrans.data.check_input import _y_check
-from mibitrans.transport.model_parent import Transport3D
 
 
 def centerline(model, y_position=0, time=None, legend_names=None, animate=False, **kwargs):
@@ -38,7 +38,7 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        _check_model_type(mod, Transport3D)
+        _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         y_pos = _y_check(mod, y_position)
         t_pos = _time_check(mod, time)
         if animate:
@@ -110,7 +110,7 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        _check_model_type(mod, Transport3D)
+        _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         x_pos = _x_check(mod, x_position)
         t_pos = _time_check(mod, time)
         if animate:
@@ -182,7 +182,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        _check_model_type(mod, Transport3D)
+        _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         x_pos = _x_check(mod, x_position)
         y_pos = _y_check(mod, y_position)
         plot_array_list.append(mod.cxyt[:, y_pos, x_pos])

@@ -1,9 +1,9 @@
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.read import AttenuationParameters
-from mibitrans.transport.karanovic import Instant
-from mibitrans.transport.karanovic import Linear
+from mibitrans.data.parameters import AttenuationParameters
+from mibitrans.transport.karanovic import InstantReaction
+from mibitrans.transport.karanovic import LinearDecay
 from tests.test_example_data import test_att_pars
 from tests.test_example_data import test_hydro_pars
 from tests.test_example_data import test_model_pars
@@ -39,21 +39,21 @@ from tests.test_example_data import testingdata_lineardecay_karanovic
 def test_require_degradation_instant(att, error):
     """Test if Instan class correctly raises error when correct attenuation parameters are missing."""
     if error is None:
-        Instant(test_hydro_pars, att, test_source_pars, test_model_pars)
+        InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
     else:
         with pytest.raises(error):
-            Instant(test_hydro_pars, att, test_source_pars, test_model_pars)
+            InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(
     "model, expected",
     [
         (
-            Linear(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
+            LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testingdata_lineardecay_karanovic,
         ),
         (
-            Instant(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
+            InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
             testingdata_instantreaction_karanovic,
         ),
     ],
@@ -64,7 +64,7 @@ def test_transport_equations_numerical(model, expected):
     assert model.cxyt == pytest.approx(expected)
 
 
-sample_model = Linear(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+sample_model = LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(

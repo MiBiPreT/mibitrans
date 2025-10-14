@@ -7,7 +7,7 @@ import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.check_input import DomainValueError
-from mibitrans.data.read import SourceParameters
+from mibitrans.data.parameters import SourceParameters
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
 from mibitrans.transport.domenico import NoDecay

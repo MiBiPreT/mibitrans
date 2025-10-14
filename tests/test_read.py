@@ -8,12 +8,12 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.read import AdsorptionParameters
-from mibitrans.data.read import AttenuationParameters
-from mibitrans.data.read import DegradationParameters
-from mibitrans.data.read import HydrologicalParameters
-from mibitrans.data.read import ModelParameters
-from mibitrans.data.read import SourceParameters
+from mibitrans.data.parameters import AdsorptionParameters
+from mibitrans.data.parameters import AttenuationParameters
+from mibitrans.data.parameters import DegradationParameters
+from mibitrans.data.parameters import HydrologicalParameters
+from mibitrans.data.parameters import ModelParameters
+from mibitrans.data.parameters import SourceParameters
 
 
 # Test HydrologicalParameters

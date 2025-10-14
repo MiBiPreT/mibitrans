@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from mibitrans.data.read import AttenuationParameters
-from mibitrans.data.read import ModelParameters
+from mibitrans.data.parameters import AttenuationParameters
+from mibitrans.data.parameters import ModelParameters
 from mibitrans.transport.model_parent import Transport3D
 from tests.test_example_data import test_att_pars
 from tests.test_example_data import test_deg_pars

@@ -1,7 +1,7 @@
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.read import AttenuationParameters
+from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
 from mibitrans.transport.domenico import NoDecay

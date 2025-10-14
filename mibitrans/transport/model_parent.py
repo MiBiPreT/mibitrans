@@ -1,13 +1,18 @@
+import copy
 import warnings
+from abc import ABC
+from abc import abstractmethod
 import numpy as np
 from scipy.integrate import quad
 from scipy.special import erf
 from scipy.special import erfc
-import mibitrans.data.read
+import mibitrans.data.parameters
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.visualize import plot_line as pline
+from mibitrans.visualize import plot_surface as psurf
 
 
-class Transport3D:
+class Transport3D(ABC):
     """Parent class that for all 3-dimensional analytical solutions."""
 
     def __init__(
@@ -16,7 +21,7 @@ class Transport3D:
         """Initialize parent class object.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
             attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
@@ -26,10 +31,10 @@ class Transport3D:
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
         """
-        self.hyd_pars = hydrological_parameters
-        self.att_pars = attenuation_parameters
-        self.src_pars = source_parameters
-        self.mod_pars = model_parameters
+        self.hyd_pars = copy.copy(hydrological_parameters)
+        self.att_pars = copy.copy(attenuation_parameters)
+        self.src_pars = copy.copy(source_parameters)
+        self.mod_pars = copy.copy(model_parameters)
         self.verbose = verbose
 
         # Check if input arguments are of the correct dataclass
@@ -67,6 +72,15 @@ class Transport3D:
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
+    @abstractmethod
+    def _calculate_cxyt(self):
+        pass
+
+    # Implement report method; gives run time of calculation, error values and other applicable post-run information
+    # @abstractmethod
+    # def report(self):
+    #     pass
+
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
 
@@ -83,24 +97,12 @@ class Transport3D:
             if par != "self":
                 validate_input_values(par, value)
 
-        # Save original 3d model domain and concentration arrays, so it can be restored afterward
-        # Needed because _calculate uses xxx, yyy and ttt and would overwrite cxyt.
-        save_x = self.xxx.copy()
-        save_y = self.yyy.copy()
-        save_t = self.ttt.copy()
-        save_c = self.cxyt.copy()
         if hasattr(self, "cxyt_noBC"):
             save_c_noBC = self.cxyt_noBC.copy()
-        self.xxx = np.array([x_position])
-        self.yyy = np.array([y_position])
-        self.ttt = np.array([time])
-        self.cxyt = np.array([0.0])
-        self._calculate()
-        concentration = self.cxyt[0]
-        self.xxx = save_x
-        self.yyy = save_y
-        self.ttt = save_t
-        self.cxyt = save_c
+        x = np.array([x_position])
+        y = np.array([y_position])
+        t = np.array([time])
+        concentration = self._calculate_cxyt(x, y, t)[0]
         if hasattr(self, "cxyt_noBC"):
             self.cxyt_noBC = save_c_noBC
         return concentration
@@ -128,10 +130,10 @@ class Transport3D:
     def _check_input_dataclasses(self, expected_class):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
         dataclass_dict = {
-            "hyd_pars": mibitrans.data.read.HydrologicalParameters,
-            "att_pars": mibitrans.data.read.AttenuationParameters,
-            "src_pars": mibitrans.data.read.SourceParameters,
-            "mod_pars": mibitrans.data.read.ModelParameters,
+            "hyd_pars": mibitrans.data.parameters.HydrologicalParameters,
+            "att_pars": mibitrans.data.parameters.AttenuationParameters,
+            "src_pars": mibitrans.data.parameters.SourceParameters,
+            "mod_pars": mibitrans.data.parameters.ModelParameters,
         }
 
         rename_dict = {
@@ -164,8 +166,88 @@ class Transport3D:
             )
         return y
 
+    def centerline(self, y_position=0, time=None, legend_names=None, animate=False, **kwargs):
+        """Plot center of contaminant plume of this model, at a specified time and y position.
 
-class Domenico(Transport3D):
+        Args:
+            y_position (float): y-position across the plume (transverse horizontal direction) for the plot.
+                By default, the center of the plume at y=0 is plotted.
+            time (float): Point of time for the plot. Will show the closest time step to given value.
+                By default, last point in time is plotted.
+            legend_names (str | list): List of legend names as strings, in the same order as given models.
+                By default, no legend is shown.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
+                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            **kwargs : Arguments to be passed to plt.plot().
+
+        """
+        pline.centerline(self, y_position=y_position, time=time, legend_names=legend_names, animate=animate, **kwargs)
+
+    def transverse(self, x_position, time=None, legend_names=None, animate=False, **kwargs):
+        """Plot concentration distribution as a line horizontal transverse to the plume extent.
+
+        Args:
+            model : Model object from mibitrans.transport, or list of model objects.
+            x_position : x-position along the plume (longitudinal direction) for the plot.
+            time (float): Point of time for the plot. Will show the closest time step to given value.
+                By default, last point in time is plotted.
+            legend_names (str | list): List of legend names as strings, in the same order as given models.
+                By default, no legend is shown.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
+                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            **kwargs : Arguments to be passed to plt.plot().
+        """
+        pline.transverse(self, x_position=x_position, time=time, legend_names=legend_names, animate=animate, **kwargs)
+
+    def breakthrough(self, x_position, y_position=0, legend_names=None, animate=False, **kwargs):
+        """Plot contaminant breakthrough curve at given x and y position in model domain.
+
+        Args:
+            model : Model object from mibitrans.transport, or list of model objects.
+            x_position : x-position along the plume (longitudinal direction).
+            y_position : y-position across the plume (transverse horizontal direction).
+                By default, at the center of the plume (at y=0).
+            legend_names (str | list): List of legend names as strings, in the same order as given models.
+                By default, no legend is shown.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
+                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            **kwargs : Arguments to be passed to plt.plot().
+        """
+        pline.breakthrough(
+            self, x_position=x_position, y_position=y_position, legend_names=legend_names, animate=animate, **kwargs
+        )
+
+    def plume_2d(self, time=None, animate=False, **kwargs):
+        """Plot contaminant plume as a 2D colormesh, at a specified time.
+
+        Args:
+            model : Model object from mibitrans.transport.
+            time (float): Point of time for the plot. Will show the closest time step to given value.
+                By default, last point in time is plotted.
+            animate (bool): If True, animation of contaminant plume until given time is shown.
+            **kwargs : Arguments to be passed to plt.pcolormesh().
+
+        Returns a matrix plot of the input plume as object.
+        """
+        psurf.plume_2d(self, time=time, animate=animate, **kwargs)
+
+    def plume_3d(self, time=None, animate=False, **kwargs):
+        """Plot contaminant plume as a 3D surface, at a specified time.
+
+        Args:
+            model : Model object from mibitrans.transport.
+            time (float): Point of time for the plot. Will show the closest time step to given value.
+                By default, last point in time is plotted.
+            animate (bool): If True, animation of contaminant plume until given time is shown.
+            **kwargs : Arguments to be passed to plt.plot_surface().
+
+        Returns:
+            ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
+        """
+        psurf.plume_3d(self, time=time, animate=animate, **kwargs)
+
+
+class Domenico(Transport3D, ABC):
     """Parent class that for all analytical solutions using the Domenico (1987) analytical model.
 
     Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
@@ -183,7 +265,7 @@ class Domenico(Transport3D):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
             attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
@@ -213,28 +295,35 @@ class Domenico(Transport3D):
         if self.att_pars.diffusion != 0:
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
-    def _eq_x_term(self, decay_sqrt=1):
+    @abstractmethod
+    def _calculate_cxyt(self, xxx, yyy, ttt):
+        pass
+
+    def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
         return erfc(
-            (self.xxx - self.rv * self.ttt * decay_sqrt) / (2 * np.sqrt(self.hyd_pars.alpha_x * self.rv * self.ttt))
+            (xxx - self.hyd_pars.velocity * ttt * decay_sqrt)
+            / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
         )
 
-    def _eq_additional_x(self):
-        return np.exp(self.xxx * self.rv / (self.hyd_pars.alpha_x * self.rv)) * (
-            erfc(self.xxx + self.rv * self.ttt / (2 * np.sqrt(self.hyd_pars.alpha_x * self.rv * self.ttt)))
+    def _eq_additional_x(self, xxx, ttt):
+        return np.exp(xxx * self.hyd_pars.velocity / (self.hyd_pars.alpha_x * self.hyd_pars.velocity)) * (
+            erfc(
+                xxx + self.hyd_pars.velocity * ttt / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
+            )
         )
 
-    def _eq_z_term(self):
-        inner_term = self.src_pars.depth / (2 * np.sqrt(self.hyd_pars.alpha_z * self.xxx))
+    def _eq_z_term(self, xxx):
+        inner_term = self.src_pars.depth / (2 * np.sqrt(self.hyd_pars.alpha_z * xxx))
         return erf(inner_term) - erf(-inner_term)
 
-    def _eq_source_decay(self):
-        term = np.exp(-self.k_source * (self.ttt - self.xxx / self.rv))
+    def _eq_source_decay(self, xxx, ttt):
+        term = np.exp(-self.k_source * (ttt - xxx / self.hyd_pars.velocity))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 
-    def _eq_y_term(self, i):
-        div_term = 2 * np.sqrt(self.hyd_pars.alpha_y * self.xxx)
-        term = erf((self.yyy + self.y_source[i]) / div_term) - erf((self.yyy - self.y_source[i]) / div_term)
+    def _eq_y_term(self, i, xxx, yyy):
+        div_term = 2 * np.sqrt(self.hyd_pars.alpha_y * xxx)
+        term = erf((yyy + self.y_source[i]) / div_term) - erf((yyy - self.y_source[i]) / div_term)
         term[np.isnan(term)] = 0
         return term
 
@@ -257,7 +346,7 @@ class Karanovic(Transport3D):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
             attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
@@ -288,7 +377,12 @@ class Karanovic(Transport3D):
         self.disp_y = self.hyd_pars.alpha_y * self.rv + self.att_pars.diffusion
         self.disp_z = self.hyd_pars.alpha_z * self.rv + self.att_pars.diffusion
         self.integral_term = np.zeros(self.ttt.shape)
-        self.error_size = np.zeros(len(self.t))
+        # Stores integral error for each time step and source zone
+        self.error_size = np.zeros((len(self.src_pars.source_zone_boundary), len(self.t)))
+
+    @abstractmethod
+    def _calculate_cxyt(self):
+        pass
 
     def _eq_integrand(self, t, sz):
         term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t, sz) * self._eq_z_term(t)
@@ -342,6 +436,7 @@ class Karanovic(Transport3D):
             concentration (float): concentration at given position and point in time [g/m^3].
 
         """
+        # Different sample method than parent class, as calculations from _calculate use array indices
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)

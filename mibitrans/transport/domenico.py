@@ -20,13 +20,13 @@ class NoDecay(Domenico):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
@@ -48,18 +48,20 @@ class NoDecay(Domenico):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
-        self._calculate()
+        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
-    def _calculate(self):
+    def _calculate_cxyt(self, xxx, yyy, ttt):
+        cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term()
-            additional_x = self._eq_additional_x()
-            z_term = self._eq_z_term()
-            source_decay = self._eq_source_decay()
+            x_term = self._eq_x_term(xxx, ttt)
+            additional_x = self._eq_additional_x(xxx, ttt)
+            z_term = self._eq_z_term(xxx)
+            source_decay = self._eq_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i)
-                cxyt = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
-                self.cxyt += cxyt
+                y_term = self._eq_y_term(i, xxx, yyy)
+                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+                cxyt += cxyt_step
+        return cxyt
 
 
 class LinearDecay(Domenico):
@@ -76,13 +78,13 @@ class LinearDecay(Domenico):
         """Initialize object and run model.
 
         Args:
-            hydrological_parameters (mibitrans.data.read.HydrologicalParameters) : Dataclass object containing
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
                 degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
@@ -104,19 +106,21 @@ class LinearDecay(Domenico):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         self.att_pars._require_linear_decay()
-        self._calculate()
+        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
-    def _calculate(self):
+    def _calculate_cxyt(self, xxx, yyy, ttt):
+        cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
             decay_sqrt = np.sqrt(1 + 4 * self.att_pars.decay_rate * self.hyd_pars.alpha_x / self.hyd_pars.velocity)
-            decay_term = np.exp(self.xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
-            x_term = self._eq_x_term(decay_sqrt)
-            z_term = self._eq_z_term()
-            source_decay = self._eq_source_decay()
+            decay_term = np.exp(xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
+            x_term = self._eq_x_term(xxx, ttt, decay_sqrt)
+            z_term = self._eq_z_term(xxx)
+            source_decay = self._eq_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i)
-                cxyt = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
-                self.cxyt += cxyt
+                y_term = self._eq_y_term(i, xxx, yyy)
+                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
+                cxyt += cxyt_step
+        return cxyt
 
 
 class InstantReaction(Domenico):
@@ -171,7 +175,7 @@ class InstantReaction(Domenico):
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        self._calculate()
+        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
@@ -181,18 +185,19 @@ class InstantReaction(Domenico):
 
         return biodegradation_capacity
 
-    def _calculate(self):
+    def _calculate_cxyt(self, xxx, yyy, ttt):
+        cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term()
-            additional_x = self._eq_additional_x()
-            z_term = self._eq_z_term()
-            source_decay = self._eq_source_decay()
-
+            x_term = self._eq_x_term(xxx, ttt)
+            additional_x = self._eq_additional_x(xxx, ttt)
+            z_term = self._eq_z_term(xxx)
+            source_decay = self._eq_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i)
-                cxyt = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
-                self.cxyt += cxyt
+                y_term = self._eq_y_term(i, xxx, yyy)
+                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+                cxyt += cxyt_step
 
-            self.cxyt_noBC = self.cxyt.copy()
-            self.cxyt -= self.biodegradation_capacity
-            self.cxyt = np.where(self.cxyt < 0, 0, self.cxyt)
+            self.cxyt_noBC = cxyt.copy()
+            cxyt -= self.biodegradation_capacity
+            cxyt = np.where(cxyt < 0, 0, cxyt)
+        return cxyt

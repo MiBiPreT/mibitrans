@@ -5,31 +5,40 @@ Module calculating the mass balance based on base parameters.
 
 import numpy as np
 import mibitrans.transport.domenico as domenico
+import mibitrans.transport.karanovic as karanovic
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
-from mibitrans.transport.domenico import NoDecay
-from mibitrans.transport.model_parent import Domenico
+from mibitrans.transport.model_parent import Transport3D
 
 
 def mass_balance(model, time=None) -> dict:
     """Calculate contaminant mass balance across model compartments.
 
     Args:
-        model (mibitrans.transport.domenico.Domenico) : Domenico transport model object.
+        model (mibitrans.transport.model_parent.Transport3D) : Three dimensional transport model object.
         time (float) : Time at which to calculate mass balance. Default is the last time step.
 
     Returns:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
-    _check_model_type(model, Domenico)
+    _check_model_type(model, Transport3D)
     time_pos = _time_check(model, time)
     mass_balance_dict = {}
 
     mass_balance_dict["time"] = model.t[time_pos]
 
     if isinstance(model, (domenico.InstantReaction | domenico.LinearDecay)):
-        no_decay_model = NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
+        no_decay_model = domenico.NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
+        if hasattr(model, "biodegradation_capacity"):
+            mode = "instant_reaction"
+        else:
+            mode = "linear_decay"
+    elif isinstance(model, karanovic.InstantReaction) or (
+        isinstance(model, karanovic.LinearDecay) and model.att_pars.decay_rate > 0
+    ):
+        model.att_pars.decay_rate = 0
+        no_decay_model = karanovic.NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
         if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:
@@ -43,7 +52,10 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict["source_mass_0"] = M_source_0
 
     # Total source mass at t=t, for the no decay model
-    M_source_t = M_source_0 * np.exp(-no_decay_model.k_source * model.t[time_pos])
+    if isinstance(model.src_pars.total_mass, str):
+        M_source_t = M_source_0
+    else:
+        M_source_t = M_source_0 * np.exp(-no_decay_model.k_source * model.t[time_pos])
     mass_balance_dict["source_mass_t"] = M_source_t
 
     # Change in source mass at t=t, due to source decay by transport
@@ -88,7 +100,10 @@ def mass_balance(model, time=None) -> dict:
 
     elif mode == "instant_reaction":
         # Total source mass at t=t, for the instant reaction model
-        M_source_t_inst = M_source_0 * np.exp(-model.k_source * model.t[time_pos])
+        if isinstance(model.src_pars.total_mass, str):
+            M_source_t_inst = M_source_0
+        else:
+            M_source_t_inst = M_source_0 * np.exp(-model.k_source * model.t[time_pos])
         mass_balance_dict["source_mass_instant_t"] = M_source_t_inst
 
         # Change in source mass at t=t due to source decay by transport and by biodegradation

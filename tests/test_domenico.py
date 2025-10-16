@@ -4,11 +4,6 @@ from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.domenico import InstantReaction
 from mibitrans.transport.domenico import LinearDecay
-from mibitrans.transport.domenico import NoDecay
-from tests.test_example_data import test_att_pars
-from tests.test_example_data import test_hydro_pars
-from tests.test_example_data import test_model_pars
-from tests.test_example_data import test_source_pars
 from tests.test_example_data import testingdata_instantreaction
 from tests.test_example_data import testingdata_lineardecay
 from tests.test_example_data import testingdata_nodecay
@@ -27,7 +22,7 @@ from tests.test_example_data import testingdata_nodecay
         ),
     ],
 )
-def test_require_degradation_linear(att, error):
+def test_require_degradation_linear(att, error, test_hydro_pars, test_source_pars, test_model_pars):
     """Test if LinearDecay class correctly raises error when correct degradation parameters are missing."""
     LinearDecay(test_hydro_pars, att, test_source_pars, test_model_pars)
 
@@ -56,7 +51,7 @@ def test_require_degradation_linear(att, error):
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_require_degradation_instant(att, error):
+def test_require_degradation_instant(att, error, test_hydro_pars, test_source_pars, test_model_pars):
     """Test if InstantReaction class correctly raises error when correct attenuation parameters are missing."""
     if error is None:
         InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
@@ -68,23 +63,16 @@ def test_require_degradation_instant(att, error):
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars), testingdata_nodecay),
-        (
-            LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
-            testingdata_lineardecay,
-        ),
-        (
-            InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
-            testingdata_instantreaction,
-        ),
+        ("test_domenico_nodecay_model", testingdata_nodecay),
+        ("test_domenico_lineardecay_model", testingdata_lineardecay),
+        ("test_domenico_instantreaction_model", testingdata_instantreaction),
     ],
 )
-def test_transport_equations_numerical(model, expected):
+@pytest.mark.filterwarnings("ignore:Decay rate was set")
+def test_transport_equations_numerical(model, expected, request):
     """Test numerical output of transport equation child classes of Domenico."""
-    assert model.cxyt == pytest.approx(expected)
-
-
-sample_model = NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    model_object = request.getfixturevalue(model)
+    assert model_object.cxyt == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -99,13 +87,13 @@ sample_model = NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_mo
         (16, 0, "nonsense", TypeError),
     ],
 )
-def test_domenico_sample(x, y, t, expected):
+def test_domenico_sample(x, y, t, expected, test_domenico_nodecay_model):
     """Tests if sample method from Domenico class works correctly."""
     if isinstance(expected, float):
-        assert sample_model.sample(x, y, t) == pytest.approx(expected)
+        assert test_domenico_nodecay_model.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
         with pytest.raises(expected):
-            sample_model.sample(x, y, t)
+            test_domenico_nodecay_model.sample(x, y, t)
     elif isinstance(expected, list):
         with pytest.warns(expected[0]):
-            assert sample_model.sample(x, y, t) == pytest.approx(expected[1])
+            assert test_domenico_nodecay_model.sample(x, y, t) == pytest.approx(expected[1])

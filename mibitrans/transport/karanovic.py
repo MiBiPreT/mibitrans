@@ -92,6 +92,7 @@ class NoDecay(LinearDecay):
 
         """
         attenuation_parameters = copy.copy(attenuation_parameters)
+        attenuation_parameters.decay_rate = 0
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
 

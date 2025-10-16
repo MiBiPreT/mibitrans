@@ -88,208 +88,6 @@ class HydrologicalParameters:
 
 
 @dataclass
-class AdsorptionParameters:
-    """Dataclass handling adsorption parameters.
-
-    Args:
-        retardation (float) : Retardation factor for transported contaminant [-]. Optional if bulk_density,
-            partition_coefficient and fraction_organic_carbon are specified.
-        bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
-        partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
-            in [m^3/g]. Optional if retardation is specified.
-        fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
-            Optional if retardation is specified.
-        verbose (bool, optional): Verbose mode. Defaults to False.
-
-    Methods:
-        calculate_retardation : Calculate retardation factor from bulk density, partition coefficient and
-            fraction organic carbon when given porosity [-]
-
-    Raises:
-        ValueError : If input parameters are incomplete or outside the valid domain.
-        TypeError : If input parameters of incorrect datatype.
-
-    """
-
-    retardation: float = None
-    bulk_density: float = None
-    partition_coefficient: float = None
-    fraction_organic_carbon: float = None
-    verbose: bool = False
-
-    def __setattr__(self, parameter, value):
-        """Override parent method to validate input when attribute is set."""
-        validate_input_values(parameter, value)
-        super().__setattr__(parameter, value)
-
-    def __post_init__(self):
-        """Check argument presence, types and domain."""
-        self._validate_input_presence()
-
-        if self.verbose:
-            print("All adsorption input arguments are present and valid.")
-
-    def calculate_retardation(self, porosity: float):
-        """Calculate retardation factor from soil adsorption parametrers and porosity."""
-        self.retardation = (
-            1 + (self.bulk_density / porosity) * self.partition_coefficient * self.fraction_organic_carbon
-        )
-        if self.verbose:
-            print(f"Retardation factor has been calculated to be {self.retardation}.")
-
-    def _validate_input_presence(self):
-        if self.retardation is None and (
-            self.bulk_density is None or self.partition_coefficient is None or self.fraction_organic_carbon is None
-        ):
-            raise MissingValueError(
-                "AdsorptionParameters missing required arguments: either retardation or "
-                "(bulk_density, partition_coefficient and fraction_organic_carbon)."
-            )
-
-
-@dataclass
-class DegradationParameters:
-    """Dataclass handling degradation parameters.
-
-    Args:
-        decay_rate (float) : First order (linear) decay coefficient in [1/day]. Only required for linear decay models.
-            Optional if half_life is specified.
-        half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
-            linear decay models. Optional if half_life is specified.
-        delta_oxygen (float) : Difference between background oxygen and plume oxygen concentrations, in [g/m^3].
-            Only required for instant reaction models.
-        delta_nitrate (float) : Difference between background nitrate and contaminant plume nitrate concentrations,
-            in [g/m^3]. Only required for instant reaction models.
-        ferrous_iron (float) : Ferrous iron concentration in contaminant plume, in [g/m^3]. Only required for
-            instant reaction models.
-        delta_sulfate (float) : Difference between background sulfate and plume sulfate concentrations, in [g/m^3].
-            Only required for instant reaction models.
-        methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
-            instant reaction models.
-        verbose (bool, optional): Verbose mode. Defaults to False.
-
-    Methods:
-        utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor utilization
-            factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995)
-
-    Raises:
-        ValueError : If input parameters are incomplete or outside the valid domain.
-        TypeError : If input parameters of incorrect datatype.
-
-    """
-
-    decay_rate: float = None
-    half_life: float = None
-    delta_oxygen: float = None
-    delta_nitrate: float = None
-    ferrous_iron: float = None
-    delta_sulfate: float = None
-    methane: float = None
-    verbose: bool = False
-
-    def __setattr__(self, parameter, value):
-        """Override parent method to validate input when attribute is set."""
-        validate_input_values(parameter, value)
-        super().__setattr__(parameter, value)
-
-    def __post_init__(self):
-        """Check argument presence, types and domain."""
-        self._validate_input_presence()
-        if self.half_life:
-            decay_rate = np.log(2) / self.half_life
-            if self.verbose:
-                print(f"Decay rate has been calculate to be {decay_rate} days.")
-            if self.decay_rate and (self.decay_rate != decay_rate):
-                warnings.warn(
-                    "Both contaminant decay rate constant and half life are defined, but are not equal. "
-                    "Only value for decay rate constant will be used in calculations.",
-                    UserWarning,
-                )
-            else:
-                self.decay_rate = decay_rate
-        elif self.half_life == 0:
-            self.decay_rate = 0
-
-        self.utilization_factor = None
-        self.set_utilization_factor()
-
-        if self.verbose:
-            print(
-                f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
-                "To adapt them, use set_utilization_factor() method of DegradationParameters."
-            )
-
-    def set_utilization_factor(
-        self,
-        util_oxygen: float = 3.14,
-        util_nitrate: float = 4.9,
-        util_ferrous_iron: float = 21.8,
-        util_sulfate: float = 4.7,
-        util_methane: float = 0.78,
-    ):
-        """Change utilization factors for each electron donor/acceptor species.
-
-        By default, electron acceptor utilization factors for a BTEX mixture are used,
-        based on values from Wiedemeier et al. (1995)
-
-        Args:
-            util_oxygen (float, optional) : utilization factor of oxygen, as mass of oxygen consumed
-                per mass of biodegraded contaminant [g/g]. Default is 3.14
-            util_nitrate (float, optional) : utilization factor of nitrate, as mass of nitrate consumed
-                per mass of biodegraded contaminant [g/g]. Default is 4.9
-            util_ferrous_iron (float, optional) : utilization factor of ferrous iron, as mass of ferrous iron generated
-                per mass of biodegraded contaminant [g/g]. Default is 21.8
-            util_sulfate (float, optional) : utilization factor of sulfate, as mass of sulfate consumed
-                per mass of biodegraded contaminant [g/g]. Default is 4.7
-            util_methane (float, optional) : utilization factor of methane, as mass of methane generated
-                per mass of biodegraded contaminant [g/g]. Default is 0.78
-
-        Raises:
-            ValueError : If input parameters are incomplete or outside the valid domain.
-            TypeError : If input parameters of incorrect datatype.
-
-        """
-        if self.verbose:
-            print("Setting utilization factors...")
-        self.utilization_factor = UtilizationFactor(
-            util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane
-        )
-
-    def _validate_input_presence(self):
-        if (self.decay_rate is None and self.half_life is None) and (
-            self.delta_oxygen is None
-            or self.delta_nitrate is None
-            or self.ferrous_iron is None
-            or self.delta_sulfate is None
-            or self.methane is None
-        ):
-            raise MissingValueError(
-                "DegradationParameters missing missing required arguments: either decay rate or half life,"
-                "or electron acceptor/donor concentrations."
-            )
-
-    def _require_electron_acceptor(self):
-        missing_ea = []
-        if self.delta_oxygen is None:
-            missing_ea.append("delta_oxygen")
-        if self.delta_nitrate is None:
-            missing_ea.append("delta_nitrate")
-        if self.ferrous_iron is None:
-            missing_ea.append("ferrous_iron")
-        if self.delta_sulfate is None:
-            missing_ea.append("delta_sulfate")
-        if self.methane is None:
-            missing_ea.append("methane")
-
-        if len(missing_ea) > 0:
-            raise MissingValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
-
-    def _require_linear_decay(self):
-        if self.decay_rate is None and self.half_life is None:
-            raise MissingValueError("Linear reaction model requires decay rate or half life.")
-
-
-@dataclass
 class AttenuationParameters:
     """Dataclass handling parameters related to adsorption, diffusion and degradation.
 
@@ -327,6 +125,7 @@ class AttenuationParameters:
         ValueError : If input parameters are incomplete or outside the valid domain.
         TypeError : If input parameters of incorrect datatype.
     """
+
     retardation: float = 1
     decay_rate: float = 0
     half_life: float = 0
@@ -361,7 +160,7 @@ class AttenuationParameters:
         if self.verbose:
             print(
                 f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
-                "To adapt them, use set_utilization_factor() method of DegradationParameters."
+                "To adapt them, use set_utilization_factor() method of AttenuationParameters."
             )
 
     def calculate_retardation(self, porosity: float):

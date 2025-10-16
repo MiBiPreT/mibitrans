@@ -3,8 +3,7 @@
 # Add some commonly used functions as top-level imports
 from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.parameters import HydrologicalParameters
-from mibitrans.data.parameters import AdsorptionParameters
-from mibitrans.data.parameters import DegradationParameters
+from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.transport.domenico import NoDecay

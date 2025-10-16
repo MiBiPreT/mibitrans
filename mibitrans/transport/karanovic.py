@@ -1,6 +1,5 @@
 import copy
 import numpy as np
-from scipy.integrate import quad_vec
 from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.transport.model_parent import Karanovic
 
@@ -49,23 +48,9 @@ class LinearDecay(Karanovic):
             for sz in range(len(self.c_source)):
                 if self.verbose:
                     print("integrating for source zone ", sz)
-                for j in range(len(self.t)):
-                    # Save run time by preventing re-evaluating the same domain for each time step
-                    if self.verbose:
-                        print("integrating for t =", self.t[j], "days")
-                    if j == 0:
-                        lower_bound = 0
-                    else:
-                        lower_bound = self.t[j - 1]
-                    upper_bound = self.t[j]
-                    self.integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
-                        self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
-                    )
-                # For each time step, resolves to cumulative sum of integral previous and current time steps.
-                self.integral_sum = np.cumsum(self.integral_term, axis=0)
-
+                integral_sum = self._eq_integral_term(sz)
                 source_term = self._eq_source_term(sz)
-                cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
+                cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
                 # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
                 cxyt[:, :, 0] += self._eq_source_zero(sz)
         return cxyt
@@ -166,24 +151,14 @@ class InstantReaction(Karanovic):
 
     def _calculate_cxyt(self):
         cxyt = self.cxyt.copy()
+
         with np.errstate(divide="ignore", invalid="ignore"):
             for sz in range(len(self.c_source)):
                 if self.verbose:
                     print("integrating for source zone ", sz)
-                for j in range(len(self.t)):
-                    if self.verbose:
-                        print("integrating for t =", self.t[j], "days")
-                    if j == 0:
-                        lower_bound = 0
-                    else:
-                        lower_bound = self.t[j - 1]
-                    upper_bound = self.t[j]
-                    self.integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
-                        self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
-                    )
-                self.integral_sum = np.cumsum(self.integral_term, axis=0)
+                integral_sum = self._eq_integral_term(sz)
                 source_term = self._eq_source_term(sz)
-                cxyt[:, :, 1:] += self.integral_sum[:, :, 1:] * source_term
+                cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
                 cxyt[:, :, 0] += self._eq_source_zero(sz)
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity

@@ -36,12 +36,15 @@ class Transport3D:
         self.att_pars = copy.copy(attenuation_parameters)
         self.src_pars = copy.copy(source_parameters)
         self.mod_pars = copy.copy(model_parameters)
-        self.verbose = verbose
 
         # Check if input arguments are of the correct dataclass
         for key in self.__dict__.keys():
-            if key != "verbose":
-                self._check_input_dataclasses(key)
+            self._check_input_dataclasses(key)
+
+        self.verbose = verbose
+
+        self.has_run = False
+        self.initialized = True
 
         # One-dimensional model domain arrays
         self.x = np.arange(0, self.mod_pars.model_length + self.mod_pars.dx, self.mod_pars.dx)
@@ -296,6 +299,9 @@ class Domenico(Transport3D, ABC):
     def _calculate_cxyt(self, xxx, yyy, ttt):
         pass
 
+    def run(self):
+        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+
     def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
         return erfc(
             (xxx - self.hyd_pars.velocity * ttt * decay_sqrt)
@@ -380,6 +386,9 @@ class Karanovic(Transport3D):
     @abstractmethod
     def _calculate_cxyt(self):
         pass
+
+    def run(self):
+        self.cxyt = self._calculate_cxyt()
 
     def _eq_integrand(self, t, sz):
         term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t, sz) * self._eq_z_term(t)

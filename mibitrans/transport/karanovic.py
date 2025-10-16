@@ -8,7 +8,13 @@ class LinearDecay(Karanovic):
     """Calculate contaminant transport with linear decay using the exact analytical solution."""
 
     def __init__(
-        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
+        self,
+        hydrological_parameters,
+        attenuation_parameters,
+        source_parameters,
+        model_parameters,
+        auto_run=True,
+        verbose=False,
     ):
         """Initialize object and run model.
 
@@ -40,11 +46,13 @@ class LinearDecay(Karanovic):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        self.cxyt = self._calculate_cxyt()
+        if auto_run:
+            self.cxyt = self._calculate_cxyt()
 
     def _calculate_cxyt(self):
         with np.errstate(divide="ignore", invalid="ignore"):
             cxyt = self._eq_superposition()
+        self.has_run = True
         return cxyt
 
 
@@ -52,7 +60,13 @@ class NoDecay(LinearDecay):
     """Calculate contaminant transport with no decay using the exact analytical solution."""
 
     def __init__(
-        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
+        self,
+        hydrological_parameters,
+        attenuation_parameters,
+        source_parameters,
+        model_parameters,
+        auto_run=True,
+        verbose=False,
     ):
         """Initialize object and run model.
 
@@ -85,14 +99,22 @@ class NoDecay(LinearDecay):
         """
         attenuation_parameters = copy.copy(attenuation_parameters)
         attenuation_parameters.decay_rate = 0
-        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        super().__init__(
+            hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, auto_run, verbose
+        )
 
 
 class InstantReaction(Karanovic):
     """Calculate contaminant transport with instant reaction degradation using the exact analytical solution."""
 
     def __init__(
-        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
+        self,
+        hydrological_parameters,
+        attenuation_parameters,
+        source_parameters,
+        model_parameters,
+        auto_run=True,
+        verbose=False,
     ):
         """Initialize object and run model.
 
@@ -132,7 +154,8 @@ class InstantReaction(Karanovic):
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        self.cxyt = self._calculate_cxyt()
+        if auto_run:
+            self.cxyt = self._calculate_cxyt()
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
@@ -148,6 +171,7 @@ class InstantReaction(Karanovic):
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
+        self.has_run = True
         return cxyt
 
     def sample(self, x_position, y_position, time):

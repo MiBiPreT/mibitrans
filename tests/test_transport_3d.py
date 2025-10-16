@@ -1,3 +1,5 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from mibitrans.data.parameters import AttenuationParameters
@@ -58,3 +60,26 @@ def test_retardation_calculation(att, expected, test_hydro_pars, test_source_par
     """Test if retardation is calculated correctly when Transport3D class is initialized."""
     parent = Transport3D(test_hydro_pars, att, test_source_pars, test_model_pars)
     assert parent.att_pars.retardation == expected
+
+
+def test_plotting_methods(test_domenico_nodecay_model):
+    """Test if plotting methods defined in parent model are working."""
+    test_domenico_nodecay_model.centerline()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+
+    test_domenico_nodecay_model.transverse(x_position=1)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+
+    test_domenico_nodecay_model.breakthrough(x_position=1)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+
+    test_domenico_nodecay_model.plume_2d()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+
+    test_domenico_nodecay_model.plume_3d()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()

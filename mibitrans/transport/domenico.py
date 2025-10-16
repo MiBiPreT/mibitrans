@@ -22,12 +22,12 @@ class NoDecay(Domenico):
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption, degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -80,12 +80,12 @@ class LinearDecay(Domenico):
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption, degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:

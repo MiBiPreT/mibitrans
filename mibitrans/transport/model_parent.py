@@ -173,8 +173,8 @@ class Transport3D:
                 By default, last point in time is plotted.
             legend_names (str | list): List of legend names as strings, in the same order as given models.
                 By default, no legend is shown.
-            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are
+                given as input, dt should be the same for each one to ensure accurate animation. Default is False.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
@@ -190,8 +190,8 @@ class Transport3D:
                 By default, last point in time is plotted.
             legend_names (str | list): List of legend names as strings, in the same order as given models.
                 By default, no legend is shown.
-            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are
+                given as input, dt should be the same for each one to ensure accurate animation. Default is False.
             **kwargs : Arguments to be passed to plt.plot().
         """
         pline.transverse(self, x_position=x_position, time=time, legend_names=legend_names, animate=animate, **kwargs)
@@ -206,8 +206,8 @@ class Transport3D:
                 By default, at the center of the plume (at y=0).
             legend_names (str | list): List of legend names as strings, in the same order as given models.
                 By default, no legend is shown.
-            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-                as input, dt should be the same for each one to ensure accurate animation. Default is False.
+            animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are
+                given as input, dt should be the same for each one to ensure accurate animation. Default is False.
             **kwargs : Arguments to be passed to plt.plot().
         """
         pline.breakthrough(
@@ -436,6 +436,18 @@ class Karanovic(Transport3D):
             )
         integral_sum = np.cumsum(integral_term, axis=0)
         return integral_sum
+
+    def _eq_superposition(self):
+        cxyt = self.cxyt.copy()
+        for sz in range(len(self.c_source)):
+            if self.verbose:
+                print("integrating for source zone ", sz)
+            integral_sum = self._eq_integral_term(sz)
+            source_term = self._eq_source_term(sz)
+            cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
+            # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
+            cxyt[:, :, 0] += self._eq_source_zero(sz)
+        return cxyt
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.

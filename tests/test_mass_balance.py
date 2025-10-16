@@ -13,6 +13,7 @@ from tests.test_example_data import testing_massbalance_nodecay
 
 @pytest.fixture(scope="module")
 def test_model_pars():
+    """ModelParameters fixture with increased spatial resolution, specifically for testing mass balance."""
     return ModelParameters(model_length=50, model_width=30, model_time=3 * 365, dx=1, dy=1, dt=1 * 365)
 
 

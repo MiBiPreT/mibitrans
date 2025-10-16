@@ -14,13 +14,13 @@ class LinearDecay(Karanovic):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-            hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+                hydrological parameters from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption, degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -43,16 +43,8 @@ class LinearDecay(Karanovic):
         self.cxyt = self._calculate_cxyt()
 
     def _calculate_cxyt(self):
-        cxyt = self.cxyt.copy()
         with np.errstate(divide="ignore", invalid="ignore"):
-            for sz in range(len(self.c_source)):
-                if self.verbose:
-                    print("integrating for source zone ", sz)
-                integral_sum = self._eq_integral_term(sz)
-                source_term = self._eq_source_term(sz)
-                cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
-                # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
-                cxyt[:, :, 0] += self._eq_source_zero(sz)
+            cxyt = self._eq_superposition()
         return cxyt
 
 
@@ -67,12 +59,12 @@ class NoDecay(LinearDecay):
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
             hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption, degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -107,12 +99,12 @@ class InstantReaction(Karanovic):
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
             hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption, degradation and diffusion parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -151,16 +143,8 @@ class InstantReaction(Karanovic):
         return biodegradation_capacity
 
     def _calculate_cxyt(self):
-        cxyt = self.cxyt.copy()
-
         with np.errstate(divide="ignore", invalid="ignore"):
-            for sz in range(len(self.c_source)):
-                if self.verbose:
-                    print("integrating for source zone ", sz)
-                integral_sum = self._eq_integral_term(sz)
-                source_term = self._eq_source_term(sz)
-                cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
-                cxyt[:, :, 0] += self._eq_source_zero(sz)
+            cxyt = self._eq_superposition()
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)

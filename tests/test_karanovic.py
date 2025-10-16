@@ -68,8 +68,8 @@ def test_transport_equations_numerical(model, expected, request):
         (16, 0, "nonsense", TypeError),
     ],
 )
-def test_karanovic_sample(x, y, t, expected, test_karanovic_lineardecay_model):
-    """Tests if sample method from Karanovic class works correctly."""
+def test_karanovic_linear_sample(x, y, t, expected, test_karanovic_lineardecay_model):
+    """Tests if sample method from Karanovic class works correctly for LinearDecay."""
     if isinstance(expected, float):
         assert test_karanovic_lineardecay_model.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
@@ -78,3 +78,27 @@ def test_karanovic_sample(x, y, t, expected, test_karanovic_lineardecay_model):
     elif isinstance(expected, list):
         with pytest.warns(expected[0]):
             assert test_karanovic_lineardecay_model.sample(x, y, t) == pytest.approx(expected[1])
+
+
+@pytest.mark.parametrize(
+    "x, y, t, expected",
+    [
+        (20, 0, 476, 3.8101869779573443),
+        (11, 7, 193, 2.0276832492832924),
+        (-16, 0, 393, DomainValueError),
+        ("nonsense", 0, 393, TypeError),
+        (16, "nonsense", 393, TypeError),
+        (16, 0, -10, DomainValueError),
+        (16, 0, "nonsense", TypeError),
+    ],
+)
+def test_karanovic_instant_sample(x, y, t, expected, test_karanovic_instantreaction_model):
+    """Tests if sample method from Karanovic class works correctly for InstantReaction."""
+    if isinstance(expected, float):
+        assert test_karanovic_instantreaction_model.sample(x, y, t) == pytest.approx(expected)
+    elif expected is ValueError or expected is TypeError:
+        with pytest.raises(expected):
+            test_karanovic_instantreaction_model.sample(x, y, t)
+    elif isinstance(expected, list):
+        with pytest.warns(expected[0]):
+            assert test_karanovic_instantreaction_model.sample(x, y, t) == pytest.approx(expected[1])

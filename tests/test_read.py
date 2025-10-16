@@ -163,7 +163,7 @@ def test_attenuationparameters_setattribute(test, value, parameter, error) -> No
             setattr(att, parameter, value)
 
 
-att_test_object = AttenuationParameters(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1)
+# att_test_object = AttenuationParameters(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1)
 
 
 @pytest.mark.parametrize(
@@ -174,13 +174,15 @@ att_test_object = AttenuationParameters(delta_oxygen=1, delta_nitrate=1, ferrous
         (dict(util_oxygen=-1, util_nitrate=2, util_ferrous_iron=3, util_sulfate=4, util_methane=5), DomainValueError),
     ],
 )
-def test_attenuationparameters_utilization(test, expected) -> None:
+def test_attenuationparameters_utilization(test, expected, test_att_pars) -> None:
     """Test set_utilization_factor method of AttenuationParameters dataclass."""
     if expected is None:
-        att_test_object.set_utilization_factor(**test)
+        # att_test_object.set_utilization_factor(**test)
+        test_att_pars.set_utilization_factor(**test)
     else:
         with pytest.raises(expected):
-            att_test_object.set_utilization_factor(**test)
+            # att_test_object.set_utilization_factor(**test)
+            test_att_pars.set_utilization_factor(**test)
 
 
 # Test AdsorptionParameters

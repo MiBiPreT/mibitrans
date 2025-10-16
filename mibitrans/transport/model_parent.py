@@ -4,6 +4,7 @@ from abc import ABC
 from abc import abstractmethod
 import numpy as np
 from scipy.integrate import quad
+from scipy.integrate import quad_vec
 from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.parameters
@@ -12,7 +13,7 @@ from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
 
 
-class Transport3D(ABC):
+class Transport3D:
     """Parent class that for all 3-dimensional analytical solutions."""
 
     def __init__(
@@ -71,10 +72,6 @@ class Transport3D(ABC):
         # Subtract outer source zones from inner source zones
         self.c_source = self.src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
-
-    @abstractmethod
-    def _calculate_cxyt(self):
-        pass
 
     # Implement report method; gives run time of calculation, error values and other applicable post-run information
     # @abstractmethod
@@ -376,7 +373,7 @@ class Karanovic(Transport3D):
         self.disp_x = self.hyd_pars.alpha_x * self.rv + self.att_pars.diffusion
         self.disp_y = self.hyd_pars.alpha_y * self.rv + self.att_pars.diffusion
         self.disp_z = self.hyd_pars.alpha_z * self.rv + self.att_pars.diffusion
-        self.integral_term = np.zeros(self.ttt.shape)
+        # self.integral_term = np.zeros(self.ttt.shape)
         # Stores integral error for each time step and source zone
         self.error_size = np.zeros((len(self.src_pars.source_zone_boundary), len(self.t)))
 
@@ -423,6 +420,22 @@ class Karanovic(Transport3D):
     def _eq_source_zero(self, sz):
         zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
+
+    def _eq_integral_term(self, sz):
+        integral_term = np.zeros(self.ttt.shape)
+        for j in range(len(self.t)):
+            if self.verbose:
+                print("integrating for t =", self.t[j], "days")
+            if j == 0:
+                lower_bound = 0
+            else:
+                lower_bound = self.t[j - 1]
+            upper_bound = self.t[j]
+            integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
+                self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
+            )
+        integral_sum = np.cumsum(integral_term, axis=0)
+        return integral_sum
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.

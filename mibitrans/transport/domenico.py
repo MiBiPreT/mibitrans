@@ -15,7 +15,13 @@ class NoDecay(Domenico):
     """Calculate contaminant transport using the Domenico (1987) analytical model without degradation."""
 
     def __init__(
-        self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
+        self,
+        hydrological_parameters,
+        attenuation_parameters,
+        source_parameters,
+        model_parameters,
+        auto_run=True,
+        verbose=False,
     ):
         """Initialize object and run model.
 
@@ -47,8 +53,8 @@ class NoDecay(Domenico):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        if auto_run:
+            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _calculate_cxyt(self, xxx, yyy, ttt):
         cxyt = 0
@@ -61,6 +67,7 @@ class NoDecay(Domenico):
                 y_term = self._eq_y_term(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
                 cxyt += cxyt_step
+        self.has_run = True
         return cxyt
 
 
@@ -73,6 +80,7 @@ class LinearDecay(Domenico):
         attenuation_parameters,
         source_parameters,
         model_parameters,
+        auto_run=True,
         verbose=False,
     ):
         """Initialize object and run model.
@@ -106,7 +114,8 @@ class LinearDecay(Domenico):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         self.att_pars._require_linear_decay()
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        if auto_run:
+            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _calculate_cxyt(self, xxx, yyy, ttt):
         cxyt = 0
@@ -120,6 +129,7 @@ class LinearDecay(Domenico):
                 y_term = self._eq_y_term(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
                 cxyt += cxyt_step
+        self.has_run = True
         return cxyt
 
 
@@ -132,6 +142,7 @@ class InstantReaction(Domenico):
         attenuation_parameters,
         source_parameters,
         model_parameters,
+        auto_run=True,
         verbose=False,
     ):
         """Initialize object and run model.
@@ -175,7 +186,8 @@ class InstantReaction(Domenico):
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        if auto_run:
+            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
@@ -200,4 +212,5 @@ class InstantReaction(Domenico):
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
+        self.has_run = True
         return cxyt

@@ -3,13 +3,9 @@ from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.karanovic import InstantReaction
-from mibitrans.transport.karanovic import LinearDecay
-from tests.test_example_data import test_att_pars
-from tests.test_example_data import test_hydro_pars
-from tests.test_example_data import test_model_pars
-from tests.test_example_data import test_source_pars
 from tests.test_example_data import testingdata_instantreaction_karanovic
 from tests.test_example_data import testingdata_lineardecay_karanovic
+from tests.test_example_data import testingdata_nodecay_karanovic
 
 
 @pytest.mark.parametrize(
@@ -36,7 +32,7 @@ from tests.test_example_data import testingdata_lineardecay_karanovic
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_require_degradation_instant(att, error):
+def test_require_degradation_instant(att, error, test_hydro_pars, test_source_pars, test_model_pars):
     """Test if Instan class correctly raises error when correct attenuation parameters are missing."""
     if error is None:
         InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
@@ -48,23 +44,16 @@ def test_require_degradation_instant(att, error):
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (
-            LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
-            testingdata_lineardecay_karanovic,
-        ),
-        (
-            InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars),
-            testingdata_instantreaction_karanovic,
-        ),
+        ("test_karanovic_nodecay_model", testingdata_nodecay_karanovic),
+        ("test_karanovic_lineardecay_model", testingdata_lineardecay_karanovic),
+        ("test_karanovic_instantreaction_model", testingdata_instantreaction_karanovic),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_transport_equations_numerical(model, expected):
+def test_transport_equations_numerical(model, expected, request):
     """Test numerical output of transport equation child classes of Karanovic."""
-    assert model.cxyt == pytest.approx(expected)
-
-
-sample_model = LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    model_object = request.getfixturevalue(model)
+    assert model_object.cxyt == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -79,13 +68,13 @@ sample_model = LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, tes
         (16, 0, "nonsense", TypeError),
     ],
 )
-def test_karanovic_sample(x, y, t, expected):
+def test_karanovic_sample(x, y, t, expected, test_karanovic_lineardecay_model):
     """Tests if sample method from Karanovic class works correctly."""
     if isinstance(expected, float):
-        assert sample_model.sample(x, y, t) == pytest.approx(expected)
+        assert test_karanovic_lineardecay_model.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
         with pytest.raises(expected):
-            sample_model.sample(x, y, t)
+            test_karanovic_lineardecay_model.sample(x, y, t)
     elif isinstance(expected, list):
         with pytest.warns(expected[0]):
-            assert sample_model.sample(x, y, t) == pytest.approx(expected[1])
+            assert test_karanovic_lineardecay_model.sample(x, y, t) == pytest.approx(expected[1])

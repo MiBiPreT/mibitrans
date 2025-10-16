@@ -18,7 +18,6 @@ from tests.test_example_data import testing_massbalance_nodecay
 
 test_model_pars.dx = 1
 test_model_pars.dy = 1
-test_model_pars.dt = 1
 
 
 @pytest.mark.parametrize(

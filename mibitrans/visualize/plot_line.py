@@ -41,6 +41,8 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         y_pos = _y_check(mod, y_position)
         t_pos = _time_check(mod, time)
+        _run_model_if_model_has_not_ran(mod)
+
         if animate:
             plot_array_list.append(mod.cxyt[:, y_pos, :])
         else:
@@ -113,6 +115,8 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
         _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         x_pos = _x_check(mod, x_position)
         t_pos = _time_check(mod, time)
+        _run_model_if_model_has_not_ran(mod)
+
         if animate:
             plot_array_list.append(mod.cxyt[:, :, x_pos])
         else:
@@ -185,6 +189,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         _check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
         x_pos = _x_check(mod, x_position)
         y_pos = _y_check(mod, y_position)
+        _run_model_if_model_has_not_ran(mod)
         plot_array_list.append(mod.cxyt[:, y_pos, x_pos])
 
     # Non animated plot
@@ -236,3 +241,10 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
 
         ani = animation.FuncAnimation(fig=fig, func=update, frames=len(model[0].t))
         return ani
+
+
+def _run_model_if_model_has_not_ran(model):
+    if not model.has_run:
+        if model.verbose:
+            print("Model has not run yet, calculating cxyt...")
+        model.run()

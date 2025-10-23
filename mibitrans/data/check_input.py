@@ -221,6 +221,8 @@ def validate_input_values(parameter, value):
         # Any input for verbose argument is fine.
         case "verbose":
             error = None
+        case "_on_change":
+            error = None
         # Specific check for retardation, which has domain >= 1
         case "retardation":
             error = _check_float_retardation(parameter, value)

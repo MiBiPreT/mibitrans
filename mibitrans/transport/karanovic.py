@@ -162,8 +162,8 @@ class InstantReaction(Karanovic):
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
 
-    def _pre_run(self):
-        super()._pre_run()
+    def _pre_run_initialization_parameters(self):
+        super()._pre_run_initialization_parameters()
         self._instant_initialization()
 
     def _calculate_biodegradation_capacity(self):

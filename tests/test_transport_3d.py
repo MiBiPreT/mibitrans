@@ -37,13 +37,13 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
         assert parent.xxx.shape == shape_arrays
         assert parent.yyy.shape == shape_arrays
         assert parent.ttt.shape == shape_arrays
-        assert parent.att_pars.retardation is not None
-        assert args[0].velocity / parent.att_pars.retardation == parent.rv
+        assert parent._att_pars.retardation is not None
+        assert args[0].velocity / parent._att_pars.retardation == parent.rv
     elif error is UserWarning:
         with pytest.warns(UserWarning):
             parent = Transport3D(*args)
             range_y = abs(parent.y[0]) + abs(parent.y[-1])
-            assert range_y >= parent.src_pars.source_zone_boundary[-1] * 2
+            assert range_y >= parent._src_pars.source_zone_boundary[-1] * 2
     elif error is TypeError:
         with pytest.raises(error):
             Transport3D(*args)
@@ -59,7 +59,7 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
 def test_retardation_calculation(att, expected, test_hydro_pars, test_source_pars, test_model_pars) -> None:
     """Test if retardation is calculated correctly when Transport3D class is initialized."""
     parent = Transport3D(test_hydro_pars, att, test_source_pars, test_model_pars)
-    assert parent.att_pars.retardation == expected
+    assert parent._att_pars.retardation == expected
 
 
 def test_plotting_methods(test_domenico_nodecay_model):

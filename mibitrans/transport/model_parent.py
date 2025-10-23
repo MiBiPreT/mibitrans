@@ -14,7 +14,7 @@ from mibitrans.visualize import plot_surface as psurf
 
 
 class Transport3D:
-    """Parent class that for all 3-dimensional analytical solutions."""
+    """Parent class for all 3-dimensional analytical solutions."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -32,54 +32,147 @@ class Transport3D:
                 ModelParameters.
             verbose (bool, optional): Verbose mode. Defaults to False.
         """
-        self.hyd_pars = copy.copy(hydrological_parameters)
-        self.att_pars = copy.copy(attenuation_parameters)
-        self.src_pars = copy.copy(source_parameters)
-        self.mod_pars = copy.copy(model_parameters)
-
         # Check if input arguments are of the correct dataclass
-        for key in self.__dict__.keys():
-            self._check_input_dataclasses(key)
+        for key, value in locals().items():
+            if key not in ["self", "verbose"]:
+                self._check_input_dataclasses(key, value)
+
+        self._hyd_pars = copy.copy(hydrological_parameters)
+        self._att_pars = copy.copy(attenuation_parameters)
+        self._src_pars = copy.copy(source_parameters)
+        self._mod_pars = copy.copy(model_parameters)
 
         self.verbose = verbose
 
         self.has_run = False
-        self.initialized = True
+        self._pre_run()
 
+    @property
+    def hydrological_parameters(self):
+        """Rename to shorthand form of hydrological_parameters inside class for ease of use."""
+        return self._hyd_pars
+
+    @hydrological_parameters.setter
+    def hydrological_parameters(self, value):
+        self._hyd_pars = self._setter_routine("hydrological_parameters", value)
+
+    @property
+    def attenuation_parameters(self):
+        """Rename to shorthand form of attenuation_parameters inside class for ease of use."""
+        return self._att_pars
+
+    @attenuation_parameters.setter
+    def attenuation_parameters(self, value):
+        self._att_pars = self._setter_routine("attenuation_parameters", value)
+
+    @property
+    def source_parameters(self):
+        """Rename to shorthand form of source_parameters inside class for ease of use."""
+        return self._src_pars
+
+    @source_parameters.setter
+    def source_parameters(self, value):
+        self._src_pars = self._setter_routine("source_parameters", value)
+
+    @property
+    def model_parameters(self):
+        """Rename to shorthand form of model_parameters inside class for ease of use."""
+        return self._mod_pars
+
+    @model_parameters.setter
+    def model_parameters(self, value):
+        self._mod_pars = self._setter_routine("model_parameters", value)
+
+    # Implement report method; gives run time of calculation, error values and other applicable post-run information
+    # @abstractmethod
+    # def report(self):
+    #     pass
+
+    def _setter_routine(self, key, value):
+        if self.has_run:
+            self.has_run = False
+            self.cxyt = np.zeros(self.xxx.shape)
+        self._check_input_dataclasses(key, value)
+        return copy.copy(value)
+
+    def _pre_run(self):
         # One-dimensional model domain arrays
-        self.x = np.arange(0, self.mod_pars.model_length + self.mod_pars.dx, self.mod_pars.dx)
+        self.x = np.arange(0, self._mod_pars.model_length + self._mod_pars.dx, self._mod_pars.dx)
         self.y = self._calculate_y()
-        self.t = np.arange(self.mod_pars.dt, self.mod_pars.model_time + self.mod_pars.dt, self.mod_pars.dt)
+        self.t = np.arange(self._mod_pars.dt, self._mod_pars.model_time + self._mod_pars.dt, self._mod_pars.dt)
 
         # Three-dimensional model domain arrays
         self.xxx = np.tile(self.x, (len(self.t), len(self.y), 1))
         self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
         self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
 
+        self.rv = self._hyd_pars.velocity / self._att_pars.retardation
+
         # cxyt is concentration output array
         self.cxyt = np.zeros(self.xxx.shape)
 
         # Calculate retardation if not already specified in adsorption_parameters
         if (
-            self.att_pars.bulk_density is not None
-            and self.att_pars.partition_coefficient is not None
-            and self.att_pars.fraction_organic_carbon is not None
+            self._att_pars.bulk_density is not None
+            and self._att_pars.partition_coefficient is not None
+            and self._att_pars.fraction_organic_carbon is not None
         ):
-            self.att_pars.calculate_retardation(self.hyd_pars.porosity)
-
-        # Calculate retarded velocity
-        self.rv = self.hyd_pars.velocity / self.att_pars.retardation
+            self._att_pars.calculate_retardation(self._hyd_pars.porosity)
 
         self.k_source = self._calculate_source_decay()
-        self.y_source = self.src_pars.source_zone_boundary
+        self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
-        self.c_source = self.src_pars.source_zone_concentration.copy()
+        self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
-    # Implement report method; gives run time of calculation, error values and other applicable post-run information
-    # @abstractmethod
-    # def report(self):
-    #     pass
+    def _calculate_source_decay(self, biodegradation_capacity=0):
+        """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
+        if isinstance(self._src_pars.total_mass, (float, int)):
+            y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
+            y_src[1:] = self._src_pars.source_zone_boundary
+            c_src = self._src_pars.source_zone_concentration
+            Q = self._hyd_pars.velocity * self._hyd_pars.porosity * self._src_pars.depth * np.max(y_src) * 2
+
+            weighted_conc = np.zeros(len(self._src_pars.source_zone_boundary))
+            for i in range(len(self._src_pars.source_zone_boundary)):
+                weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
+
+            c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+            k_source = Q * c0_avg / self._src_pars.total_mass
+        # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
+        else:
+            k_source = 0
+
+        return k_source
+
+    def _check_input_dataclasses(self, key, value):
+        """Check if input parameters are the correct dataclasses. Raise an error if not."""
+        dataclass_dict = {
+            "hydrological_parameters": mibitrans.data.parameters.HydrologicalParameters,
+            "attenuation_parameters": mibitrans.data.parameters.AttenuationParameters,
+            "source_parameters": mibitrans.data.parameters.SourceParameters,
+            "model_parameters": mibitrans.data.parameters.ModelParameters,
+        }
+
+        if not isinstance(value, dataclass_dict[key]):
+            raise TypeError(f"Input argument {key} should be {dataclass_dict[key]}, but is {type(value)} instead.")
+
+    def _calculate_y(self):
+        """Calculate y-direction discretization."""
+        if self._mod_pars.model_width >= 2 * self._src_pars.source_zone_boundary[-1]:
+            y = np.arange(
+                -self._mod_pars.model_width / 2, self._mod_pars.model_width / 2 + self._mod_pars.dy, self._mod_pars.dy
+            )
+        else:
+            y = np.arange(
+                -self._src_pars.source_zone_boundary[-1],
+                self._src_pars.source_zone_boundary[-1] + self._mod_pars.dy,
+                self._mod_pars.dy,
+            )
+            warnings.warn(
+                "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
+            )
+        return y
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -97,6 +190,8 @@ class Transport3D:
             if par != "self":
                 validate_input_values(par, value)
 
+        self._pre_run()
+
         if hasattr(self, "cxyt_noBC"):
             save_c_noBC = self.cxyt_noBC.copy()
         x = np.array([x_position])
@@ -106,65 +201,6 @@ class Transport3D:
         if hasattr(self, "cxyt_noBC"):
             self.cxyt_noBC = save_c_noBC
         return concentration
-
-    def _calculate_source_decay(self, biodegradation_capacity=0):
-        """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
-        if isinstance(self.src_pars.total_mass, (float, int)):
-            y_src = np.zeros(len(self.src_pars.source_zone_boundary) + 1)
-            y_src[1:] = self.src_pars.source_zone_boundary
-            c_src = self.src_pars.source_zone_concentration
-            Q = self.hyd_pars.velocity * self.hyd_pars.porosity * self.src_pars.depth * np.max(y_src) * 2
-
-            weighted_conc = np.zeros(len(self.src_pars.source_zone_boundary))
-            for i in range(len(self.src_pars.source_zone_boundary)):
-                weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
-
-            c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
-            k_source = Q * c0_avg / self.src_pars.total_mass
-        # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
-        else:
-            k_source = 0
-
-        return k_source
-
-    def _check_input_dataclasses(self, expected_class):
-        """Check if input parameters are the correct dataclasses. Raise an error if not."""
-        dataclass_dict = {
-            "hyd_pars": mibitrans.data.parameters.HydrologicalParameters,
-            "att_pars": mibitrans.data.parameters.AttenuationParameters,
-            "src_pars": mibitrans.data.parameters.SourceParameters,
-            "mod_pars": mibitrans.data.parameters.ModelParameters,
-        }
-
-        rename_dict = {
-            "hyd_pars": "hydrological_parameters",
-            "att_pars": "attenuation_parameters",
-            "src_pars": "source_parameters",
-            "mod_pars": "model_parameters",
-        }
-
-        if not isinstance(self.__dict__[expected_class], dataclass_dict[expected_class]):
-            raise TypeError(
-                f"Input argument {rename_dict[expected_class]} should be {dataclass_dict[expected_class]}, "
-                f"but is {type(self.__dict__[expected_class])} instead."
-            )
-
-    def _calculate_y(self):
-        """Calculate y-direction discretization."""
-        if self.mod_pars.model_width >= 2 * self.src_pars.source_zone_boundary[-1]:
-            y = np.arange(
-                -self.mod_pars.model_width / 2, self.mod_pars.model_width / 2 + self.mod_pars.dy, self.mod_pars.dy
-            )
-        else:
-            y = np.arange(
-                -self.src_pars.source_zone_boundary[-1],
-                self.src_pars.source_zone_boundary[-1] + self.mod_pars.dy,
-                self.mod_pars.dy,
-            )
-            warnings.warn(
-                "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
-            )
-        return y
 
     def centerline(self, y_position=0, time=None, legend_names=None, animate=False, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
@@ -292,7 +328,7 @@ class Domenico(Transport3D, ABC):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        if self.att_pars.diffusion != 0:
+        if self._att_pars.diffusion != 0:
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
     @abstractmethod
@@ -300,32 +336,35 @@ class Domenico(Transport3D, ABC):
         pass
 
     def run(self):
+        """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
+        self._pre_run()
         self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
         return erfc(
-            (xxx - self.hyd_pars.velocity * ttt * decay_sqrt)
-            / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
+            (xxx - self._hyd_pars.velocity * ttt * decay_sqrt)
+            / (2 * np.sqrt(self._hyd_pars.alpha_x * self._hyd_pars.velocity * ttt))
         )
 
     def _eq_additional_x(self, xxx, ttt):
-        return np.exp(xxx * self.hyd_pars.velocity / (self.hyd_pars.alpha_x * self.hyd_pars.velocity)) * (
+        return np.exp(xxx * self._hyd_pars.velocity / (self._hyd_pars.alpha_x * self._hyd_pars.velocity)) * (
             erfc(
-                xxx + self.hyd_pars.velocity * ttt / (2 * np.sqrt(self.hyd_pars.alpha_x * self.hyd_pars.velocity * ttt))
+                xxx
+                + self._hyd_pars.velocity * ttt / (2 * np.sqrt(self._hyd_pars.alpha_x * self._hyd_pars.velocity * ttt))
             )
         )
 
     def _eq_z_term(self, xxx):
-        inner_term = self.src_pars.depth / (2 * np.sqrt(self.hyd_pars.alpha_z * xxx))
+        inner_term = self._src_pars.depth / (2 * np.sqrt(self._hyd_pars.alpha_z * xxx))
         return erf(inner_term) - erf(-inner_term)
 
     def _eq_source_decay(self, xxx, ttt):
-        term = np.exp(-self.k_source * (ttt - xxx / self.hyd_pars.velocity))
+        term = np.exp(-self.k_source * (ttt - xxx / self._hyd_pars.velocity))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 
     def _eq_y_term(self, i, xxx, yyy):
-        div_term = 2 * np.sqrt(self.hyd_pars.alpha_y * xxx)
+        div_term = 2 * np.sqrt(self._hyd_pars.alpha_y * xxx)
         term = erf((yyy + self.y_source[i]) / div_term) - erf((yyy - self.y_source[i]) / div_term)
         term[np.isnan(term)] = 0
         return term
@@ -376,18 +415,23 @@ class Karanovic(Transport3D):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        self.disp_x = self.hyd_pars.alpha_x * self.rv + self.att_pars.diffusion
-        self.disp_y = self.hyd_pars.alpha_y * self.rv + self.att_pars.diffusion
-        self.disp_z = self.hyd_pars.alpha_z * self.rv + self.att_pars.diffusion
-        # self.integral_term = np.zeros(self.ttt.shape)
-        # Stores integral error for each time step and source zone
-        self.error_size = np.zeros((len(self.src_pars.source_zone_boundary), len(self.t)))
 
     @abstractmethod
     def _calculate_cxyt(self):
         pass
 
+    def _pre_run(self):
+        super()._pre_run()
+        self.disp_x = self._hyd_pars.alpha_x * self.rv + self._att_pars.diffusion
+        self.disp_y = self._hyd_pars.alpha_y * self.rv + self._att_pars.diffusion
+        self.disp_z = self._hyd_pars.alpha_z * self.rv + self._att_pars.diffusion
+        # self.integral_term = np.zeros(self.ttt.shape)
+        # Stores integral error for each time step and source zone
+        self.error_size = np.zeros((len(self._src_pars.source_zone_boundary), len(self.t)))
+
     def run(self):
+        """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
+        self._pre_run()
         self.cxyt = self._calculate_cxyt()
 
     def _eq_integrand(self, t, sz):
@@ -397,7 +441,7 @@ class Karanovic(Transport3D):
 
     def _eq_x_exp_term(self, t):
         term = np.exp(
-            (-self.k_source - self.att_pars.decay_rate) * t
+            (-self.k_source - self._att_pars.decay_rate) * t
             - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
         )
         term[np.isnan(term)] = 0
@@ -415,7 +459,7 @@ class Karanovic(Transport3D):
         if t == 0 or self.disp_z == 0:
             inner_term = 2
         else:
-            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t))
+            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t))
         return erfc(-inner_term) - erfc(inner_term)
 
     def _eq_source_term(self, sz):
@@ -475,15 +519,17 @@ class Karanovic(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
 
+        self._pre_run()
+
         def integrand(t, sz):
             div_term = 2 * np.sqrt(self.disp_y * t**4)
-            inner_term = self.src_pars.depth / (2 * np.sqrt(self.disp_z * t**4))
+            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t**4))
             integrand_results = (
                 1
                 / (t**3)
                 * (
                     np.exp(
-                        (-self.k_source - self.att_pars.decay_rate) * t**4
+                        (-self.k_source - self._att_pars.decay_rate) * t**4
                         - (x_position - self.rv * t**4) ** 2 / (4 * self.disp_x * t**4)
                     )
                     * (

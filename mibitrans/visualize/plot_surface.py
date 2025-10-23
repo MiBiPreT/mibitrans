@@ -4,6 +4,7 @@ from matplotlib import animation
 import mibitrans
 from mibitrans.data.check_input import _check_model_type
 from mibitrans.data.check_input import _time_check
+from mibitrans.visualize.plot_line import _run_model_if_model_has_not_ran
 
 
 def plume_2d(model, time=None, animate=False, **kwargs):
@@ -20,7 +21,7 @@ def plume_2d(model, time=None, animate=False, **kwargs):
     """
     _check_model_type(model, mibitrans.transport.model_parent.Transport3D)
     t_pos = _time_check(model, time)
-
+    _run_model_if_model_has_not_ran(model)
     # Non animated plot
     if not animate:
         plt.pcolormesh(model.x, model.y, model.cxyt[t_pos, :, :], **kwargs)
@@ -61,7 +62,7 @@ def plume_3d(model, time=None, animate=False, **kwargs):
     """
     _check_model_type(model, mibitrans.transport.model_parent.Transport3D)
     t_pos = _time_check(model, time)
-
+    _run_model_if_model_has_not_ran(model)
     # Non animated plot
     if not animate:
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})

@@ -29,16 +29,16 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict["time"] = model.t[time_pos]
 
     if isinstance(model, (domenico.InstantReaction | domenico.LinearDecay)):
-        no_decay_model = domenico.NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
+        no_decay_model = domenico.NoDecay(model._hyd_pars, model._att_pars, model._src_pars, model._mod_pars)
         if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:
             mode = "linear_decay"
     elif isinstance(model, karanovic.InstantReaction) or (
-        isinstance(model, karanovic.LinearDecay) and model.att_pars.decay_rate > 0
+        isinstance(model, karanovic.LinearDecay) and model._att_pars.decay_rate > 0
     ):
-        model.att_pars.decay_rate = 0
-        no_decay_model = karanovic.NoDecay(model.hyd_pars, model.att_pars, model.src_pars, model.mod_pars)
+        model._att_pars.decay_rate = 0
+        no_decay_model = karanovic.NoDecay(model._hyd_pars, model._att_pars, model._src_pars, model._mod_pars)
         if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:
@@ -48,11 +48,11 @@ def mass_balance(model, time=None) -> dict:
         no_decay_model = model
 
     # Total source mass at t=0
-    M_source_0 = model.src_pars.total_mass
+    M_source_0 = model._src_pars.total_mass
     mass_balance_dict["source_mass_0"] = M_source_0
 
     # Total source mass at t=t, for the no decay model
-    if isinstance(model.src_pars.total_mass, str):
+    if isinstance(model._src_pars.total_mass, str):
         M_source_t = M_source_0
     else:
         M_source_t = M_source_0 * np.exp(-no_decay_model.k_source * model.t[time_pos])
@@ -63,10 +63,10 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict["source_mass_change"] = M_source_delta
 
     # Volume of single cell, as dx * dy * source thickness
-    cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.src_pars.depth
+    cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model._src_pars.depth
 
     # Plume mass of no decay model; concentration is converted to mass by multiplying by cellsize and pore space.
-    plume_mass_nodecay = np.sum(no_decay_model.cxyt[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)
+    plume_mass_nodecay = np.sum(no_decay_model.cxyt[time_pos, :, 1:] * cellsize * model._hyd_pars.porosity)
     mass_balance_dict["plume_mass_no_decay"] = plume_mass_nodecay
 
     # Difference between current plume mass and change in source mass must have been transported outside of model
@@ -80,7 +80,7 @@ def mass_balance(model, time=None) -> dict:
 
     if mode == "linear_decay":
         # Plume mass of linear decay model.
-        plume_mass_lindecay = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)
+        plume_mass_lindecay = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model._hyd_pars.porosity)
         mass_balance_dict["plume_mass_linear_decay"] = plume_mass_lindecay
 
         # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay
@@ -100,7 +100,7 @@ def mass_balance(model, time=None) -> dict:
 
     elif mode == "instant_reaction":
         # Total source mass at t=t, for the instant reaction model
-        if isinstance(model.src_pars.total_mass, str):
+        if isinstance(model._src_pars.total_mass, str):
             M_source_t_inst = M_source_0
         else:
             M_source_t_inst = M_source_0 * np.exp(-model.k_source * model.t[time_pos])
@@ -111,11 +111,11 @@ def mass_balance(model, time=None) -> dict:
         mass_balance_dict["source_mass_instant_change"] = M_source_delta
 
         # Plume mass without biodegradation according to the instant degradation model
-        plume_mass_inst_nodecay = np.sum(model.cxyt_noBC[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)
+        plume_mass_inst_nodecay = np.sum(model.cxyt_noBC[time_pos, :, 1:] * cellsize * model._hyd_pars.porosity)
         mass_balance_dict["plume_mass_no_decay_instant_reaction"] = plume_mass_inst_nodecay
 
         # Plume mass with biodegradation according to the instant degradation model
-        plume_mass_inst = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.hyd_pars.porosity)
+        plume_mass_inst = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model._hyd_pars.porosity)
         mass_balance_dict["plume_mass_instant_reaction"] = plume_mass_inst
 
         # Assumption: all mass difference between instant degradation model with biodegradation and

@@ -34,6 +34,7 @@ class NoDecay(Domenico):
                 parameters from SourceParameters.
             model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
                 from ModelParameters.
+            auto_run (bool, optional): Automatically run model when initialized. Defaults to True.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -94,6 +95,7 @@ class LinearDecay(Domenico):
                 parameters from SourceParameters.
             model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
                 from ModelParameters.
+            auto_run (bool, optional): Automatically run model when initialized. Defaults to True.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -113,15 +115,15 @@ class LinearDecay(Domenico):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        self.att_pars._require_linear_decay()
+        self._att_pars._require_linear_decay()
         if auto_run:
             self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _calculate_cxyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            decay_sqrt = np.sqrt(1 + 4 * self.att_pars.decay_rate * self.hyd_pars.alpha_x / self.hyd_pars.velocity)
-            decay_term = np.exp(xxx * (1 - decay_sqrt) / (self.hyd_pars.alpha_x * 2))
+            decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self._hyd_pars.velocity)
+            decay_term = np.exp(xxx * (1 - decay_sqrt) / (self._hyd_pars.alpha_x * 2))
             x_term = self._eq_x_term(xxx, ttt, decay_sqrt)
             z_term = self._eq_z_term(xxx)
             source_decay = self._eq_source_decay(xxx, ttt)
@@ -156,6 +158,7 @@ class InstantReaction(Domenico):
             SourceParameters.
         model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
             ModelParameters.
+        auto_run (bool, optional): Automatically run model when initialized. Defaults to True.
         verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
@@ -179,21 +182,28 @@ class InstantReaction(Domenico):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        self.att_pars._require_electron_acceptor()
+        if auto_run:
+            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+
+    def _instant_initialization(self):
+        self._att_pars._require_electron_acceptor()
+        self._att_pars.decay_rate = 0
         self.biodegradation_capacity = self._calculate_biodegradation_capacity()
         self.k_source = self._calculate_source_decay(self.biodegradation_capacity)
         # Source decay calculation uses self.c_source, therefore, addition of biodegradation_capacity to
         # outer source zone after calculation of k_source
         self.c_source[-1] += self.biodegradation_capacity
         self.cxyt_noBC = 0
-        if auto_run:
-            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+
+    def _pre_run(self):
+        super()._pre_run()
+        self._instant_initialization()
 
     def _calculate_biodegradation_capacity(self):
         biodegradation_capacity = 0
-        utilization_factor = getattr(self.att_pars, "utilization_factor").dictionary
+        utilization_factor = getattr(self._att_pars, "utilization_factor").dictionary
         for key, item in utilization_factor.items():
-            biodegradation_capacity += getattr(self.att_pars, util_to_conc_name[key]) / item
+            biodegradation_capacity += getattr(self._att_pars, util_to_conc_name[key]) / item
 
         return biodegradation_capacity
 

@@ -44,8 +44,11 @@ class Transport3D:
 
         self.verbose = verbose
 
+        self._observe_input_dataclass_change()
+
         self.has_run = False
-        self._pre_run()
+        self.initialized = False
+        self._pre_run_initialization_parameters()
 
     @property
     def hydrological_parameters(self):
@@ -54,7 +57,8 @@ class Transport3D:
 
     @hydrological_parameters.setter
     def hydrological_parameters(self, value):
-        self._hyd_pars = self._setter_routine("hydrological_parameters", value)
+        self._hyd_pars = copy.copy(value)
+        self._check_and_reset_when_input_dataclass_change("hydrological_parameters", value)
 
     @property
     def attenuation_parameters(self):
@@ -63,7 +67,8 @@ class Transport3D:
 
     @attenuation_parameters.setter
     def attenuation_parameters(self, value):
-        self._att_pars = self._setter_routine("attenuation_parameters", value)
+        self._att_pars = copy.copy(value)
+        self._check_and_reset_when_input_dataclass_change("attenuation_parameters", value)
 
     @property
     def source_parameters(self):
@@ -72,7 +77,8 @@ class Transport3D:
 
     @source_parameters.setter
     def source_parameters(self, value):
-        self._src_pars = self._setter_routine("source_parameters", value)
+        self._src_pars = copy.copy(value)
+        self._check_and_reset_when_input_dataclass_change("source_parameters", value)
 
     @property
     def model_parameters(self):
@@ -81,24 +87,36 @@ class Transport3D:
 
     @model_parameters.setter
     def model_parameters(self, value):
-        self._mod_pars = self._setter_routine("model_parameters", value)
+        self._mod_pars = copy.copy(value)
+        self._check_and_reset_when_input_dataclass_change("model_parameters", value)
 
-    # Implement report method; gives run time of calculation, error values and other applicable post-run information
-    # @abstractmethod
-    # def report(self):
-    #     pass
+    def _observe_input_dataclass_change(self):
+        self._hyd_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+            "hydrological_parameters", self._hyd_pars
+        )
+        self._att_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+            "attenuation_parameters", self._att_pars
+        )
+        self._src_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+            "source_parameters", self._src_pars
+        )
+        self._mod_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+            "model_parameters", self._mod_pars
+        )
 
-    def _setter_routine(self, key, value):
-        if self.has_run:
-            self.has_run = False
-            self.cxyt = np.zeros(self.xxx.shape)
+    def _check_and_reset_when_input_dataclass_change(self, key, value):
         self._check_input_dataclasses(key, value)
-        return copy.copy(value)
+        self.initialized  = False
+        if self.has_run:
+            self.cxyt = np.zeros(self.xxx.shape)
+            self.has_run = False
+            if self.verbose:
+                print(f"Parameter '{key}' has changed — resetting output")
 
-    def _pre_run(self):
+    def _pre_run_initialization_parameters(self):
         # One-dimensional model domain arrays
         self.x = np.arange(0, self._mod_pars.model_length + self._mod_pars.dx, self._mod_pars.dx)
-        self.y = self._calculate_y()
+        self.y = self._calculate_y_discretization()
         self.t = np.arange(self._mod_pars.dt, self._mod_pars.model_time + self._mod_pars.dt, self._mod_pars.dt)
 
         # Three-dimensional model domain arrays
@@ -124,6 +142,8 @@ class Transport3D:
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
+        self.initialized = True
 
     def _calculate_source_decay(self, biodegradation_capacity=0):
         """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
@@ -157,7 +177,7 @@ class Transport3D:
         if not isinstance(value, dataclass_dict[key]):
             raise TypeError(f"Input argument {key} should be {dataclass_dict[key]}, but is {type(value)} instead.")
 
-    def _calculate_y(self):
+    def _calculate_y_discretization(self):
         """Calculate y-direction discretization."""
         if self._mod_pars.model_width >= 2 * self._src_pars.source_zone_boundary[-1]:
             y = np.arange(
@@ -189,8 +209,8 @@ class Transport3D:
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
-
-        self._pre_run()
+        if not self.has_run and not self.initialized:
+            self._pre_run_initialization_parameters()
 
         if hasattr(self, "cxyt_noBC"):
             save_c_noBC = self.cxyt_noBC.copy()
@@ -337,7 +357,7 @@ class Domenico(Transport3D, ABC):
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
-        self._pre_run()
+        self._pre_run_initialization_parameters()
         self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
 
     def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
@@ -420,8 +440,8 @@ class Karanovic(Transport3D):
     def _calculate_cxyt(self):
         pass
 
-    def _pre_run(self):
-        super()._pre_run()
+    def _pre_run_initialization_parameters(self):
+        super()._pre_run_initialization_parameters()
         self.disp_x = self._hyd_pars.alpha_x * self.rv + self._att_pars.diffusion
         self.disp_y = self._hyd_pars.alpha_y * self.rv + self._att_pars.diffusion
         self.disp_z = self._hyd_pars.alpha_z * self.rv + self._att_pars.diffusion
@@ -431,7 +451,7 @@ class Karanovic(Transport3D):
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
-        self._pre_run()
+        self._pre_run_initialization_parameters()
         self.cxyt = self._calculate_cxyt()
 
     def _eq_integrand(self, t, sz):
@@ -519,7 +539,8 @@ class Karanovic(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
 
-        self._pre_run()
+        if not self.has_run and not self.initialized:
+            self._pre_run_initialization_parameters()
 
         def integrand(t, sz):
             div_term = 2 * np.sqrt(self.disp_y * t**4)

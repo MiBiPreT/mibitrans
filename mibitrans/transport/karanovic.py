@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from mibitrans.transport.model_parent import Karanovic
 
@@ -56,7 +55,7 @@ class LinearDecay(Karanovic):
         return cxyt
 
 
-class NoDecay(LinearDecay):
+class NoDecay(Karanovic):
     """Calculate contaminant transport with no decay using the exact analytical solution."""
 
     def __init__(
@@ -98,11 +97,21 @@ class NoDecay(LinearDecay):
             TypeError : If input is not of the correct Dataclass.
 
         """
-        attenuation_parameters = copy.copy(attenuation_parameters)
-        attenuation_parameters.decay_rate = 0
-        super().__init__(
-            hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, auto_run, verbose
-        )
+        # attenuation_parameters = copy.copy(attenuation_parameters)
+        # attenuation_parameters.decay_rate = 0
+        # super().__init__(
+        #     hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, auto_run, verbose
+        # )
+        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        self._att_pars.decay_rate = 0
+        if auto_run:
+            self.cxyt = self._calculate_concentration_for_all_xyt()
+
+    def _calculate_concentration_for_all_xyt(self):
+        with np.errstate(divide="ignore", invalid="ignore"):
+            cxyt = self._equation_source_superposition()
+        self.has_run = True
+        return cxyt
 
 
 class InstantReaction(Karanovic):

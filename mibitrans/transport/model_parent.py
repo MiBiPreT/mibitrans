@@ -483,7 +483,7 @@ class Karanovic(Transport3D):
                 lower_bound = self.t[j - 1]
             upper_bound = self.t[j]
             integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
-                self._equation_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
+                self._equation_integrand, lower_bound, upper_bound, limit=10000 // len(self.t), args=(sz,)
             )
         integral_sum = np.cumsum(integral_term, axis=0)
         return integral_sum

@@ -41,7 +41,8 @@ def generate_mass_balance_tables(mass_dict):
     # Loop to add each mass balance components to their respective table
     for key, item in mass_dict.items():
         # Round mass balance to one decimal to avoid clutter
-        round_item = np.round(item, 1)
+        if isinstance(item, (float, np.ndarray)):
+            item = np.round(item, 1)
 
         # Time does not need to be renamed and does not need to be added as a row to a table
         if key != "time":
@@ -59,11 +60,11 @@ def generate_mass_balance_tables(mass_dict):
                 # Add time information to name of source mass at t = t
                 if rename_key == "mass t = ":
                     rename_key = rename_key + str(mass_dict["time"])
-                table_source.add_row([rename_key, round_item])
+                table_source.add_row([rename_key, item])
 
             elif key in ["plume_mass_no_decay", "transport_outside_extent_nodecay"]:
                 print_nodecay = True
-                table_nodecay.add_row([rename_key, round_item])
+                table_nodecay.add_row([rename_key, item])
 
             elif key in [
                 "plume_mass_linear_decay",
@@ -71,7 +72,7 @@ def generate_mass_balance_tables(mass_dict):
                 "plume_mass_degraded_linear",
             ]:
                 print_lindecay = True
-                table_lindecay.add_row([rename_key, round_item])
+                table_lindecay.add_row([rename_key, item])
 
             elif key in [
                 "source_mass_instant_t",
@@ -83,11 +84,11 @@ def generate_mass_balance_tables(mass_dict):
                 print_instant = True
                 if rename_key == "source mass t = ":
                     rename_key = rename_key + str(mass_dict["time"])
-                table_instant.add_row([rename_key, round_item])
+                table_instant.add_row([rename_key, item])
 
             elif key == "electron_acceptor_mass_change":
                 print_electron = True
-                oxy, no, fe, so, ch = round_item
+                oxy, no, fe, so, ch = item
                 # Oxygen, Nitrate and Sulfate are electron acceptors and thus consumed (negative change),
                 # Iron2+ and Methane are byproducts from electron acceptors and thus generated (positive change).
                 table_electron.add_row([rename_key, -oxy, -no, f"+{fe}", -so, f"+{ch}"])

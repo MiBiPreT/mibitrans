@@ -16,7 +16,10 @@ from tests.test_example_data import testingdata_nodecay
         (AttenuationParameters(half_life=1), None),
         (
             AttenuationParameters(
-                half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                half_life=1,
+                electron_acceptors=dict(
+                    delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                ),
             ),
             None,
         ),
@@ -32,22 +35,23 @@ def test_require_degradation_linear(att, error, test_hydro_pars, test_source_par
     [
         (
             AttenuationParameters(
-                half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                half_life=1,
+                electron_acceptors=dict(
+                    delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                ),
             ),
             None,
         ),
         (
             AttenuationParameters(
-                delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                electron_acceptors=dict(
+                    delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, delta_sulfate=22.4, methane=6.6
+                )
             ),
             None,
         ),
         (AttenuationParameters(decay_rate=1), MissingValueError),
         (AttenuationParameters(half_life=1), MissingValueError),
-        (
-            AttenuationParameters(half_life=1, delta_oxygen=1.65, delta_nitrate=0.7, ferrous_iron=16.6, methane=6.6),
-            MissingValueError,
-        ),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")

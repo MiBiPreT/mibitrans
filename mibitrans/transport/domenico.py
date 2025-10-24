@@ -7,7 +7,6 @@ Journal of Hydrology, 91(1-2), 49-58.
 """
 
 import numpy as np
-from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.transport.model_parent import Domenico
 
 
@@ -198,14 +197,6 @@ class InstantReaction(Domenico):
     def _pre_run_initialization_parameters(self):
         super()._pre_run_initialization_parameters()
         self._instant_initialization()
-
-    def _calculate_biodegradation_capacity(self):
-        biodegradation_capacity = 0
-        utilization_factor = getattr(self._att_pars, "utilization_factor").dictionary
-        for key, item in utilization_factor.items():
-            biodegradation_capacity += getattr(self._att_pars, util_to_conc_name[key]) / item
-
-        return biodegradation_capacity
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0

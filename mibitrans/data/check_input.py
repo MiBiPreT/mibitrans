@@ -5,7 +5,7 @@ Module evaluating if a dictionary contains all required (correct) parameters for
 
 import warnings
 import numpy as np
-import mibitrans.data.parameter_information
+import mibitrans  # .data.parameter_information
 
 
 def _check_numeric(parameter: str, value):
@@ -157,6 +157,28 @@ def _check_dataclass(parameter, value, expected_type):
         return TypeError(f"{parameter} must be of type {expected_type}, but is {type(value)} instead.")
 
 
+def _check_electron_acceptor(value):
+    """Check if variable is an ElectronAcceptors dataclass, list, array or dictionary, raise an error if it is not."""
+    if isinstance(value, mibitrans.data.parameter_information.ElectronAcceptors):
+        return None
+    elif isinstance(value, (list, np.ndarray, dict)):
+        if len(value) != 5:
+            return ValueError(
+                f"Input for electron_acceptors as list, array or dictionary must have an entry for each electron "
+                f"acceptor, of which there are five utilized by this model. The current input has {len(value)} "
+                f"entries instead."
+            )
+        else:
+            return None
+
+    else:
+        return TypeError(
+            f"electron_acceptors must be of type {mibitrans.data.parameter_information.ElectronAcceptors},"
+            f" or alternatively as list, numpy array or dictionary containing electron acceptor "
+            f"concentrations. But is {type(value)} instead."
+        )
+
+
 def check_model_type(parameter, allowed_model_types):
     """Check if variable is of the given allowed model types, and raise an error if it is not."""
     if not isinstance(parameter, allowed_model_types):
@@ -218,7 +240,7 @@ def check_x_in_domain(model, x_position):
 def validate_input_values(parameter, value):
     """Validate if input parameter is of correct type and in correct domain."""
     match parameter:
-        # Any input for verbose argument is fine.
+        # Any input for verbose argument is fine; if set to anything other than False, 0 or None, verbose is on
         case "verbose":
             error = None
         case "_on_change":
@@ -241,6 +263,8 @@ def validate_input_values(parameter, value):
         # Parameters which are input as single values, lists or numpy arrays
         case "source_zone_boundary" | "source_zone_concentration":
             error = _check_array_list_numeric_positive(parameter, value)
+        case "electron_acceptors":
+            error = _check_electron_acceptor(value)
         # All other parameters are checked as floats on positive domain
         case _:
             error = _check_numeric_positive(parameter, value)

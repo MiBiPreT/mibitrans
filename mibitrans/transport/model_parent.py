@@ -9,6 +9,7 @@ from scipy.special import erf
 from scipy.special import erfc
 import mibitrans.data.parameters
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
 
@@ -194,6 +195,14 @@ class Transport3D:
             )
         return y
 
+    def _calculate_biodegradation_capacity(self):
+        biodegradation_capacity = 0
+        utilization_factor = getattr(self._att_pars, "utilization_factor").dictionary
+        for key, item in utilization_factor.items():
+            biodegradation_capacity += getattr(self._att_pars.electron_acceptors, util_to_conc_name[key]) / item
+
+        return biodegradation_capacity
+
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
 
@@ -217,7 +226,7 @@ class Transport3D:
         x = np.array([x_position])
         y = np.array([y_position])
         t = np.array([time])
-        concentration = self._calculate_cxyt(x, y, t)[0]
+        concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
         if hasattr(self, "cxyt_noBC"):
             self.cxyt_noBC = save_c_noBC
         return concentration

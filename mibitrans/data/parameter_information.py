@@ -36,7 +36,7 @@ mass_balance_renaming_dictionary = {
 
 @dataclass
 class UtilizationFactor:
-    """Make UtilizationFactor object.
+    """Make object containing information about electron acceptor utilization factor.
 
     Args:
         util_oxygen (float) : utilization factor of oxygen, as mass of oxygen consumed
@@ -77,3 +77,33 @@ class UtilizationFactor:
             util_sulfate=self.util_sulfate,
             util_methane=self.util_methane,
         )
+
+@dataclass
+class ElectronAcceptors:
+    """Make object with concentrations of electron acceptors.
+
+    Dataclass which handles the entry of electron acceptor concentrations used for the instant reaction biodegradation
+    method. As plume concentrations for reduced electron acceptor species and as difference between plume and background
+    concentrations for the electron acceptors themselves.
+
+    delta_oxygen (float) : Difference between background oxygen and plume oxygen concentrations, in [g/m^3].
+        Only required for instant reaction models.
+    delta_nitrate (float) : Difference between background nitrate and contaminant plume nitrate concentrations,
+        in [g/m^3]. Only required for instant reaction models.
+    ferrous_iron (float) : Ferrous iron concentration in contaminant plume, in [g/m^3]. Only required for
+        instant reaction models.
+    delta_sulfate (float) : Difference between background sulfate and plume sulfate concentrations, in [g/m^3].
+        Only required for instant reaction models.
+    methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
+        instant reaction models.
+    """
+    delta_oxygen: float
+    delta_nitrate: float
+    ferrous_iron: float
+    delta_sulfate: float
+    methane: float
+
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)

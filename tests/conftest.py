@@ -21,11 +21,7 @@ def test_att_pars():
     return AttenuationParameters(
         retardation=1,
         half_life=0.1 * 365,
-        delta_oxygen=0.5,
-        delta_nitrate=0.5,
-        ferrous_iron=0.5,
-        delta_sulfate=0.5,
-        methane=0.5,
+        electron_acceptors=dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5),
     )
 
 

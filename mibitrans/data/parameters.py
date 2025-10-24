@@ -12,6 +12,7 @@ import numpy as np
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
+from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize.show_conditions import source_zone
 
@@ -119,16 +120,7 @@ class AttenuationParameters(_ChangeObserver):
             in [m^3/g]. Optional if retardation is specified.
         fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
             Optional if retardation is specified.
-        delta_oxygen (float) : Difference between background oxygen and plume oxygen concentrations, in [g/m^3].
-            Only required for instant reaction models.
-        delta_nitrate (float) : Difference between background nitrate and contaminant plume nitrate concentrations,
-            in [g/m^3]. Only required for instant reaction models.
-        ferrous_iron (float) : Ferrous iron concentration in contaminant plume, in [g/m^3]. Only required for
-            instant reaction models.
-        delta_sulfate (float) : Difference between background sulfate and plume sulfate concentrations, in [g/m^3].
-            Only required for instant reaction models.
-        methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
-            instant reaction models.
+        electron_acceptors
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Methods:
@@ -149,11 +141,7 @@ class AttenuationParameters(_ChangeObserver):
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
-    delta_oxygen: float = None
-    delta_nitrate: float = None
-    ferrous_iron: float = None
-    delta_sulfate: float = None
-    methane: float = None
+    electron_acceptors: list | np.ndarray | dict | ElectronAcceptors = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
@@ -170,6 +158,7 @@ class AttenuationParameters(_ChangeObserver):
     def __post_init__(self):
         """Check argument presence, types and domain."""
         self.initialized = True
+        self._standardize_electron_acceptor_input_to_dataclass()
         self.utilization_factor = None
         self.set_utilization_factor()
 
@@ -223,25 +212,20 @@ class AttenuationParameters(_ChangeObserver):
             util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane
         )
 
-    def _require_electron_acceptor(self):
-        missing_ea = []
-        if self.delta_oxygen is None:
-            missing_ea.append("delta_oxygen")
-        if self.delta_nitrate is None:
-            missing_ea.append("delta_nitrate")
-        if self.ferrous_iron is None:
-            missing_ea.append("ferrous_iron")
-        if self.delta_sulfate is None:
-            missing_ea.append("delta_sulfate")
-        if self.methane is None:
-            missing_ea.append("methane")
+    def _standardize_electron_acceptor_input_to_dataclass(self):
+        if isinstance(self.electron_acceptors, (list, np.ndarray)):
+            self.electron_acceptors = ElectronAcceptors(*self.electron_acceptors)
+        elif isinstance(self.electron_acceptors, dict):
+            self.electron_acceptors = ElectronAcceptors(**self.electron_acceptors)
 
-        if len(missing_ea) > 0:
-            raise MissingValueError(f"Instant reaction model requires concentrations of {missing_ea}.")
+    def _require_electron_acceptor(self):
+        if not isinstance(self.electron_acceptors, ElectronAcceptors):
+            raise MissingValueError("Instant reaction model requires concentrations of electron acceptors.")
 
         if self.decay_rate is not None and self.decay_rate > 0.0:
             warnings.warn(
-                "Decay rate was set to a value, but will not be used, as model uses electron acceptor concentrations."
+                "Decay rate was set to a value, but will not be used, as model uses electron acceptor concentrations "
+                "for biodegradation calculations."
             )
 
     def _require_linear_decay(self):

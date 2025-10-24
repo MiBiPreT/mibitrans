@@ -370,17 +370,11 @@ class Domenico(Transport3D, ABC):
         self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
     def _equation_term_x(self, xxx, ttt, decay_sqrt=1):
-        return erfc(
-            (xxx - self._hyd_pars.velocity * ttt * decay_sqrt)
-            / (2 * np.sqrt(self._hyd_pars.alpha_x * self._hyd_pars.velocity * ttt))
-        )
+        return erfc((xxx - self.rv * ttt * decay_sqrt) / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
 
     def _equation_term_additional_x(self, xxx, ttt):
-        return np.exp(xxx * self._hyd_pars.velocity / (self._hyd_pars.alpha_x * self._hyd_pars.velocity)) * (
-            erfc(
-                xxx
-                + self._hyd_pars.velocity * ttt / (2 * np.sqrt(self._hyd_pars.alpha_x * self._hyd_pars.velocity * ttt))
-            )
+        return np.exp(xxx * self.rv / (self._hyd_pars.alpha_x * self.rv)) * (
+            erfc(xxx + self.rv * ttt / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
         )
 
     def _equation_term_z(self, xxx):
@@ -388,7 +382,7 @@ class Domenico(Transport3D, ABC):
         return erf(inner_term) - erf(-inner_term)
 
     def _equation_term_source_decay(self, xxx, ttt):
-        term = np.exp(-self.k_source * (ttt - xxx / self._hyd_pars.velocity))
+        term = np.exp(-self.k_source * (ttt - xxx / self.rv))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 

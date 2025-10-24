@@ -121,7 +121,7 @@ class LinearDecay(Domenico):
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self._hyd_pars.velocity)
+            decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self.rv)
             decay_term = np.exp(xxx * (1 - decay_sqrt) / (self._hyd_pars.alpha_x * 2))
             x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
             z_term = self._equation_term_z(xxx)

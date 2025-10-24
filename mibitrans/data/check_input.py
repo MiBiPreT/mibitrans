@@ -8,17 +8,17 @@ import numpy as np
 import mibitrans.data.parameter_information
 
 
-def _check_float(parameter: str, value):
-    """Check if a variable is a float and if it is positive."""
+def _check_numeric(parameter: str, value):
+    """Check if a variable is numerical and if it is positive."""
     if isinstance(value, (float, int, np.floating, np.integer)):
         return None
     else:
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
 
-def _check_float_positive(parameter: str, value):
-    """Check if a variable is a float and if it is positive."""
-    is_float = _check_float(parameter, value)
+def _check_numeric_positive(parameter: str, value):
+    """Check if a variable is numerical and if it is positive."""
+    is_float = _check_numeric(parameter, value)
     if is_float is None:
         if value >= 0:
             return None
@@ -28,9 +28,9 @@ def _check_float_positive(parameter: str, value):
         return is_float
 
 
-def _check_float_fraction(parameter: str, value):
-    """Check if a variable is a float and if it is between 0 and 1."""
-    is_float = _check_float(parameter, value)
+def _check_numeric_fraction(parameter: str, value):
+    """Check if a variable is numerical and if it is between 0 and 1."""
+    is_float = _check_numeric(parameter, value)
     if is_float is None:
         if 0 <= value <= 1:
             return None
@@ -40,9 +40,9 @@ def _check_float_fraction(parameter: str, value):
         return is_float
 
 
-def _check_float_retardation(parameter: str, value):
-    """Check if a variable is a float and if it is 1 or larger."""
-    is_float = _check_float(parameter, value)
+def _check_numeric_retardation(parameter: str, value):
+    """Check if a variable is numerical and if it is 1 or larger."""
+    is_float = _check_numeric(parameter, value)
     if is_float is None:
         if value >= 1:
             return None
@@ -52,8 +52,8 @@ def _check_float_retardation(parameter: str, value):
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
 
-def _check_array_float_positive(parameter: str, value):
-    """Check if variable is numpy array, list, or float, if it is positive and if an array is 1-dimensional."""
+def _check_array_list_numeric_positive(parameter: str, value):
+    """Check if variable is numpy array, list, or numerical, if it is positive and if an array is 1-dimensional."""
     if isinstance(value, np.ndarray):
         if len(value.shape) == 1:
             if all(value >= 0):
@@ -128,7 +128,7 @@ def validate_source_zones(boundary, concentration):
 
 def _check_total_mass(parameter: str, value):
     """Check variable properties of total source mass specifically."""
-    if _check_float(parameter, value) is None:
+    if _check_numeric(parameter, value) is None:
         if value >= 0:
             return None
         else:
@@ -143,7 +143,7 @@ def _check_total_mass(parameter: str, value):
         return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 
 
-def _check_dictionary(value):
+def check_dictionary(value):
     """Check if variable is a dictionary, and raise an error if it is not."""
     if not isinstance(value, dict):
         raise TypeError(f"Input must be a dict, but is {type(value)} instead.")
@@ -157,7 +157,7 @@ def _check_dataclass(parameter, value, expected_type):
         return TypeError(f"{parameter} must be of type {expected_type}, but is {type(value)} instead.")
 
 
-def _check_model_type(parameter, allowed_model_types):
+def check_model_type(parameter, allowed_model_types):
     """Check if variable is of the given allowed model types, and raise an error if it is not."""
     if not isinstance(parameter, allowed_model_types):
         raise TypeError(
@@ -166,10 +166,10 @@ def _check_model_type(parameter, allowed_model_types):
         )
 
 
-def _time_check(model, time):
+def check_time_in_domain(model, time):
     """Check if time input is valid, and returns the index of nearest time."""
     if time is not None:
-        error = _check_float_positive("time", time)
+        error = _check_numeric_positive("time", time)
         if error is not None:
             raise error
         elif time > np.max(model.t):
@@ -185,9 +185,9 @@ def _time_check(model, time):
     return time_pos
 
 
-def _y_check(model, y_position):
+def check_y_in_domain(model, y_position):
     """Check if y-position input is valid, and returns the index of nearest y position."""
-    error = _check_float("y_position", y_position)
+    error = _check_numeric("y_position", y_position)
     if error is not None:
         raise error
     if y_position > np.max(model.y):
@@ -200,9 +200,9 @@ def _y_check(model, y_position):
     return y_pos
 
 
-def _x_check(model, x_position):
+def check_x_in_domain(model, x_position):
     """Check if x-position input is valid, and returns the index of nearest x position."""
-    error = _check_float_positive("x_position", x_position)
+    error = _check_numeric_positive("x_position", x_position)
     if error is not None:
         raise error
     if x_position > np.max(model.x):
@@ -225,7 +225,7 @@ def validate_input_values(parameter, value):
             error = None
         # Specific check for retardation, which has domain >= 1
         case "retardation":
-            error = _check_float_retardation(parameter, value)
+            error = _check_numeric_retardation(parameter, value)
         # Specific check for total mass, which can be a positive float, or a specific string
         case "total_mass":
             error = _check_total_mass(parameter, value)
@@ -234,16 +234,16 @@ def validate_input_values(parameter, value):
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
         # Parameters which can be any float value
         case "y_position":
-            error = _check_float(parameter, value)
+            error = _check_numeric(parameter, value)
         # Parameters which have domain [0,1]
         case "porosity" | "fraction_organic_carbon":
-            error = _check_float_fraction(parameter, value)
+            error = _check_numeric_fraction(parameter, value)
         # Parameters which are input as single values, lists or numpy arrays
         case "source_zone_boundary" | "source_zone_concentration":
-            error = _check_array_float_positive(parameter, value)
+            error = _check_array_list_numeric_positive(parameter, value)
         # All other parameters are checked as floats on positive domain
         case _:
-            error = _check_float_positive(parameter, value)
+            error = _check_numeric_positive(parameter, value)
 
     if error and (value is not None):
         raise error

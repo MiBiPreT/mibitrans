@@ -5,7 +5,7 @@ Module calculating methods for mass balance visualization.
 
 import numpy as np
 from prettytable import PrettyTable
-from mibitrans.data.check_input import _check_dictionary
+from mibitrans.data.check_input import check_dictionary
 from mibitrans.data.parameter_information import mass_balance_renaming_dictionary as rename_dict
 
 
@@ -17,7 +17,7 @@ def generate_mass_balance_tables(mass_dict):
 
     """
     # Check if input is indeed a dictionary
-    _check_dictionary(mass_dict)
+    check_dictionary(mass_dict)
 
     # Generate table object with object headers. Seperate tables for each component for clarity
     # table_source will contain the source decay masses from no decay and linear decay model mode.

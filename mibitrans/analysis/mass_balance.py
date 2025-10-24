@@ -7,8 +7,8 @@ import numpy as np
 import mibitrans.transport.domenico as domenico
 import mibitrans.transport.karanovic as karanovic
 from mibitrans.analysis.parameter_calculations import calculate_utilization
-from mibitrans.data.check_input import _check_model_type
-from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import check_model_type
+from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.transport.model_parent import Transport3D
 
 
@@ -22,8 +22,8 @@ def mass_balance(model, time=None) -> dict:
     Returns:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
-    _check_model_type(model, Transport3D)
-    time_pos = _time_check(model, time)
+    check_model_type(model, Transport3D)
+    time_pos = check_time_in_domain(model, time)
     mass_balance_dict = {}
 
     mass_balance_dict["time"] = model.t[time_pos]

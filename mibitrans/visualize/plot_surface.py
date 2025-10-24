@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
 import mibitrans
-from mibitrans.data.check_input import _check_model_type
-from mibitrans.data.check_input import _time_check
+from mibitrans.data.check_input import check_model_type
+from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.visualize.plot_line import _run_model_if_model_has_not_ran
 
 
@@ -19,8 +19,8 @@ def plume_2d(model, time=None, animate=False, **kwargs):
 
     Returns a matrix plot of the input plume as object.
     """
-    _check_model_type(model, mibitrans.transport.model_parent.Transport3D)
-    t_pos = _time_check(model, time)
+    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
+    t_pos = check_time_in_domain(model, time)
     _run_model_if_model_has_not_ran(model)
     # Non animated plot
     if not animate:
@@ -60,8 +60,8 @@ def plume_3d(model, time=None, animate=False, **kwargs):
     Returns:
         ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
     """
-    _check_model_type(model, mibitrans.transport.model_parent.Transport3D)
-    t_pos = _time_check(model, time)
+    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
+    t_pos = check_time_in_domain(model, time)
     _run_model_if_model_has_not_ran(model)
     # Non animated plot
     if not animate:

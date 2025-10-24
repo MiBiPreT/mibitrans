@@ -1,12 +1,45 @@
+import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.parameters import AttenuationParameters
-from mibitrans.transport.domenico import InstantReaction
-from mibitrans.transport.domenico import LinearDecay
+from mibitrans.transport import domenico as dom
 from tests.test_example_data import testingdata_instantreaction
 from tests.test_example_data import testingdata_lineardecay
 from tests.test_example_data import testingdata_nodecay
+
+
+@pytest.mark.parametrize(
+    "model_type",
+    [
+        "no_decay",
+        "linear",
+        "instant",
+    ],
+)
+@pytest.mark.filterwarnings("ignore:Decay rate was set")
+def test_auto_run_off_and_reset(model_type, test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Test if model does not auto run when set to False and resets whenever property gets changed."""
+    match model_type:
+        case "no_decay":
+            mod = dom.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, auto_run=False)
+        case "linear":
+            mod = dom.LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, auto_run=False)
+        case "instant":
+            mod = dom.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, auto_run=False)
+
+    assert not mod.has_run
+    assert np.sum(mod.cxyt) == 0.0
+
+    mod.run()
+
+    assert mod.has_run
+    assert np.sum(mod.cxyt) > 0.0
+
+    mod.hydrological_parameters.velocity = 10
+
+    assert not mod.has_run
+    assert np.sum(mod.cxyt) == 0.0
 
 
 @pytest.mark.parametrize(
@@ -27,7 +60,7 @@ from tests.test_example_data import testingdata_nodecay
 )
 def test_require_degradation_linear(att, error, test_hydro_pars, test_source_pars, test_model_pars):
     """Test if LinearDecay class correctly raises error when correct degradation parameters are missing."""
-    LinearDecay(test_hydro_pars, att, test_source_pars, test_model_pars)
+    dom.LinearDecay(test_hydro_pars, att, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(
@@ -58,10 +91,10 @@ def test_require_degradation_linear(att, error, test_hydro_pars, test_source_par
 def test_require_degradation_instant(att, error, test_hydro_pars, test_source_pars, test_model_pars):
     """Test if InstantReaction class correctly raises error when correct attenuation parameters are missing."""
     if error is None:
-        InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
+        dom.InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
     else:
         with pytest.raises(error):
-            InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
+            dom.InstantReaction(test_hydro_pars, att, test_source_pars, test_model_pars)
 
 
 @pytest.mark.parametrize(

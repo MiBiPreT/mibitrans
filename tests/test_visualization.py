@@ -2,10 +2,12 @@ from types import NoneType
 import matplotlib
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
+import numpy as np
 import prettytable
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.check_input import DomainValueError
+from mibitrans.transport import karanovic as kar
 from mibitrans.visualize.plot_line import breakthrough
 from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse
@@ -251,6 +253,37 @@ def test_input_plotting(plottable, expected, request):
         plume_2d(plottable)
     with pytest.raises(expected):
         plume_3d(plottable)
+
+
+@pytest.mark.parametrize(
+    "plotter",
+    [
+        "centerline",
+        "transverse",
+        "breakthrough",
+        "plume_2d",
+        "plume_3d",
+    ],
+)
+def test_auto_calculate_when_not_run(plotter, test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Test if an unrun model object gets run when trying to plot."""
+    mod = kar.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars, auto_run=False)
+    assert not mod.has_run
+    empty_sum = np.sum(mod.cxyt)
+    match plotter:
+        case "centerline":
+            mod.centerline()
+        case "transverse":
+            mod.transverse(1)
+        case "breakthrough":
+            mod.breakthrough(1)
+        case "plume_2d":
+            mod.plume_2d()
+        case "plume_3d":
+            mod.plume_3d()
+    plt.clf()
+    assert mod.has_run
+    assert np.sum(mod.cxyt) > empty_sum
 
 
 pt_type = prettytable.prettytable.PrettyTable

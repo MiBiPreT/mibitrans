@@ -107,3 +107,4 @@ class ElectronAcceptors:
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
         super().__setattr__(parameter, value)
+

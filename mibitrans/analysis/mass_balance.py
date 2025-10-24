@@ -3,6 +3,7 @@
 Module calculating the mass balance based on base parameters.
 """
 
+import copy
 import numpy as np
 import mibitrans.transport.domenico as domenico
 import mibitrans.transport.karanovic as karanovic
@@ -23,7 +24,14 @@ def mass_balance(model, time=None) -> dict:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
     check_model_type(model, Transport3D)
+    model = copy.deepcopy(model)
     time_pos = check_time_in_domain(model, time)
+
+    if isinstance(model.source_parameters.total_mass, str):
+        inf_source = True
+    else:
+        inf_source = False
+
     mass_balance_dict = {}
 
     mass_balance_dict["time"] = model.t[time_pos]
@@ -32,6 +40,7 @@ def mass_balance(model, time=None) -> dict:
         no_decay_model = domenico.NoDecay(
             model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
         )
+
         if hasattr(model, "biodegradation_capacity"):
             mode = "instant_reaction"
         else:
@@ -39,7 +48,6 @@ def mass_balance(model, time=None) -> dict:
     elif isinstance(model, karanovic.InstantReaction) or (
         isinstance(model, karanovic.LinearDecay) and model.attenuation_parameters.decay_rate > 0
     ):
-        model.attenuation_parameters.decay_rate = 0
         no_decay_model = karanovic.NoDecay(
             model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
         )
@@ -56,14 +64,18 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict["source_mass_0"] = M_source_0
 
     # Total source mass at t=t, for the no decay model
-    if isinstance(model.source_parameters.total_mass, str):
+    if inf_source:
         M_source_t = M_source_0
     else:
         M_source_t = M_source_0 * np.exp(-no_decay_model.k_source * model.t[time_pos])
     mass_balance_dict["source_mass_t"] = M_source_t
 
     # Change in source mass at t=t, due to source decay by transport
-    M_source_delta = M_source_0 - M_source_t
+    if inf_source:
+        Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration(0)
+        M_source_delta = Q * c0_avg * model.t[time_pos]
+    else:
+        M_source_delta = M_source_0 - M_source_t
     mass_balance_dict["source_mass_change"] = M_source_delta
 
     # Volume of single cell, as dx * dy * source thickness
@@ -113,7 +125,11 @@ def mass_balance(model, time=None) -> dict:
         mass_balance_dict["source_mass_instant_t"] = M_source_t_inst
 
         # Change in source mass at t=t due to source decay by transport and by biodegradation
-        M_source_delta = M_source_0 - M_source_t_inst
+        if inf_source:
+            Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration(model.biodegradation_capacity)
+            M_source_delta = Q * c0_avg * model.t[time_pos]
+        else:
+            M_source_delta = M_source_0 - M_source_t_inst
         mass_balance_dict["source_mass_instant_change"] = M_source_delta
 
         # Plume mass without biodegradation according to the instant degradation model

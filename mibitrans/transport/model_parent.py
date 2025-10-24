@@ -149,22 +149,27 @@ class Transport3D:
     def _calculate_source_decay(self, biodegradation_capacity=0):
         """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
         if isinstance(self._src_pars.total_mass, (float, int)):
-            y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
-            y_src[1:] = self._src_pars.source_zone_boundary
-            c_src = self._src_pars.source_zone_concentration
-            Q = self._hyd_pars.velocity * self._hyd_pars.porosity * self._src_pars.depth * np.max(y_src) * 2
-
-            weighted_conc = np.zeros(len(self._src_pars.source_zone_boundary))
-            for i in range(len(self._src_pars.source_zone_boundary)):
-                weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
-
-            c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+            Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration(biodegradation_capacity)
             k_source = Q * c0_avg / self._src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
         else:
             k_source = 0
 
         return k_source
+
+    def _calculate_discharge_and_average_source_zone_concentration(self, biodegradation_capacity):
+        y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
+        y_src[1:] = self._src_pars.source_zone_boundary
+        c_src = self._src_pars.source_zone_concentration
+        Q = self._hyd_pars.velocity * self._hyd_pars.porosity * self._src_pars.depth * np.max(y_src) * 2
+
+        weighted_conc = np.zeros(len(self._src_pars.source_zone_boundary))
+        for i in range(len(self._src_pars.source_zone_boundary)):
+            weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
+
+        c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+
+        return Q, c0_avg
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -252,7 +257,6 @@ class Transport3D:
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
-            model : Model object from mibitrans.transport, or list of model objects.
             x_position : x-position along the plume (longitudinal direction) for the plot.
             time (float): Point of time for the plot. Will show the closest time step to given value.
                 By default, last point in time is plotted.
@@ -268,7 +272,6 @@ class Transport3D:
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
-            model : Model object from mibitrans.transport, or list of model objects.
             x_position : x-position along the plume (longitudinal direction).
             y_position : y-position across the plume (transverse horizontal direction).
                 By default, at the center of the plume (at y=0).

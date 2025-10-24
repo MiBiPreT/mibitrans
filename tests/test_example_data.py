@@ -197,7 +197,7 @@ testingdata_instantreaction_karanovic = np.array(
     ]
 )
 
-testing_massbalance_nodecay = {
+testing_massbalance_nodecay_dom = {
     "time": np.int64(1095),
     "source_mass_0": 1000000,
     "source_mass_t": np.float64(987330.9369029925),
@@ -206,7 +206,7 @@ testing_massbalance_nodecay = {
     "transport_outside_extent_nodecay": np.float64(1784.261321114951),
 }
 
-testing_massbalance_lindecay = {
+testing_massbalance_lindecay_dom = {
     "time": np.int64(1095),
     "source_mass_0": 1000000,
     "source_mass_t": np.float64(987330.9369029925),
@@ -218,7 +218,7 @@ testing_massbalance_lindecay = {
     "plume_mass_degraded_linear": np.float64(10711.176804869348),
 }
 
-testing_massbalance_instant = {
+testing_massbalance_instant_dom = {
     "time": np.int64(1095),
     "source_mass_0": 1000000,
     "source_mass_t": np.float64(987330.9369029925),
@@ -232,5 +232,77 @@ testing_massbalance_instant = {
     "plume_mass_degraded_instant": np.float64(3970.8409985514627),
     "electron_acceptor_mass_change": np.array(
         [1924.56408043, 1924.56408043, 1924.56408043, 1924.56408043, 1924.56408043]
+    ),
+}
+
+testing_massbalance_instant_dom_inf = {
+    "time": np.int64(1095),
+    "source_mass_0": "infinite",
+    "source_mass_t": "infinite",
+    "source_mass_change": np.float64(12750.0),
+    "plume_mass_no_decay": np.float64(10943.20737211077),
+    "transport_outside_extent_nodecay": np.float64(1806.79262788923),
+    "source_mass_instant_t": "infinite",
+    "source_mass_instant_change": np.float64(15071.146990534271),
+    "plume_mass_no_decay_instant_reaction": np.float64(12810.491497436684),
+    "plume_mass_instant_reaction": np.float64(8839.650498885221),
+    "plume_mass_degraded_instant": np.float64(3970.8409985514627),
+    "electron_acceptor_mass_change": np.array(
+        [1924.56408043, 1924.56408043, 1924.56408043, 1924.56408043, 1924.56408043]
+    ),
+}
+
+testing_massbalance_nodecay_kar = {
+    "time": np.int64(1095),
+    "source_mass_0": 1000000,
+    "source_mass_t": np.float64(987330.9369029925),
+    "source_mass_change": np.float64(12669.063097007456),
+    "plume_mass_no_decay": np.float64(13710.24884304135),
+    "transport_outside_extent": 0,
+}
+
+testing_massbalance_lindecay_kar = {
+    "time": np.int64(1095),
+    "source_mass_0": 1000000,
+    "source_mass_t": np.float64(987330.9369029925),
+    "source_mass_change": np.float64(12669.063097007456),
+    "plume_mass_no_decay": np.float64(13710.24884304135),
+    "transport_outside_extent": 0,
+    "plume_mass_linear_decay": np.float64(1711.1646817402216),
+    "transport_outside_extent_lineardecay": np.float64(0.0),
+    "plume_mass_degraded_linear": np.float64(11999.084161301129),
+}
+
+testing_massbalance_instant_kar = {
+    "time": np.int64(1095),
+    "source_mass_0": 1000000,
+    "source_mass_t": np.float64(987330.9369029925),
+    "source_mass_change": np.float64(12669.063097007456),
+    "plume_mass_no_decay": np.float64(13710.24884304135),
+    "transport_outside_extent": 0,
+    "source_mass_instant_t": np.float64(985041.8543464276),
+    "source_mass_instant_change": np.float64(14958.1456535724),
+    "plume_mass_no_decay_instant_reaction": np.float64(16025.030867780724),
+    "plume_mass_instant_reaction": np.float64(12039.642701485522),
+    "plume_mass_degraded_instant": np.float64(3985.3881662952026),
+    "electron_acceptor_mass_change": np.array(
+        [1931.61471693, 1931.61471693, 1931.61471693, 1931.61471693, 1931.61471693]
+    ),
+}
+
+testing_massbalance_instant_kar_inf = {
+    "time": np.int64(1095),
+    "source_mass_0": "infinite",
+    "source_mass_t": "infinite",
+    "source_mass_change": np.float64(12750.0),
+    "plume_mass_no_decay": np.float64(13953.724534605748),
+    "transport_outside_extent": 0,
+    "source_mass_instant_t": "infinite",
+    "source_mass_instant_change": np.float64(15071.146990534271),
+    "plume_mass_no_decay_instant_reaction": np.float64(16361.711921001373),
+    "plume_mass_instant_reaction": np.float64(12374.472832085463),
+    "plume_mass_degraded_instant": np.float64(3987.2390889159105),
+    "electron_acceptor_mass_change": np.array(
+        [1932.51181133, 1932.51181133, 1932.51181133, 1932.51181133, 1932.51181133]
     ),
 }

@@ -106,7 +106,7 @@ class Transport3D:
 
     def _check_and_reset_when_input_dataclass_change(self, key, value):
         self._check_input_dataclasses(key, value)
-        self.initialized  = False
+        self.initialized = False
         if self.has_run:
             self.cxyt = np.zeros(self.xxx.shape)
             self.has_run = False
@@ -352,21 +352,21 @@ class Domenico(Transport3D, ABC):
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
     @abstractmethod
-    def _calculate_cxyt(self, xxx, yyy, ttt):
+    def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         pass
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._pre_run_initialization_parameters()
-        self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+        self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
-    def _eq_x_term(self, xxx, ttt, decay_sqrt=1):
+    def _equation_term_x(self, xxx, ttt, decay_sqrt=1):
         return erfc(
             (xxx - self._hyd_pars.velocity * ttt * decay_sqrt)
             / (2 * np.sqrt(self._hyd_pars.alpha_x * self._hyd_pars.velocity * ttt))
         )
 
-    def _eq_additional_x(self, xxx, ttt):
+    def _equation_term_additional_x(self, xxx, ttt):
         return np.exp(xxx * self._hyd_pars.velocity / (self._hyd_pars.alpha_x * self._hyd_pars.velocity)) * (
             erfc(
                 xxx
@@ -374,16 +374,16 @@ class Domenico(Transport3D, ABC):
             )
         )
 
-    def _eq_z_term(self, xxx):
+    def _equation_term_z(self, xxx):
         inner_term = self._src_pars.depth / (2 * np.sqrt(self._hyd_pars.alpha_z * xxx))
         return erf(inner_term) - erf(-inner_term)
 
-    def _eq_source_decay(self, xxx, ttt):
+    def _equation_term_source_decay(self, xxx, ttt):
         term = np.exp(-self.k_source * (ttt - xxx / self._hyd_pars.velocity))
         # Term can be max 1; can not have 'generation' of solute ahead of advection.
         return np.where(term > 1, 1, term)
 
-    def _eq_y_term(self, i, xxx, yyy):
+    def _equation_term_y(self, i, xxx, yyy):
         div_term = 2 * np.sqrt(self._hyd_pars.alpha_y * xxx)
         term = erf((yyy + self.y_source[i]) / div_term) - erf((yyy - self.y_source[i]) / div_term)
         term[np.isnan(term)] = 0
@@ -437,7 +437,7 @@ class Karanovic(Transport3D):
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
     @abstractmethod
-    def _calculate_cxyt(self):
+    def _calculate_concentration_for_all_xyt(self):
         pass
 
     def _pre_run_initialization_parameters(self):
@@ -452,49 +452,21 @@ class Karanovic(Transport3D):
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._pre_run_initialization_parameters()
-        self.cxyt = self._calculate_cxyt()
+        self.cxyt = self._calculate_concentration_for_all_xyt()
 
-    def _eq_integrand(self, t, sz):
-        term = 1 / (t ** (3 / 2)) * self._eq_x_exp_term(t) * self._eq_y_term(t, sz) * self._eq_z_term(t)
-        term[np.isnan(term)] = 0
-        return term
+    def _equation_source_superposition(self):
+        cxyt = self.cxyt.copy()
+        for sz in range(len(self.c_source)):
+            if self.verbose:
+                print("integrating for source zone ", sz)
+            integral_sum = self._equation_term_integral(sz)
+            source_term = self._equation_term_source(sz)
+            cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
+            # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
+            cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)
+        return cxyt
 
-    def _eq_x_exp_term(self, t):
-        term = np.exp(
-            (-self.k_source - self._att_pars.decay_rate) * t
-            - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
-        )
-        term[np.isnan(term)] = 0
-        return term
-
-    def _eq_y_term(self, t, sz):
-        div_term = 2 * np.sqrt(self.disp_y * t)
-        term = erfc((self.yyy[0, :, 1:] - self.y_source[sz]) / div_term) - erfc(
-            (self.yyy[0, :, 1:] + self.y_source[sz]) / div_term
-        )
-        term[np.isnan(term)] = 0
-        return term
-
-    def _eq_z_term(self, t):
-        if t == 0 or self.disp_z == 0:
-            inner_term = 2
-        else:
-            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t))
-        return erfc(-inner_term) - erfc(inner_term)
-
-    def _eq_source_term(self, sz):
-        return (
-            self.c_source[sz]
-            * self.xxx[:, :, 1:]
-            / (8 * np.sqrt(np.pi * self.disp_x))
-            * np.exp(-self.k_source * self.ttt[:, :, 1:])
-        )
-
-    def _eq_source_zero(self, sz):
-        zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
-        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
-
-    def _eq_integral_term(self, sz):
+    def _equation_term_integral(self, sz):
         integral_term = np.zeros(self.ttt.shape)
         for j in range(len(self.t)):
             if self.verbose:
@@ -505,22 +477,51 @@ class Karanovic(Transport3D):
                 lower_bound = self.t[j - 1]
             upper_bound = self.t[j]
             integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
-                self._eq_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
+                self._equation_integrand, lower_bound, upper_bound, limit=10000 / len(self.t), args=(sz,)
             )
         integral_sum = np.cumsum(integral_term, axis=0)
         return integral_sum
 
-    def _eq_superposition(self):
-        cxyt = self.cxyt.copy()
-        for sz in range(len(self.c_source)):
-            if self.verbose:
-                print("integrating for source zone ", sz)
-            integral_sum = self._eq_integral_term(sz)
-            source_term = self._eq_source_term(sz)
-            cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
-            # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
-            cxyt[:, :, 0] += self._eq_source_zero(sz)
-        return cxyt
+    def _equation_integrand(self, t, sz):
+        term = 1 / (t ** (3 / 2)) * self._equation_term_x(t) * self._equation_term_y(t, sz) * self._equation_term_z(t)
+        term[np.isnan(term)] = 0
+        return term
+
+    def _equation_term_x(self, t):
+        term = np.exp(
+            (-self.k_source - self._att_pars.decay_rate) * t
+            - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
+        )
+        term[np.isnan(term)] = 0
+        return term
+
+    def _equation_term_y(self, t, sz):
+        div_term = 2 * np.sqrt(self.disp_y * t)
+        term = erfc((self.yyy[0, :, 1:] - self.y_source[sz]) / div_term) - erfc(
+            (self.yyy[0, :, 1:] + self.y_source[sz]) / div_term
+        )
+        term[np.isnan(term)] = 0
+        return term
+
+    def _equation_term_z(self, t):
+        if t == 0 or self.disp_z == 0:
+            inner_term = 2
+        else:
+            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t))
+        return erfc(-inner_term) - erfc(inner_term)
+
+    def _equation_term_source(self, sz):
+        return (
+            self.c_source[sz]
+            * self.xxx[:, :, 1:]
+            / (8 * np.sqrt(np.pi * self.disp_x))
+            * np.exp(-self.k_source * self.ttt[:, :, 1:])
+        )
+
+    def _equation_term_source_x_is_zero(self, sz):
+        # Select y-positions of current source zone
+        zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
+        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -534,7 +535,7 @@ class Karanovic(Transport3D):
             concentration (float): concentration at given position and point in time [g/m^3].
 
         """
-        # Different sample method than parent class, as calculations from _calculate use array indices
+        # Different sample method than parent class, as field-wide calculations use array indices
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)

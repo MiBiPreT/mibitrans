@@ -48,11 +48,11 @@ class LinearDecay(Karanovic):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if auto_run:
-            self.cxyt = self._calculate_cxyt()
+            self.cxyt = self._calculate_concentration_for_all_xyt()
 
-    def _calculate_cxyt(self):
+    def _calculate_concentration_for_all_xyt(self):
         with np.errstate(divide="ignore", invalid="ignore"):
-            cxyt = self._eq_superposition()
+            cxyt = self._equation_source_superposition()
         self.has_run = True
         return cxyt
 
@@ -150,7 +150,7 @@ class InstantReaction(Karanovic):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if auto_run:
-            self.cxyt = self._calculate_cxyt()
+            self.cxyt = self._calculate_concentration_for_all_xyt()
 
     def _instant_initialization(self):
         self._att_pars._require_electron_acceptor()
@@ -174,9 +174,9 @@ class InstantReaction(Karanovic):
 
         return biodegradation_capacity
 
-    def _calculate_cxyt(self):
+    def _calculate_concentration_for_all_xyt(self):
         with np.errstate(divide="ignore", invalid="ignore"):
-            cxyt = self._eq_superposition()
+            cxyt = self._equation_source_superposition()
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)

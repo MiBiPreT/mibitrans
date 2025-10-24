@@ -55,17 +55,17 @@ class NoDecay(Domenico):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if auto_run:
-            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
+    def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term(xxx, ttt)
-            additional_x = self._eq_additional_x(xxx, ttt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
+            x_term = self._equation_term_x(xxx, ttt)
+            additional_x = self._equation_term_additional_x(xxx, ttt)
+            z_term = self._equation_term_z(xxx)
+            source_decay = self._equation_term_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
+                y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
                 cxyt += cxyt_step
         self.has_run = True
@@ -117,18 +117,18 @@ class LinearDecay(Domenico):
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         self._att_pars._require_linear_decay()
         if auto_run:
-            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
+    def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
             decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self._hyd_pars.velocity)
             decay_term = np.exp(xxx * (1 - decay_sqrt) / (self._hyd_pars.alpha_x * 2))
-            x_term = self._eq_x_term(xxx, ttt, decay_sqrt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
+            x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
+            z_term = self._equation_term_z(xxx)
+            source_decay = self._equation_term_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
+                y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_decay * decay_term * x_term * y_term * z_term
                 cxyt += cxyt_step
         self.has_run = True
@@ -183,7 +183,7 @@ class InstantReaction(Domenico):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if auto_run:
-            self.cxyt = self._calculate_cxyt(self.xxx, self.yyy, self.ttt)
+            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
     def _instant_initialization(self):
         self._att_pars._require_electron_acceptor()
@@ -207,15 +207,15 @@ class InstantReaction(Domenico):
 
         return biodegradation_capacity
 
-    def _calculate_cxyt(self, xxx, yyy, ttt):
+    def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            x_term = self._eq_x_term(xxx, ttt)
-            additional_x = self._eq_additional_x(xxx, ttt)
-            z_term = self._eq_z_term(xxx)
-            source_decay = self._eq_source_decay(xxx, ttt)
+            x_term = self._equation_term_x(xxx, ttt)
+            additional_x = self._equation_term_additional_x(xxx, ttt)
+            z_term = self._equation_term_z(xxx)
+            source_decay = self._equation_term_source_decay(xxx, ttt)
             for i in range(len(self.c_source)):
-                y_term = self._eq_y_term(i, xxx, yyy)
+                y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
                 cxyt += cxyt_step
 

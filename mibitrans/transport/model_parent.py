@@ -121,14 +121,14 @@ class Transport3D:
         self.t = np.arange(self._mod_pars.dt, self._mod_pars.model_time + self._mod_pars.dt, self._mod_pars.dt)
 
         # Three-dimensional model domain arrays
-        self.xxx = np.tile(self.x, (len(self.t), len(self.y), 1))
-        self.yyy = np.tile(self.y[:, None], (len(self.t), 1, len(self.x)))
-        self.ttt = np.tile(self.t[:, None, None], (1, len(self.y), len(self.x)))
+        self.xxx = self.x[None, None, :]
+        self.yyy = self.y[None, :, None]
+        self.ttt = self.t[:, None, None]
 
         self.rv = self._hyd_pars.velocity / self._att_pars.retardation
 
         # cxyt is concentration output array
-        self.cxyt = np.zeros(self.xxx.shape)
+        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
 
         # Calculate retardation if not already specified in adsorption_parameters
         if (
@@ -469,11 +469,11 @@ class Karanovic(Transport3D):
             source_term = self._equation_term_source(sz)
             cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
             # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
-            cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)
+            cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)[:, :, 0]
         return cxyt
 
     def _equation_term_integral(self, sz):
-        integral_term = np.zeros(self.ttt.shape)
+        integral_term = np.zeros(self.cxyt.shape)
         for j in range(len(self.t)):
             if self.verbose:
                 print("integrating for t =", self.t[j], "days")
@@ -496,16 +496,14 @@ class Karanovic(Transport3D):
     def _equation_term_x(self, t):
         term = np.exp(
             (-self.k_source - self._att_pars.decay_rate) * t
-            - (self.xxx[0, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
+            - (self.xxx[:, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
         )
         term[np.isnan(term)] = 0
         return term
 
     def _equation_term_y(self, t, sz):
         div_term = 2 * np.sqrt(self.disp_y * t)
-        term = erfc((self.yyy[0, :, 1:] - self.y_source[sz]) / div_term) - erfc(
-            (self.yyy[0, :, 1:] + self.y_source[sz]) / div_term
-        )
+        term = erfc((self.yyy - self.y_source[sz]) / div_term) - erfc((self.yyy + self.y_source[sz]) / div_term)
         term[np.isnan(term)] = 0
         return term
 
@@ -521,13 +519,13 @@ class Karanovic(Transport3D):
             self.c_source[sz]
             * self.xxx[:, :, 1:]
             / (8 * np.sqrt(np.pi * self.disp_x))
-            * np.exp(-self.k_source * self.ttt[:, :, 1:])
+            * np.exp(-self.k_source * self.ttt)
         )
 
     def _equation_term_source_x_is_zero(self, sz):
         # Select y-positions of current source zone
-        zone_location = np.where(abs(self.yyy[:, :, 0]) <= self.y_source[sz], 1, 0)
-        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt[:, :, 0])
+        zone_location = np.where(abs(self.yyy) <= self.y_source[sz], 1, 0)
+        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt)
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.

@@ -27,16 +27,15 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
 
     if error is None:
         parent = Transport3D(*args)
-        shape_arrays = (len(parent.t), len(parent.y), len(parent.x))
         # Source zone concentrations adapted for superposition should still have the same length as those in input
         assert (len(parent.c_source) == len(args[2].source_zone_concentration)) and (
             len(parent.c_source) == len(args[2].source_zone_boundary)
         )
         # Extent of y-domain should be at least the size of
         assert (np.max(parent.y) + abs(np.min(parent.y))) >= (np.max(args[2].source_zone_boundary) * 2)
-        assert parent.xxx.shape == shape_arrays
-        assert parent.yyy.shape == shape_arrays
-        assert parent.ttt.shape == shape_arrays
+        assert parent.xxx.shape == (1, 1, len(parent.x))
+        assert parent.yyy.shape == (1, len(parent.y), 1)
+        assert parent.ttt.shape == (len(parent.t), 1, 1)
         assert parent._att_pars.retardation is not None
         assert args[0].velocity / parent._att_pars.retardation == parent.rv
     elif error is UserWarning:

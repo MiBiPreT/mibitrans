@@ -48,6 +48,10 @@ class LinearDecay(Karanovic):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt()
 
+    @property
+    def short_description(self):
+        return "Karanovic Linear Decay"
+
     def _calculate_concentration_for_all_xyt(self):
         with np.errstate(divide="ignore", invalid="ignore"):
             cxyt = self._equation_source_superposition()
@@ -107,6 +111,10 @@ class NoDecay(Karanovic):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt()
 
+    @property
+    def short_description(self):
+        return "Karanovic No Decay"
+
     def _calculate_concentration_for_all_xyt(self):
         with np.errstate(divide="ignore", invalid="ignore"):
             cxyt = self._equation_source_superposition()
@@ -160,6 +168,10 @@ class InstantReaction(Karanovic):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt()
 
+    @property
+    def short_description(self):
+        return "Karanovic Instant Reaction"
+
     def _instant_initialization(self):
         self._att_pars._require_electron_acceptor()
         self._att_pars.decay_rate = 0
@@ -200,3 +212,5 @@ class InstantReaction(Karanovic):
         if concentration < 0:
             concentration = 0
         return concentration
+
+

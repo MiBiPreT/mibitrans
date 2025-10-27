@@ -4,6 +4,7 @@ from matplotlib import animation
 import mibitrans
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
+from mibitrans.visualize.plot_line import _plot_title_generator
 from mibitrans.visualize.plot_line import _run_model_if_model_has_not_ran
 
 
@@ -28,6 +29,8 @@ def plume_2d(model, time=None, animate=False, **kwargs):
         plt.xlabel("Distance from source (m)")
         plt.ylabel("Distance from plume center (m)")
         plt.colorbar(label=r"Concentration (g/$m^{3}$)")
+        plot_title = _plot_title_generator("Plume", model, time=model.t[t_pos])
+        plt.title(plot_title)
 
     # Animated plot
     else:
@@ -43,7 +46,7 @@ def plume_2d(model, time=None, animate=False, **kwargs):
             ax.set_title(f"Concentration distribution at t={model.t[frame]} days")
             return mesh
 
-        ani = animation.FuncAnimation(fig=fig, func=update, frames=len(model.t))
+        ani = animation.FuncAnimation(fig=fig, func=update, frames=t_pos + 1)
         return ani
 
 
@@ -73,6 +76,8 @@ def plume_3d(model, time=None, animate=False, **kwargs):
         ax.set_xlabel("Distance from source (m)")
         ax.set_ylabel("Distance from plume center (m)")
         ax.set_zlabel(r"Concentration [$g/m^{3}$]")
+        plot_title = _plot_title_generator("Plume", model, time=model.t[t_pos])
+        ax.set_title(plot_title)
         return ax
 
     # Animated plot
@@ -108,5 +113,5 @@ def plume_3d(model, time=None, animate=False, **kwargs):
             ax.set_title(f"Concentration distribution at t={model.t[frame]} days")
             return surface
 
-        ani = animation.FuncAnimation(fig=fig, func=update, frames=len(model.t))
+        ani = animation.FuncAnimation(fig=fig, func=update, frames=t_pos + 1)
         return ani

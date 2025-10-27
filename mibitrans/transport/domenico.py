@@ -56,6 +56,10 @@ class NoDecay(Domenico):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
+    @property
+    def short_description(self):
+        return "Domenico No Decay"
+
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -118,6 +122,10 @@ class LinearDecay(Domenico):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
+    @property
+    def short_description(self):
+        return "Domenico Linear Decay"
+
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -132,6 +140,7 @@ class LinearDecay(Domenico):
                 cxyt += cxyt_step
         self.has_run = True
         return cxyt
+
 
 
 class InstantReaction(Domenico):
@@ -184,6 +193,10 @@ class InstantReaction(Domenico):
         if auto_run:
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
+    @property
+    def short_description(self):
+        return "Domenico Instant Reaction"
+
     def _instant_initialization(self):
         self._att_pars._require_electron_acceptor()
         self._att_pars.decay_rate = 0
@@ -215,3 +228,5 @@ class InstantReaction(Domenico):
             cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True
         return cxyt
+
+

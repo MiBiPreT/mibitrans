@@ -59,6 +59,10 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         plt.ylim(bottom=0)
         plt.xlabel("Distance from source [m]")
         plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plot_title = _plot_title_generator(
+            "Centerline", model[0], time=model[0].t[t_pos], y_position=y_position, multiple=len(model) > 1
+        )
+        plt.title(plot_title)
         if legend_names is not None:
             plt.legend()
 
@@ -132,6 +136,10 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
         plt.ylim(bottom=0)
         plt.xlabel("y-position [m]")
         plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plot_title = _plot_title_generator(
+            "Transverse", model[0], time=model[0].t[t_pos], x_position=x_position, multiple=len(model) > 1
+        )
+        plt.title(plot_title)
         if legend_names is not None:
             plt.legend()
     else:
@@ -203,6 +211,10 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         plt.ylim(bottom=0)
         plt.xlabel("Time [days]")
         plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plot_title = _plot_title_generator(
+            "Breakthrough", model[0], x_position=x_position, y_position=y_position, multiple=len(model) > 1
+        )
+        plt.title(plot_title)
         if legend_names is not None:
             plt.legend()
 
@@ -248,3 +260,23 @@ def _run_model_if_model_has_not_ran(model):
         if model.verbose:
             print("Model has not run yet, calculating cxyt...")
         model.run()
+
+
+def _plot_title_generator(plot_type, model, time=None, x_position=None, y_position=None, multiple=False):
+    if multiple:
+        title = f"{plot_type} plot of multiple models, at"
+    else:
+        title = f"{plot_type} plot of {model.short_description} model, at "
+
+    if time is not None:
+        title += f"t = {time} days"
+    if x_position is not None:
+        if time is not None:
+            title += ", "
+        title += f"x = {x_position} m"
+    if y_position is not None and y_position != 0:
+        if time is not None or x_position is not None:
+            title += ", "
+        title += f"y = {y_position} m"
+    title += "."
+    return title

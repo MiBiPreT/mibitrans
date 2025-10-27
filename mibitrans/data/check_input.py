@@ -199,11 +199,11 @@ def check_time_in_domain(model, time):
                 f"Desired time is larger than maximum time of model ({time} > {np.max(model.t)}). Using maximum time "
                 f"of model instead."
             )
-            time_pos = -1
+            time_pos = len(model.t) - 1
         else:
             time_pos = np.argmin(abs(model.t - time))
     else:
-        time_pos = -1
+        time_pos = len(model.t) - 1
     return time_pos
 
 

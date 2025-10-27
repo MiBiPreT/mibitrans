@@ -364,6 +364,12 @@ class Domenico(Transport3D, ABC):
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
     @abstractmethod
+    def short_description(self):
+        """Short string describing model type."""
+        # Should return a string starting with 'Domenico' and ending in model subtype.
+        pass
+
+    @abstractmethod
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         pass
 
@@ -441,6 +447,12 @@ class Karanovic(Transport3D):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+
+    @abstractmethod
+    def short_description(self):
+        """Short string describing model type."""
+        # Should return a string starting with 'Karanovic' and ending in model subtype.
+        pass
 
     @abstractmethod
     def _calculate_concentration_for_all_xyt(self):

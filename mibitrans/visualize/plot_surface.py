@@ -64,9 +64,11 @@ def plume_3d(model, time=None, animate=False, **kwargs):
     t_pos = check_time_in_domain(model, time)
     _run_model_if_model_has_not_ran(model)
     # Non animated plot
+    xxx = np.tile(model.x, (len(model.t), len(model.y), 1))
+    yyy = np.tile(model.y[:, None], (len(model.t), 1, len(model.x)))
     if not animate:
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        ax.plot_surface(model.xxx[t_pos, :, :], model.yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
+        ax.plot_surface(xxx[t_pos, :, :], yyy[t_pos, :, :], model.cxyt[t_pos, :, :], **kwargs)
         ax.view_init(elev=30, azim=310)
         ax.set_xlabel("Distance from source (m)")
         ax.set_ylabel("Distance from plume center (m)")
@@ -96,8 +98,8 @@ def plume_3d(model, time=None, animate=False, **kwargs):
             nonlocal surface
             surface.remove()
             surface = ax.plot_surface(
-                model.xxx[frame, :, :],
-                model.yyy[frame, :, :],
+                xxx[frame, :, :],
+                yyy[frame, :, :],
                 model.cxyt[frame, :, :],
                 vmin=0,
                 vmax=model_max,

@@ -58,6 +58,7 @@ class NoDecay(Domenico):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Domenico No Decay"
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
@@ -124,6 +125,7 @@ class LinearDecay(Domenico):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Domenico Linear Decay"
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
@@ -140,7 +142,6 @@ class LinearDecay(Domenico):
                 cxyt += cxyt_step
         self.has_run = True
         return cxyt
-
 
 
 class InstantReaction(Domenico):
@@ -195,6 +196,7 @@ class InstantReaction(Domenico):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Domenico Instant Reaction"
 
     def _instant_initialization(self):
@@ -228,5 +230,3 @@ class InstantReaction(Domenico):
             cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True
         return cxyt
-
-

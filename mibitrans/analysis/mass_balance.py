@@ -106,7 +106,7 @@ def mass_balance(model, time=None) -> dict:
         transport_outside_extent_lindecay = transport_outside_extent_nodecay * plume_mass_lindecay / plume_mass_nodecay
         mass_balance_dict["transport_outside_extent_lineardecay"] = transport_outside_extent_lindecay
 
-        # Contaminant mass degraded by linear decay is diffrence plume mass no and linear decay plus difference in
+        # Contaminant mass degraded by linear decay is difference plume mass no and linear decay plus difference in
         # mass transported outside model extent by no and linear decay.
         degraded_mass = (
             plume_mass_nodecay

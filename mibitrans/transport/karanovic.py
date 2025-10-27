@@ -50,6 +50,7 @@ class LinearDecay(Karanovic):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Karanovic Linear Decay"
 
     def _calculate_concentration_for_all_xyt(self):
@@ -113,6 +114,7 @@ class NoDecay(Karanovic):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Karanovic No Decay"
 
     def _calculate_concentration_for_all_xyt(self):
@@ -170,6 +172,7 @@ class InstantReaction(Karanovic):
 
     @property
     def short_description(self):
+        """Short string describing model type."""
         return "Karanovic Instant Reaction"
 
     def _instant_initialization(self):
@@ -212,5 +215,3 @@ class InstantReaction(Karanovic):
         if concentration < 0:
             concentration = 0
         return concentration
-
-

@@ -12,20 +12,26 @@ from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.data.check_input import check_x_in_domain
 from mibitrans.data.check_input import check_y_in_domain
 
+relative_conc_ylabel = r"Relative concentration ($C/C_0$)"
+absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
-def centerline(model, y_position=0, time=None, legend_names=None, animate=False, **kwargs):
+def centerline(
+    model, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
+):
     """Plot center of contaminant plume of one or multiple models as a line, at a specified time and y position.
 
     Args:
         model : Model object from mibitrans.transport, or list of model objects.
-        y_position (float): y-position across the plume (transverse horizontal direction) for the plot.
+        y_position (float, optional): y-position across the plume (transverse horizontal direction) for the plot.
             By default, the center of the plume at y=0 is plotted.
-        time (float): Point of time for the plot. Will show the closest time step to given value.
+        time (float, optional): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
-        legend_names (str | list): List of legend names as strings, in the same order as given models.
+        relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
+            zone concentrations at t=0. By default, absolute concentrations are shown.
+        legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
             By default, no legend is shown.
-        animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-            as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
+            are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
         **kwargs : Arguments to be passed to plt.plot().
 
     """
@@ -43,10 +49,18 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
 
-        if animate:
-            plot_array_list.append(mod.cxyt[:, y_pos, :])
+        if relative_concentration:
+            if animate:
+                plot_array_list.append(mod.relative_cxyt[:, y_pos, :])
+            else:
+                plot_array_list.append(mod.relative_cxyt[t_pos, y_pos, :])
+            y_label = relative_conc_ylabel
         else:
-            plot_array_list.append(mod.cxyt[t_pos, y_pos, :])
+            if animate:
+                plot_array_list.append(mod.relative_cxyt[:, y_pos, :])
+            else:
+                plot_array_list.append(mod.cxyt[t_pos, y_pos, :])
+            y_label = absolute_conc_ylabel
 
     # Non-animated plot
     if not animate:
@@ -58,7 +72,8 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
 
         plt.ylim(bottom=0)
         plt.xlabel("Distance from source [m]")
-        plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plt.ylabel(y_label)
+
         plot_title = _plot_title_generator(
             "Centerline", model[0], time=model[0].t[t_pos], y_position=y_position, multiple=len(model) > 1
         )
@@ -78,7 +93,8 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
             plot_bin.append(line)
         ax.set_ylim(bottom=0)
         ax.set_xlabel("Distance from source [m]")
-        ax.set_ylabel(r"Concentration [g/$m^{3}$]")
+        ax.set_ylabel(y_label)
+
         if legend_names is not None:
             ax.legend()
 
@@ -93,7 +109,7 @@ def centerline(model, y_position=0, time=None, legend_names=None, animate=False,
         return ani
 
 
-def transverse(model, x_position, time=None, legend_names=None, animate=False, **kwargs):
+def transverse(model, x_position, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs):
     """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
     Args:
@@ -101,10 +117,12 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
         x_position : x-position along the plume (longitudinal direction) for the plot.
         time (float): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
-        legend_names (str | list): List of legend names as strings, in the same order as given models.
+        relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
+            zone concentrations at t=0. By default, absolute concentrations are shown.
+        legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
             By default, no legend is shown.
-        animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-            as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
+            are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
         **kwargs : Arguments to be passed to plt.plot().
     """
     if not isinstance(model, list):
@@ -121,10 +139,18 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
 
-        if animate:
-            plot_array_list.append(mod.cxyt[:, :, x_pos])
+        if relative_concentration:
+            if animate:
+                plot_array_list.append(mod.relative_cxyt[:, :, x_pos])
+            else:
+                plot_array_list.append(mod.relative_cxyt[t_pos, :, x_pos])
+            y_label = relative_conc_ylabel
         else:
-            plot_array_list.append(mod.cxyt[t_pos, :, x_pos])
+            if animate:
+                plot_array_list.append(mod.relative_cxyt[:, :, x_pos])
+            else:
+                plot_array_list.append(mod.cxyt[t_pos, :, x_pos])
+            y_label = absolute_conc_ylabel
 
     if not animate:
         for i, mod in enumerate(model):
@@ -135,7 +161,7 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
 
         plt.ylim(bottom=0)
         plt.xlabel("y-position [m]")
-        plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plt.ylabel(y_label)
         plot_title = _plot_title_generator(
             "Transverse", model[0], time=model[0].t[t_pos], x_position=x_position, multiple=len(model) > 1
         )
@@ -155,8 +181,10 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
                 max_conc = np.max(plot_array_list[i])
             plot_bin.append(line)
         ax.set_ylim(bottom=0, top=max_conc + max_conc / 10)
+
         ax.set_xlabel("y-position [m]")
-        ax.set_ylabel(r"Concentration [g/$m^{3}$]")
+        ax.set_ylabel(y_label)
+
         if legend_names is not None:
             ax.legend()
 
@@ -171,7 +199,9 @@ def transverse(model, x_position, time=None, legend_names=None, animate=False, *
         return ani
 
 
-def breakthrough(model, x_position, y_position=0, legend_names=None, animate=False, **kwargs):
+def breakthrough(
+    model, x_position, y_position=0, relative_concentration=False, legend_names=None, animate=False, **kwargs
+):
     """Plot contaminant breakthrough curve at given x and y position in model domain.
 
     Args:
@@ -179,10 +209,12 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         x_position : x-position along the plume (longitudinal direction).
         y_position : y-position across the plume (transverse horizontal direction).
             By default, at the center of the plume (at y=0).
-        legend_names (str | list): List of legend names as strings, in the same order as given models.
+        relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
+            zone concentrations at t=0. By default, absolute concentrations are shown.
+        legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
             By default, no legend is shown.
-        animate (bool): If True, animation of contaminant plume until given time is shown. If multiple models are given
-            as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
+            are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
         **kwargs : Arguments to be passed to plt.plot().
     """
     if not isinstance(model, list):
@@ -198,7 +230,12 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         x_pos = check_x_in_domain(mod, x_position)
         y_pos = check_y_in_domain(mod, y_position)
         _run_model_if_model_has_not_ran(mod)
-        plot_array_list.append(mod.cxyt[:, y_pos, x_pos])
+        if relative_concentration:
+            plot_array_list.append(mod.relative_cxyt[:, y_pos, x_pos])
+            y_label = relative_conc_ylabel
+        else:
+            plot_array_list.append(mod.cxyt[:, y_pos, x_pos])
+            y_label = absolute_conc_ylabel
 
     # Non animated plot
     if not animate:
@@ -210,7 +247,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
 
         plt.ylim(bottom=0)
         plt.xlabel("Time [days]")
-        plt.ylabel(r"Concentration [g/$m^{3}$]")
+        plt.ylabel(y_label)
         plot_title = _plot_title_generator(
             "Breakthrough", model[0], x_position=x_position, y_position=y_position, multiple=len(model) > 1
         )
@@ -240,7 +277,7 @@ def breakthrough(model, x_position, y_position=0, legend_names=None, animate=Fal
         ax.set_xlim(right=max_time)
         ax.set_ylim(bottom=0, top=max_conc + max_conc / 10)
         ax.set_xlabel("Time [days]")
-        ax.set_ylabel(r"Concentration [g/$m^{3}$]")
+        ax.set_ylabel(y_label)
         if legend_names is not None:
             ax.legend()
 

@@ -7,6 +7,7 @@ from scipy.integrate import quad
 from scipy.integrate import quad_vec
 from scipy.special import erf
 from scipy.special import erfc
+from scipy.special import erfcx
 import mibitrans.data.parameters
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import util_to_conc_name
@@ -438,9 +439,11 @@ class Domenico(Transport3D, ABC):
         return erfc((xxx - self.rv * ttt * decay_sqrt) / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
 
     def _equation_term_additional_x(self, xxx, ttt):
-        return np.exp(xxx * self.rv / (self._hyd_pars.alpha_x * self.rv)) * (
-            erfc(xxx + self.rv * ttt / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
-        )
+        erfc_inner = (xxx + self.rv * ttt) / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt))
+        # Additional term is prone to overflow of exp and underflow of erfc under certain parameter combinations.
+        # To decrease cases, used erfcx. Where erfcx(a) = exp(a**2)*erfc(a) -> exp(b)*erfc(a) = exp(b - a**2) * erfcx(a)
+        term = np.exp(xxx * self.rv / self._hyd_pars.alpha_x - erfc_inner**2) * erfcx(erfc_inner)
+        return term
 
     def _equation_term_z(self, xxx):
         inner_term = self._src_pars.depth / (2 * np.sqrt(self._hyd_pars.alpha_z * xxx))
@@ -458,7 +461,7 @@ class Domenico(Transport3D, ABC):
         return term
 
 
-class Karanovic(Transport3D):
+class Karanovic(Transport3D, ABC):
     """Parent class that for all models using the exact analytical solution described in Karanovic (2007).
 
     Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.

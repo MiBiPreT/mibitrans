@@ -8,6 +8,9 @@ from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
+from mibitrans.transport.domenico import NoDecay
+from mibitrans.transport.domenico import LinearDecay
+from mibitrans.transport.domenico import InstantReaction
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse

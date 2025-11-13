@@ -15,6 +15,7 @@ from mibitrans.data.check_input import check_y_in_domain
 relative_conc_ylabel = r"Relative concentration ($C/C_0$)"
 absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
+
 def centerline(
     model, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
 ):
@@ -57,7 +58,7 @@ def centerline(
             y_label = relative_conc_ylabel
         else:
             if animate:
-                plot_array_list.append(mod.relative_cxyt[:, y_pos, :])
+                plot_array_list.append(mod.cxyt[:, y_pos, :])
             else:
                 plot_array_list.append(mod.cxyt[t_pos, y_pos, :])
             y_label = absolute_conc_ylabel
@@ -301,7 +302,7 @@ def _run_model_if_model_has_not_ran(model):
 
 def _plot_title_generator(plot_type, model, time=None, x_position=None, y_position=None, multiple=False):
     if multiple:
-        title = f"{plot_type} plot of multiple models, at"
+        title = f"{plot_type} plot of multiple models, at "
     else:
         title = f"{plot_type} plot of {model.short_description} model, at "
 

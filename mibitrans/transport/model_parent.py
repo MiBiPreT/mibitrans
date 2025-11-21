@@ -442,7 +442,7 @@ class Domenico(Transport3D, ABC):
         erfc_inner = (xxx + self.rv * ttt) / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt))
         # Additional term is prone to overflow of exp and underflow of erfc under certain parameter combinations.
         # To decrease cases, used erfcx. Where erfcx(a) = exp(a**2)*erfc(a) -> exp(b)*erfc(a) = exp(b - a**2) * erfcx(a)
-        term = np.exp(xxx * self.rv / self._hyd_pars.alpha_x - erfc_inner**2) * erfcx(erfc_inner)
+        term = np.exp(xxx / self._hyd_pars.alpha_x - erfc_inner**2) * erfcx(erfc_inner)
         return term
 
     def _equation_term_z(self, xxx):

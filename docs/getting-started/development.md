@@ -79,6 +79,30 @@ You can enable automatic linting with `ruff` on commit by enabling the git hook 
 git config --local core.hooksPath .githooks
 ```
 
+## Cleaning notebooks
+
+The linter tests now also check that the example notebooks are "clean". This means they do not contain the output and execution metadata that
+Jupyter adds when you execute them. Removing this reduces the size and noisiness of the diffs and consequently makes reviewing changes easier.
+
+To clean the notebooks locally before each commit, you can use the `nb-clean` tool, which is listed as one of the `[dev]` dependencies of the project. They are installable
+with:
+```
+python -m pip install .[dev]
+```
+
+You can then run:
+```
+nb-clean add-filter
+```
+This adds a git hook that will automatically clean any staged notebooks before they are committed. If you would rather run this manually, you can instead use:
+```
+nb-clean clean mynotebook.ipynb
+```
+replacing with the name of the notebook in question.
+
+
+
+
 ## Testing docs locally
 
 To build the documentation locally, first make sure `mkdocs` and its dependencies are installed:

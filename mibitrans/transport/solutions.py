@@ -1,6 +1,7 @@
 import copy
 import warnings
 from abc import ABC
+from abc import abstractmethod
 import numpy as np
 from scipy.integrate import quad
 from scipy.integrate import quad_vec
@@ -100,22 +101,46 @@ class Transport3D(ABC):
         relative_cxyt = self.cxyt / maximum_concentration
         return relative_cxyt
 
+    @abstractmethod
+    def short_description(self):
+        """Short string describing model type."""
+        pass
+
+    @abstractmethod
+    def run(self):
+        """Method that runs the model and ensures that initialisation is performed."""
+        pass
+
+    @abstractmethod
+    def sample(self, x_position, y_position, t_position):
+        """Method that calculates concentration at single, specified location in model domain."""
+        pass
+
+    @abstractmethod
+    def _calculate_concentration_for_all_xyt(self) -> np.ndarray:
+        """Method that calculates and return concentration array for all model x, y and t."""
+        pass
+
     def _observe_input_dataclass_change(self):
-        self._hyd_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        """Keeps track of input dataclass changes, and ensures re-initialization for following model runs."""
+        self.hydrological_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "hydrological_parameters", self._hyd_pars
         )
-        self.model_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.attenuation_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "attenuation_parameters", self._att_pars
         )
-        self._src_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.source_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "source_parameters", self._src_pars
         )
-        self._mod_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.model_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "model_parameters", self._mod_pars
         )
 
     def _check_and_reset_when_input_dataclass_change(self, key, value):
+        """Remove output and unflag initialization when input dataclass changes are observed."""
         self._check_input_dataclasses(key, value)
+        if self.verbose:
+            print(key, " got changed")
         self.initialized = False
         if self.has_run:
             self.cxyt = np.zeros(self.xxx.shape)
@@ -124,6 +149,7 @@ class Transport3D(ABC):
                 print(f"Parameter '{key}' has changed — resetting output")
 
     def _pre_run_initialization_parameters(self):
+        """Parameter initialization for model."""
         # One-dimensional model domain arrays
         self.x = np.arange(0, self._mod_pars.model_length + self._mod_pars.dx, self._mod_pars.dx)
         self.y = self._calculate_y_discretization()
@@ -162,7 +188,7 @@ class Transport3D(ABC):
         self.initialized = True
 
     def _calculate_source_decay(self):
-        """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
+        """Calculate source decay/depletion."""
         if isinstance(self._src_pars.total_mass, (float, int)):
             Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration()
             k_source = Q * c0_avg / self._src_pars.total_mass
@@ -173,6 +199,7 @@ class Transport3D(ABC):
         return k_source
 
     def _calculate_discharge_and_average_source_zone_concentration(self):
+        """Calculate the average source zone concentration, and discharge through source zone."""
         if self.biodegradation_capacity is not None and self.biodegradation_capacity > 0:
             bc = self.biodegradation_capacity
         else:
@@ -220,39 +247,12 @@ class Transport3D(ABC):
         return y
 
     def _calculate_biodegradation_capacity(self):
+        """Determine biodegradation capacity based on electron acceptor concentrations and utilization factor."""
         biodegradation_capacity = 0
         for key, item in self.utilization_factor.dictionary.items():
             biodegradation_capacity += getattr(self.electron_acceptors, util_to_conc_name[key]) / item
 
         return biodegradation_capacity
-
-    def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time.
-
-        Args:
-            x_position (float): x position in domain extent [m].
-            y_position (float): y position in domain extent [m].
-            time (float): time for which concentration is sampled [days].
-
-        Returns:
-            concentration (float): concentration at given position and point in time [g/m^3].
-
-        """
-        for par, value in locals().items():
-            if par != "self":
-                validate_input_values(par, value)
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
-
-        if hasattr(self, "cxyt_noBC"):
-            save_c_noBC = self.cxyt_noBC.copy()
-        x = np.array([x_position])
-        y = np.array([y_position])
-        t = np.array([time])
-        concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
-        if hasattr(self, "cxyt_noBC"):
-            self.cxyt_noBC = save_c_noBC
-        return concentration
 
     def instant_reaction(
         self,
@@ -261,9 +261,26 @@ class Transport3D(ABC):
             util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
         ),
     ):
+        """Enable and set up parameters for instant reaction model.
+
+        Instant reaction model assumes that biodegradation is an instanteneous process compared to the groundwater flow
+        velocity. The biodegradation is assumed to be governed by the availability of electron acceptors, and quantified
+        using  stoichiometric relations from the degradation reactions. Considered are concentrations of acceptors
+        Oxygen, Nitrate and Sulfate, and reduced species Ferrous Iron and Methane.
+
+        Args:
+            electron_acceptors (ElectronAcceptors): ElectronAcceptor dataclass containing electron acceptor
+                concentrations. Alternatively provided as list, numpy array or dictionary corresponding with
+                delta_oxygen, delta_nitrate, ferrous_iron, delta_sulfate and methane. For more information, see
+                documentation for ElectronAcceptors.
+            utilization_factor (UtilizationFactor, optional): UtilizationFactor dataclass containing electron acceptor
+                utilization factors.Alternatively provided as list, numpy array or dictionary corresponding with
+                information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
+                for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
+        """
+        self._att_pars.decay_rate = 0
         if not self.initialized:
             self._pre_run_initialization_parameters()
-        self._att_pars.decay_rate = 0
         self.electron_acceptors, self.utilization_factor = _check_instant_reaction_acceptor_input(
             electron_acceptors, utilization_factor
         )
@@ -406,7 +423,6 @@ class Transport3D(ABC):
 class Mibitrans(Transport3D):
     """Model class using an exact analytical solution as described in Karanovic (2007), based on Wexler (1992).
 
-
     Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.
     Groundwater, 45(2), 242-245.
     """
@@ -451,14 +467,18 @@ class Mibitrans(Transport3D):
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
     def short_description(self):
-        return "Mibitrans model"
+        """Return short description of model type."""
+        if self.biodegradation_capacity:
+            return "Mibitrans Instant Reaction"
+        else:
+            return "Mibitrans Linear"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         if not self.initialized:
             self._pre_run_initialization_parameters()
         with np.errstate(divide="ignore", invalid="ignore"):
-            self.cxyt = self._equation_source_superposition()
+            self.cxyt = self._calculate_concentration_for_all_xyt()
         self.has_run = True
 
     def sample(self, x_position, y_position, time):
@@ -524,7 +544,7 @@ class Mibitrans(Transport3D):
         # Stores integral error for each time step and source zone
         self.error_size = np.zeros((len(self._src_pars.source_zone_boundary), len(self.t)))
 
-    def _equation_source_superposition(self):
+    def _calculate_concentration_for_all_xyt(self):
         cxyt = self.cxyt.copy()
         for sz in range(len(self.c_source)):
             if self.verbose:
@@ -655,7 +675,36 @@ class Anatrans(Transport3D):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         if not self.initialized:
             self._pre_run_initialization_parameters()
-        self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+    def sample(self, x_position, y_position, time):
+        """Give concentration at any given position and point in time.
+
+        Args:
+            x_position (float): x position in domain extent [m].
+            y_position (float): y position in domain extent [m].
+            time (float): time for which concentration is sampled [days].
+
+        Returns:
+            concentration (float): concentration at given position and point in time [g/m^3].
+
+        """
+        for par, value in locals().items():
+            if par != "self":
+                validate_input_values(par, value)
+        if not self.has_run and not self.initialized:
+            self._pre_run_initialization_parameters()
+
+        if hasattr(self, "cxyt_noBC"):
+            save_c_noBC = self.cxyt_noBC.copy()
+        x = np.array([x_position])
+        y = np.array([y_position])
+        t = np.array([time])
+        concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
+        if hasattr(self, "cxyt_noBC"):
+            self.cxyt_noBC = save_c_noBC
+        return concentration
 
     def _equation_term_x(self, xxx, ttt, decay_sqrt):
         return np.exp(xxx * (1 - decay_sqrt) / (self._hyd_pars.alpha_x * 2)) * erfc(
@@ -686,16 +735,15 @@ class Anatrans(Transport3D):
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
-        with np.errstate(divide="ignore", invalid="ignore"):
-            decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self.rv)
-            x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
-            additional_x = self._equation_term_additional_x(xxx, ttt, decay_sqrt)
-            z_term = self._equation_term_z(xxx)
-            source_decay = self._equation_term_source_decay(xxx, ttt)
-            for i in range(len(self.c_source)):
-                y_term = self._equation_term_y(i, xxx, yyy)
-                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
-                cxyt += cxyt_step
+        decay_sqrt = np.sqrt(1 + 4 * self._att_pars.decay_rate * self._hyd_pars.alpha_x / self.rv)
+        x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
+        additional_x = self._equation_term_additional_x(xxx, ttt, decay_sqrt)
+        z_term = self._equation_term_z(xxx)
+        source_decay = self._equation_term_source_decay(xxx, ttt)
+        for i in range(len(self.c_source)):
+            y_term = self._equation_term_y(i, xxx, yyy)
+            cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+            cxyt += cxyt_step
         if self.biodegradation_capacity:
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
@@ -705,6 +753,7 @@ class Anatrans(Transport3D):
 
 
 # bioscreen ; Domenico - additional term
+
 
 class Bioscreen(Anatrans):
     def __init__(
@@ -746,6 +795,9 @@ class Bioscreen(Anatrans):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
+    def short_description(self):
+        return "Bioscreen model"
+
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -763,6 +815,7 @@ class Bioscreen(Anatrans):
             cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True
         return cxyt
+
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
     if isinstance(electron_acceptors, (list, np.ndarray)):

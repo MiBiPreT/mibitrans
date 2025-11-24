@@ -7,6 +7,9 @@ from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.transport import domenico as dom
 from mibitrans.transport import karanovic as kar
+from mibitrans.transport.solutions import Anatrans
+from mibitrans.transport.solutions import Bioscreen
+from mibitrans.transport.solutions import Mibitrans
 
 
 @pytest.fixture(scope="session")
@@ -23,6 +26,9 @@ def test_att_pars():
         half_life=0.1 * 365,
         electron_acceptors=dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5),
     )
+
+
+electron_acceptor_dict = dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5)
 
 
 @pytest.fixture(scope="session")
@@ -48,6 +54,9 @@ def test_model_pars_short(test_source_pars, test_model_pars):
     short_model_pars = copy.copy(test_model_pars)
     short_model_pars.model_width = test_source_pars.source_zone_boundary[-1] - 1
     return short_model_pars
+
+
+#### Decrepit in version 0.5 ####
 
 
 @pytest.fixture(scope="module")
@@ -84,3 +93,84 @@ def test_karanovic_lineardecay_model(test_hydro_pars, test_att_pars, test_source
 def test_karanovic_instantreaction_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
     """karanovic.InstantReaction fixture model object for testing."""
     return kar.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+
+
+###############################
+
+
+@pytest.fixture(scope="session")
+def test_mibitrans_model_nodecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with no decay."""
+    test_att_pars.decay_rate = 0
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="session")
+def test_mibitrans_model_lineardecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with linear decay."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="session")
+def test_mibitrans_model_instantreaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with instant reaction."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="module")
+def test_anatrans_model_nodecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Anatrans fixture model object for testing, with no decay."""
+    test_att_pars.decay_rate = 0
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="module")
+def test_anatrans_model_lineardecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Anatrans fixture model object for testing, with linear decay."""
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="module")
+def test_anatrans_model_instantreaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Anatrans fixture model object for testing, with instant reaction."""
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="session")
+def test_bioscreen_model_nodecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Bioscreen fixture model object for testing, with no decay"""
+    test_att_pars.decay_rate = 0
+    obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="session")
+def test_bioscreen_model_lineardecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Bioscreen fixture model object for testing, with linear decay"""
+    obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
+
+
+@pytest.fixture(scope="session")
+def test_bioscreen_model_instantreaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Bioscreen fixture model object for testing, with instant reaction."""
+    obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
+    obj.run()
+    return obj

@@ -141,7 +141,9 @@ class AttenuationParameters(_ChangeObserver):
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
+    #### Decrepit in v0.5, functionality moved to transport class ####
     electron_acceptors: list | np.ndarray | dict | ElectronAcceptors = None
+    ##################################################################
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
@@ -158,6 +160,7 @@ class AttenuationParameters(_ChangeObserver):
     def __post_init__(self):
         """Check argument presence, types and domain."""
         self.initialized = True
+        #### Decrepit in v0.5, functionality moved to transport class ####
         self._standardize_electron_acceptor_input_to_dataclass()
         self.utilization_factor = None
         self.set_utilization_factor()
@@ -167,6 +170,7 @@ class AttenuationParameters(_ChangeObserver):
                 f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
                 "To adapt them, use set_utilization_factor() method of AttenuationParameters."
             )
+        ##################################################################
 
     def calculate_retardation(self, porosity: float):
         """Calculate retardation factor from soil adsorption parametrers and porosity."""
@@ -176,6 +180,7 @@ class AttenuationParameters(_ChangeObserver):
         if self.verbose:
             print(f"Retardation factor has been calculated to be {self.retardation}.")
 
+    #### Decrepit in v0.5, functionality moved to transport class ####
     def set_utilization_factor(
         self,
         util_oxygen: float = 3.14,
@@ -228,6 +233,7 @@ class AttenuationParameters(_ChangeObserver):
                 "for biodegradation calculations."
             )
 
+    ##################################################################
     def _require_linear_decay(self):
         if self.decay_rate is None and self.half_life is None:
             raise MissingValueError("Linear reaction model requires decay rate or half life.")
@@ -278,7 +284,7 @@ class SourceParameters(_ChangeObserver):
             source zone, only one value is required. Source is symmetrical in the x-axis.
         source_zone_concentration (np.ndarray) : Contaminant concentration in each source zone [g/m^3]. Input as numpy
             array in the same order and of the same length as specified in source_zone_boundary.
-        depth (float) : Depth (transeverse vertical or z-dimension) of the source zone in [m].
+        depth (float) : Depth (transverse vertical or z-dimension) of the source zone in [m].
         total_mass (float | str) : Mass of contaminant present in source zone, either expressed in [g],
             or set to 'infinite'. The latter meaning that the source mass and therefore, the source zone concentrations
             do not diminish over time.

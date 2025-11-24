@@ -26,7 +26,7 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, **kw
 
     Returns a matrix plot of the input plume as object.
     """
-    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
+    check_model_type(model, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.solutions.Transport3D))
     t_pos = check_time_in_domain(model, time)
     _run_model_if_model_has_not_ran(model)
     if relative_concentration:
@@ -80,7 +80,7 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
     Returns:
         ax (matplotlib.axes._axes.Axes) : Returns matplotlib axes object of plume plot.
     """
-    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
+    check_model_type(model, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.solutions.Transport3D))
     t_pos = check_time_in_domain(model, time)
     _run_model_if_model_has_not_ran(model)
     if relative_concentration:

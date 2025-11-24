@@ -10,6 +10,9 @@ copyright: Copyright &copy; 2024 Alraune Zech, Jorrit Bakker, Robin Richardson, 
 nav:
   - Home: index.md
   - Introduction: introduction/introduction.md
+  - Background: 
+     - Theory: background/transport_theory.md
+     - Bioscreen: background/bioscreen.md
   - Development: development/development.md
   - API Reference:
     - Data: reference/reference_data.md

@@ -29,7 +29,7 @@ Modeling all these processes at the same time, requires a high level of model de
 
 ## Functionality
 
-`mibitrans` reproduces the functionality of the *Excel*-based screening tool [`BIOSCREEN`](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) [Newell et al., 1996]. Thus, transport is modelled based on the 2D advection dispersion equation considering linear equilibrium adsorption. Microbial degredation can be accounted for in two ways: as simple first-order decay or as an instantaneous field-wide reaction based on electron acceptor concentrations. The option of no decay is also available. `mibitrans` is validated by comparing example field data with results from `BIOSCREEN`. 
+`mibitrans` is supposed to serve as hydrogeological transport screening model based on field data for biodegredation and bioremediation. In parts `mibitrans` reproduces - and extends- the functionality of the *Excel*-based screening tool [`BIOSCREEN`](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) [Newell et al., 1996]. Thus, transport is modelled based on the 3D advection dispersion equation considering linear equilibrium adsorption and various options for biodegradation. The option of no decay is also available. `mibitrans` is validated by comparing example field data with results from `BIOSCREEN`. 
 
 ## Structure
 
@@ -42,13 +42,6 @@ The core elements and folders for users of `mibitrans` are:
     * `visualization`
 * The folder `examples` contains example workflows in the form of Jupyter-Notebooks outlining application of functionality on example data.
 
-## Example Field data
-
-We gathered field data from two sites for development and testing of implemented routines on field sample data:
-
-* BIOSCREEN base example
-
-All sites are heavily contaminated with petroleum hydrocarbons. 
 
 ## References
 

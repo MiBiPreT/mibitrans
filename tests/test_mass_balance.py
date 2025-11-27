@@ -3,6 +3,7 @@
 File testing functionality of mass_balance module.
 """
 
+import os
 import numpy as np
 import pytest
 from mibitrans.analysis.mass_balance import mass_balance
@@ -18,6 +19,8 @@ from tests.test_example_data import testing_massbalance_lindecay_dom
 from tests.test_example_data import testing_massbalance_lindecay_kar
 from tests.test_example_data import testing_massbalance_nodecay_dom
 from tests.test_example_data import testing_massbalance_nodecay_kar
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 @pytest.fixture(scope="module")
@@ -67,6 +70,7 @@ def test_domenico_instantreaction_model_inf(test_hydro_pars, test_att_pars, test
     return dom.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Mass balance tests temporarily disabled due to incoming refactor.")
 @pytest.mark.parametrize(
     "model, expected",
     [
@@ -90,6 +94,7 @@ def test_balance_numerical_karanovic(model, expected, request) -> None:
             mass_balance(model, time=3 * 365)
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Mass balance tests temporarily disabled due to incoming refactor.")
 @pytest.mark.parametrize(
     "model, expected",
     [

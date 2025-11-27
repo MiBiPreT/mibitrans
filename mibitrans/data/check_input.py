@@ -5,7 +5,7 @@ Module evaluating if a dictionary contains all required (correct) parameters for
 
 import warnings
 import numpy as np
-import mibitrans  # .data.parameter_information
+import mibitrans
 
 
 def _check_numeric(parameter: str, value):

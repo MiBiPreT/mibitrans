@@ -316,8 +316,8 @@ def test_show_mass_balance(model, expected, request):
 @pytest.mark.parametrize(
     "model",
     [
-        "test_domenico_lineardecay_model",
-        "test_domenico_instantreaction_model",
+        "test_mibitrans_model_lineardecay",
+        "test_mibitrans_model_instantreaction",
     ],
 )
 @pytest.mark.filterwarnings("ignore:UserWarning")

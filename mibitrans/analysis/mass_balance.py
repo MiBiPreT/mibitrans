@@ -5,12 +5,12 @@ Module calculating the mass balance based on base parameters.
 
 import copy
 import numpy as np
+import mibitrans
 import mibitrans.transport.domenico as domenico
 import mibitrans.transport.karanovic as karanovic
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
-from mibitrans.transport.model_parent import Transport3D
 
 
 def mass_balance(model, time=None) -> dict:
@@ -23,7 +23,7 @@ def mass_balance(model, time=None) -> dict:
     Returns:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
-    check_model_type(model, Transport3D)
+    check_model_type(model, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.models.Transport3D))
     model = copy.deepcopy(model)
     time_pos = check_time_in_domain(model, time)
 

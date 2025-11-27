@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import ModelParameters
@@ -87,12 +87,6 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(half_life=2), None),
         (dict(retardation=1), None),
         (dict(diffusion=0.00004), None),
-        (
-            dict(electron_acceptors=dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, delta_sulfate=1, methane=1)),
-            None,
-        ),
-        (dict(electron_acceptors=ElectronAcceptors(1, 1, 1, 1, 1)), None),
-        (dict(electron_acceptors=[1, 1, 1, 1, 1]), None),
         (dict(decay_rate=0.2, retardation=2, diffusion=0.00002), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
@@ -104,11 +98,6 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(retardation=0.1), DomainValueError),
         (dict(retardation=1, fraction_organic_carbon="no"), TypeError),
         (dict(retardation=1, fraction_organic_carbon=2), DomainValueError),
-        (dict(electron_acceptors="nonsense"), TypeError),
-        (dict(electron_acceptors=dict(delta_oxygen=1, delta_nitrate=1, ferrous_iron=1, methane=1)), ValueError),
-        (dict(electron_acceptors=[1, 1, 1, 1]), ValueError),
-        (dict(electron_acceptors=[1, 1, -1, 1, 1]), DomainValueError),
-        (dict(electron_acceptors=[1, 1, "nonsense", 1, 1]), TypeError),
     ],
 )
 def test_attenuationparameters_validation(parameters, error) -> None:
@@ -183,10 +172,10 @@ def test_attenuationparameters_setattribute(test, value, parameter, error) -> No
 def test_attenuationparameters_utilization(test, expected, test_att_pars) -> None:
     """Test set_utilization_factor method of AttenuationParameters dataclass."""
     if expected is None:
-        test_att_pars.set_utilization_factor(**test)
+        UtilizationFactor(**test)
     else:
         with pytest.raises(expected):
-            test_att_pars.set_utilization_factor(**test)
+            UtilizationFactor(**test)
 
 
 # Test SourceParameters

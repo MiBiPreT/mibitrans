@@ -9,8 +9,8 @@ import pytest
 from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameters import SourceParameters
-from mibitrans.transport import domenico as dom
-from mibitrans.transport import karanovic as kar
+from mibitrans.transport.models import Anatrans
+from mibitrans.transport.models import Mibitrans
 from tests.test_example_data import testing_massbalance_instant_dom
 from tests.test_example_data import testing_massbalance_instant_dom_inf
 from tests.test_example_data import testing_massbalance_instant_kar
@@ -41,49 +41,62 @@ def test_source_pars_inf():
 
 
 @pytest.fixture(scope="module")
-def test_karanovic_nodecay_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.NoDecay fixture model object for testing."""
-    return kar.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+def test_mibitrans_nodecay_model_mb(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+    """Mibitrans with no decay fixture model object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
 
 
 @pytest.fixture(scope="module")
-def test_karanovic_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.LinearDecay fixture model object for testing."""
-    return kar.LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+def test_mibitrans_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans with linear decay fixture model object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.run()
+    return obj
 
 
 @pytest.fixture(scope="module")
-def test_karanovic_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.InstantReaction fixture model object for testing."""
-    return kar.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+def test_mibitrans_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans with instant reacion fixture model object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.run()
+    return obj
 
 
 @pytest.fixture(scope="module")
-def test_karanovic_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
-    """karanovic.InstantReaction fixture model object for testing."""
-    return kar.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+def test_mibitrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
+    """Mibitrans with instant reaction and infinite source mass fixture model object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.run()
+    return obj
 
 
 @pytest.fixture(scope="module")
-def test_domenico_instantreaction_model_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
-    """karanovic.InstantReaction fixture model object for testing."""
-    return dom.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+def test_anatrans_instantreaction_model_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
+    """Anatrans instant reaction fixture model object for testing."""
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.run()
+    return obj
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Mass balance tests temporarily disabled due to incoming refactor.")
 @pytest.mark.parametrize(
     "model, expected",
     [
-        ("test_karanovic_nodecay_model_mb", testing_massbalance_nodecay_kar),
-        ("test_karanovic_lineardecay_model_mb", testing_massbalance_lindecay_kar),
-        ("test_karanovic_instantreaction_model_mb", testing_massbalance_instant_kar),
-        ("test_karanovic_instantreaction_model_mb_inf", testing_massbalance_instant_kar_inf),
+        ("test_mibitrans_nodecay_model_mb", testing_massbalance_nodecay_kar),
+        ("test_mibitrans_lineardecay_model_mb", testing_massbalance_lindecay_kar),
+        ("test_mibitrans_instantreaction_model_mb", testing_massbalance_instant_kar),
+        ("test_mibitrans_instantreaction_model_mb_inf", testing_massbalance_instant_kar_inf),
         (ModelParameters(), TypeError),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_balance_numerical_karanovic(model, expected, request) -> None:
-    """Test if mass balance is correctly calculated by comparing to precomputed results for Karanovic model."""
+def test_balance_numerical_mibitrans(model, expected, request) -> None:
+    """Test if mass balance is correctly calculated by comparing to precomputed results for Mibitrans model."""
     if isinstance(expected, dict):
         model_object = request.getfixturevalue(model)
         dictionary = mass_balance(model_object, time=3 * 365)
@@ -98,16 +111,16 @@ def test_balance_numerical_karanovic(model, expected, request) -> None:
 @pytest.mark.parametrize(
     "model, expected",
     [
-        ("test_domenico_nodecay_model", testing_massbalance_nodecay_dom),
-        ("test_domenico_lineardecay_model", testing_massbalance_lindecay_dom),
-        ("test_domenico_instantreaction_model", testing_massbalance_instant_dom),
-        ("test_domenico_instantreaction_model_inf", testing_massbalance_instant_dom_inf),
+        ("test_anatrans_model_nodecay", testing_massbalance_nodecay_dom),
+        ("test_anatrans_model_lineardecay", testing_massbalance_lindecay_dom),
+        ("test_anatrans_model_instantreaction", testing_massbalance_instant_dom),
+        ("test_anatrans_instantreaction_model_inf", testing_massbalance_instant_dom_inf),
         (ModelParameters(), TypeError),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
 def test_balance_numerical(model, expected, request) -> None:
-    """Test if mass balance is correctly calculated by comparing to precomputed results for Domenico model."""
+    """Test if mass balance is correctly calculated by comparing to precomputed results for Anatrans model."""
     if isinstance(expected, dict):
         model_object = request.getfixturevalue(model)
         dictionary = mass_balance(model_object, time=3 * 365)

@@ -90,7 +90,7 @@ def mass_balance(model, time=None) -> dict:
 
     # Change in source mass at t=t, due to source decay by transport
     if inf_source:
-        Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration(0)
+        Q, c0_avg = no_decay_model._calculate_discharge_and_average_source_zone_concentration()
         M_source_delta = Q * c0_avg * model.t[time_pos]
     else:
         M_source_delta = M_source_0 - M_source_t

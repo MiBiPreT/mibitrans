@@ -5,8 +5,6 @@ from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameters import SourceParameters
-from mibitrans.transport import domenico as dom
-from mibitrans.transport import karanovic as kar
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen
 from mibitrans.transport.models import Mibitrans
@@ -24,7 +22,6 @@ def test_att_pars():
     return AttenuationParameters(
         retardation=1,
         half_life=0.1 * 365,
-        electron_acceptors=dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5),
     )
 
 
@@ -34,7 +31,6 @@ def test_att_pars_nodecay():
     return AttenuationParameters(
         retardation=1,
         decay_rate=0,
-        electron_acceptors=dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5),
     )
 
 
@@ -64,48 +60,6 @@ def test_model_pars_short(test_source_pars, test_model_pars):
     short_model_pars = copy.copy(test_model_pars)
     short_model_pars.model_width = test_source_pars.source_zone_boundary[-1] - 1
     return short_model_pars
-
-
-#### Decrepit in version 0.5 ####
-
-
-@pytest.fixture(scope="module")
-def test_domenico_nodecay_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """domenico.NoDecay fixture model object for testing."""
-    return dom.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-@pytest.fixture(scope="module")
-def test_domenico_lineardecay_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """domenico.LinearDecay fixture model object for testing."""
-    return dom.LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-@pytest.fixture(scope="module")
-def test_domenico_instantreaction_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """domenico.InstantReaction fixture model object for testing."""
-    return dom.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-@pytest.fixture(scope="session")
-def test_karanovic_nodecay_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.NoDecay fixture model object for testing."""
-    return kar.NoDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-@pytest.fixture(scope="session")
-def test_karanovic_lineardecay_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.LinearDecay fixture model object for testing."""
-    return kar.LinearDecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-@pytest.fixture(scope="session")
-def test_karanovic_instantreaction_model(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """karanovic.InstantReaction fixture model object for testing."""
-    return kar.InstantReaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-
-
-###############################
 
 
 @pytest.fixture(scope="session")

@@ -4,9 +4,9 @@ from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport import karanovic as kar
-from tests.test_example_data import testingdata_instantreaction_karanovic
-from tests.test_example_data import testingdata_lineardecay_karanovic
-from tests.test_example_data import testingdata_nodecay_karanovic
+from tests.test_example_data import testingdata_instantreaction_mibitrans
+from tests.test_example_data import testingdata_lineardecay_mibitrans
+from tests.test_example_data import testingdata_nodecay_mibitrans
 
 
 @pytest.mark.parametrize(
@@ -79,9 +79,9 @@ def test_require_degradation_instant(att, error, test_hydro_pars, test_source_pa
 @pytest.mark.parametrize(
     "model, expected",
     [
-        ("test_karanovic_nodecay_model", testingdata_nodecay_karanovic),
-        ("test_karanovic_lineardecay_model", testingdata_lineardecay_karanovic),
-        ("test_karanovic_instantreaction_model", testingdata_instantreaction_karanovic),
+        ("test_karanovic_nodecay_model", testingdata_nodecay_mibitrans),
+        ("test_karanovic_lineardecay_model", testingdata_lineardecay_mibitrans),
+        ("test_karanovic_instantreaction_model", testingdata_instantreaction_mibitrans),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")

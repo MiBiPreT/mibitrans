@@ -1,0 +1,62 @@
+import pytest
+from mibitrans.data.check_input import DomainValueError
+from tests.test_example_data import testingdata_instantreaction_anatrans
+from tests.test_example_data import testingdata_lineardecay_anatrans
+from tests.test_example_data import testingdata_nodecay_anatrans
+
+
+@pytest.mark.parametrize(
+    "model, expected",
+    [
+        ("test_anatrans_model_nodecay", testingdata_nodecay_anatrans),
+        ("test_anatrans_model_lineardecay", testingdata_lineardecay_anatrans),
+        ("test_anatrans_model_instantreaction", testingdata_instantreaction_anatrans),
+    ],
+)
+@pytest.mark.filterwarnings("ignore:Decay rate was set")
+def test_transport_equations_numerical(model, expected, request):
+    """Test numerical output of transport equation child classes of Domenico."""
+    model_object = request.getfixturevalue(model)
+    assert model_object.cxyt == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "x, y, t, expected",
+    [
+        (16, 0, 393, 0.2403406438598838),
+        (24, -5, 283, 0.031529981399875194),
+        (-16, 0, 393, DomainValueError),
+        ("nonsense", 0, 393, TypeError),
+        (16, "nonsense", 393, TypeError),
+        (16, 0, -10, DomainValueError),
+        (16, 0, "nonsense", TypeError),
+    ],
+)
+def test_anatrans_sample_linear(x, y, t, expected, test_anatrans_model_lineardecay):
+    """Tests if sample method from Domenico class works correctly."""
+    if isinstance(expected, float):
+        assert test_anatrans_model_lineardecay.sample(x, y, t) == pytest.approx(expected)
+    elif expected is ValueError or expected is TypeError:
+        with pytest.raises(expected):
+            test_anatrans_model_lineardecay.sample(x, y, t)
+
+
+@pytest.mark.parametrize(
+    "x, y, t, expected",
+    [
+        (20, 0, 476, 3.076798202181921),
+        (11, 7, 193, 2.0747279062256183),
+        (-16, 0, 393, DomainValueError),
+        ("nonsense", 0, 393, TypeError),
+        (16, "nonsense", 393, TypeError),
+        (16, 0, -10, DomainValueError),
+        (16, 0, "nonsense", TypeError),
+    ],
+)
+def test_anatrans_sample_instantreaction(x, y, t, expected, test_anatrans_model_instantreaction):
+    """Tests if sample method from Domenico class works correctly."""
+    if isinstance(expected, float):
+        assert test_anatrans_model_instantreaction.sample(x, y, t) == pytest.approx(expected)
+    elif expected is ValueError or expected is TypeError:
+        with pytest.raises(expected):
+            test_anatrans_model_instantreaction.sample(x, y, t)

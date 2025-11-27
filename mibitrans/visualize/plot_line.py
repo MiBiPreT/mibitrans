@@ -14,6 +14,7 @@ from mibitrans.data.check_input import check_y_in_domain
 
 relative_conc_ylabel = r"Relative concentration ($C/C_0$)"
 absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
+allowed_model_types = (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.models.Transport3D)
 
 
 def centerline(
@@ -45,7 +46,7 @@ def centerline(
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.solutions.Transport3D))
+        check_model_type(mod, allowed_model_types)
         y_pos = check_y_in_domain(mod, y_position)
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
@@ -135,7 +136,7 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.solutions.Transport3D))
+        check_model_type(mod, allowed_model_types)
         x_pos = check_x_in_domain(mod, x_position)
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
@@ -227,7 +228,7 @@ def breakthrough(
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.solutions.Transport3D))
+        check_model_type(mod, allowed_model_types)
         x_pos = check_x_in_domain(mod, x_position)
         y_pos = check_y_in_domain(mod, y_position)
         _run_model_if_model_has_not_ran(mod)

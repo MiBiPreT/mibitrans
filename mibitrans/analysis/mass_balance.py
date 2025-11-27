@@ -25,6 +25,9 @@ def mass_balance(model, time=None) -> dict:
     """
     check_model_type(model, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.models.Transport3D))
     model = copy.deepcopy(model)
+    if not model.has_run:
+        model.run()
+
     time_pos = check_time_in_domain(model, time)
 
     if isinstance(model.source_parameters.total_mass, str):
@@ -58,6 +61,21 @@ def mass_balance(model, time=None) -> dict:
     else:
         mode = "no_decay"
         no_decay_model = model
+
+    if hasattr(model, "mode"):
+        if model.mode == "instant_reaction":
+            mode = model.mode
+        elif model.mode == "linear":
+            if model._decay_rate == 0:
+                mode = "no_decay"
+            else:
+                mode = "linear_decay"
+
+        if mode in ["instant_reaction", "linear_decay"]:
+            no_decay_model = copy.deepcopy(model)
+            no_decay_model.mode = "linear"
+            no_decay_model.attenuation_parameters.decay_rate = 0
+            no_decay_model.run()
 
     # Total source mass at t=0
     M_source_0 = model.source_parameters.total_mass

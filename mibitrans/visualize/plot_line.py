@@ -17,7 +17,7 @@ absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
 
 def allowed_model_types():
-    return (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.models.Transport3D)
+    return mibitrans.transport.model_parent.Transport3D
 
 
 def centerline(

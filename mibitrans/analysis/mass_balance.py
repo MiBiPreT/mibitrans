@@ -6,8 +6,6 @@ Module calculating the mass balance based on base parameters.
 import copy
 import numpy as np
 import mibitrans
-import mibitrans.transport.domenico as domenico
-import mibitrans.transport.karanovic as karanovic
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
@@ -23,7 +21,7 @@ def mass_balance(model, time=None) -> dict:
     Returns:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
-    check_model_type(model, (mibitrans.transport.model_parent.Transport3D, mibitrans.transport.models.Transport3D))
+    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
     model = copy.deepcopy(model)
     if not model.has_run:
         model.run()
@@ -38,30 +36,7 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict = {}
 
     mass_balance_dict["time"] = model.t[time_pos]
-
-    if isinstance(model, (domenico.InstantReaction | domenico.LinearDecay)):
-        no_decay_model = domenico.NoDecay(
-            model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
-        )
-
-        if hasattr(model, "biodegradation_capacity"):
-            mode = "instant_reaction"
-        else:
-            mode = "linear_decay"
-    elif isinstance(model, karanovic.InstantReaction) or (
-        isinstance(model, karanovic.LinearDecay) and model.attenuation_parameters.decay_rate > 0
-    ):
-        no_decay_model = karanovic.NoDecay(
-            model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
-        )
-        if hasattr(model, "biodegradation_capacity"):
-            mode = "instant_reaction"
-        else:
-            mode = "linear_decay"
-    else:
-        mode = "no_decay"
-        no_decay_model = model
-
+    mode = "unknown"
     if hasattr(model, "mode"):
         if model.mode == "instant_reaction":
             mode = model.mode
@@ -76,6 +51,8 @@ def mass_balance(model, time=None) -> dict:
             no_decay_model.mode = "linear"
             no_decay_model.attenuation_parameters.decay_rate = 0
             no_decay_model.run()
+        else:
+            no_decay_model = model
 
     # Total source mass at t=0
     M_source_0 = model.source_parameters.total_mass

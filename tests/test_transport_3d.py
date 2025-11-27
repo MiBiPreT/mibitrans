@@ -6,7 +6,7 @@ from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
-from mibitrans.transport.models import Transport3D
+from mibitrans.transport.model_parent import Transport3D
 
 
 class Transport3DConcrete(Transport3D):

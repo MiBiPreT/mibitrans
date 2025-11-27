@@ -182,10 +182,15 @@ def _check_electron_acceptor(value):
 def check_model_type(parameter, allowed_model_types):
     """Check if variable is of the given allowed model types, and raise an error if it is not."""
     if not isinstance(parameter, allowed_model_types):
-        raise TypeError(
-            f"Input argument model should be in {allowed_model_types.__subclasses__()}, "
-            f"but is {type(parameter)} instead."
-        )
+        if isinstance(allowed_model_types, tuple):
+            raise TypeError(
+                f"Input argument model should be subclass of {allowed_model_types}, but is {type(parameter)} instead."
+            )
+        else:
+            raise TypeError(
+                f"Input argument model should be in {allowed_model_types.__subclasses__()}, "
+                f"but is {type(parameter)} instead."
+            )
 
 
 def check_time_in_domain(model, time):

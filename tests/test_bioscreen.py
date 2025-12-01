@@ -14,8 +14,8 @@ from tests.test_example_data import testingdata_nodecay_bioscreen
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_transport_equations_numerical(model, expected, request):
-    """Test numerical output of transport equation child classes of Domenico."""
+def test_transport_equation_numerical_bioscreen(model, expected, request):
+    """Test numerical output of transport equation of Anatrans, by comparing to pre-calculated values."""
     model_object = request.getfixturevalue(model)
     assert model_object.cxyt == pytest.approx(expected)
 
@@ -32,8 +32,8 @@ def test_transport_equations_numerical(model, expected, request):
         (16, 0, "nonsense", TypeError),
     ],
 )
-def test_anatrans_sample_linear(x, y, t, expected, test_bioscreen_model_lineardecay):
-    """Tests if sample method from Domenico class works correctly."""
+def test_bioscreen_sample_linear(x, y, t, expected, test_bioscreen_model_lineardecay):
+    """Test if sample method from Bioscreen works correctly, and gives expected output for linear models."""
     if isinstance(expected, float):
         assert test_bioscreen_model_lineardecay.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
@@ -53,8 +53,8 @@ def test_anatrans_sample_linear(x, y, t, expected, test_bioscreen_model_linearde
         (16, 0, "nonsense", TypeError),
     ],
 )
-def test_anatrans_sample_instantreaction(x, y, t, expected, test_bioscreen_model_instantreaction):
-    """Tests if sample method from Domenico class works correctly."""
+def test_bioscreen_sample_instantreaction(x, y, t, expected, test_bioscreen_model_instantreaction):
+    """Test if sample method from Bioscreen works correctly, and gives expected output for instant reaction models."""
     if isinstance(expected, float):
         assert test_bioscreen_model_instantreaction.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:

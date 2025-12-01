@@ -14,8 +14,8 @@ from tests.test_example_data import testingdata_nodecay_mibitrans
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_transport_equations(model, expected, request):
-    """Test numerical output of transport equation child classes of Karanovic."""
+def test_transport_equation_numerical_mibitrans(model, expected, request):
+    """Test numerical output of transport equation of Mibitrans, by comparing to pre-calculated values."""
     model_object = request.getfixturevalue(model)
     assert model_object.cxyt == pytest.approx(expected)
 
@@ -33,7 +33,7 @@ def test_transport_equations(model, expected, request):
     ],
 )
 def test_mibitrans_linear_sample(x, y, t, expected, test_mibitrans_model_lineardecay):
-    """Tests if sample method from Karanovic class works correctly for LinearDecay."""
+    """Test if sample method from Mibitrans works correctly, and gives expected output for linear models."""
     if isinstance(expected, float):
         assert test_mibitrans_model_lineardecay.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
@@ -54,7 +54,7 @@ def test_mibitrans_linear_sample(x, y, t, expected, test_mibitrans_model_lineard
     ],
 )
 def test_mibitrans_instant_sample(x, y, t, expected, test_mibitrans_model_instantreaction):
-    """Tests if sample method from Karanovic class works correctly for InstantReaction."""
+    """Test if sample method from Mibitrans works correctly, and gives expected output for instant reaction models."""
     if isinstance(expected, float):
         assert test_mibitrans_model_instantreaction.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:

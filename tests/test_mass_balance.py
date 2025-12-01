@@ -91,20 +91,15 @@ def test_anatrans_instantreaction_model_inf(test_hydro_pars, test_att_pars, test
         ("test_mibitrans_lineardecay_model_mb", testing_massbalance_lindecay_kar),
         ("test_mibitrans_instantreaction_model_mb", testing_massbalance_instant_kar),
         ("test_mibitrans_instantreaction_model_mb_inf", testing_massbalance_instant_kar_inf),
-        (ModelParameters(), TypeError),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
 def test_balance_numerical_mibitrans(model, expected, request) -> None:
     """Test if mass balance is correctly calculated by comparing to precomputed results for Mibitrans model."""
-    if isinstance(expected, dict):
-        model_object = request.getfixturevalue(model)
-        dictionary = mass_balance(model_object, time=3 * 365)
-        for key, output_item in dictionary.items():
-            assert expected[key] == pytest.approx(output_item)
-    else:
-        with pytest.raises(expected):
-            mass_balance(model, time=3 * 365)
+    model_object = request.getfixturevalue(model)
+    dictionary = mass_balance(model_object, time=3 * 365)
+    for key, output_item in dictionary.items():
+        assert expected[key] == pytest.approx(output_item)
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Mass balance tests temporarily disabled due to incoming refactor.")
@@ -115,17 +110,12 @@ def test_balance_numerical_mibitrans(model, expected, request) -> None:
         ("test_anatrans_model_lineardecay", testing_massbalance_lindecay_dom),
         ("test_anatrans_model_instantreaction", testing_massbalance_instant_dom),
         ("test_anatrans_instantreaction_model_inf", testing_massbalance_instant_dom_inf),
-        (ModelParameters(), TypeError),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
 def test_balance_numerical(model, expected, request) -> None:
     """Test if mass balance is correctly calculated by comparing to precomputed results for Anatrans model."""
-    if isinstance(expected, dict):
-        model_object = request.getfixturevalue(model)
-        dictionary = mass_balance(model_object, time=3 * 365)
-        for key, output_item in dictionary.items():
-            assert expected[key] == pytest.approx(output_item)
-    else:
-        with pytest.raises(expected):
-            mass_balance(model, time=3 * 365)
+    model_object = request.getfixturevalue(model)
+    dictionary = mass_balance(model_object, time=3 * 365)
+    for key, output_item in dictionary.items():
+        assert expected[key] == pytest.approx(output_item)

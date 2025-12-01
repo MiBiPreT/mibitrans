@@ -17,6 +17,7 @@ absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
 
 def allowed_model_types():
+    """Return object of parent class that is allowed for input/output."""
     return mibitrans.transport.model_parent.Transport3D
 
 

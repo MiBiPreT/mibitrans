@@ -70,6 +70,7 @@ class UtilizationFactor:
 
     @property
     def dictionary(self):
+        """Returns utilization factors in the form of a dictionary."""
         return dict(
             util_oxygen=self.util_oxygen,
             util_nitrate=self.util_nitrate,
@@ -77,15 +78,7 @@ class UtilizationFactor:
             util_sulfate=self.util_sulfate,
             util_methane=self.util_methane,
         )
-    # def __post_init__(self):
-    #     """Initialize utilization factors as dictionary."""
-    #     self.dictionary = dict(
-    #         util_oxygen=self.util_oxygen,
-    #         util_nitrate=self.util_nitrate,
-    #         util_ferrous_iron=self.util_ferrous_iron,
-    #         util_sulfate=self.util_sulfate,
-    #         util_methane=self.util_methane,
-    #     )
+
 
 @dataclass
 class ElectronAcceptors:
@@ -117,3 +110,13 @@ class ElectronAcceptors:
         validate_input_values(parameter, value)
         super().__setattr__(parameter, value)
 
+    @property
+    def dictionary(self):
+        """Returns electron acceptors in the form of a dictionary."""
+        return dict(
+            delta_oxygen=self.delta_oxygen,
+            delta_nitrate=self.delta_nitrate,
+            ferrous_iron=self.ferrous_iron,
+            delta_sulfate=self.delta_sulfate,
+            methane=self.methane,
+        )

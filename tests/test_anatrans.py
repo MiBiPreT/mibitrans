@@ -14,8 +14,8 @@ from tests.test_example_data import testingdata_nodecay_anatrans
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-def test_transport_equations_numerical(model, expected, request):
-    """Test numerical output of transport equation child classes of Domenico."""
+def test_transport_equation_numerical_anatrans(model, expected, request):
+    """Test numerical output of transport equation of Anatrans, by comparing to pre-calculated values."""
     model_object = request.getfixturevalue(model)
     assert model_object.cxyt == pytest.approx(expected)
 
@@ -33,7 +33,7 @@ def test_transport_equations_numerical(model, expected, request):
     ],
 )
 def test_anatrans_sample_linear(x, y, t, expected, test_anatrans_model_lineardecay):
-    """Tests if sample method from Domenico class works correctly."""
+    """Test if sample method from Anatrans works correctly, and gives expected output for linear models."""
     if isinstance(expected, float):
         assert test_anatrans_model_lineardecay.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:
@@ -54,7 +54,7 @@ def test_anatrans_sample_linear(x, y, t, expected, test_anatrans_model_lineardec
     ],
 )
 def test_anatrans_sample_instantreaction(x, y, t, expected, test_anatrans_model_instantreaction):
-    """Tests if sample method from Domenico class works correctly."""
+    """Test if sample method from Anatrans works correctly, and gives expected output for instant reaction models."""
     if isinstance(expected, float):
         assert test_anatrans_model_instantreaction.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:

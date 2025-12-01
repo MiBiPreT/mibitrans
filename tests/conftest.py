@@ -114,7 +114,7 @@ def test_anatrans_model_instantreaction(test_hydro_pars, test_att_pars, test_sou
 
 @pytest.fixture(scope="session")
 def test_bioscreen_model_nodecay(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
-    """Bioscreen fixture model object for testing, with no decay"""
+    """Bioscreen fixture model object for testing, with no decay."""
     test_att_pars_nodecay.decay_rate = 0
     obj = Bioscreen(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
     obj.run()
@@ -123,7 +123,7 @@ def test_bioscreen_model_nodecay(test_hydro_pars, test_att_pars_nodecay, test_so
 
 @pytest.fixture(scope="session")
 def test_bioscreen_model_lineardecay(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Bioscreen fixture model object for testing, with linear decay"""
+    """Bioscreen fixture model object for testing, with linear decay."""
     obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     obj.run()
     return obj

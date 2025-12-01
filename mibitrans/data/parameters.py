@@ -123,8 +123,6 @@ class AttenuationParameters(_ChangeObserver):
     Methods:
         calculate_retardation : Calculate retardation factor from bulk density, partition coefficient and
             fraction organic carbon when given porosity [-]
-        set_utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor
-        utilization factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
 
     Raises:
         ValueError : If input parameters are incomplete or outside the valid domain.
@@ -283,9 +281,11 @@ class ModelParameters(_ChangeObserver):
         model_length (float) : Model extent in the longitudinal (x) direction in [m].
         model_width (float) : Model extent in the transverse horizontal (y) direction in [m].
         model_time (float) : Model duration in [days].
-        dx (float) : Model grid discretization step size in the longitudinal (x) direction, in [m].
-        dy (float) : Model grid discretization step size in the transverse horizontal (y) direction, in [m].
-        dt (float) : Model time discretization step size, in [days]
+        dx (float, optional) : Model grid discretization step size in the longitudinal (x) direction, in [m]. By
+            default, dx = (model_length / 100).
+        dy (float, optional) : Model grid discretization step size in the transverse horizontal (y) direction, in [m].
+            By default, dy = (model_width / 50).
+        dt (float, optional) : Model time discretization step size, in [days]. By default, dt = (model_time / 10).
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Raises:
@@ -295,9 +295,9 @@ class ModelParameters(_ChangeObserver):
 
     """
 
-    model_length: float = None
-    model_width: float = None
-    model_time: float = None
+    model_length: float
+    model_width: float
+    model_time: float
     dx: float = None
     dy: float = None
     dt: float = None
@@ -333,3 +333,12 @@ class ModelParameters(_ChangeObserver):
                             f"Model time step size ({self.dt}) "
                             f"is greater than the total model time ({self.model_time})."
                         )
+
+    def __post_init__(self):
+        """Set model discretization parameters if not provided."""
+        if not self.dx:
+            self.dx = self.model_length / 100
+        if not self.dy:
+            self.dy = self.model_width / 50
+        if not self.dt:
+            self.dt = self.model_time / 10

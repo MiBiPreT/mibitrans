@@ -136,6 +136,9 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
     """Test if model correctly switches modes when using the mode property."""
     pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
     model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    with pytest.raises(ValueError):
+        # Model should raise error if attempting to switch to instant reaction model without providing parameters.
+        model_object.mode = "instant_reaction"
     model_object.instant_reaction(**pars)
     assert (
         model_object.c_source[-1]
@@ -143,24 +146,24 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
     ), ("Biodegradation capacity was not added to the outermost source zone.",)
     model_object.mode = "linear"
     assert model_object.mode == "linear", "Model mode was not switched to 'linear'."
-    assert model_object.initialized == False, "Model was incorrectly flagged as initialized."
+    assert not model_object.initialized, "Model was incorrectly flagged as initialized."
     model_object._pre_run_initialization_parameters()
-    assert model_object.initialized == True, "Model was incorrectly flagged as not initialized."
+    assert model_object.initialized, "Model was incorrectly flagged as not initialized."
     assert model_object.c_source[-1] == test_source_pars.source_zone_concentration[-1], (
         "Outermost source zone concentration was not converted back from instant reaction."
     )
 
 
 def test_reset_on_parameter_change(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Test if model output gets reset after changing parameters"""
+    """Test if model output gets reset after changing parameters."""
     pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
     model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     model_object.instant_reaction(**pars)
     model_object.cxyt = np.array(([[[1, 2], [2, 3]], [[3, 4], [4, 5]]]))
     model_object.has_run = True
     model_object.hydrological_parameters.velocity = 8 / 365
-    assert model_object.initialized == False, "Model has been incorrectly flagged as initialized."
-    assert model_object.has_run == False, "Model has been incorrectly flagged as being ran."
+    assert not model_object.initialized, "Model has been incorrectly flagged as initialized."
+    assert not model_object.has_run, "Model has been incorrectly flagged as being ran."
     assert np.sum(model_object.cxyt) == 0, "Model output has not been reset after parameter change."
 
 

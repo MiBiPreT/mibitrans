@@ -9,12 +9,25 @@ from mibitrans.data.check_input import validate_input_values
 from mibitrans.transport.model_parent import Transport3D
 
 
-# mibitrans ; Karanovic
 class Mibitrans(Transport3D):
     """Model class using an exact analytical solution as described in Karanovic (2007), based on Wexler (1992).
 
+    Karanovic (2007) implemented the Wexler (1992) exact analytical solution in the Excel based BIOSCREEN-AT, and added
+    source depletion, akin to that implemented in its predecessor BIOSCREEN by Newell et al. (1997). The Mibitrans model
+    allows for the same method as used in BIOSCREEN-AT, but expands it by allowing multiple source zones (by means of
+    superposition) and including the instant reaction model. These were present in the original BIOSCREEN, but not
+    reimplemented in BIOSCREEN-AT. Using a single source zone in this model, and not using the instant reaction option
+    will make the Mibitrans solution resolve to the equation described in Karanovic (2007). Which in turn resolves to
+    the Wexler (1992) solution if source depletion is disabled.
+
     Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.
     Groundwater, 45(2), 242-245.
+
+    Newell, C. J., McLeod, R. K., & Gonzales, J. R. (1997). BIOSCREEN natural attenuation decision support
+    system version 1.4 revisions, Tech. rep., U.S. EPA.
+
+    Wexler, E. J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water
+    systems with uniform flow. US Government Printing Office.
     """
 
     def __init__(
@@ -25,7 +38,7 @@ class Mibitrans(Transport3D):
         model_parameters,
         verbose=False,
     ):
-        """Initialize object and run model.
+        """Initialize model object.
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
@@ -39,16 +52,31 @@ class Mibitrans(Transport3D):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
+            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
+                this attribute to switch between 'linear' and 'instant_reaction' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+            relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
+                zone concentration at t=0. Indexed as [t,y,x].
             x (np.ndarray) : Discretized model x-dimension, in [m].
             y (np.ndarray) : Discretized model y-dimension, in [y].
             t (np.ndarray) : Discretized model t-dimension, in [days].
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
-            k_source (float) : Source zone decay rate, in [1/days]
+            k_source (float) : Source zone decay rate, in [1/days].
+            biodegradation_capacity (float) : Maximum capacity of biodegradation given provided electron acceptor
+            concentrations, in [g/m^3].
 
         Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
+            run : Run model with current parameters, output is written to the cxyt array.
+            sample : Calculate concentration at any given position and point in time.
+            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
+                optionally electron acceptor utilization factors. Switch between model modes by using the mode
+                attribute.
+            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
+            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
+            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
+            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
+            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -208,14 +236,26 @@ class Mibitrans(Transport3D):
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt)
 
 
-# anatrans ; Domenico
-
-
 class Anatrans(Transport3D):
-    """Parent class that for all analytical solutions using the Domenico (1987) analytical model.
+    """Model class using an analytical solution based on Bear (1979), Domenico (1987) & Newell et al. (1997).
+
+    Under the assumption that C(x,y,z,t) = C(x,t) * C(y,t) * C(z,t), the 3D ADE can be broken up in three separate
+    differential equations which can be solved individually. For C(x,t) the solution is given in Bear (1979), C(y,t) and
+    C(z,t) can be derived from Crank (1975). The equation used for Anatrans is the combination of these solutions, with
+    addition of source depletion, source superposition and instant reaction model, described in Newell et al. (1997) and
+    implemented in the BIOSCREEN screening model. The solution of Newell et al. (1997) is based of the Domenico (1987)
+    solution, a truncated version of the equation described above, which introduces an error with a size dependent on
+    the ratio of flow velocity and longitudinal dispersivity. Anatrans instead uses the fully untruncated version.
+
+    Bear, J. 1979. Hydraulics of Ground Water. New York: McGraw-Hill.
+
+    Crank, J. 1975. The mathematics of Diffusion. New York: Oxford University Press.
 
     Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
     Journal of Hydrology, 91(1-2), 49-58.
+
+    Newell, C. J., McLeod, R. K., & Gonzales, J. R. (1997). BIOSCREEN natural attenuation decision support
+    system version 1.4 revisions, Tech. rep., U.S. EPA.
     """
 
     def __init__(
@@ -226,7 +266,7 @@ class Anatrans(Transport3D):
         model_parameters,
         verbose=False,
     ):
-        """Initialize object and run model.
+        """Initialize model object.
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
@@ -240,16 +280,31 @@ class Anatrans(Transport3D):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
+            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
+                this attribute to switch between 'linear' and 'instant_reaction' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+            relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
+                zone concentration at t=0. Indexed as [t,y,x].
             x (np.ndarray) : Discretized model x-dimension, in [m].
             y (np.ndarray) : Discretized model y-dimension, in [y].
             t (np.ndarray) : Discretized model t-dimension, in [days].
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
-            k_source (float) : Source zone decay rate, in [1/days]
+            k_source (float) : Source zone decay rate, in [1/days].
+            biodegradation_capacity (float) : Maximum capacity of biodegradation given provided electron acceptor
+            concentrations, in [g/m^3].
 
         Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
+            run : Run model with current parameters, output is written to the cxyt array.
+            sample : Calculate concentration at any given position and point in time.
+            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
+                optionally electron acceptor utilization factors. Switch between model modes by using the mode
+                attribute.
+            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
+            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
+            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
+            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
+            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -260,6 +315,7 @@ class Anatrans(Transport3D):
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
     def short_description(self):
+        """Short description of model type."""
         return "Anatrans model"
 
     def run(self):
@@ -347,6 +403,24 @@ class Anatrans(Transport3D):
 
 
 class Bioscreen(Anatrans):
+    """Model class using the analytical solution implemented in the BIOSCREEN screening model, Newell et al. (1997).
+
+    This model is an exact implementation of the transport equations implemented in the BIOSCREEN screening model of
+    Newell et al. (1997), which is based on the Domenico (1987) analytical model. Using a truncated version of the
+    equation used in the Anatrans model. This model is implemented as a method of comparison with the original BIOSCREEN
+    software. And is included for legacy reasons, since it is the first model implemented in the mibitrans package,
+    serving as a basis for the other models. However, caution should be taken when using this model, since a varying
+    error is introduced by using the truncated analytical solution. The error is most prominent for shorter times and
+    distances from the source, and depends on the ratio of flow velocity and longitudinal dispersivity. For modelling,
+    the Anatrans (untruncated approximate solution) and Mibitrans (exact analytical solution) models are recommended
+    instead.
+
+    Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
+    Journal of Hydrology, 91(1-2), 49-58.
+
+    Newell, C. J., McLeod, R. K., & Gonzales, J. R. (1997). BIOSCREEN natural attenuation decision support
+    system version 1.4 revisions, Tech. rep., U.S. EPA.
+    """
     def __init__(
         self,
         hydrological_parameters,
@@ -355,7 +429,7 @@ class Bioscreen(Anatrans):
         model_parameters,
         verbose=False,
     ):
-        """Initialize object and run model.
+        """Initialize model object.
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
@@ -369,16 +443,31 @@ class Bioscreen(Anatrans):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
+            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
+                this attribute to switch between 'linear' and 'instant_reaction' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
+            relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
+                zone concentration at t=0. Indexed as [t,y,x].
             x (np.ndarray) : Discretized model x-dimension, in [m].
             y (np.ndarray) : Discretized model y-dimension, in [y].
             t (np.ndarray) : Discretized model t-dimension, in [days].
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
-            k_source (float) : Source zone decay rate, in [1/days]
+            k_source (float) : Source zone decay rate, in [1/days].
+            biodegradation_capacity (float) : Maximum capacity of biodegradation given provided electron acceptor
+            concentrations, in [g/m^3].
 
         Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
+            run : Run model with current parameters, output is written to the cxyt array.
+            sample : Calculate concentration at any given position and point in time.
+            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
+                optionally electron acceptor utilization factors. Switch between model modes by using the mode
+                attribute.
+            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
+            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
+            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
+            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
+            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -387,9 +476,11 @@ class Bioscreen(Anatrans):
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
     def short_description(self):
+        """Short description of model type."""
         return "Bioscreen model"
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
+        # Difference with the Anatrans solution is the lack of additional term.
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
             decay_sqrt = np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)

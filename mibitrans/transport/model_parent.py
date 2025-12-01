@@ -106,6 +106,12 @@ class Transport3D(ABC):
                 self._mode = "linear"
                 self.initialized = False
             case "instant" | "instant_reaction" | "instant reaction" | 1:
+                if self._electron_acceptors is None or self._utilization_factor is None:
+                    raise ValueError(
+                        "Model mode was set to 'instant reaction', but electron acceptor parameters are "
+                        "missing. Use the instant_reaction method to supply the electron acceptor "
+                        "concentrations."
+                    )
                 self._mode = "instant_reaction"
                 self.initialized = False
             case _:

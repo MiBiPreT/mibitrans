@@ -292,13 +292,14 @@ def test_sourceparameters_visualize():
 @pytest.mark.parametrize(
     "parameters, error",
     [
-        (dict(), None),
+        (dict(model_length=1, model_width=1, model_time=1), None),
         (dict(model_length=1, model_width=1, model_time=1, dx=1, dy=1, dt=1), None),
-        (dict(model_length="one"), TypeError),
-        (dict(model_length=-2), DomainValueError),
-        (dict(model_length=1, dx=2), ValueError),
-        (dict(model_width=1, dy=2), ValueError),
-        (dict(model_time=1, dt=2), ValueError),
+        (dict(dx=1, dy=1, dt=1), TypeError),
+        (dict(model_length="one", model_width=1, model_time=1), TypeError),
+        (dict(model_length=-2, model_width=1, model_time=1), DomainValueError),
+        (dict(model_length=1, model_width=1, model_time=1, dx=2), ValueError),
+        (dict(model_length=1, model_width=1, model_time=1, dy=2), ValueError),
+        (dict(model_length=1, model_width=1, model_time=1, dt=2), ValueError),
     ],
 )
 def test_modelparameters_validation(parameters, error) -> None:
@@ -340,11 +341,18 @@ def test_modelparameters_validation_setattr(parameter, value, error) -> None:
 @pytest.mark.parametrize(
     "test, param, expected",
     [
-        (dict(model_length=1, dx=0.5), "model_length", 1),
-        (dict(model_length=1, dx=0.5), "dx", 0.5),
+        (dict(model_length=1, model_width=1, model_time=1, dx=0.5), "model_length", 1),
+        (dict(model_length=1, model_width=1, model_time=1, dx=0.5), "dx", 0.5),
     ],
 )
 def test_modelparameters_output(test, param, expected) -> None:
     """Test output of ModelParameters dataclass."""
     model = ModelParameters(**test)
     assert model.__dict__[param] == expected
+
+def test_calculation_optional_discretization():
+    """Test if model discretization is calculated if not given."""
+    model = ModelParameters(model_length=100, model_width=50, model_time=10)
+    assert model.dx, "Model dx should have been calculated, but was not."
+    assert model.dy, "Model dy should have been calculated, but was not."
+    assert model.dt, "Model dt should have been calculated, but was not."

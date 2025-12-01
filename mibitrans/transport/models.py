@@ -84,6 +84,7 @@ class Mibitrans(Transport3D):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
+    @property
     def short_description(self):
         """Return short description of model type."""
         if self.biodegradation_capacity:
@@ -168,8 +169,6 @@ class Mibitrans(Transport3D):
     def _calculate_concentration_for_all_xyt(self):
         cxyt = self.cxyt.copy()
         for sz in range(len(self.c_source)):
-            if self.verbose:
-                print("integrating for source zone ", sz)
             integral_sum = self._equation_term_integral(sz)
             source_term = self._equation_term_source(sz)
             cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
@@ -185,7 +184,7 @@ class Mibitrans(Transport3D):
         integral_term = np.zeros(self.cxyt.shape)
         for j in range(len(self.t)):
             if self.verbose:
-                print("integrating for t =", self.t[j], "days")
+                print("integrating for source zone ", sz, " and t =", self.t[j], "days")
             if j == 0:
                 lower_bound = 0
             else:
@@ -314,14 +313,14 @@ class Anatrans(Transport3D):
         if self._att_pars.diffusion != 0:
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
+    @property
     def short_description(self):
         """Short description of model type."""
         return "Anatrans model"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
-        if not self.initialized:
-            self._pre_run_initialization_parameters()
+        self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
@@ -421,6 +420,7 @@ class Bioscreen(Anatrans):
     Newell, C. J., McLeod, R. K., & Gonzales, J. R. (1997). BIOSCREEN natural attenuation decision support
     system version 1.4 revisions, Tech. rep., U.S. EPA.
     """
+
     def __init__(
         self,
         hydrological_parameters,
@@ -475,6 +475,7 @@ class Bioscreen(Anatrans):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
+    @property
     def short_description(self):
         """Short description of model type."""
         return "Bioscreen model"

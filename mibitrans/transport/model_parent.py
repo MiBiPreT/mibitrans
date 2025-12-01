@@ -120,12 +120,23 @@ class Transport3D(ABC):
                 self.initialized = False
 
     @property
+    def electron_acceptors(self):
+        """Return dictionary of electron acceptor parameters."""
+        return self._electron_acceptors.dictionary
+
+    @property
+    def utilization_factor(self):
+        """Return dictionary of utilization factor property."""
+        return self._utilization_factor.dictionary
+
+    @property
     def relative_cxyt(self):
         """Compute relative concentration c(x,y,t)/c0, where c0 is the maximum source zone concentration at t=0."""
         maximum_concentration = np.max(self.source_parameters.source_zone_concentration)
         relative_cxyt = self.cxyt / maximum_concentration
         return relative_cxyt
 
+    @property
     @abstractmethod
     def short_description(self):
         """Short string describing model type."""
@@ -313,6 +324,8 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     def _check_model_mode_before_run(self):
+        # Reset concentration array to make sure it is empty before calculation.
+        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
         if not self.initialized:
             self._pre_run_initialization_parameters()
         if self._mode == "linear":

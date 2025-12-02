@@ -20,8 +20,8 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, **kw
             By default, last point in time is plotted.
         relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
             zone concentrations at t=0. By default, absolute concentrations are shown.
-        animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
-            are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+            False.
         **kwargs : Arguments to be passed to plt.pcolormesh().
 
     Returns a matrix plot of the input plume as object.
@@ -73,8 +73,8 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
             By default, last point in time is plotted.
         relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
             zone concentrations at t=0. By default, absolute concentrations are shown.
-        animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
-            are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+            False.
         **kwargs : Arguments to be passed to plt.plot_surface().
 
     Returns:

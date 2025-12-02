@@ -93,7 +93,7 @@ def centerline(
         plot_bin = []
         for i, mod in enumerate(model):
             if legend_names is not None:
-                line = ax.plot(mod.x, plot_array_list[i][0, :], label=legend_names[i])[0]
+                line = ax.plot(mod.x, plot_array_list[i][0, :], label=legend_names[i], **kwargs)[0]
             else:
                 line = ax.plot(mod.x, plot_array_list[i][0, :], **kwargs)[0]
             plot_bin.append(line)

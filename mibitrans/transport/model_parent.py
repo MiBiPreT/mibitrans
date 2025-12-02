@@ -341,9 +341,7 @@ class Transport3D(ABC):
                     "Please provide them with the 'instant_reaction' class method."
                 )
 
-    def centerline(
-        self, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -353,27 +351,33 @@ class Transport3D(ABC):
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
-        pline.centerline(
-            self,
-            y_position=y_position,
-            time=time,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.centerline(
+                self,
+                y_position=y_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.centerline(
+                self,
+                y_position=y_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
-    def transverse(
-        self, x_position, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -382,26 +386,32 @@ class Transport3D(ABC):
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
         """
-        pline.transverse(
-            self,
-            x_position=x_position,
-            time=time,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.transverse(
+                self,
+                x_position=x_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.transverse(
+                self,
+                x_position=x_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
-    def breakthrough(
-        self, x_position, y_position=0, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
@@ -410,22 +420,30 @@ class Transport3D(ABC):
                 By default, at the center of the plume (at y=0).
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
         """
-        pline.breakthrough(
-            self,
-            x_position=x_position,
-            y_position=y_position,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.breakthrough(
+                self,
+                x_position=x_position,
+                y_position=y_position,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.breakthrough(
+                self,
+                x_position=x_position,
+                y_position=y_position,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
     def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
@@ -435,9 +453,8 @@ class Transport3D(ABC):
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.pcolormesh().
 
         Returns a matrix plot of the input plume as object.
@@ -453,9 +470,8 @@ class Transport3D(ABC):
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot_surface().
 
         Returns:

@@ -153,7 +153,7 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
             y_label = relative_conc_ylabel
         else:
             if animate:
-                plot_array_list.append(mod.relative_cxyt[:, :, x_pos])
+                plot_array_list.append(mod.cxyt[:, :, x_pos])
             else:
                 plot_array_list.append(mod.cxyt[t_pos, :, x_pos])
             y_label = absolute_conc_ylabel

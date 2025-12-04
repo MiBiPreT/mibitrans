@@ -5,12 +5,10 @@ Module calculating the mass balance based on base parameters.
 
 import copy
 import numpy as np
-import mibitrans.transport.domenico as domenico
-import mibitrans.transport.karanovic as karanovic
+import mibitrans
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
-from mibitrans.transport.model_parent import Transport3D
 
 
 def mass_balance(model, time=None) -> dict:
@@ -23,8 +21,11 @@ def mass_balance(model, time=None) -> dict:
     Returns:
         mass_balance_dict : Dictionary containing the mass balance elements of the given model.
     """
-    check_model_type(model, Transport3D)
+    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
     model = copy.deepcopy(model)
+    if not model.has_run:
+        model.run()
+
     time_pos = check_time_in_domain(model, time)
 
     if isinstance(model.source_parameters.total_mass, str):
@@ -35,29 +36,23 @@ def mass_balance(model, time=None) -> dict:
     mass_balance_dict = {}
 
     mass_balance_dict["time"] = model.t[time_pos]
+    mode = "unknown"
+    if hasattr(model, "mode"):
+        if model.mode == "instant_reaction":
+            mode = model.mode
+        elif model.mode == "linear":
+            if model._decay_rate == 0:
+                mode = "no_decay"
+            else:
+                mode = "linear_decay"
 
-    if isinstance(model, (domenico.InstantReaction | domenico.LinearDecay)):
-        no_decay_model = domenico.NoDecay(
-            model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
-        )
-
-        if hasattr(model, "biodegradation_capacity"):
-            mode = "instant_reaction"
+        if mode in ["instant_reaction", "linear_decay"]:
+            no_decay_model = copy.deepcopy(model)
+            no_decay_model.mode = "linear"
+            no_decay_model.attenuation_parameters.decay_rate = 0
+            no_decay_model.run()
         else:
-            mode = "linear_decay"
-    elif isinstance(model, karanovic.InstantReaction) or (
-        isinstance(model, karanovic.LinearDecay) and model.attenuation_parameters.decay_rate > 0
-    ):
-        no_decay_model = karanovic.NoDecay(
-            model.hydrological_parameters, model.attenuation_parameters, model.source_parameters, model.model_parameters
-        )
-        if hasattr(model, "biodegradation_capacity"):
-            mode = "instant_reaction"
-        else:
-            mode = "linear_decay"
-    else:
-        mode = "no_decay"
-        no_decay_model = model
+            no_decay_model = model
 
     # Total source mass at t=0
     M_source_0 = model.source_parameters.total_mass
@@ -72,7 +67,7 @@ def mass_balance(model, time=None) -> dict:
 
     # Change in source mass at t=t, due to source decay by transport
     if inf_source:
-        Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration(0)
+        Q, c0_avg = no_decay_model._calculate_discharge_and_average_source_zone_concentration()
         M_source_delta = Q * c0_avg * model.t[time_pos]
     else:
         M_source_delta = M_source_0 - M_source_t

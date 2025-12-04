@@ -1,14 +1,16 @@
 """Documentation about mibitrans."""
 
 # Add some commonly used functions as top-level imports
-import mibitrans.transport.domenico as domenico
-import mibitrans.transport.karanovic as karanovic
 from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
+from mibitrans.transport.models import Anatrans
+from mibitrans.transport.models import Bioscreen
+from mibitrans.transport.models import Mibitrans
 from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_line import breakthrough

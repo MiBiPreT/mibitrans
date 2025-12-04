@@ -10,12 +10,12 @@ from mibitrans.data.parameter_information import util_to_conc_name
 
 def calculate_utilization(model):
     """Function that calculates relative use of electron acceptors in biodegradation of BTEX."""
-    util_factor = model.attenuation_parameters.utilization_factor.dictionary
+    util_factor = model._utilization_factor.dictionary
     biodeg_array = np.zeros(len(list(util_factor.keys())))
     util_array = np.zeros(len(biodeg_array))
 
     for i, (key, value) in enumerate(util_factor.items()):
-        biodeg_array[i] = getattr(model.attenuation_parameters.electron_acceptors, util_to_conc_name[key]) / value
+        biodeg_array[i] = getattr(model._electron_acceptors, util_to_conc_name[key]) / value
         util_array[i] = value
 
     biodegradation_capacity = np.sum(biodeg_array)

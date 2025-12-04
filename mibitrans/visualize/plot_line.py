@@ -16,6 +16,11 @@ relative_conc_ylabel = r"Relative concentration ($C/C_0$)"
 absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
 
+def allowed_model_types():
+    """Return object of parent class that is allowed for input/output."""
+    return mibitrans.transport.model_parent.Transport3D
+
+
 def centerline(
     model, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
 ):
@@ -45,7 +50,7 @@ def centerline(
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
+        check_model_type(mod, allowed_model_types())
         y_pos = check_y_in_domain(mod, y_position)
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
@@ -88,7 +93,7 @@ def centerline(
         plot_bin = []
         for i, mod in enumerate(model):
             if legend_names is not None:
-                line = ax.plot(mod.x, plot_array_list[i][0, :], label=legend_names[i])[0]
+                line = ax.plot(mod.x, plot_array_list[i][0, :], label=legend_names[i], **kwargs)[0]
             else:
                 line = ax.plot(mod.x, plot_array_list[i][0, :], **kwargs)[0]
             plot_bin.append(line)
@@ -135,7 +140,7 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
+        check_model_type(mod, allowed_model_types())
         x_pos = check_x_in_domain(mod, x_position)
         t_pos = check_time_in_domain(mod, time)
         _run_model_if_model_has_not_ran(mod)
@@ -148,7 +153,7 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
             y_label = relative_conc_ylabel
         else:
             if animate:
-                plot_array_list.append(mod.relative_cxyt[:, :, x_pos])
+                plot_array_list.append(mod.cxyt[:, :, x_pos])
             else:
                 plot_array_list.append(mod.cxyt[t_pos, :, x_pos])
             y_label = absolute_conc_ylabel
@@ -227,7 +232,7 @@ def breakthrough(
     # Checks for list model input: dt should be equal, time should be smaller than the smallest end time, y_position
     # should be inside narrowest domain boundaries
     for mod in model:
-        check_model_type(mod, mibitrans.transport.model_parent.Transport3D)
+        check_model_type(mod, allowed_model_types())
         x_pos = check_x_in_domain(mod, x_position)
         y_pos = check_y_in_domain(mod, y_position)
         _run_model_if_model_has_not_ran(mod)
@@ -302,7 +307,7 @@ def _run_model_if_model_has_not_ran(model):
 
 def _plot_title_generator(plot_type, model, time=None, x_position=None, y_position=None, multiple=False):
     if multiple:
-        title = f"{plot_type} plot of multiple models, at"
+        title = f"{plot_type} plot of multiple models, at "
     else:
         title = f"{plot_type} plot of {model.short_description} model, at "
 

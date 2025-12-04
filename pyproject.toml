@@ -70,6 +70,7 @@ dev = [
     "pytest-cov",
     "ruff",
     "tox",
+    "nb-clean ==4.0.1",
 ]
 
 publishing = [

@@ -55,6 +55,17 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     @property
+    def input_parameters(self):
+        """Return the input arguments for the model in the form of a dictionary, based on current values."""
+        return dict(
+            hydrological_parameters=self.hydrological_parameters,
+            attenuation_parameters=self.attenuation_parameters,
+            source_parameters=self.source_parameters,
+            model_parameters=self.model_parameters,
+            verbose=self.verbose,
+        )
+
+    @property
     def hydrological_parameters(self):
         """Rename to shorthand form of hydrological_parameters inside class for ease of use."""
         return self._hyd_pars

@@ -4,11 +4,160 @@ Module calculating the mass balance based on base parameters.
 """
 
 import copy
+import warnings
 import numpy as np
 import mibitrans
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
+
+
+class MassBalance:
+    def __init__(self, model, time, method="default", verbose=False):
+        self.model = model
+        self.verbose = verbose
+        self._time_check(time)
+        self._method_check(method)
+
+        self._plume_mass_t = None
+        self._source_mass_t = None
+        self._delta_source_t = None
+        self._degraded_mass_t = None
+        self._model_without_degradation = None
+
+        # Volume of single cell, as dx * dy * source thickness
+        self.cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.source_parameters.depth
+
+        if self.model.source_parameters.total_mass == "infinite":
+            self.source_mass_finite = True
+        else:
+            self.source_mass_finite = False
+
+        match self.model.mode:
+            case "instant_reaction":
+                self.model_instant_reaction = True
+                self.model_degradation = True
+            case "linear" if self.model.attenuation_parameters.decay_rate > 0:
+                self.model_degradation = True
+                self.model_instant_reaction = False
+            case _:
+                self.model_degradation = False
+                self.model_instant_reaction = False
+
+        self._calculation_routine()
+
+    def __call__(self, time=None, method=None):
+        if time:
+            self._time_check(time)
+        if method:
+            self._method_check(method)
+
+        if self.verbose:
+            print("Recalculating mass balance...")
+
+        self._calculation_routine()
+
+    @property
+    def plume_mass(self):
+        return self._plume_mass_t
+
+    @property
+    def source_mass(self):
+        return self._source_mass_t
+
+    @property
+    def delta_source(self):
+        return self._delta_source_t
+
+    @property
+    def degraded_mass(self):
+        return self._degraded_mass_t
+
+    @property
+    def model_without_degradation(self):
+        return self._model_without_degradation
+
+    def _calculation_routine(self):
+        self._plume_mass_t = self.calculate_plume_mass(self.model)
+        self._source_mass_t = self.calculate_source_mass()
+        self._delta_source_t = self.calculate_delta_source()
+        if self.model_degradation:
+            self._model_without_degradation = self.calculate_model_without_degradation()
+            self._degraded_mass_t = self.calculate_degraded_mass()
+
+    def calculate_plume_mass(self, model):
+        # Plume mass of model; concentration is converted to mass by multiplying by cellsize and pore space.
+        if isinstance(self.t, np.ndarray):
+            _plume_mass_t = np.sum(
+                model.cxyt[:, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity, axis=(1, 2)
+            )
+        else:
+            _plume_mass_t = np.sum(
+                model.cxyt[self.t, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity
+            )
+
+        return _plume_mass_t
+
+    def calculate_source_mass(self):
+        if isinstance(self.t, np.ndarray):
+            local_time = self.t
+        else:
+            local_time = self.model.t[self.t]
+
+        if self.source_mass_finite:
+            _source_mass_t = self.model.source_parameters.source_mass * np.exp(-self.model.k_source * local_time)
+        else:
+            _source_mass_t = "infinite"
+
+        return _source_mass_t
+
+    def calculate_delta_source(self):
+        if isinstance(self.t, np.ndarray):
+            local_time = self.t
+        else:
+            local_time = self.model.t[self.t]
+
+        if self.source_mass_finite:
+            _delta_source_t = self.model.source_parameters.source_mass - self._source_mass_t
+        else:
+            Q, c0_avg = self.model._calculate_discharge_and_average_source_zone_concentration()
+            _delta_source_t = Q * c0_avg * local_time
+        return _delta_source_t
+
+    def calculate_model_without_degradation(self):
+        # Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs
+        _model_without_degradation = self.model.__class__(**self.model.input_parameters)
+        _model_without_degradation.attenuation_parameters.decay_rate = 0
+        _model_without_degradation.run()
+        return _model_without_degradation
+
+    def calculate_degraded_mass(self):
+        no_degradation_plume_mass = self.calculate_plume_mass(self._model_without_degradation)
+        _degraded_mass_t = no_degradation_plume_mass - self._plume_mass_t
+        return _degraded_mass_t
+
+    def _time_check(self, time):
+        if time is None or time == "all":
+            self.t = self.model.t
+        elif isinstance(time, str):
+            warnings.warn("String not recognized, defaulting to 'all', for all time points.")
+            self.t = self.model.t
+        else:
+            self.t = check_time_in_domain(self.model, time)
+
+    def _method_check(self, method):
+        match method:
+            case "default" | 0:
+                self.method = "default"
+            case "legacy" | 1:
+                self.method = "legacy"
+            case met if not isinstance(met, (str, int)):
+                warnings.warn("Method not recognized, using default.")
+                self.method = "default"
+            case _:
+                raise TypeError(
+                    f"Method should a string, either 'default' or 'legacy', but was {type(method)} instead."
+                )
 
 
 def mass_balance(model, time=None) -> dict:
@@ -121,7 +270,7 @@ def mass_balance(model, time=None) -> dict:
 
         # Change in source mass at t=t due to source decay by transport and by biodegradation
         if inf_source:
-            Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration(model.biodegradation_capacity)
+            Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration()
             M_source_delta = Q * c0_avg * model.t[time_pos]
         else:
             M_source_delta = M_source_0 - M_source_t_inst

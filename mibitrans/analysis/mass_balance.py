@@ -13,7 +13,36 @@ from mibitrans.data.check_input import check_time_in_domain
 
 
 class MassBalance:
-    def __init__(self, model, time, method="default", verbose=False):
+    """Calculate mass balance characteristics of input model."""
+
+    def __init__(self, model, time, method, verbose=False):
+        """Mass balance object with source and plume characteristics at given time(s), of input model.
+
+        Args:
+            model: Input model for which mass balance is calculated, should be a child class of Transport3D.
+            time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
+                model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
+            method (str): Which method to use for mass balance. 'default' will generate a mass balance based on model
+                in and output. 'legacy' will generate a mass balance as done in older mibitrans versions, which is based
+                on BIOSCREEN mass balance. Note that the latter is not conservative in inferences made on data, and
+                should be used with discretion.
+            verbose (bool, optional): Verbose mode. Defaults to False.
+
+        Call:
+            Calling the MassBalance object will recalculate the mass balance characteristics of input model for given
+                input time and method.
+
+        Properties:
+            plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
+            source_mass: Mass of the contaminant source at the given time(s), in [g]. No values are given for models
+                with infinite source mass.
+            delta_source: Difference in mass between contaminant source at given time and source at t = 0, in [g].
+            degraded_mass: Mass of plume contaminant degradation at the given time(s), compared to a model without
+                degradation, in [g]. Has no value if model does not consider degradation.
+            model_without_degradation: Object of model without degradation. Has no value if model does not consider
+                degradation.
+        """
+        check_model_type(model, mibitrans.transport.model_parent.Transport3D)
         self.model = model
         self.verbose = verbose
         self._time_check(time)
@@ -25,13 +54,15 @@ class MassBalance:
         self._degraded_mass_t = None
         self._model_without_degradation = None
 
+        # Relative concentration considered to be boundary of the plume extent.
+        self.extent_threshold_value = 0.01
         # Volume of single cell, as dx * dy * source thickness
         self.cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.source_parameters.depth
 
         if self.model.source_parameters.total_mass == "infinite":
-            self.source_mass_finite = True
-        else:
             self.source_mass_finite = False
+        else:
+            self.source_mass_finite = True
 
         match self.model.mode:
             case "instant_reaction":
@@ -44,9 +75,13 @@ class MassBalance:
                 self.model_degradation = False
                 self.model_instant_reaction = False
 
+        if self.verbose:
+            print("Calculating mass balance...")
+
         self._calculation_routine()
 
     def __call__(self, time=None, method=None):
+        """Recalculate the mass balance characteristics of input model for given time and method."""
         if time:
             self._time_check(time)
         if method:
@@ -59,33 +94,71 @@ class MassBalance:
 
     @property
     def plume_mass(self):
+        """Mass of the contaminant plume in the model extent, at the given time(s), in [g]."""
         return self._plume_mass_t
 
     @property
     def source_mass(self):
+        """Mass of the contaminant source at the given time(s), in [g]. No values are given for infinite source mass."""
         return self._source_mass_t
 
     @property
     def delta_source(self):
+        """Difference in mass between contaminant source at given time and source at t = 0, in [g]."""
         return self._delta_source_t
 
     @property
     def degraded_mass(self):
+        """Mass of plume contaminant degradation at the given time(s), compared to a no degradation model, in [g]."""
         return self._degraded_mass_t
 
     @property
     def model_without_degradation(self):
+        """Model with no degradation used to compare with given model."""
         return self._model_without_degradation
 
     def _calculation_routine(self):
-        self._plume_mass_t = self.calculate_plume_mass(self.model)
-        self._source_mass_t = self.calculate_source_mass()
-        self._delta_source_t = self.calculate_delta_source()
+        """Performs mass_balance calculations"""
+        self._check_model_extent()
+        self._plume_mass_t = self._calculate_plume_mass(self.model)
+        self._source_mass_t = self._calculate_source_mass()
+        self._delta_source_t = self._calculate_delta_source()
         if self.model_degradation:
-            self._model_without_degradation = self.calculate_model_without_degradation()
-            self._degraded_mass_t = self.calculate_degraded_mass()
+            self._model_without_degradation = self._calculate_model_without_degradation()
+            self._degraded_mass_t = self._calculate_degraded_mass()
 
-    def calculate_plume_mass(self, model):
+    def _check_model_extent(self):
+        """Check if contaminant plume at given time is reasonably situated within the model extent."""
+        if isinstance(self.t, np.ndarray):
+            cxyt_y_boundary = self.model.relative_cxyt[:, [0, -1], :]
+            cxyt_x_boundary = self.model.relative_cxyt[:, :, -1]
+        else:
+            cxyt_y_boundary = self.model.relative_cxyt[self.t, [0, -1], :]
+            cxyt_x_boundary = self.model.relative_cxyt[self.t, :, -1]
+
+        y_boundary_above_threshold = np.where(cxyt_y_boundary > self.extent_threshold_value, cxyt_y_boundary, 0.0)
+        x_boundary_above_threshold = np.where(cxyt_x_boundary > self.extent_threshold_value, cxyt_x_boundary, 0.0)
+        if np.sum(y_boundary_above_threshold) > 0:
+            y_max = np.round(
+                np.max(y_boundary_above_threshold) * np.max(self.model.source_parameters.source_zone_concentration), 2
+            )
+            warnings.warn(
+                "Contaminant plume extents beyond the model width, with a maximum concentration at the "
+                f"boundary of {y_max}g/m3. To ensure reliable mass balance, re-run the model with increased dimensions "
+                "to include the entire plume width in the model extent."
+            )
+        if np.sum(x_boundary_above_threshold) > 0:
+            x_max = np.round(
+                np.max(x_boundary_above_threshold) * np.max(self.model.source_parameters.source_zone_concentration), 2
+            )
+            warnings.warn(
+                "Contaminant plume extents beyond the model length, with a maximum concentration at the "
+                f"boundary of {x_max}g/m3. To ensure reliable mass balance, re-run the model with increased dimensions "
+                "to include the entire plume length in the model extent."
+            )
+
+    def _calculate_plume_mass(self, model):
+        """Calculate plume mass of input model, for the given time(s)."""
         # Plume mass of model; concentration is converted to mass by multiplying by cellsize and pore space.
         if isinstance(self.t, np.ndarray):
             _plume_mass_t = np.sum(
@@ -98,45 +171,49 @@ class MassBalance:
 
         return _plume_mass_t
 
-    def calculate_source_mass(self):
+    def _calculate_source_mass(self):
+        """Calculate source mass of input model, for the given time(s)."""
         if isinstance(self.t, np.ndarray):
             local_time = self.t
         else:
             local_time = self.model.t[self.t]
 
         if self.source_mass_finite:
-            _source_mass_t = self.model.source_parameters.source_mass * np.exp(-self.model.k_source * local_time)
+            _source_mass_t = self.model.source_parameters.total_mass * np.exp(-self.model.k_source * local_time)
         else:
             _source_mass_t = "infinite"
 
         return _source_mass_t
 
-    def calculate_delta_source(self):
+    def _calculate_delta_source(self):
+        """Calculate difference in source mass between t=0 and given time(s)."""
         if isinstance(self.t, np.ndarray):
             local_time = self.t
         else:
             local_time = self.model.t[self.t]
 
         if self.source_mass_finite:
-            _delta_source_t = self.model.source_parameters.source_mass - self._source_mass_t
+            _delta_source_t = self.model.source_parameters.total_mass - self._source_mass_t
         else:
             Q, c0_avg = self.model._calculate_discharge_and_average_source_zone_concentration()
             _delta_source_t = Q * c0_avg * local_time
         return _delta_source_t
 
-    def calculate_model_without_degradation(self):
-        # Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs
+    def _calculate_model_without_degradation(self):
+        """Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs."""
         _model_without_degradation = self.model.__class__(**self.model.input_parameters)
         _model_without_degradation.attenuation_parameters.decay_rate = 0
         _model_without_degradation.run()
         return _model_without_degradation
 
-    def calculate_degraded_mass(self):
-        no_degradation_plume_mass = self.calculate_plume_mass(self._model_without_degradation)
+    def _calculate_degraded_mass(self):
+        """Calculate difference between input model plume mass and no degradation model, for a given time(s)."""
+        no_degradation_plume_mass = self._calculate_plume_mass(self._model_without_degradation)
         _degraded_mass_t = no_degradation_plume_mass - self._plume_mass_t
         return _degraded_mass_t
 
     def _time_check(self, time):
+        """Check if time input is valid."""
         if time is None or time == "all":
             self.t = self.model.t
         elif isinstance(time, str):
@@ -146,6 +223,7 @@ class MassBalance:
             self.t = check_time_in_domain(self.model, time)
 
     def _method_check(self, method):
+        """Check if method input is valid."""
         match method:
             case "default" | 0:
                 self.method = "default"

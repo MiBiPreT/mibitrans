@@ -4,6 +4,7 @@ from abc import ABC
 from abc import abstractmethod
 import numpy as np
 import mibitrans.data.parameters
+from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameter_information import util_to_conc_name
@@ -495,6 +496,32 @@ class Transport3D(ABC):
         )
         return ax_or_anim
 
+    def mass_balance(self, time="all", method="default"):
+        """Return a mass balance object with source and plume characteristics at given time(s).
+
+        Args:
+            time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
+                model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
+            method (str): Which method to use for mass balance. 'default' will generate a mass balance based on model
+                in and output. 'legacy' will generate a mass balance as done in older mibitrans versions, which is based
+                on BIOSCREEN mass balance. Note that the latter is not conservative in inferences made on data, and
+                should be used with discretion.
+
+        Returns:
+            mass_balance_object: Object of the MassBalance class. Output is accessed through object properties. Can be
+                called to change the time of the mass balance, or the calculation method.
+
+        The mass balance object has the following properties:
+            plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
+            source_mass: Mass of the contaminant source at the given time(s), in [g]. No values are given for models
+                with infinite source mass.
+            delta_source: Difference in mass between contaminant source at given time and source at t = 0, in [g].
+            degraded_mass: Mass of plume contaminant degradation at the given time(s), compared to a model without
+                degradation, in [g]. Has no value if model does not consider degradation.
+            model_without_degradation: Object of model without degradation. Has no value if model does not consider
+                degradation.
+        """
+        return MassBalance(self, time, method, verbose=self.verbose)
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
     if isinstance(electron_acceptors, (list, np.ndarray)):

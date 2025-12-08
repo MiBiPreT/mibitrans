@@ -10,6 +10,7 @@ import mibitrans
 from mibitrans.analysis.parameter_calculations import calculate_utilization
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
+from mibitrans.data.check_input import validate_input_values
 
 
 class MassBalance:
@@ -52,6 +53,8 @@ class MassBalance:
         self._source_mass_t = None
         self._delta_source_t = None
         self._degraded_mass_t = None
+        self._electron_acceptor_change_t = None
+        self._instant_reaction_degraded_mass_t = None
         self._model_without_degradation = None
 
         # Relative concentration considered to be boundary of the plume extent.
@@ -59,18 +62,22 @@ class MassBalance:
         # Volume of single cell, as dx * dy * source thickness
         self.cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.source_parameters.depth
 
+        # Mass balance output differs if the source as infinite mass
         if self.model.source_parameters.total_mass == "infinite":
             self.source_mass_finite = False
         else:
             self.source_mass_finite = True
 
         match self.model.mode:
+            # Instant reaction model
             case "instant_reaction":
                 self.model_instant_reaction = True
                 self.model_degradation = True
+            # Linear decay model
             case "linear" if self.model.attenuation_parameters.decay_rate > 0:
                 self.model_degradation = True
                 self.model_instant_reaction = False
+            # No decay model
             case _:
                 self.model_degradation = False
                 self.model_instant_reaction = False
@@ -117,6 +124,37 @@ class MassBalance:
         """Model with no degradation used to compare with given model."""
         return self._model_without_degradation
 
+    @property
+    def instant_reaction_degraded_mass(self):
+        """Difference in plume mass instant reaction with and without biodegradation capacity subtracted, in [g].
+
+        For the instant reaction model, the underlying assumption reads that observed concentrations in the source zone
+        are post-degradation. Therefore, the source concentrations without any biodegradation would be higher, the
+        amount which is determined by the biodegradation capacity. Then, according to this method, the degraded mass
+        is the difference between plume mass before and after subtracting the biodegradation capacity.
+        """
+        return self._instant_reaction_degraded_mass_t
+
+    @property
+    def electron_acceptor_change(self):
+        """Change in electron acceptor/byproduct masses at the given time(s), in [g]. Only for instant reaction.
+
+        Electron acceptor/byproduct consumption or generation is based on the degraded plume mass (specifically
+        'instant_reaction_degraded_mass'), the utilization factor and relative abundance of the acceptors/byproducts.
+        Under the governing assumptions of the instant reaction model, a crude estimate of the total consumption of
+        electron acceptors and the generation of byproduct is calculated.
+        """
+        return self._electron_acceptor_change_t
+
+    def source_threshold(self, threshold):
+        """Calculate when source mass is below given threshold. No values are given for infinite source mass."""
+        validate_input_values("threshold", threshold)
+        if not self.source_mass_finite:
+            raise ValueError("Source mass is infinite and therefore cannot go below given threshold.")
+        else:
+            time_to_threshold = -1 / self.model.k_source * np.log(threshold / self.model.source_parameters.total_mass)
+        return time_to_threshold
+
     def _calculation_routine(self):
         """Performs mass_balance calculations"""
         self._check_model_extent()
@@ -126,6 +164,9 @@ class MassBalance:
         if self.model_degradation:
             self._model_without_degradation = self._calculate_model_without_degradation()
             self._degraded_mass_t = self._calculate_degraded_mass()
+        if self.model_instant_reaction:
+            self._instant_reaction_degraded_mass_t = self._calculate_instant_reaction_degraded_mass()
+            self._electron_acceptor_change_t = self._calculate_electron_acceptor_change()
 
     def _check_model_extent(self):
         """Check if contaminant plume at given time is reasonably situated within the model extent."""
@@ -211,6 +252,29 @@ class MassBalance:
         no_degradation_plume_mass = self._calculate_plume_mass(self._model_without_degradation)
         _degraded_mass_t = no_degradation_plume_mass - self._plume_mass_t
         return _degraded_mass_t
+
+    def _calculate_instant_reaction_degraded_mass(self):
+        if isinstance(self.t, np.ndarray):
+            _plume_mass_t_noBC = np.sum(
+                self.model.cxyt_noBC[:, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity,
+                axis=(1, 2),
+            )
+        else:
+            _plume_mass_t_noBC = np.sum(
+                self.model.cxyt_noBC[self.t, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity
+            )
+
+        degraded_mass_instant_t = _plume_mass_t_noBC - self._plume_mass_t
+        return degraded_mass_instant_t
+
+    def _calculate_electron_acceptor_change(self):
+        mass_fraction_degraded_acceptor = self.model._electron_acceptors.array / self.model.biodegradation_capacity
+        electron_acceptor_change = {}
+        electron_acceptors = ["oxygen", "nitrate", "ferrous_iron", "sulfate", "methane"]
+        for i, ea in enumerate(electron_acceptors):
+            electron_acceptor_change[ea] = self._instant_reaction_degraded_mass_t * mass_fraction_degraded_acceptor[i]
+
+        return electron_acceptor_change
 
     def _time_check(self, time):
         """Check if time input is valid."""

@@ -4,6 +4,7 @@ File containing various dictionaries used for evaluation of names, value types a
 
 """
 
+import numpy as np
 from dataclasses import dataclass
 from mibitrans.data.check_input import validate_input_values
 
@@ -79,6 +80,13 @@ class UtilizationFactor:
             util_methane=self.util_methane,
         )
 
+    @property
+    def array(self):
+        """Return utilization factors in the form of an array, in order of [O2, NO3, Fe, SO4, CH4]."""
+        return np.array(
+            [self.util_oxygen, self.util_nitrate, self.util_ferrous_iron, self.util_sulfate, self.util_methane]
+        )
+
 
 @dataclass
 class ElectronAcceptors:
@@ -120,3 +128,8 @@ class ElectronAcceptors:
             delta_sulfate=self.delta_sulfate,
             methane=self.methane,
         )
+
+    @property
+    def array(self):
+        """Return electron acceptor concentrations in the form of an array, in order of [O2, NO3, Fe, SO4, CH4]."""
+        return np.array([self.delta_oxygen, self.delta_nitrate, self.ferrous_iron, self.delta_sulfate, self.methane])

@@ -3,18 +3,15 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
-from scipy.integrate import quad
-from scipy.integrate import quad_vec
-from scipy.special import erf
-from scipy.special import erfc
 import mibitrans.data.parameters
-from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
 
 
-class Transport3D:
+class Transport3D(ABC):
     """Parent class for all 3-dimensional analytical solutions."""
 
     def __init__(
@@ -42,6 +39,7 @@ class Transport3D:
         self._att_pars = copy.copy(attenuation_parameters)
         self._src_pars = copy.copy(source_parameters)
         self._mod_pars = copy.copy(model_parameters)
+        self._decay_rate = self._att_pars.decay_rate
 
         self.verbose = verbose
 
@@ -49,6 +47,11 @@ class Transport3D:
 
         self.has_run = False
         self.initialized = False
+        self._mode = "linear"
+        self._electron_acceptors = None
+        self._utilization_factor = None
+        self.biodegradation_capacity = None
+        self.cxyt_noBC = None
         self._pre_run_initialization_parameters()
 
     @property
@@ -92,36 +95,99 @@ class Transport3D:
         self._check_and_reset_when_input_dataclass_change("model_parameters", value)
 
     @property
+    def mode(self):
+        """Model mode property. Either 'linear' or 'instant_reaction'."""
+        return self._mode
+
+    @mode.setter
+    def mode(self, value):
+        match value:
+            case "linear" | "linear decay" | "linear_decay" | 0:
+                self._mode = "linear"
+                self.initialized = False
+            case "instant" | "instant_reaction" | "instant reaction" | 1:
+                if self._electron_acceptors is None or self._utilization_factor is None:
+                    raise ValueError(
+                        "Model mode was set to 'instant reaction', but electron acceptor parameters are "
+                        "missing. Use the instant_reaction method to supply the electron acceptor "
+                        "concentrations."
+                    )
+                self._mode = "instant_reaction"
+                self.initialized = False
+            case _:
+                warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
+                self._mode = "linear"
+                self.initialized = False
+
+    @property
+    def electron_acceptors(self):
+        """Return dictionary of electron acceptor parameters."""
+        return self._electron_acceptors.dictionary
+
+    @property
+    def utilization_factor(self):
+        """Return dictionary of utilization factor property."""
+        return self._utilization_factor.dictionary
+
+    @property
     def relative_cxyt(self):
         """Compute relative concentration c(x,y,t)/c0, where c0 is the maximum source zone concentration at t=0."""
         maximum_concentration = np.max(self.source_parameters.source_zone_concentration)
         relative_cxyt = self.cxyt / maximum_concentration
         return relative_cxyt
 
+    @property
+    @abstractmethod
+    def short_description(self):
+        """Short string describing model type."""
+        pass
+
+    @abstractmethod
+    def run(self):
+        """Method that runs the model and ensures that initialisation is performed."""
+        pass
+
+    @abstractmethod
+    def sample(self, x_position, y_position, t_position):
+        """Method that calculates concentration at single, specified location in model domain."""
+        pass
+
+    @abstractmethod
+    def _calculate_concentration_for_all_xyt(self) -> np.ndarray:
+        """Method that calculates and return concentration array for all model x, y and t."""
+        pass
+
     def _observe_input_dataclass_change(self):
-        self._hyd_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        """Keeps track of input dataclass changes, and ensures re-initialization for following model runs."""
+        self.hydrological_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "hydrological_parameters", self._hyd_pars
         )
-        self._att_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.attenuation_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "attenuation_parameters", self._att_pars
         )
-        self._src_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.source_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "source_parameters", self._src_pars
         )
-        self._mod_pars._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
+        self.model_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
             "model_parameters", self._mod_pars
         )
 
     def _check_and_reset_when_input_dataclass_change(self, key, value):
+        """Remove output and unflag initialization when input dataclass changes are observed."""
         self._check_input_dataclasses(key, value)
+        if self.verbose:
+            print(key, " got changed")
         self.initialized = False
         if self.has_run:
-            self.cxyt = np.zeros(self.xxx.shape)
+            self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
+            if self.cxyt_noBC is not None:
+                self.cxyt_noBC = 0
             self.has_run = False
             if self.verbose:
                 print(f"Parameter '{key}' has changed — resetting output")
 
     def _pre_run_initialization_parameters(self):
+        """Parameter initialization for model."""
         # One-dimensional model domain arrays
         self.x = np.arange(0, self._mod_pars.model_length + self._mod_pars.dx, self._mod_pars.dx)
         self.y = self._calculate_y_discretization()
@@ -150,13 +216,18 @@ class Transport3D:
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        if self._mode == "instant_reaction":
+            self.c_source[-1] += self.biodegradation_capacity
+            self._decay_rate = 0
+        else:
+            self._decay_rate = self._att_pars.decay_rate
 
         self.initialized = True
 
-    def _calculate_source_decay(self, biodegradation_capacity=0):
-        """Calculate source decay, for instant_reaction, biodegradation_capacity is required."""
+    def _calculate_source_decay(self):
+        """Calculate source decay/depletion."""
         if isinstance(self._src_pars.total_mass, (float, int)):
-            Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration(biodegradation_capacity)
+            Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration()
             k_source = Q * c0_avg / self._src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
         else:
@@ -164,7 +235,12 @@ class Transport3D:
 
         return k_source
 
-    def _calculate_discharge_and_average_source_zone_concentration(self, biodegradation_capacity):
+    def _calculate_discharge_and_average_source_zone_concentration(self):
+        """Calculate the average source zone concentration, and discharge through source zone."""
+        if self._mode == "instant_reaction":
+            bc = self.biodegradation_capacity
+        else:
+            bc = 0
         y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
         y_src[1:] = self._src_pars.source_zone_boundary
         c_src = self._src_pars.source_zone_concentration
@@ -174,7 +250,7 @@ class Transport3D:
         for i in range(len(self._src_pars.source_zone_boundary)):
             weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
 
-        c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+        c0_avg = bc + np.sum(weighted_conc) / np.max(y_src)
 
         return Q, c0_avg
 
@@ -208,44 +284,64 @@ class Transport3D:
         return y
 
     def _calculate_biodegradation_capacity(self):
+        """Determine biodegradation capacity based on electron acceptor concentrations and utilization factor."""
         biodegradation_capacity = 0
-        utilization_factor = getattr(self._att_pars, "utilization_factor").dictionary
-        for key, item in utilization_factor.items():
-            biodegradation_capacity += getattr(self._att_pars.electron_acceptors, util_to_conc_name[key]) / item
+        for key, item in self._utilization_factor.dictionary.items():
+            biodegradation_capacity += getattr(self._electron_acceptors, util_to_conc_name[key]) / item
 
         return biodegradation_capacity
 
-    def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time.
+    def instant_reaction(
+        self,
+        electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,
+        utilization_factor: list | np.ndarray | dict | UtilizationFactor = UtilizationFactor(
+            util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
+        ),
+    ):
+        """Enable and set up parameters for instant reaction model.
+
+        Instant reaction model assumes that biodegradation is an instantaneous process compared to the groundwater flow
+        velocity. The biodegradation is assumed to be governed by the availability of electron acceptors, and quantified
+        using  stoichiometric relations from the degradation reactions. Considered are concentrations of acceptors
+        Oxygen, Nitrate and Sulfate, and reduced species Ferrous Iron and Methane.
 
         Args:
-            x_position (float): x position in domain extent [m].
-            y_position (float): y position in domain extent [m].
-            time (float): time for which concentration is sampled [days].
-
-        Returns:
-            concentration (float): concentration at given position and point in time [g/m^3].
-
+            electron_acceptors (ElectronAcceptors): ElectronAcceptor dataclass containing electron acceptor
+                concentrations. Alternatively provided as list, numpy array or dictionary corresponding with
+                delta_oxygen, delta_nitrate, ferrous_iron, delta_sulfate and methane. For more information, see
+                documentation for ElectronAcceptors.
+            utilization_factor (UtilizationFactor, optional): UtilizationFactor dataclass containing electron acceptor
+                utilization factors. Alternatively provided as list, numpy array or dictionary corresponding with
+                information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
+                for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
         """
-        for par, value in locals().items():
-            if par != "self":
-                validate_input_values(par, value)
-        if not self.has_run and not self.initialized:
+        self._electron_acceptors, self._utilization_factor = _check_instant_reaction_acceptor_input(
+            electron_acceptors, utilization_factor
+        )
+        self._mode = "instant_reaction"
+        self.biodegradation_capacity = self._calculate_biodegradation_capacity()
+        self.cxyt_noBC = 0
+        self._pre_run_initialization_parameters()
+
+    def _check_model_mode_before_run(self):
+        # Reset concentration array to make sure it is empty before calculation.
+        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
+        if not self.initialized:
             self._pre_run_initialization_parameters()
+        if self._mode == "linear":
+            if self.biodegradation_capacity is not None:
+                warnings.warn(
+                    "Instant reaction parameters are present while model mode is linear. "
+                    "Make sure that this is indeed the desired model."
+                )
+        if self._mode == "instant_reaction":
+            if self.biodegradation_capacity is None:
+                raise ValueError(
+                    "Instant reaction parameters are not present. "
+                    "Please provide them with the 'instant_reaction' class method."
+                )
 
-        if hasattr(self, "cxyt_noBC"):
-            save_c_noBC = self.cxyt_noBC.copy()
-        x = np.array([x_position])
-        y = np.array([y_position])
-        t = np.array([time])
-        concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
-        if hasattr(self, "cxyt_noBC"):
-            self.cxyt_noBC = save_c_noBC
-        return concentration
-
-    def centerline(
-        self, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -255,27 +351,33 @@ class Transport3D:
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
-        pline.centerline(
-            self,
-            y_position=y_position,
-            time=time,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.centerline(
+                self,
+                y_position=y_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.centerline(
+                self,
+                y_position=y_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
-    def transverse(
-        self, x_position, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -284,26 +386,32 @@ class Transport3D:
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
         """
-        pline.transverse(
-            self,
-            x_position=x_position,
-            time=time,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.transverse(
+                self,
+                x_position=x_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.transverse(
+                self,
+                x_position=x_position,
+                time=time,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
-    def breakthrough(
-        self, x_position, y_position=0, relative_concentration=False, legend_names=None, animate=False, **kwargs
-    ):
+    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
@@ -312,22 +420,30 @@ class Transport3D:
                 By default, at the center of the plume (at y=0).
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
-                By default, no legend is shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot().
         """
-        pline.breakthrough(
-            self,
-            x_position=x_position,
-            y_position=y_position,
-            relative_concentration=relative_concentration,
-            legend_names=legend_names,
-            animate=animate,
-            **kwargs,
-        )
+        if animate:
+            anim = pline.breakthrough(
+                self,
+                x_position=x_position,
+                y_position=y_position,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return anim
+        else:
+            pline.breakthrough(
+                self,
+                x_position=x_position,
+                y_position=y_position,
+                relative_concentration=relative_concentration,
+                animate=animate,
+                **kwargs,
+            )
+            return None
 
     def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
@@ -337,9 +453,8 @@ class Transport3D:
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.pcolormesh().
 
         Returns a matrix plot of the input plume as object.
@@ -355,9 +470,8 @@ class Transport3D:
                 By default, last point in time is plotted.
             relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple
-                models are given as input, dt should be the same for each one to ensure accurate animation.
-                Default is False.
+            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
+                False.
             **kwargs : Arguments to be passed to plt.plot_surface().
 
         Returns:
@@ -371,280 +485,29 @@ class Transport3D:
         return ax_or_anim
 
 
-class Domenico(Transport3D, ABC):
-    """Parent class that for all analytical solutions using the Domenico (1987) analytical model.
-
-    Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species.
-    Journal of Hydrology, 91(1-2), 49-58.
-    """
-
-    def __init__(
-        self,
-        hydrological_parameters,
-        attenuation_parameters,
-        source_parameters,
-        model_parameters,
-        verbose=False,
-    ):
-        """Initialize object and run model.
-
-        Args:
-            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
-            verbose (bool, optional): Verbose mode. Defaults to False.
-
-        Attributes:
-            cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
-            x (np.ndarray) : Discretized model x-dimension, in [m].
-            y (np.ndarray) : Discretized model y-dimension, in [y].
-            t (np.ndarray) : Discretized model t-dimension, in [days].
-            c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
-            vr (float) : Retarded groundwater flow velocity, in [m/d].
-            k_source (float) : Source zone decay rate, in [1/days]
-
-        Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
-
-        Raises:
-            TypeError : If input is not of the correct Dataclass.
-
-        """
-        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        if self._att_pars.diffusion != 0:
-            warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
-
-    @abstractmethod
-    def short_description(self):
-        """Short string describing model type."""
-        # Should return a string starting with 'Domenico' and ending in model subtype.
-        pass
-
-    @abstractmethod
-    def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
-        pass
-
-    def run(self):
-        """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
-        self._pre_run_initialization_parameters()
-        self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
-
-    def _equation_term_x(self, xxx, ttt, decay_sqrt=1):
-        return erfc((xxx - self.rv * ttt * decay_sqrt) / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
-
-    def _equation_term_additional_x(self, xxx, ttt):
-        return np.exp(xxx * self.rv / (self._hyd_pars.alpha_x * self.rv)) * (
-            erfc(xxx + self.rv * ttt / (2 * np.sqrt(self._hyd_pars.alpha_x * self.rv * ttt)))
+def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
+    if isinstance(electron_acceptors, (list, np.ndarray)):
+        electron_acceptors_out = ElectronAcceptors(*electron_acceptors)
+    elif isinstance(electron_acceptors, dict):
+        electron_acceptors_out = ElectronAcceptors(**electron_acceptors)
+    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.ElectronAcceptors):
+        electron_acceptors_out = electron_acceptors
+    else:
+        raise TypeError(
+            f"electron_acceptors must be a list, dictionary or ElectronAcceptors dataclass, but is "
+            f"{type(electron_acceptors)} instead."
         )
 
-    def _equation_term_z(self, xxx):
-        inner_term = self._src_pars.depth / (2 * np.sqrt(self._hyd_pars.alpha_z * xxx))
-        return erf(inner_term) - erf(-inner_term)
-
-    def _equation_term_source_decay(self, xxx, ttt):
-        term = np.exp(-self.k_source * (ttt - xxx / self.rv))
-        # Term can be max 1; can not have 'generation' of solute ahead of advection.
-        return np.where(term > 1, 1, term)
-
-    def _equation_term_y(self, i, xxx, yyy):
-        div_term = 2 * np.sqrt(self._hyd_pars.alpha_y * xxx)
-        term = erf((yyy + self.y_source[i]) / div_term) - erf((yyy - self.y_source[i]) / div_term)
-        term[np.isnan(term)] = 0
-        return term
-
-
-class Karanovic(Transport3D):
-    """Parent class that for all models using the exact analytical solution described in Karanovic (2007).
-
-    Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.
-    Groundwater, 45(2), 242-245.
-    """
-
-    def __init__(
-        self,
-        hydrological_parameters,
-        attenuation_parameters,
-        source_parameters,
-        model_parameters,
-        verbose=False,
-    ):
-        """Initialize object and run model.
-
-        Args:
-            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
-            verbose (bool, optional): Verbose mode. Defaults to False.
-
-        Attributes:
-            cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
-            x (np.ndarray) : Discretized model x-dimension, in [m].
-            y (np.ndarray) : Discretized model y-dimension, in [y].
-            t (np.ndarray) : Discretized model t-dimension, in [days].
-            c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
-            vr (float) : Retarded groundwater flow velocity, in [m/d].
-            k_source (float) : Source zone decay rate, in [1/days]
-
-        Methods:
-            sample : Give concentration at any given position and point in time, closest as discretization allows.
-
-        Raises:
-            TypeError : If input is not of the correct Dataclass.
-
-        """
-        super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-
-    @abstractmethod
-    def short_description(self):
-        """Short string describing model type."""
-        # Should return a string starting with 'Karanovic' and ending in model subtype.
-        pass
-
-    @abstractmethod
-    def _calculate_concentration_for_all_xyt(self):
-        pass
-
-    def _pre_run_initialization_parameters(self):
-        super()._pre_run_initialization_parameters()
-        self.disp_x = self._hyd_pars.alpha_x * self.rv + self._att_pars.diffusion
-        self.disp_y = self._hyd_pars.alpha_y * self.rv + self._att_pars.diffusion
-        self.disp_z = self._hyd_pars.alpha_z * self.rv + self._att_pars.diffusion
-        # self.integral_term = np.zeros(self.ttt.shape)
-        # Stores integral error for each time step and source zone
-        self.error_size = np.zeros((len(self._src_pars.source_zone_boundary), len(self.t)))
-
-    def run(self):
-        """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
-        self._pre_run_initialization_parameters()
-        self.cxyt = self._calculate_concentration_for_all_xyt()
-
-    def _equation_source_superposition(self):
-        cxyt = self.cxyt.copy()
-        for sz in range(len(self.c_source)):
-            if self.verbose:
-                print("integrating for source zone ", sz)
-            integral_sum = self._equation_term_integral(sz)
-            source_term = self._equation_term_source(sz)
-            cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
-            # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
-            cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)[:, :, 0]
-        return cxyt
-
-    def _equation_term_integral(self, sz):
-        integral_term = np.zeros(self.cxyt.shape)
-        for j in range(len(self.t)):
-            if self.verbose:
-                print("integrating for t =", self.t[j], "days")
-            if j == 0:
-                lower_bound = 0
-            else:
-                lower_bound = self.t[j - 1]
-            upper_bound = self.t[j]
-            integral_term[j, :, 1:], self.error_size[sz, j] = quad_vec(
-                self._equation_integrand, lower_bound, upper_bound, limit=10000 // len(self.t), args=(sz,)
-            )
-        integral_sum = np.cumsum(integral_term, axis=0)
-        return integral_sum
-
-    def _equation_integrand(self, t, sz):
-        term = 1 / (t ** (3 / 2)) * self._equation_term_x(t) * self._equation_term_y(t, sz) * self._equation_term_z(t)
-        term[np.isnan(term)] = 0
-        return term
-
-    def _equation_term_x(self, t):
-        term = np.exp(
-            (-self.k_source - self._att_pars.decay_rate) * t
-            - (self.xxx[:, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
-        )
-        term[np.isnan(term)] = 0
-        return term
-
-    def _equation_term_y(self, t, sz):
-        div_term = 2 * np.sqrt(self.disp_y * t)
-        term = erfc((self.yyy - self.y_source[sz]) / div_term) - erfc((self.yyy + self.y_source[sz]) / div_term)
-        term[np.isnan(term)] = 0
-        return term
-
-    def _equation_term_z(self, t):
-        if t == 0 or self.disp_z == 0:
-            inner_term = 2
-        else:
-            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t))
-        return erfc(-inner_term) - erfc(inner_term)
-
-    def _equation_term_source(self, sz):
-        return (
-            self.c_source[sz]
-            * self.xxx[:, :, 1:]
-            / (8 * np.sqrt(np.pi * self.disp_x))
-            * np.exp(-self.k_source * self.ttt)
+    if isinstance(utilization_factor, (list, np.ndarray)):
+        utilization_factor_out = UtilizationFactor(*utilization_factor)
+    elif isinstance(utilization_factor, dict):
+        utilization_factor_out = UtilizationFactor(**utilization_factor)
+    elif isinstance(utilization_factor, mibitrans.data.parameter_information.UtilizationFactor):
+        utilization_factor_out = utilization_factor
+    else:
+        raise TypeError(
+            f"utilization_factor must be a list, dictionary or UtilizationFactor dataclass, but is "
+            f"{type(utilization_factor)} instead."
         )
 
-    def _equation_term_source_x_is_zero(self, sz):
-        # Select y-positions of current source zone
-        zone_location = np.where(abs(self.yyy) <= self.y_source[sz], 1, 0)
-        return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt)
-
-    def sample(self, x_position, y_position, time):
-        """Give concentration at any given position and point in time.
-
-        Args:
-            x_position (float): x position in domain extent [m].
-            y_position (float): y position in domain extent [m].
-            time (float): time for which concentration is sampled [days].
-
-        Returns:
-            concentration (float): concentration at given position and point in time [g/m^3].
-
-        """
-        # Different sample method than parent class, as field-wide calculations use array indices
-        for par, value in locals().items():
-            if par != "self":
-                validate_input_values(par, value)
-
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
-
-        def integrand(t, sz):
-            div_term = 2 * np.sqrt(self.disp_y * t**4)
-            inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t**4))
-            integrand_results = (
-                1
-                / (t**3)
-                * (
-                    np.exp(
-                        (-self.k_source - self._att_pars.decay_rate) * t**4
-                        - (x_position - self.rv * t**4) ** 2 / (4 * self.disp_x * t**4)
-                    )
-                    * (
-                        erfc((y_position - self.y_source[sz]) / div_term)
-                        - erfc((y_position + self.y_source[sz]) / div_term)
-                    )
-                    * (erfc(-inner_term) - erfc(inner_term))
-                )
-            )
-            return integrand_results
-
-        conc_array = np.zeros(len(self.c_source))
-        error_array = np.zeros(len(self.c_source))
-        time = time ** (1 / 4)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            for sz in range(len(self.c_source)):
-                integral_term, error = quad(integrand, 0, time, limit=10000, args=(sz,))
-                source_term = (
-                    self.c_source[sz] * x_position / (8 * np.sqrt(np.pi * self.disp_x)) * np.exp(-self.k_source * time)
-                )
-                conc_array[sz] = 4 * integral_term * source_term
-                error_array[sz] = error
-            concentration = np.sum(conc_array)
-        return concentration
+    return electron_acceptors_out, utilization_factor_out

@@ -12,8 +12,6 @@ import numpy as np
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
-from mibitrans.data.parameter_information import ElectronAcceptors
-from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize.show_conditions import source_zone
 
 
@@ -120,14 +118,11 @@ class AttenuationParameters(_ChangeObserver):
             in [m^3/g]. Optional if retardation is specified.
         fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
             Optional if retardation is specified.
-        electron_acceptors
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Methods:
         calculate_retardation : Calculate retardation factor from bulk density, partition coefficient and
             fraction organic carbon when given porosity [-]
-        set_utilization_factor : Customize electron acceptor utilization factors. By default, electron acceptor
-        utilization factors for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
 
     Raises:
         ValueError : If input parameters are incomplete or outside the valid domain.
@@ -141,7 +136,6 @@ class AttenuationParameters(_ChangeObserver):
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
-    electron_acceptors: list | np.ndarray | dict | ElectronAcceptors = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
@@ -158,15 +152,6 @@ class AttenuationParameters(_ChangeObserver):
     def __post_init__(self):
         """Check argument presence, types and domain."""
         self.initialized = True
-        self._standardize_electron_acceptor_input_to_dataclass()
-        self.utilization_factor = None
-        self.set_utilization_factor()
-
-        if self.verbose:
-            print(
-                f"Utilization factors has been set to {self.utilization_factor.dictionary}. "
-                "To adapt them, use set_utilization_factor() method of AttenuationParameters."
-            )
 
     def calculate_retardation(self, porosity: float):
         """Calculate retardation factor from soil adsorption parametrers and porosity."""
@@ -175,58 +160,6 @@ class AttenuationParameters(_ChangeObserver):
         )
         if self.verbose:
             print(f"Retardation factor has been calculated to be {self.retardation}.")
-
-    def set_utilization_factor(
-        self,
-        util_oxygen: float = 3.14,
-        util_nitrate: float = 4.9,
-        util_ferrous_iron: float = 21.8,
-        util_sulfate: float = 4.7,
-        util_methane: float = 0.78,
-    ):
-        """Change utilization factors for each electron donor/acceptor species.
-
-        By default, electron acceptor utilization factors for a BTEX mixture are used,
-        based on values from Wiedemeier et al. (1995)
-
-        Args:
-            util_oxygen (float, optional) : utilization factor of oxygen, as mass of oxygen consumed
-                per mass of biodegraded contaminant [g/g]. Default is 3.14
-            util_nitrate (float, optional) : utilization factor of nitrate, as mass of nitrate consumed
-                per mass of biodegraded contaminant [g/g]. Default is 4.9
-            util_ferrous_iron (float, optional) : utilization factor of ferrous iron, as mass of ferrous iron generated
-                per mass of biodegraded contaminant [g/g]. Default is 21.8
-            util_sulfate (float, optional) : utilization factor of sulfate, as mass of sulfate consumed
-                per mass of biodegraded contaminant [g/g]. Default is 4.7
-            util_methane (float, optional) : utilization factor of methane, as mass of methane generated
-                per mass of biodegraded contaminant [g/g]. Default is 0.78
-
-        Raises:
-            ValueError : If input parameters are incomplete or outside the valid domain.
-            TypeError : If input parameters of incorrect datatype.
-
-        """
-        if self.verbose:
-            print("Setting utilization factors...")
-        self.utilization_factor = UtilizationFactor(
-            util_oxygen, util_nitrate, util_ferrous_iron, util_sulfate, util_methane
-        )
-
-    def _standardize_electron_acceptor_input_to_dataclass(self):
-        if isinstance(self.electron_acceptors, (list, np.ndarray)):
-            self.electron_acceptors = ElectronAcceptors(*self.electron_acceptors)
-        elif isinstance(self.electron_acceptors, dict):
-            self.electron_acceptors = ElectronAcceptors(**self.electron_acceptors)
-
-    def _require_electron_acceptor(self):
-        if not isinstance(self.electron_acceptors, ElectronAcceptors):
-            raise MissingValueError("Instant reaction model requires concentrations of electron acceptors.")
-
-        if self.decay_rate is not None and self.decay_rate > 0.0:
-            warnings.warn(
-                "Decay rate was set to a value, but will not be used, as model uses electron acceptor concentrations "
-                "for biodegradation calculations."
-            )
 
     def _require_linear_decay(self):
         if self.decay_rate is None and self.half_life is None:
@@ -278,7 +211,7 @@ class SourceParameters(_ChangeObserver):
             source zone, only one value is required. Source is symmetrical in the x-axis.
         source_zone_concentration (np.ndarray) : Contaminant concentration in each source zone [g/m^3]. Input as numpy
             array in the same order and of the same length as specified in source_zone_boundary.
-        depth (float) : Depth (transeverse vertical or z-dimension) of the source zone in [m].
+        depth (float) : Depth (transverse vertical or z-dimension) of the source zone in [m].
         total_mass (float | str) : Mass of contaminant present in source zone, either expressed in [g],
             or set to 'infinite'. The latter meaning that the source mass and therefore, the source zone concentrations
             do not diminish over time.
@@ -348,9 +281,11 @@ class ModelParameters(_ChangeObserver):
         model_length (float) : Model extent in the longitudinal (x) direction in [m].
         model_width (float) : Model extent in the transverse horizontal (y) direction in [m].
         model_time (float) : Model duration in [days].
-        dx (float) : Model grid discretization step size in the longitudinal (x) direction, in [m].
-        dy (float) : Model grid discretization step size in the transverse horizontal (y) direction, in [m].
-        dt (float) : Model time discretization step size, in [days]
+        dx (float, optional) : Model grid discretization step size in the longitudinal (x) direction, in [m]. By
+            default, dx = (model_length / 100).
+        dy (float, optional) : Model grid discretization step size in the transverse horizontal (y) direction, in [m].
+            By default, dy = (model_width / 50).
+        dt (float, optional) : Model time discretization step size, in [days]. By default, dt = (model_time / 10).
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Raises:
@@ -360,9 +295,9 @@ class ModelParameters(_ChangeObserver):
 
     """
 
-    model_length: float = None
-    model_width: float = None
-    model_time: float = None
+    model_length: float
+    model_width: float
+    model_time: float
     dx: float = None
     dy: float = None
     dt: float = None
@@ -398,3 +333,12 @@ class ModelParameters(_ChangeObserver):
                             f"Model time step size ({self.dt}) "
                             f"is greater than the total model time ({self.model_time})."
                         )
+
+    def __post_init__(self):
+        """Set model discretization parameters if not provided."""
+        if not self.dx:
+            self.dx = self.model_length / 100
+        if not self.dy:
+            self.dy = self.model_width / 50
+        if not self.dt:
+            self.dt = self.model_time / 10

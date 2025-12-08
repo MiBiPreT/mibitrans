@@ -2,8 +2,31 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from mibitrans.data.check_input import DomainValueError
+from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.model_parent import Transport3D
+
+
+class Transport3DConcrete(Transport3D):
+    """Concrete class of abstract class Transport3D, for purpose of testing."""
+
+    def short_description(self):
+        """Short string describing model type."""
+        return "Test version of abstract class Transport3D"
+
+    def run(self):
+        """Method that runs the model and ensures that initialisation is performed."""
+        self._calculate_concentration_for_all_xyt()
+
+    def sample(self, x_position, y_position, t_position):
+        """Method that calculates concentration at single, specified location in model domain."""
+        return self.cxyt
+
+    def _calculate_concentration_for_all_xyt(self) -> np.ndarray:
+        """Method that calculates and return concentration array for all model x, y and t."""
+        return self.cxyt
 
 
 @pytest.mark.parametrize(
@@ -26,7 +49,7 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
             args.append(entry)
 
     if error is None:
-        parent = Transport3D(*args)
+        parent = Transport3DConcrete(*args)
         # Source zone concentrations adapted for superposition should still have the same length as those in input
         assert (len(parent.c_source) == len(args[2].source_zone_concentration)) and (
             len(parent.c_source) == len(args[2].source_zone_boundary)
@@ -40,12 +63,12 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
         assert args[0].velocity / parent._att_pars.retardation == parent.rv
     elif error is UserWarning:
         with pytest.warns(UserWarning):
-            parent = Transport3D(*args)
+            parent = Transport3DConcrete(*args)
             range_y = abs(parent.y[0]) + abs(parent.y[-1])
             assert range_y >= parent._src_pars.source_zone_boundary[-1] * 2
     elif error is TypeError:
         with pytest.raises(error):
-            Transport3D(*args)
+            Transport3DConcrete(*args)
 
 
 @pytest.mark.parametrize(
@@ -57,28 +80,111 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
 )
 def test_retardation_calculation(att, expected, test_hydro_pars, test_source_pars, test_model_pars) -> None:
     """Test if retardation is calculated correctly when Transport3D class is initialized."""
-    parent = Transport3D(test_hydro_pars, att, test_source_pars, test_model_pars)
+    parent = Transport3DConcrete(test_hydro_pars, att, test_source_pars, test_model_pars)
     assert parent._att_pars.retardation == expected
 
 
-def test_plotting_methods(test_domenico_nodecay_model):
+@pytest.mark.parametrize(
+    "pars, expected",
+    [
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1]}, None),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}, None),
+        # Test for accepting ElectronAcceptors and UtilizationFactor dataclasses
+        (
+            {
+                "electron_acceptors": ElectronAcceptors(0.2, 0.4, 1, 0.5, 1),
+                "utilization_factor": UtilizationFactor(2.1, 1, 2, 3, 0.2),
+            },
+            None,
+        ),
+        # Test for accepting dictionaries
+        (
+            {
+                "electron_acceptors": dict(
+                    delta_oxygen=0.2, delta_nitrate=0.4, ferrous_iron=1, delta_sulfate=0.5, methane=1
+                ),
+                "utilization_factor": dict(
+                    util_oxygen=2.1, util_nitrate=1, util_ferrous_iron=2, util_sulfate=3, util_methane=0.2
+                ),
+            },
+            None,
+        ),
+        ({"utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": "No ea for you", "utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": 3}, TypeError),
+        ({"electron_acceptors": [0.2, "horseradish", 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, -2, 3, 0.2]}, DomainValueError),
+    ],
+)
+def test_instant_reaction_setup(
+    pars, expected, test_hydro_pars, test_att_pars, test_source_pars, test_model_pars
+) -> None:
+    """Test if the instant reaction method accepts correct data and raises the intended errors if not."""
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    if expected is None:
+        model_object.instant_reaction(**pars)
+        assert model_object.mode == "instant_reaction", (
+            f"Model mode should be 'instant_reaction', but is '{model_object.mode}' instead."
+        )
+        assert model_object.biodegradation_capacity is not None, "No biodegradation capacity was calculated."
+    elif expected in [TypeError, ValueError]:
+        with pytest.raises(expected):
+            model_object.instant_reaction(**pars)
+
+
+def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars) -> None:
+    """Test if model correctly switches modes when using the mode property."""
+    pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    with pytest.raises(ValueError):
+        # Model should raise error if attempting to switch to instant reaction model without providing parameters.
+        model_object.mode = "instant_reaction"
+    model_object.instant_reaction(**pars)
+    assert (
+        model_object.c_source[-1]
+        == test_source_pars.source_zone_concentration[-1] + model_object.biodegradation_capacity
+    ), ("Biodegradation capacity was not added to the outermost source zone.",)
+    model_object.mode = "linear"
+    assert model_object.mode == "linear", "Model mode was not switched to 'linear'."
+    assert not model_object.initialized, "Model was incorrectly flagged as initialized."
+    model_object._pre_run_initialization_parameters()
+    assert model_object.initialized, "Model was incorrectly flagged as not initialized."
+    assert model_object.c_source[-1] == test_source_pars.source_zone_concentration[-1], (
+        "Outermost source zone concentration was not converted back from instant reaction."
+    )
+
+
+def test_reset_on_parameter_change(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Test if model output gets reset after changing parameters."""
+    pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    model_object.instant_reaction(**pars)
+    model_object.cxyt = np.array(([[[1, 2], [2, 3]], [[3, 4], [4, 5]]]))
+    model_object.has_run = True
+    model_object.hydrological_parameters.velocity = 8 / 365
+    assert not model_object.initialized, "Model has been incorrectly flagged as initialized."
+    assert not model_object.has_run, "Model has been incorrectly flagged as being ran."
+    assert np.sum(model_object.cxyt) == 0, "Model output has not been reset after parameter change."
+
+
+def test_plotting_methods(test_anatrans_model_nodecay):
     """Test if plotting methods defined in parent model are working."""
-    test_domenico_nodecay_model.centerline()
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    test_anatrans_model_nodecay.centerline()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for centerline."
     plt.clf()
 
-    test_domenico_nodecay_model.transverse(x_position=1)
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    test_anatrans_model_nodecay.transverse(x_position=1)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for transverse."
     plt.clf()
 
-    test_domenico_nodecay_model.breakthrough(x_position=1)
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    test_anatrans_model_nodecay.breakthrough(x_position=1)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for breakthrough."
     plt.clf()
 
-    test_domenico_nodecay_model.plume_2d()
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    test_anatrans_model_nodecay.plume_2d()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for plume_2d."
     plt.clf()
 
-    test_domenico_nodecay_model.plume_3d()
-    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    test_anatrans_model_nodecay.plume_3d()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for plume_3d."
     plt.clf()

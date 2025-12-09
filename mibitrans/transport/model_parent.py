@@ -342,78 +342,97 @@ class Results:
 
     @property
     def model_type(self):
+        """Class object of the model that generated the results."""
         return self._model_type
 
     @property
     def short_description(self):
+        """Short description of the model that generated the results."""
         return self._short_description
 
     @property
     def x(self):
+        """Model x discretization array."""
         return self._x
 
     @property
     def y(self):
+        """Model y discretization array."""
         return self._y
 
     @property
     def t(self):
+        """Model t discretization array."""
         return self._t
 
     @property
     def hydrological_parameters(self):
+        """Hydrological parameters of the model used for the results."""
         return self._hydrological_parameters
 
     @property
     def attenuation_parameters(self):
+        """Attenuation parameters of the model used for the results."""
         return self._attenuation_parameters
 
     @property
     def source_parameters(self):
+        """Source parameters of the model used for the results."""
         return self._source_parameters
 
     @property
     def model_parameters(self):
+        """Space-time discretization parameters of the model used for the results."""
         return self._model_parameters
 
     @property
     def electron_acceptors(self):
+        """Electron acceptor/byproduct concentrations of the model used for the results."""
         return self._electron_acceptors
 
     @property
     def utilization_factor(self):
+        """Utilization factor of the model used for the results."""
         return self._utilization_factor
 
     @property
     def mode(self):
+        """Model mode used for running the model."""
         return self._mode
 
     @property
     def rv(self):
+        """Retarded flow velocity used in the model."""
         return self._rv
 
     @property
     def k_source(self):
+        """Source depletion rate used in the model."""
         return self._k_source
 
     @property
     def c_source(self):
+        """Nett source zone concentration used in the model."""
         return self._c_source
 
     @property
     def biodegradation_capacity(self):
+        """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
         return self._biodegradation_capacity
 
     @property
     def cxyt(self):
+        """Modelled concentration for all x, y and t, using the input parameters present in this object."""
         return self._cxyt
 
     @property
     def relative_cxyt(self):
+        """Modelled concentration for all x, y and t, divided by the maximum source zone concentration."""
         return self._relative_cxyt
 
     @property
     def cxyt_noBC(self):
+        """Concentration in domain without subtracting biodegradation capacity, in the instant reaction model."""
         return self._cxyt_noBC
 
     @property
@@ -569,20 +588,17 @@ class Results:
         )
         return ax_or_anim
 
-    def mass_balance(self, time="all", method="default", verbose=False):
+    def mass_balance(self, time="all", verbose=False):
         """Return a mass balance object with source and plume characteristics at given time(s).
 
         Args:
             time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
                 model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
-            method (str): Which method to use for mass balance. 'default' will generate a mass balance based on model
-                in and output. 'legacy' will generate a mass balance as done in older mibitrans versions, which is based
-                on BIOSCREEN mass balance. Note that the latter is not conservative in inferences made on data, and
-                should be used with discretion.
+            verbose (bool, optional): Verbose mode. Defaults to False.
 
         Returns:
             mass_balance_object: Object of the MassBalance class. Output is accessed through object properties. Can be
-                called to change the time of the mass balance, or the calculation method.
+                called to change the time of the mass balance.
 
         The mass balance object has the following properties:
             plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
@@ -594,7 +610,7 @@ class Results:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
         """
-        return MassBalance(self, time, method, verbose)
+        return MassBalance(self, time, verbose)
 
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):

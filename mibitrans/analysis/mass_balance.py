@@ -16,22 +16,18 @@ from mibitrans.data.check_input import validate_input_values
 class MassBalance:
     """Calculate mass balance characteristics of input model."""
 
-    def __init__(self, model, time, method, verbose=False):
+    def __init__(self, results, time, verbose=False):
         """Mass balance object with source and plume characteristics at given time(s), of input model.
 
         Args:
-            model: Input model for which mass balance is calculated, should be a child class of Transport3D.
+            results: Input model for which mass balance is calculated, should be a child class of Transport3D.
             time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
                 model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
-            method (str): Which method to use for mass balance. 'default' will generate a mass balance based on model
-                in and output. 'legacy' will generate a mass balance as done in older mibitrans versions, which is based
-                on BIOSCREEN mass balance. Note that the latter is not conservative in inferences made on data, and
-                should be used with discretion.
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Call:
             Calling the MassBalance object will recalculate the mass balance characteristics of input model for given
-                input time and method.
+                input time.
 
         Properties:
             plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
@@ -43,11 +39,10 @@ class MassBalance:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
         """
-        check_model_type(model, mibitrans.transport.model_parent.Results)
-        self.model = model
+        check_model_type(results, mibitrans.transport.model_parent.Results)
+        self.results = results
         self.verbose = verbose
         self._time_check(time)
-        self._method_check(method)
 
         self._plume_mass_t = None
         self._source_mass_t = None
@@ -60,21 +55,23 @@ class MassBalance:
         # Relative concentration considered to be boundary of the plume extent.
         self.extent_threshold_value = 0.01
         # Volume of single cell, as dx * dy * source thickness
-        self.cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.source_parameters.depth
+        self.cellsize = (
+            abs(results.x[0] - results.x[1]) * abs(results.y[0] - results.y[1]) * results.source_parameters.depth
+        )
 
         # Mass balance output differs if the source as infinite mass
-        if self.model.source_parameters.total_mass == "infinite":
+        if self.results.source_parameters.total_mass == "infinite":
             self.source_mass_finite = False
         else:
             self.source_mass_finite = True
 
-        match self.model.mode:
+        match self.results.mode:
             # Instant reaction model
             case "instant_reaction":
                 self.model_instant_reaction = True
                 self.model_degradation = True
             # Linear decay model
-            case "linear" if self.model.attenuation_parameters.decay_rate > 0:
+            case "linear" if self.results.attenuation_parameters.decay_rate > 0:
                 self.model_degradation = True
                 self.model_instant_reaction = False
             # No decay model
@@ -152,13 +149,15 @@ class MassBalance:
         if not self.source_mass_finite:
             raise ValueError("Source mass is infinite and therefore cannot go below given threshold.")
         else:
-            time_to_threshold = -1 / self.model.k_source * np.log(threshold / self.model.source_parameters.total_mass)
+            time_to_threshold = (
+                -1 / self.results.k_source * np.log(threshold / self.results.source_parameters.total_mass)
+            )
         return time_to_threshold
 
     def _calculation_routine(self):
         """Performs mass_balance calculations"""
         self._check_model_extent()
-        self._plume_mass_t = self._calculate_plume_mass(self.model)
+        self._plume_mass_t = self._calculate_plume_mass(self.results)
         self._source_mass_t = self._calculate_source_mass()
         self._delta_source_t = self._calculate_delta_source()
         if self.model_degradation:
@@ -171,17 +170,17 @@ class MassBalance:
     def _check_model_extent(self):
         """Check if contaminant plume at given time is reasonably situated within the model extent."""
         if isinstance(self.t, np.ndarray):
-            cxyt_y_boundary = self.model.relative_cxyt[:, [0, -1], :]
-            cxyt_x_boundary = self.model.relative_cxyt[:, :, -1]
+            cxyt_y_boundary = self.results.relative_cxyt[:, [0, -1], :]
+            cxyt_x_boundary = self.results.relative_cxyt[:, :, -1]
         else:
-            cxyt_y_boundary = self.model.relative_cxyt[self.t, [0, -1], :]
-            cxyt_x_boundary = self.model.relative_cxyt[self.t, :, -1]
+            cxyt_y_boundary = self.results.relative_cxyt[self.t, [0, -1], :]
+            cxyt_x_boundary = self.results.relative_cxyt[self.t, :, -1]
 
         y_boundary_above_threshold = np.where(cxyt_y_boundary > self.extent_threshold_value, cxyt_y_boundary, 0.0)
         x_boundary_above_threshold = np.where(cxyt_x_boundary > self.extent_threshold_value, cxyt_x_boundary, 0.0)
         if np.sum(y_boundary_above_threshold) > 0:
             y_max = np.round(
-                np.max(y_boundary_above_threshold) * np.max(self.model.source_parameters.source_zone_concentration), 2
+                np.max(y_boundary_above_threshold) * np.max(self.results.source_parameters.source_zone_concentration), 2
             )
             warnings.warn(
                 "Contaminant plume extents beyond the model width, with a maximum concentration at the "
@@ -190,7 +189,7 @@ class MassBalance:
             )
         if np.sum(x_boundary_above_threshold) > 0:
             x_max = np.round(
-                np.max(x_boundary_above_threshold) * np.max(self.model.source_parameters.source_zone_concentration), 2
+                np.max(x_boundary_above_threshold) * np.max(self.results.source_parameters.source_zone_concentration), 2
             )
             warnings.warn(
                 "Contaminant plume extents beyond the model length, with a maximum concentration at the "
@@ -203,11 +202,11 @@ class MassBalance:
         # Plume mass of model; concentration is converted to mass by multiplying by cellsize and pore space.
         if isinstance(self.t, np.ndarray):
             _plume_mass_t = np.sum(
-                model.cxyt[:, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity, axis=(1, 2)
+                model.cxyt[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity, axis=(1, 2)
             )
         else:
             _plume_mass_t = np.sum(
-                model.cxyt[self.t, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity
+                model.cxyt[self.t, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
             )
 
         return _plume_mass_t
@@ -217,10 +216,10 @@ class MassBalance:
         if isinstance(self.t, np.ndarray):
             local_time = self.t
         else:
-            local_time = self.model.t[self.t]
+            local_time = self.results.t[self.t]
 
         if self.source_mass_finite:
-            _source_mass_t = self.model.source_parameters.total_mass * np.exp(-self.model.k_source * local_time)
+            _source_mass_t = self.results.source_parameters.total_mass * np.exp(-self.results.k_source * local_time)
         else:
             _source_mass_t = "infinite"
 
@@ -231,18 +230,18 @@ class MassBalance:
         if isinstance(self.t, np.ndarray):
             local_time = self.t
         else:
-            local_time = self.model.t[self.t]
+            local_time = self.results.t[self.t]
 
         if self.source_mass_finite:
-            _delta_source_t = self.model.source_parameters.total_mass - self._source_mass_t
+            _delta_source_t = self.results.source_parameters.total_mass - self._source_mass_t
         else:
-            Q, c0_avg = self.model._calculate_discharge_and_average_source_zone_concentration()
+            Q, c0_avg = self.results._calculate_discharge_and_average_source_zone_concentration()
             _delta_source_t = Q * c0_avg * local_time
         return _delta_source_t
 
     def _calculate_model_without_degradation(self):
         """Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs."""
-        _model_without_degradation = self.model.model_type(**self.model.input_parameters)
+        _model_without_degradation = self.results.model_type(**self.results.input_parameters)
         _model_without_degradation.attenuation_parameters.decay_rate = 0
         _model_without_degradation.run()
         return _model_without_degradation
@@ -256,19 +255,19 @@ class MassBalance:
     def _calculate_instant_reaction_degraded_mass(self):
         if isinstance(self.t, np.ndarray):
             _plume_mass_t_noBC = np.sum(
-                self.model.cxyt_noBC[:, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity,
+                self.results.cxyt_noBC[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity,
                 axis=(1, 2),
             )
         else:
             _plume_mass_t_noBC = np.sum(
-                self.model.cxyt_noBC[self.t, :, 1:] * self.cellsize * self.model.hydrological_parameters.porosity
+                self.results.cxyt_noBC[self.t, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
             )
 
         degraded_mass_instant_t = _plume_mass_t_noBC - self._plume_mass_t
         return degraded_mass_instant_t
 
     def _calculate_electron_acceptor_change(self):
-        mass_fraction_degraded_acceptor = self.model._electron_acceptors.array / self.model.biodegradation_capacity
+        mass_fraction_degraded_acceptor = self.results._electron_acceptors.array / self.results.biodegradation_capacity
         electron_acceptor_change = {}
         electron_acceptors = ["oxygen", "nitrate", "ferrous_iron", "sulfate", "methane"]
         for i, ea in enumerate(electron_acceptors):
@@ -279,12 +278,12 @@ class MassBalance:
     def _time_check(self, time):
         """Check if time input is valid."""
         if time is None or time == "all":
-            self.t = self.model.t
+            self.t = self.results.t
         elif isinstance(time, str):
             warnings.warn("String not recognized, defaulting to 'all', for all time points.")
-            self.t = self.model.t
+            self.t = self.results.t
         else:
-            self.t = check_time_in_domain(self.model, time)
+            self.t = check_time_in_domain(self.results, time)
 
     def _method_check(self, method):
         """Check if method input is valid."""

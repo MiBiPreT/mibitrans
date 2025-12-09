@@ -6,7 +6,7 @@ from matplotlib import animation
 def animate_1d(
     x_axis_parameter: np.ndarray, y_axis_parameter, time_parameter, y_names=None, y_colors=None, linestyle=None
 ):
-    """Animate any type and number of input 1D plottables"""
+    """Animate any type and number of input 1D plottables."""
     if not isinstance(y_axis_parameter, list):
         y_axis_parameter = [y_axis_parameter]
     fig, ax = plt.subplots()

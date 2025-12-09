@@ -6,6 +6,7 @@ import numpy as np
 import mibitrans
 import mibitrans.data.parameters
 from mibitrans.analysis.mass_balance import MassBalance
+from mibitrans.analysis.parameter_calculations import calculate_discharge_and_average_source_zone_concentration
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameter_information import util_to_conc_name
@@ -201,32 +202,13 @@ class Transport3D(ABC):
     def _calculate_source_decay(self):
         """Calculate source decay/depletion."""
         if isinstance(self._src_pars.total_mass, (float, int)):
-            Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration()
+            Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self)
             k_source = Q * c0_avg / self._src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
         else:
             k_source = 0
 
         return k_source
-
-    def _calculate_discharge_and_average_source_zone_concentration(self):
-        """Calculate the average source zone concentration, and discharge through source zone."""
-        if self._mode == "instant_reaction":
-            bc = self.biodegradation_capacity
-        else:
-            bc = 0
-        y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
-        y_src[1:] = self._src_pars.source_zone_boundary
-        c_src = self._src_pars.source_zone_concentration
-        Q = self._hyd_pars.velocity * self._hyd_pars.porosity * self._src_pars.depth * np.max(y_src) * 2
-
-        weighted_conc = np.zeros(len(self._src_pars.source_zone_boundary))
-        for i in range(len(self._src_pars.source_zone_boundary)):
-            weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
-
-        c0_avg = bc + np.sum(weighted_conc) / np.max(y_src)
-
-        return Q, c0_avg
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -314,7 +296,59 @@ class Transport3D(ABC):
 
 
 class Results:
+    """Object that holds model results and input parameters for individual runs."""
+
     def __init__(self, model):
+        """Records input parameters and resulting output based given model.
+
+        Args:
+            model (Transport3D): Model object from which to initialize results. Should be child class of Transport3D.
+
+        Properties:
+            model_type (Transport3D) : Class instance of model used to generate results.
+            short_description (str) : Short description of model.
+            x (np.ndarray) : Numpy array with model x (longitudinal direction) discretization, corresponding to
+                model_parameters, with distance in [m].
+            y (np.ndarray) : Numpy array with model y (transverse horizontal direction) discretization, corresponding to
+                model_parameters, with distance in [m].
+            t (np.ndarray) : Numpy array with model t (time) discretization, corresponding to
+                model_parameters, with time in [days].
+            hydrological_parameters (HydrologicalParameters) : Dataclass holding the hydrological parameters used to
+                run the model.
+            attenuation_parameters (AttenuationParameters) : Dataclass holding the attenuation parameters used to run
+                the model.
+            source_parameters (SourceParameters) : Dataclass holding the source parameters used to run the model.
+            model_parameters (ModelParameters): Dataclass holding the model parameters used to run the model.
+            electron_acceptors (ElectronAcceptors): Dataclass holding the electron acceptor concentrations used to run
+                the model. Only for instant reaction, None for other models.
+            utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
+                run the model. Only for instant reaction, None for other models.
+            mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
+            rv (float) : Retarded flow velocity, as v / R [m/day].
+            k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
+                source depletion takes place.
+            c_source (np.ndarray) : Initial nett source zone concentrations. For multiple source zones, nett
+                concentration in nth source zone is original concentration minus concentration in source zone n - 1. For
+                instant reaction model, the biodegradation capacity is added to the outermost source zone.
+            biodegradation_capacity (float) : Maximum capacity of biodegradation taking place, based on electron
+                acceptor concentrations and utilization factor.
+            cxyt (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t positions. Indexed
+             as cxyt[t,y,x]. In [g/m3].
+            relative_cxyt (np.ndarray) : Three-dimensional numpy array with relative concentrations for all x, y and t
+                positions. Compared to maximum source zone concentrations.
+            cxyt_noBC (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t of instant
+                reaction models, without subtracting the biodegradation capacity, in [g/m3].
+            input_parameters (dict) : Dictionary of input parameter dataclasses for the model. Does not include instant
+                reaction parameters.
+
+        Methods:
+            centerline : Plot center of contaminant plume, at a specified time and y position.
+            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
+            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
+            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
+            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
+            mass_balance : Return a mass balance object with source and plume characteristics at given time(s).
+        """
         self._model_type = model.__class__
         self._short_description = model.short_description
         self._x = model.x

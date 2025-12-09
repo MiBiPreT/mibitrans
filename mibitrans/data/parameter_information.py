@@ -4,8 +4,8 @@ File containing various dictionaries used for evaluation of names, value types a
 
 """
 
-import numpy as np
 from dataclasses import dataclass
+import numpy as np
 from mibitrans.data.check_input import validate_input_values
 
 # Couples utilization factors to electron acceptors/donors
@@ -107,6 +107,7 @@ class ElectronAcceptors:
     methane (float) : Methane concentration in contaminant plume, in [g/m^3]. Only required for
         instant reaction models.
     """
+
     delta_oxygen: float
     delta_nitrate: float
     ferrous_iron: float

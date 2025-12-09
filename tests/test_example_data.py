@@ -293,6 +293,89 @@ testingdata_instantreaction_bioscreen = np.array(
     ]
 )
 
+testing_massbalance_nodecay_bio = {
+    "t": np.array([365, 730, 1095]),
+    "_plume_mass_t": np.array([4673.88175389, 8134.17708612, 10882.8752081]),
+    "_source_mass_t": np.array([995759.01846931, 991536.02286297, 987330.93690299]),
+    "_delta_source_t": np.array([4240.98153069, 8463.97713703, 12669.06309701]),
+    "_degraded_mass_t": None,
+    "_electron_acceptor_change_t": None,
+    "_instant_reaction_degraded_mass_t": None,
+    "source_mass_finite": True,
+    "model_degradation": False,
+    "model_instant_reaction": False,
+}
+
+testing_massbalance_lineardecay_ana = {
+    "t": np.array([365, 730, 1095]),
+    "_plume_mass_t": np.array([1695.49626089, 1689.27120085, 1682.14524122]),
+    "_source_mass_t": np.array([995759.01846931, 991536.02286297, 987330.93690299]),
+    "_delta_source_t": np.array([4240.98153069, 8463.97713703, 12669.06309701]),
+    "_degraded_mass_t": np.array([5009.69193858, 8944.92003192, 11683.6189408]),
+    "_electron_acceptor_change_t": None,
+    "_instant_reaction_degraded_mass_t": None,
+    "source_mass_finite": True,
+    "model_degradation": True,
+    "model_instant_reaction": False,
+}
+
+testing_massbalance_instant_mbt = {
+    "t": np.array([365, 730, 1095]),
+    "_plume_mass_t": np.array([5486.89557135, 9074.16458818, 12039.64270149]),
+    "_source_mass_t": np.array([994988.88209135, 990002.87548539, 985041.85434643]),
+    "_delta_source_t": np.array([5011.11790865, 9997.12451461, 14958.14565357]),
+    "_degraded_mass_t": np.array([1415.58024519, 1893.57017734, 1670.60614156]),
+    "_electron_acceptor_change_t": {
+        "oxygen": np.array([1270.70443741, 1827.39892317, 1931.61471693]),
+        "nitrate": np.array([1270.70443741, 1827.39892317, 1931.61471693]),
+        "ferrous_iron": np.array([1270.70443741, 1827.39892317, 1931.61471693]),
+        "sulfate": np.array([1270.70443741, 1827.39892317, 1931.61471693]),
+        "methane": np.array([1270.70443741, 1827.39892317, 1931.61471693]),
+    },
+    "_instant_reaction_degraded_mass_t": np.array([2621.77047178, 3770.36578757, 3985.3881663]),
+    "source_mass_finite": True,
+    "model_degradation": True,
+    "model_instant_reaction": True,
+}
+
+testing_massbalance_instant_mbt_inf = {
+    "t": np.array([365, 730, 1095]),
+    "_plume_mass_t": np.array([5539.00845817, 9248.17128318, 12374.47283209]),
+    "_source_mass_t": "infinite",
+    "_delta_source_t": np.array([5023.71566351, 10047.43132702, 15071.14699053]),
+    "_degraded_mass_t": np.array([1404.7379325, 1850.99155079, 1579.25170252]),
+    "_electron_acceptor_change_t": {
+        "oxygen": np.array([1273.22026095, 1831.27321473, 1932.51181133]),
+        "nitrate": np.array([1273.22026095, 1831.27321473, 1932.51181133]),
+        "ferrous_iron": np.array([1273.22026095, 1831.27321473, 1932.51181133]),
+        "sulfate": np.array([1273.22026095, 1831.27321473, 1932.51181133]),
+        "methane": np.array([1273.22026095, 1831.27321473, 1932.51181133]),
+    },
+    "_instant_reaction_degraded_mass_t": np.array([2626.961224, 3778.35938776, 3987.23908892]),
+    "source_mass_finite": False,
+    "model_degradation": True,
+    "model_instant_reaction": True,
+}
+
+testing_massbalance_instant_ana_inf = {
+    "t": np.array([365, 730, 1095]),
+    "_plume_mass_t": np.array([5248.12131322, 8706.47934067, 11728.94763204]),
+    "_source_mass_t": "infinite",
+    "_delta_source_t": np.array([5023.71566351, 10047.43132702, 15071.14699053]),
+    "_degraded_mass_t": np.array([1464.30682696, 1957.90718873, 1705.30840063]),
+    "_electron_acceptor_change_t": {
+        "oxygen": np.array([1269.42660124, 1832.46497738, 1936.67681991]),
+        "nitrate": np.array([1269.42660124, 1832.46497738, 1936.67681991]),
+        "ferrous_iron": np.array([1269.42660124, 1832.46497738, 1936.67681991]),
+        "sulfate": np.array([1269.42660124, 1832.46497738, 1936.67681991]),
+        "methane": np.array([1269.42660124, 1832.46497738, 1936.67681991]),
+    },
+    "_instant_reaction_degraded_mass_t": np.array([2619.13398683, 3780.81828224, 3995.8325086]),
+    "source_mass_finite": False,
+    "model_degradation": True,
+    "model_instant_reaction": True,
+}
+
 ######## Decrepit ######################################################################################################
 
 testing_massbalance_nodecay_dom = {

@@ -1,7 +1,6 @@
 """Documentation about mibitrans."""
 
 # Add some commonly used functions as top-level imports
-from mibitrans.analysis.mass_balance import mass_balance
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
@@ -16,7 +15,6 @@ from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_line import breakthrough
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
-from mibitrans.visualize.show_mass_balance import visualize_mass_balance
 
 import logging
 

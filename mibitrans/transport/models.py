@@ -68,16 +68,11 @@ class Mibitrans(Transport3D):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
                 attribute.
-            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
-            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
-            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
-            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
-            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -294,7 +289,7 @@ class Anatrans(Transport3D):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
@@ -459,16 +454,11 @@ class Bioscreen(Anatrans):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
                 attribute.
-            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
-            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
-            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
-            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
-            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.

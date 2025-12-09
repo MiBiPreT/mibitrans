@@ -3,11 +3,10 @@
 Module calculating the mass balance based on base parameters.
 """
 
-import copy
 import warnings
 import numpy as np
 import mibitrans
-from mibitrans.analysis.parameter_calculations import calculate_utilization
+from mibitrans.analysis.parameter_calculations import calculate_discharge_and_average_source_zone_concentration
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.data.check_input import validate_input_values
@@ -42,7 +41,7 @@ class MassBalance:
         check_model_type(results, mibitrans.transport.model_parent.Results)
         self.results = results
         self.verbose = verbose
-        self._time_check(time)
+        self.t = self._time_check(time)
 
         self._plume_mass_t = None
         self._source_mass_t = None
@@ -87,9 +86,7 @@ class MassBalance:
     def __call__(self, time=None, method=None):
         """Recalculate the mass balance characteristics of input model for given time and method."""
         if time:
-            self._time_check(time)
-        if method:
-            self._method_check(method)
+            self.t = self._time_check(time)
 
         if self.verbose:
             print("Recalculating mass balance...")
@@ -155,7 +152,7 @@ class MassBalance:
         return time_to_threshold
 
     def _calculation_routine(self):
-        """Performs mass_balance calculations"""
+        """Perform mass_balance calculations."""
         self._check_model_extent()
         self._plume_mass_t = self._calculate_plume_mass(self.results)
         self._source_mass_t = self._calculate_source_mass()
@@ -173,8 +170,8 @@ class MassBalance:
             cxyt_y_boundary = self.results.relative_cxyt[:, [0, -1], :]
             cxyt_x_boundary = self.results.relative_cxyt[:, :, -1]
         else:
-            cxyt_y_boundary = self.results.relative_cxyt[self.t, [0, -1], :]
-            cxyt_x_boundary = self.results.relative_cxyt[self.t, :, -1]
+            cxyt_y_boundary = self.results.relative_cxyt[self._t_index, [0, -1], :]
+            cxyt_x_boundary = self.results.relative_cxyt[self._t_index, :, -1]
 
         y_boundary_above_threshold = np.where(cxyt_y_boundary > self.extent_threshold_value, cxyt_y_boundary, 0.0)
         x_boundary_above_threshold = np.where(cxyt_x_boundary > self.extent_threshold_value, cxyt_x_boundary, 0.0)
@@ -206,20 +203,15 @@ class MassBalance:
             )
         else:
             _plume_mass_t = np.sum(
-                model.cxyt[self.t, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
+                model.cxyt[self._t_index, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
             )
 
         return _plume_mass_t
 
     def _calculate_source_mass(self):
         """Calculate source mass of input model, for the given time(s)."""
-        if isinstance(self.t, np.ndarray):
-            local_time = self.t
-        else:
-            local_time = self.results.t[self.t]
-
         if self.source_mass_finite:
-            _source_mass_t = self.results.source_parameters.total_mass * np.exp(-self.results.k_source * local_time)
+            _source_mass_t = self.results.source_parameters.total_mass * np.exp(-self.results.k_source * self.t)
         else:
             _source_mass_t = "infinite"
 
@@ -227,16 +219,11 @@ class MassBalance:
 
     def _calculate_delta_source(self):
         """Calculate difference in source mass between t=0 and given time(s)."""
-        if isinstance(self.t, np.ndarray):
-            local_time = self.t
-        else:
-            local_time = self.results.t[self.t]
-
         if self.source_mass_finite:
             _delta_source_t = self.results.source_parameters.total_mass - self._source_mass_t
         else:
-            Q, c0_avg = self.results._calculate_discharge_and_average_source_zone_concentration()
-            _delta_source_t = Q * c0_avg * local_time
+            Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self.results)
+            _delta_source_t = Q * c0_avg * self.t
         return _delta_source_t
 
     def _calculate_model_without_degradation(self):
@@ -260,14 +247,16 @@ class MassBalance:
             )
         else:
             _plume_mass_t_noBC = np.sum(
-                self.results.cxyt_noBC[self.t, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
+                self.results.cxyt_noBC[self._t_index, :, 1:]
+                * self.cellsize
+                * self.results.hydrological_parameters.porosity
             )
 
         degraded_mass_instant_t = _plume_mass_t_noBC - self._plume_mass_t
         return degraded_mass_instant_t
 
     def _calculate_electron_acceptor_change(self):
-        mass_fraction_degraded_acceptor = self.results._electron_acceptors.array / self.results.biodegradation_capacity
+        mass_fraction_degraded_acceptor = self.results.electron_acceptors.array / self.results.biodegradation_capacity
         electron_acceptor_change = {}
         electron_acceptors = ["oxygen", "nitrate", "ferrous_iron", "sulfate", "methane"]
         for i, ea in enumerate(electron_acceptors):
@@ -278,165 +267,11 @@ class MassBalance:
     def _time_check(self, time):
         """Check if time input is valid."""
         if time is None or time == "all":
-            self.t = self.results.t
+            t = self.results.t
         elif isinstance(time, str):
             warnings.warn("String not recognized, defaulting to 'all', for all time points.")
-            self.t = self.results.t
+            t = self.results.t
         else:
-            self.t = check_time_in_domain(self.results, time)
-
-    def _method_check(self, method):
-        """Check if method input is valid."""
-        match method:
-            case "default" | 0:
-                self.method = "default"
-            case "legacy" | 1:
-                self.method = "legacy"
-            case met if not isinstance(met, (str, int)):
-                warnings.warn("Method not recognized, using default.")
-                self.method = "default"
-            case _:
-                raise TypeError(
-                    f"Method should a string, either 'default' or 'legacy', but was {type(method)} instead."
-                )
-
-
-def mass_balance(model, time=None) -> dict:
-    """Calculate contaminant mass balance across model compartments.
-
-    Args:
-        model (mibitrans.transport.model_parent.Transport3D) : Three dimensional transport model object.
-        time (float) : Time at which to calculate mass balance. Default is the last time step.
-
-    Returns:
-        mass_balance_dict : Dictionary containing the mass balance elements of the given model.
-    """
-    check_model_type(model, mibitrans.transport.model_parent.Transport3D)
-    model = copy.deepcopy(model)
-    if not model.has_run:
-        model.run()
-
-    time_pos = check_time_in_domain(model, time)
-
-    if isinstance(model.source_parameters.total_mass, str):
-        inf_source = True
-    else:
-        inf_source = False
-
-    mass_balance_dict = {}
-
-    mass_balance_dict["time"] = model.t[time_pos]
-    mode = "unknown"
-    if hasattr(model, "mode"):
-        if model.mode == "instant_reaction":
-            mode = model.mode
-        elif model.mode == "linear":
-            if model._decay_rate == 0:
-                mode = "no_decay"
-            else:
-                mode = "linear_decay"
-
-        if mode in ["instant_reaction", "linear_decay"]:
-            no_decay_model = copy.deepcopy(model)
-            no_decay_model.mode = "linear"
-            no_decay_model.attenuation_parameters.decay_rate = 0
-            no_decay_model.run()
-        else:
-            no_decay_model = model
-
-    # Total source mass at t=0
-    M_source_0 = model.source_parameters.total_mass
-    mass_balance_dict["source_mass_0"] = M_source_0
-
-    # Total source mass at t=t, for the no decay model
-    if inf_source:
-        M_source_t = M_source_0
-    else:
-        M_source_t = M_source_0 * np.exp(-no_decay_model.k_source * model.t[time_pos])
-    mass_balance_dict["source_mass_t"] = M_source_t
-
-    # Change in source mass at t=t, due to source decay by transport
-    if inf_source:
-        Q, c0_avg = no_decay_model._calculate_discharge_and_average_source_zone_concentration()
-        M_source_delta = Q * c0_avg * model.t[time_pos]
-    else:
-        M_source_delta = M_source_0 - M_source_t
-    mass_balance_dict["source_mass_change"] = M_source_delta
-
-    # Volume of single cell, as dx * dy * source thickness
-    cellsize = abs(model.x[0] - model.x[1]) * abs(model.y[0] - model.y[1]) * model.source_parameters.depth
-
-    # Plume mass of no decay model; concentration is converted to mass by multiplying by cellsize and pore space.
-    plume_mass_nodecay = np.sum(
-        no_decay_model.cxyt[time_pos, :, 1:] * cellsize * model.hydrological_parameters.porosity
-    )
-    mass_balance_dict["plume_mass_no_decay"] = plume_mass_nodecay
-
-    # Difference between current plume mass and change in source mass must have been transported outside of model
-    # extent for no decay scenarios; preservation of mass.
-    if M_source_delta - plume_mass_nodecay < 0:
-        transport_outside_extent_nodecay = 0
-        mass_balance_dict["transport_outside_extent"] = transport_outside_extent_nodecay
-    else:
-        transport_outside_extent_nodecay = M_source_delta - plume_mass_nodecay
-        mass_balance_dict["transport_outside_extent_nodecay"] = transport_outside_extent_nodecay
-
-    if mode == "linear_decay":
-        # Plume mass of linear decay model.
-        plume_mass_lindecay = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.hydrological_parameters.porosity)
-        mass_balance_dict["plume_mass_linear_decay"] = plume_mass_lindecay
-
-        # Calculate transport out of model extent linear decay as fraction of transport out of model for no decay
-        # model, scaled by ratio between no decay and linear decay plume mass.
-        transport_outside_extent_lindecay = transport_outside_extent_nodecay * plume_mass_lindecay / plume_mass_nodecay
-        mass_balance_dict["transport_outside_extent_lineardecay"] = transport_outside_extent_lindecay
-
-        # Contaminant mass degraded by linear decay is difference plume mass no and linear decay plus difference in
-        # mass transported outside model extent by no and linear decay.
-        degraded_mass = (
-            plume_mass_nodecay
-            - plume_mass_lindecay
-            + transport_outside_extent_nodecay
-            - transport_outside_extent_lindecay
-        )
-        mass_balance_dict["plume_mass_degraded_linear"] = degraded_mass
-
-    elif mode == "instant_reaction":
-        # Total source mass at t=t, for the instant reaction model
-        if isinstance(model.source_parameters.total_mass, str):
-            M_source_t_inst = M_source_0
-        else:
-            M_source_t_inst = M_source_0 * np.exp(-model.k_source * model.t[time_pos])
-        mass_balance_dict["source_mass_instant_t"] = M_source_t_inst
-
-        # Change in source mass at t=t due to source decay by transport and by biodegradation
-        if inf_source:
-            Q, c0_avg = model._calculate_discharge_and_average_source_zone_concentration()
-            M_source_delta = Q * c0_avg * model.t[time_pos]
-        else:
-            M_source_delta = M_source_0 - M_source_t_inst
-        mass_balance_dict["source_mass_instant_change"] = M_source_delta
-
-        # Plume mass without biodegradation according to the instant degradation model
-        plume_mass_inst_nodecay = np.sum(
-            model.cxyt_noBC[time_pos, :, 1:] * cellsize * model.hydrological_parameters.porosity
-        )
-        mass_balance_dict["plume_mass_no_decay_instant_reaction"] = plume_mass_inst_nodecay
-
-        # Plume mass with biodegradation according to the instant degradation model
-        plume_mass_inst = np.sum(model.cxyt[time_pos, :, 1:] * cellsize * model.hydrological_parameters.porosity)
-        mass_balance_dict["plume_mass_instant_reaction"] = plume_mass_inst
-
-        # Assumption: all mass difference between instant degradation model with biodegradation and
-        # instant degradation model without biodegradation is caused by degradation.
-        degraded_mass = plume_mass_inst_nodecay - plume_mass_inst
-        mass_balance_dict["plume_mass_degraded_instant"] = degraded_mass
-
-        # Weight fraction of electron acceptor used for degradation and degraded contaminant
-        mass_fraction_electron_acceptor = calculate_utilization(model)
-
-        # Change in total mass of each electron acceptor
-        electron_acceptor_mass_change = mass_fraction_electron_acceptor * degraded_mass
-        mass_balance_dict["electron_acceptor_mass_change"] = electron_acceptor_mass_change
-
-    return mass_balance_dict
+            self._t_index = check_time_in_domain(self.results, time)
+            t = float(self.results.t[self._t_index])
+        return t

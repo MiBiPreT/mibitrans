@@ -18,7 +18,7 @@ absolute_conc_ylabel = r"Concentration [g/$m^{3}$]"
 
 def allowed_model_types():
     """Return object of parent class that is allowed for input/output."""
-    return mibitrans.transport.model_parent.Transport3D
+    return mibitrans.transport.model_parent.Results
 
 
 def centerline(
@@ -53,7 +53,6 @@ def centerline(
         check_model_type(mod, allowed_model_types())
         y_pos = check_y_in_domain(mod, y_position)
         t_pos = check_time_in_domain(mod, time)
-        _run_model_if_model_has_not_ran(mod)
 
         if relative_concentration:
             if animate:
@@ -143,7 +142,6 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
         check_model_type(mod, allowed_model_types())
         x_pos = check_x_in_domain(mod, x_position)
         t_pos = check_time_in_domain(mod, time)
-        _run_model_if_model_has_not_ran(mod)
 
         if relative_concentration:
             if animate:
@@ -235,7 +233,6 @@ def breakthrough(
         check_model_type(mod, allowed_model_types())
         x_pos = check_x_in_domain(mod, x_position)
         y_pos = check_y_in_domain(mod, y_position)
-        _run_model_if_model_has_not_ran(mod)
         if relative_concentration:
             plot_array_list.append(mod.relative_cxyt[:, y_pos, x_pos])
             y_label = relative_conc_ylabel
@@ -296,13 +293,6 @@ def breakthrough(
 
         ani = animation.FuncAnimation(fig=fig, func=update, frames=len(model[0].t))
         return ani
-
-
-def _run_model_if_model_has_not_ran(model):
-    if not model.has_run:
-        if model.verbose:
-            print("Model has not run yet, calculating cxyt...")
-        model.run()
 
 
 def _plot_title_generator(plot_type, model, time=None, x_position=None, y_position=None, multiple=False):

@@ -44,11 +44,6 @@ class Transport3D(ABC):
         self._decay_rate = self._att_pars.decay_rate
 
         self.verbose = verbose
-
-        self._observe_input_dataclass_change()
-
-        self.has_run = False
-        self.initialized = False
         self._mode = "linear"
         self._electron_acceptors = None
         self._utilization_factor = None
@@ -74,8 +69,8 @@ class Transport3D(ABC):
 
     @hydrological_parameters.setter
     def hydrological_parameters(self, value):
+        self._check_input_dataclasses("hydrological_parameters", value)
         self._hyd_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("hydrological_parameters", value)
 
     @property
     def attenuation_parameters(self):
@@ -84,8 +79,8 @@ class Transport3D(ABC):
 
     @attenuation_parameters.setter
     def attenuation_parameters(self, value):
+        self._check_input_dataclasses("attenuation_parameters", value)
         self._att_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("attenuation_parameters", value)
 
     @property
     def source_parameters(self):
@@ -94,8 +89,8 @@ class Transport3D(ABC):
 
     @source_parameters.setter
     def source_parameters(self, value):
+        self._check_input_dataclasses("source_parameters", value)
         self._src_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("source_parameters", value)
 
     @property
     def model_parameters(self):
@@ -104,8 +99,8 @@ class Transport3D(ABC):
 
     @model_parameters.setter
     def model_parameters(self, value):
+        self._check_input_dataclasses("model_parameters", value)
         self._mod_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("model_parameters", value)
 
     @property
     def mode(self):
@@ -117,7 +112,6 @@ class Transport3D(ABC):
         match value:
             case "linear" | "linear decay" | "linear_decay" | 0:
                 self._mode = "linear"
-                self.initialized = False
             case "instant" | "instant_reaction" | "instant reaction" | 1:
                 if self._electron_acceptors is None or self._utilization_factor is None:
                     raise ValueError(
@@ -126,11 +120,9 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
-                self.initialized = False
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
-                self.initialized = False
 
     @property
     def electron_acceptors(self):
@@ -155,10 +147,6 @@ class Transport3D(ABC):
         """Short string describing model type."""
         pass
 
-    # @functools.lru_cache()
-    # def calc(self, x, y):
-    #     return x * y
-
     @abstractmethod
     def run(self):
         """Method that runs the model and ensures that initialisation is performed."""
@@ -173,35 +161,6 @@ class Transport3D(ABC):
     def _calculate_concentration_for_all_xyt(self) -> np.ndarray:
         """Method that calculates and return concentration array for all model x, y and t."""
         pass
-
-    def _observe_input_dataclass_change(self):
-        """Keeps track of input dataclass changes, and ensures re-initialization for following model runs."""
-        self.hydrological_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "hydrological_parameters", self._hyd_pars
-        )
-        self.attenuation_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "attenuation_parameters", self._att_pars
-        )
-        self.source_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "source_parameters", self._src_pars
-        )
-        self.model_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "model_parameters", self._mod_pars
-        )
-
-    def _check_and_reset_when_input_dataclass_change(self, key, value):
-        """Remove output and unflag initialization when input dataclass changes are observed."""
-        self._check_input_dataclasses(key, value)
-        if self.verbose:
-            print(key, " got changed")
-        self.initialized = False
-        if self.has_run:
-            self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
-            if self.cxyt_noBC is not None:
-                self.cxyt_noBC = 0
-            self.has_run = False
-            if self.verbose:
-                print(f"Parameter '{key}' has changed — resetting output")
 
     def _pre_run_initialization_parameters(self):
         """Parameter initialization for model."""
@@ -238,8 +197,6 @@ class Transport3D(ABC):
             self._decay_rate = 0
         else:
             self._decay_rate = self._att_pars.decay_rate
-
-        self.initialized = True
 
     def _calculate_source_decay(self):
         """Calculate source decay/depletion."""
@@ -341,10 +298,7 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     def _check_model_mode_before_run(self):
-        # Reset concentration array to make sure it is empty before calculation.
-        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
-        if not self.initialized:
-            self._pre_run_initialization_parameters()
+        self._pre_run_initialization_parameters()
         if self._mode == "linear":
             if self.biodegradation_capacity is not None:
                 warnings.warn(
@@ -358,185 +312,17 @@ class Transport3D(ABC):
                     "Please provide them with the 'instant_reaction' class method."
                 )
 
-    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
-        """Plot center of contaminant plume of this model, at a specified time and y position.
 
-        Args:
-            y_position (float, optional): y-position across the plume (transverse horizontal direction) for the plot.
-                By default, the center of the plume at y=0 is plotted.
-            time (float, optional): Point of time for the plot. Will show the closest time step to given value.
-                By default, last point in time is plotted.
-            relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
-                source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
-                False.
-            **kwargs : Arguments to be passed to plt.plot().
-
-        """
-        if animate:
-            anim = pline.centerline(
-                self,
-                y_position=y_position,
-                time=time,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return anim
-        else:
-            pline.centerline(
-                self,
-                y_position=y_position,
-                time=time,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return None
-
-    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
-        """Plot concentration distribution as a line horizontal transverse to the plume extent.
-
-        Args:
-            x_position : x-position along the plume (longitudinal direction) for the plot.
-            time (float): Point of time for the plot. Will show the closest time step to given value.
-                By default, last point in time is plotted.
-            relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
-                source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
-                False.
-            **kwargs : Arguments to be passed to plt.plot().
-        """
-        if animate:
-            anim = pline.transverse(
-                self,
-                x_position=x_position,
-                time=time,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return anim
-        else:
-            pline.transverse(
-                self,
-                x_position=x_position,
-                time=time,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return None
-
-    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
-        """Plot contaminant breakthrough curve at given x and y position in model domain.
-
-        Args:
-            x_position : x-position along the plume (longitudinal direction).
-            y_position : y-position across the plume (transverse horizontal direction).
-                By default, at the center of the plume (at y=0).
-            relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
-                source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
-                False.
-            **kwargs : Arguments to be passed to plt.plot().
-        """
-        if animate:
-            anim = pline.breakthrough(
-                self,
-                x_position=x_position,
-                y_position=y_position,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return anim
-        else:
-            pline.breakthrough(
-                self,
-                x_position=x_position,
-                y_position=y_position,
-                relative_concentration=relative_concentration,
-                animate=animate,
-                **kwargs,
-            )
-            return None
-
-    def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
-        """Plot contaminant plume as a 2D colormesh, at a specified time.
-
-        Args:
-            time (float): Point of time for the plot. Will show the closest time step to given value.
-                By default, last point in time is plotted.
-            relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
-                source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
-                False.
-            **kwargs : Arguments to be passed to plt.pcolormesh().
-
-        Returns a matrix plot of the input plume as object.
-        """
-        anim = psurf.plume_2d(self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs)
-        return anim
-
-    def plume_3d(self, time=None, relative_concentration=False, animate=False, **kwargs):
-        """Plot contaminant plume as a 3D surface, at a specified time.
-
-        Args:
-            time (float): Point of time for the plot. Will show the closest time step to given value.
-                By default, last point in time is plotted.
-            relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum
-                source zone concentrations at t=0. By default, absolute concentrations are shown.
-            animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
-                False.
-            **kwargs : Arguments to be passed to plt.plot_surface().
-
-        Returns:
-            ax (matplotlib.axes._axes.Axes) : Matplotlib Axes object of plume plot.
-                or if animate == True
-            anim (matplotib.animation.FuncAnimation) : Matplotlib FuncAnimation object of plume plot.
-        """
-        ax_or_anim = psurf.plume_3d(
-            self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs
-        )
-        return ax_or_anim
-
-    def mass_balance(self, time="all", method="default"):
-        """Return a mass balance object with source and plume characteristics at given time(s).
-
-        Args:
-            time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
-                model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
-            method (str): Which method to use for mass balance. 'default' will generate a mass balance based on model
-                in and output. 'legacy' will generate a mass balance as done in older mibitrans versions, which is based
-                on BIOSCREEN mass balance. Note that the latter is not conservative in inferences made on data, and
-                should be used with discretion.
-
-        Returns:
-            mass_balance_object: Object of the MassBalance class. Output is accessed through object properties. Can be
-                called to change the time of the mass balance, or the calculation method.
-
-        The mass balance object has the following properties:
-            plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
-            source_mass: Mass of the contaminant source at the given time(s), in [g]. No values are given for models
-                with infinite source mass.
-            delta_source: Difference in mass between contaminant source at given time and source at t = 0, in [g].
-            degraded_mass: Mass of plume contaminant degradation at the given time(s), compared to a model without
-                degradation, in [g]. Has no value if model does not consider degradation.
-            model_without_degradation: Object of model without degradation. Has no value if model does not consider
-                degradation.
-        """
-        return MassBalance(self, time, method, verbose=self.verbose)
-
-
-# @dataclass(frozen=True)
 class Results:
     def __init__(self, model):
-        self._model_type = self.__class__
+        self._model_type = model.__class__
+        self._short_description = model.short_description
         self._x = model.x
         self._y = model.y
         self._t = model.t
 
+        # All properties of Transport3D that are objects should be copied; if not copied, changing them in the class
+        # object where they originated will also change them here, which is not the intended behaviour.
         self._hydrological_parameters = copy.copy(model.hydrological_parameters)
         self._attenuation_parameters = copy.copy(model.attenuation_parameters)
         self._source_parameters = copy.copy(model.source_parameters)
@@ -551,11 +337,16 @@ class Results:
         self._biodegradation_capacity = model.biodegradation_capacity
 
         self._cxyt = model.cxyt
+        self._relative_cxyt = model.relative_cxyt
         self._cxyt_noBC = model.cxyt_noBC
 
     @property
     def model_type(self):
         return self._model_type
+
+    @property
+    def short_description(self):
+        return self._short_description
 
     @property
     def x(self):
@@ -618,8 +409,22 @@ class Results:
         return self._cxyt
 
     @property
+    def relative_cxyt(self):
+        return self._relative_cxyt
+
+    @property
     def cxyt_noBC(self):
         return self._cxyt_noBC
+
+    @property
+    def input_parameters(self):
+        """Return the input arguments for the model in the form of a dictionary, based on current values."""
+        return dict(
+            hydrological_parameters=self.hydrological_parameters,
+            attenuation_parameters=self.attenuation_parameters,
+            source_parameters=self.source_parameters,
+            model_parameters=self.model_parameters,
+        )
 
     def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
@@ -764,7 +569,7 @@ class Results:
         )
         return ax_or_anim
 
-    def mass_balance(self, time="all", method="default"):
+    def mass_balance(self, time="all", method="default", verbose=False):
         """Return a mass balance object with source and plume characteristics at given time(s).
 
         Args:
@@ -789,7 +594,7 @@ class Results:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
         """
-        return MassBalance(self, time, method, verbose=self.verbose)
+        return MassBalance(self, time, method, verbose)
 
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):

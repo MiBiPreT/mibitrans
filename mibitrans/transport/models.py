@@ -6,6 +6,7 @@ from scipy.special import erf
 from scipy.special import erfc
 from scipy.special import erfcx
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.transport.model_parent import Results
 from mibitrans.transport.model_parent import Transport3D
 
 
@@ -97,7 +98,7 @@ class Mibitrans(Transport3D):
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
             self.cxyt = self._calculate_concentration_for_all_xyt()
-        self.has_run = True
+        return Results(self)
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -116,8 +117,7 @@ class Mibitrans(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
 
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
+        self._pre_run_initialization_parameters()
 
         def integrand(t, sz):
             div_term = 2 * np.sqrt(self.disp_y * t**4)
@@ -323,6 +323,7 @@ class Anatrans(Transport3D):
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        return Results(self)
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -339,8 +340,8 @@ class Anatrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
+
+        self._pre_run_initialization_parameters()
 
         if self.mode == "instant_reaction":
             save_c_noBC = self.cxyt_noBC.copy()

@@ -43,7 +43,7 @@ class MassBalance:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
         """
-        check_model_type(model, mibitrans.transport.model_parent.Transport3D)
+        check_model_type(model, mibitrans.transport.model_parent.Results)
         self.model = model
         self.verbose = verbose
         self._time_check(time)
@@ -242,7 +242,7 @@ class MassBalance:
 
     def _calculate_model_without_degradation(self):
         """Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs."""
-        _model_without_degradation = self.model.__class__(**self.model.input_parameters)
+        _model_without_degradation = self.model.model_type(**self.model.input_parameters)
         _model_without_degradation.attenuation_parameters.decay_rate = 0
         _model_without_degradation.run()
         return _model_without_degradation

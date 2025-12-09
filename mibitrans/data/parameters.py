@@ -5,9 +5,6 @@ Module handling data input in the form of a dictionary.
 
 import warnings
 from dataclasses import dataclass
-from dataclasses import fields
-from typing import Callable
-from typing import Optional
 import numpy as np
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.check_input import validate_input_values
@@ -15,21 +12,8 @@ from mibitrans.data.check_input import validate_source_zones
 from mibitrans.visualize.show_conditions import source_zone
 
 
-class _ChangeObserver:
-    """Base class for dataclasses that can notify a parent when a field changes."""
-
-    _on_change: Optional[Callable[[], None]] = None
-
-    def __setattr__(self, key, value):
-        super().__setattr__(key, value)
-        # Trigger callback if field is one of dataclass fields
-        if hasattr(self, "_on_change") and callable(self._on_change):
-            if key in [f.name for f in fields(self)]:
-                self._on_change()
-
-
 @dataclass
-class HydrologicalParameters(_ChangeObserver):
+class HydrologicalParameters:
     """Dataclass handling input of hydrological parameters.
 
     Args:
@@ -103,7 +87,7 @@ class HydrologicalParameters(_ChangeObserver):
 
 
 @dataclass
-class AttenuationParameters(_ChangeObserver):
+class AttenuationParameters:
     """Dataclass handling parameters related to adsorption, diffusion and degradation.
 
     Args:
@@ -201,7 +185,7 @@ class AttenuationParameters(_ChangeObserver):
 
 
 @dataclass
-class SourceParameters(_ChangeObserver):
+class SourceParameters:
     """Dataclass handling source parameters. Specifying concentrations and extent of source zone.
 
     Args:
@@ -274,7 +258,7 @@ class SourceParameters(_ChangeObserver):
 
 
 @dataclass
-class ModelParameters(_ChangeObserver):
+class ModelParameters:
     """Dataclass handling model discretization parameters.
 
     Args:

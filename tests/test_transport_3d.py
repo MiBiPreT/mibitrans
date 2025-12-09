@@ -146,45 +146,34 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
     ), ("Biodegradation capacity was not added to the outermost source zone.",)
     model_object.mode = "linear"
     assert model_object.mode == "linear", "Model mode was not switched to 'linear'."
-    assert not model_object.initialized, "Model was incorrectly flagged as initialized."
-    model_object._pre_run_initialization_parameters()
-    assert model_object.initialized, "Model was incorrectly flagged as not initialized."
-    assert model_object.c_source[-1] == test_source_pars.source_zone_concentration[-1], (
-        "Outermost source zone concentration was not converted back from instant reaction."
-    )
 
-
-def test_reset_on_parameter_change(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Test if model output gets reset after changing parameters."""
-    pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
-    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-    model_object.instant_reaction(**pars)
-    model_object.cxyt = np.array(([[[1, 2], [2, 3]], [[3, 4], [4, 5]]]))
-    model_object.has_run = True
-    model_object.hydrological_parameters.velocity = 8 / 365
-    assert not model_object.initialized, "Model has been incorrectly flagged as initialized."
-    assert not model_object.has_run, "Model has been incorrectly flagged as being ran."
-    assert np.sum(model_object.cxyt) == 0, "Model output has not been reset after parameter change."
-
+def test_model_results_independance(test_mibitrans_model_instantreaction):
+    """Test to make sure that changing model parameters does not change result parameters."""
+    model, results = test_mibitrans_model_instantreaction
+    assert model.hydrological_parameters.velocity == results.hydrological_parameters.velocity
+    model.hydrological_parameters.velocity += 1
+    assert model.hydrological_parameters.velocity != results.hydrological_parameters.velocity
 
 def test_plotting_methods(test_anatrans_model_nodecay):
     """Test if plotting methods defined in parent model are working."""
-    test_anatrans_model_nodecay.centerline()
+    model, results = test_anatrans_model_nodecay
+
+    results.centerline()
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for centerline."
     plt.clf()
 
-    test_anatrans_model_nodecay.transverse(x_position=1)
+    results.transverse(x_position=1)
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for transverse."
     plt.clf()
 
-    test_anatrans_model_nodecay.breakthrough(x_position=1)
+    results.breakthrough(x_position=1)
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for breakthrough."
     plt.clf()
 
-    test_anatrans_model_nodecay.plume_2d()
+    results.plume_2d()
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for plume_2d."
     plt.clf()
 
-    test_anatrans_model_nodecay.plume_3d()
+    results.plume_3d()
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes), "No or incorrect plot was created for plume_3d."
     plt.clf()

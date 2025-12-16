@@ -122,7 +122,7 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
 
         # plot_surface creates a static surface; need to create new plot every time step
         def update(frame):
-            # nonlocal needed in order for the previous plot to be removed before new on is plotted
+            # nonlocal needed in order for the previous plot to be removed before new one is plotted
             nonlocal surface
             surface.remove()
             surface = ax.plot_surface(

@@ -643,6 +643,10 @@ class Results:
                 degradation, in [g]. Has no value if model does not consider degradation.
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
+            instant_reaction_degraded_mass(self): Difference in plume mass instant reaction with and without
+                biodegradation capacity subtracted, in [g].
+            electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
+                Only for instant reaction.
         """
         return MassBalance(self, time, verbose)
 

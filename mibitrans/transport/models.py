@@ -77,6 +77,16 @@ class Mibitrans(Transport3D):
         Raises:
             TypeError : If input is not of the correct Dataclass.
 
+        Example::
+
+            obj = Mibitrans(
+                hydrological_parameters=HydrologicalParameters(),
+                attenuation_parameters=AttenuationParameters(),
+                source_parameters=SourceParameters(),
+                model_parameters=ModelParameters()
+            )
+            results = obj.run()
+
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
 
@@ -392,9 +402,6 @@ class Anatrans(Transport3D):
             cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True
         return cxyt
-
-
-# bioscreen ; Domenico - additional term
 
 
 class Bioscreen(Anatrans):

@@ -4,7 +4,6 @@ from matplotlib import animation
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.visualize.plot_line import _plot_title_generator
-from mibitrans.visualize.plot_line import _run_model_if_model_has_not_ran
 from mibitrans.visualize.plot_line import allowed_model_types
 
 relative_conc_zlabel = r"Relative concentration ($C/C_0$)"
@@ -28,7 +27,6 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, **kw
     """
     check_model_type(model, allowed_model_types())
     t_pos = check_time_in_domain(model, time)
-    _run_model_if_model_has_not_ran(model)
     if relative_concentration:
         model_concentration = model.relative_cxyt
         z_label = relative_conc_zlabel
@@ -82,7 +80,6 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
     """
     check_model_type(model, allowed_model_types())
     t_pos = check_time_in_domain(model, time)
-    _run_model_if_model_has_not_ran(model)
     if relative_concentration:
         model_concentration = model.relative_cxyt
         z_label = relative_conc_zlabel
@@ -111,8 +108,8 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
         model_max = np.max(model_concentration)
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         surface = ax.plot_surface(
-            model.xxx[0, :, :],
-            model.yyy[0, :, :],
+            xxx[0, :, :],
+            yyy[0, :, :],
             model_concentration[0, :, :],
             vmin=0,
             vmax=model_max,
@@ -125,7 +122,7 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
 
         # plot_surface creates a static surface; need to create new plot every time step
         def update(frame):
-            # nonlocal needed in order for the previous plot to be removed before new on is plotted
+            # nonlocal needed in order for the previous plot to be removed before new one is plotted
             nonlocal surface
             surface.remove()
             surface = ax.plot_surface(

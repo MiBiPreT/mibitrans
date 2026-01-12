@@ -6,6 +6,7 @@ from scipy.special import erf
 from scipy.special import erfc
 from scipy.special import erfcx
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.transport.model_parent import Results
 from mibitrans.transport.model_parent import Transport3D
 
 
@@ -67,16 +68,11 @@ class Mibitrans(Transport3D):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
                 attribute.
-            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
-            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
-            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
-            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
-            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -97,7 +93,7 @@ class Mibitrans(Transport3D):
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
             self.cxyt = self._calculate_concentration_for_all_xyt()
-        self.has_run = True
+        return Results(self)
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -116,8 +112,7 @@ class Mibitrans(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
 
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
+        self._pre_run_initialization_parameters()
 
         def integrand(t, sz):
             div_term = 2 * np.sqrt(self.disp_y * t**4)
@@ -294,7 +289,7 @@ class Anatrans(Transport3D):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
@@ -323,6 +318,7 @@ class Anatrans(Transport3D):
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
             self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        return Results(self)
 
     def sample(self, x_position, y_position, time):
         """Give concentration at any given position and point in time.
@@ -339,8 +335,8 @@ class Anatrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
-        if not self.has_run and not self.initialized:
-            self._pre_run_initialization_parameters()
+
+        self._pre_run_initialization_parameters()
 
         if self.mode == "instant_reaction":
             save_c_noBC = self.cxyt_noBC.copy()
@@ -458,16 +454,11 @@ class Bioscreen(Anatrans):
             concentrations, in [g/m^3].
 
         Methods:
-            run : Run model with current parameters, output is written to the cxyt array.
+            run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
             instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
                 optionally electron acceptor utilization factors. Switch between model modes by using the mode
                 attribute.
-            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
-            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
-            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
-            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
-            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.

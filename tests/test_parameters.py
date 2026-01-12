@@ -185,6 +185,8 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5), None),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), None),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="inf"), None),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="infint"), None),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=np.inf), None),
         (dict(source_zone_boundary=1, source_zone_concentration=[3], depth=5, total_mass=2), None),
         (
             dict(source_zone_boundary=np.array([1, 2, 3]), source_zone_concentration=[3, 2, 1], depth=5, total_mass=2),
@@ -228,6 +230,8 @@ def test_sourceparameters_validation(parameters, error) -> None:
         ("source_zone_boundary", [1, 2, 3], None),
         ("source_zone_concentration", [3, 2, 1], None),
         ("total_mass", 1000, None),
+        ("total_mass", "infini", None),
+        ("total_mass", np.inf, None),
         ("source_zone_concentration", [1, 2, 3], ValueError),
         ("source_zone_concentration", 1, ValueError),
         ("source_zone_concentration", "No", TypeError),
@@ -266,7 +270,7 @@ def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
         (
             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass="inf"),
             "total_mass",
-            "infinite",
+            np.inf,
         ),
     ],
 )
@@ -349,6 +353,7 @@ def test_modelparameters_output(test, param, expected) -> None:
     """Test output of ModelParameters dataclass."""
     model = ModelParameters(**test)
     assert model.__dict__[param] == expected
+
 
 def test_calculation_optional_discretization():
     """Test if model discretization is calculated if not given."""

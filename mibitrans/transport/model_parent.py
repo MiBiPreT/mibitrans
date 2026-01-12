@@ -3,7 +3,10 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
+import mibitrans
 import mibitrans.data.parameters
+from mibitrans.analysis.mass_balance import MassBalance
+from mibitrans.analysis.parameter_calculations import calculate_discharge_and_average_source_zone_concentration
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameter_information import util_to_conc_name
@@ -42,11 +45,6 @@ class Transport3D(ABC):
         self._decay_rate = self._att_pars.decay_rate
 
         self.verbose = verbose
-
-        self._observe_input_dataclass_change()
-
-        self.has_run = False
-        self.initialized = False
         self._mode = "linear"
         self._electron_acceptors = None
         self._utilization_factor = None
@@ -55,14 +53,25 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     @property
+    def input_parameters(self):
+        """Return the input arguments for the model in the form of a dictionary, based on current values."""
+        return dict(
+            hydrological_parameters=self.hydrological_parameters,
+            attenuation_parameters=self.attenuation_parameters,
+            source_parameters=self.source_parameters,
+            model_parameters=self.model_parameters,
+            verbose=self.verbose,
+        )
+
+    @property
     def hydrological_parameters(self):
         """Rename to shorthand form of hydrological_parameters inside class for ease of use."""
         return self._hyd_pars
 
     @hydrological_parameters.setter
     def hydrological_parameters(self, value):
+        self._check_input_dataclasses("hydrological_parameters", value)
         self._hyd_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("hydrological_parameters", value)
 
     @property
     def attenuation_parameters(self):
@@ -71,8 +80,8 @@ class Transport3D(ABC):
 
     @attenuation_parameters.setter
     def attenuation_parameters(self, value):
+        self._check_input_dataclasses("attenuation_parameters", value)
         self._att_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("attenuation_parameters", value)
 
     @property
     def source_parameters(self):
@@ -81,8 +90,8 @@ class Transport3D(ABC):
 
     @source_parameters.setter
     def source_parameters(self, value):
+        self._check_input_dataclasses("source_parameters", value)
         self._src_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("source_parameters", value)
 
     @property
     def model_parameters(self):
@@ -91,8 +100,8 @@ class Transport3D(ABC):
 
     @model_parameters.setter
     def model_parameters(self, value):
+        self._check_input_dataclasses("model_parameters", value)
         self._mod_pars = copy.copy(value)
-        self._check_and_reset_when_input_dataclass_change("model_parameters", value)
 
     @property
     def mode(self):
@@ -104,7 +113,6 @@ class Transport3D(ABC):
         match value:
             case "linear" | "linear decay" | "linear_decay" | 0:
                 self._mode = "linear"
-                self.initialized = False
             case "instant" | "instant_reaction" | "instant reaction" | 1:
                 if self._electron_acceptors is None or self._utilization_factor is None:
                     raise ValueError(
@@ -113,11 +121,9 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
-                self.initialized = False
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
-                self.initialized = False
 
     @property
     def electron_acceptors(self):
@@ -157,35 +163,6 @@ class Transport3D(ABC):
         """Method that calculates and return concentration array for all model x, y and t."""
         pass
 
-    def _observe_input_dataclass_change(self):
-        """Keeps track of input dataclass changes, and ensures re-initialization for following model runs."""
-        self.hydrological_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "hydrological_parameters", self._hyd_pars
-        )
-        self.attenuation_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "attenuation_parameters", self._att_pars
-        )
-        self.source_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "source_parameters", self._src_pars
-        )
-        self.model_parameters._on_change = lambda: self._check_and_reset_when_input_dataclass_change(
-            "model_parameters", self._mod_pars
-        )
-
-    def _check_and_reset_when_input_dataclass_change(self, key, value):
-        """Remove output and unflag initialization when input dataclass changes are observed."""
-        self._check_input_dataclasses(key, value)
-        if self.verbose:
-            print(key, " got changed")
-        self.initialized = False
-        if self.has_run:
-            self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
-            if self.cxyt_noBC is not None:
-                self.cxyt_noBC = 0
-            self.has_run = False
-            if self.verbose:
-                print(f"Parameter '{key}' has changed — resetting output")
-
     def _pre_run_initialization_parameters(self):
         """Parameter initialization for model."""
         # One-dimensional model domain arrays
@@ -198,12 +175,6 @@ class Transport3D(ABC):
         self.yyy = self.y[None, :, None]
         self.ttt = self.t[:, None, None]
 
-        self.rv = self._hyd_pars.velocity / self._att_pars.retardation
-
-        # cxyt is concentration output array
-        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
-
-        # Calculate retardation if not already specified in adsorption_parameters
         if (
             self._att_pars.bulk_density is not None
             and self._att_pars.partition_coefficient is not None
@@ -211,6 +182,12 @@ class Transport3D(ABC):
         ):
             self._att_pars.calculate_retardation(self._hyd_pars.porosity)
 
+        self.rv = self._hyd_pars.velocity / self._att_pars.retardation
+
+        # cxyt is concentration output array
+        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
+
+        # Calculate retardation if not already specified in adsorption_parameters
         self.k_source = self._calculate_source_decay()
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
@@ -222,37 +199,16 @@ class Transport3D(ABC):
         else:
             self._decay_rate = self._att_pars.decay_rate
 
-        self.initialized = True
-
     def _calculate_source_decay(self):
         """Calculate source decay/depletion."""
-        if isinstance(self._src_pars.total_mass, (float, int)):
-            Q, c0_avg = self._calculate_discharge_and_average_source_zone_concentration()
+        if self._src_pars.total_mass != np.inf:
+            Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self)
             k_source = Q * c0_avg / self._src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
         else:
             k_source = 0
 
         return k_source
-
-    def _calculate_discharge_and_average_source_zone_concentration(self):
-        """Calculate the average source zone concentration, and discharge through source zone."""
-        if self._mode == "instant_reaction":
-            bc = self.biodegradation_capacity
-        else:
-            bc = 0
-        y_src = np.zeros(len(self._src_pars.source_zone_boundary) + 1)
-        y_src[1:] = self._src_pars.source_zone_boundary
-        c_src = self._src_pars.source_zone_concentration
-        Q = self._hyd_pars.velocity * self._hyd_pars.porosity * self._src_pars.depth * np.max(y_src) * 2
-
-        weighted_conc = np.zeros(len(self._src_pars.source_zone_boundary))
-        for i in range(len(self._src_pars.source_zone_boundary)):
-            weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
-
-        c0_avg = bc + np.sum(weighted_conc) / np.max(y_src)
-
-        return Q, c0_avg
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -324,10 +280,7 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     def _check_model_mode_before_run(self):
-        # Reset concentration array to make sure it is empty before calculation.
-        self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
-        if not self.initialized:
-            self._pre_run_initialization_parameters()
+        self._pre_run_initialization_parameters()
         if self._mode == "linear":
             if self.biodegradation_capacity is not None:
                 warnings.warn(
@@ -340,6 +293,191 @@ class Transport3D(ABC):
                     "Instant reaction parameters are not present. "
                     "Please provide them with the 'instant_reaction' class method."
                 )
+
+
+class Results:
+    """Object that holds model results and input parameters for individual runs."""
+
+    def __init__(self, model):
+        """Records input parameters and resulting output based given model.
+
+        Args:
+            model (Transport3D): Model object from which to initialize results. Should be child class of Transport3D.
+
+        Properties:
+            model_type (Transport3D) : Class instance of model used to generate results.
+            short_description (str) : Short description of model.
+            x (np.ndarray) : Numpy array with model x (longitudinal direction) discretization, corresponding to
+                model_parameters, with distance in [m].
+            y (np.ndarray) : Numpy array with model y (transverse horizontal direction) discretization, corresponding to
+                model_parameters, with distance in [m].
+            t (np.ndarray) : Numpy array with model t (time) discretization, corresponding to
+                model_parameters, with time in [days].
+            hydrological_parameters (HydrologicalParameters) : Dataclass holding the hydrological parameters used to
+                run the model.
+            attenuation_parameters (AttenuationParameters) : Dataclass holding the attenuation parameters used to run
+                the model.
+            source_parameters (SourceParameters) : Dataclass holding the source parameters used to run the model.
+            model_parameters (ModelParameters): Dataclass holding the model parameters used to run the model.
+            electron_acceptors (ElectronAcceptors): Dataclass holding the electron acceptor concentrations used to run
+                the model. Only for instant reaction, None for other models.
+            utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
+                run the model. Only for instant reaction, None for other models.
+            mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
+            rv (float) : Retarded flow velocity, as v / R [m/day].
+            k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
+                source depletion takes place.
+            c_source (np.ndarray) : Initial nett source zone concentrations. For multiple source zones, nett
+                concentration in nth source zone is original concentration minus concentration in source zone n - 1. For
+                instant reaction model, the biodegradation capacity is added to the outermost source zone.
+            biodegradation_capacity (float) : Maximum capacity of biodegradation taking place, based on electron
+                acceptor concentrations and utilization factor.
+            cxyt (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t positions. Indexed
+             as cxyt[t,y,x]. In [g/m3].
+            relative_cxyt (np.ndarray) : Three-dimensional numpy array with relative concentrations for all x, y and t
+                positions. Compared to maximum source zone concentrations.
+            cxyt_noBC (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t of instant
+                reaction models, without subtracting the biodegradation capacity, in [g/m3].
+            input_parameters (dict) : Dictionary of input parameter dataclasses for the model. Does not include instant
+                reaction parameters.
+
+        Methods:
+            centerline : Plot center of contaminant plume, at a specified time and y position.
+            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
+            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
+            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
+            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
+            mass_balance : Return a mass balance object with source and plume characteristics at given time(s).
+        """
+        self._model_type = model.__class__
+        self._short_description = model.short_description
+        self._x = model.x
+        self._y = model.y
+        self._t = model.t
+
+        # All properties of Transport3D that are objects should be copied; if not copied, changing them in the class
+        # object where they originated will also change them here, which is not the intended behaviour.
+        self._hydrological_parameters = copy.copy(model.hydrological_parameters)
+        self._attenuation_parameters = copy.copy(model.attenuation_parameters)
+        self._source_parameters = copy.copy(model.source_parameters)
+        self._model_parameters = copy.copy(model.model_parameters)
+        self._electron_acceptors = copy.copy(model._electron_acceptors)
+        self._utilization_factor = copy.copy(model._utilization_factor)
+
+        self._mode = model.mode
+        self._rv = model.rv
+        self._k_source = model.k_source
+        self._c_source = model.c_source
+        self._biodegradation_capacity = model.biodegradation_capacity
+
+        self._cxyt = model.cxyt
+        self._relative_cxyt = model.relative_cxyt
+        self._cxyt_noBC = model.cxyt_noBC
+
+    @property
+    def model_type(self):
+        """Class object of the model that generated the results."""
+        return self._model_type
+
+    @property
+    def short_description(self):
+        """Short description of the model that generated the results."""
+        return self._short_description
+
+    @property
+    def x(self):
+        """Model x discretization array."""
+        return self._x
+
+    @property
+    def y(self):
+        """Model y discretization array."""
+        return self._y
+
+    @property
+    def t(self):
+        """Model t discretization array."""
+        return self._t
+
+    @property
+    def hydrological_parameters(self):
+        """Hydrological parameters of the model used for the results."""
+        return self._hydrological_parameters
+
+    @property
+    def attenuation_parameters(self):
+        """Attenuation parameters of the model used for the results."""
+        return self._attenuation_parameters
+
+    @property
+    def source_parameters(self):
+        """Source parameters of the model used for the results."""
+        return self._source_parameters
+
+    @property
+    def model_parameters(self):
+        """Space-time discretization parameters of the model used for the results."""
+        return self._model_parameters
+
+    @property
+    def electron_acceptors(self):
+        """Electron acceptor/byproduct concentrations of the model used for the results."""
+        return self._electron_acceptors
+
+    @property
+    def utilization_factor(self):
+        """Utilization factor of the model used for the results."""
+        return self._utilization_factor
+
+    @property
+    def mode(self):
+        """Model mode used for running the model."""
+        return self._mode
+
+    @property
+    def rv(self):
+        """Retarded flow velocity used in the model."""
+        return self._rv
+
+    @property
+    def k_source(self):
+        """Source depletion rate used in the model."""
+        return self._k_source
+
+    @property
+    def c_source(self):
+        """Nett source zone concentration used in the model."""
+        return self._c_source
+
+    @property
+    def biodegradation_capacity(self):
+        """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
+        return self._biodegradation_capacity
+
+    @property
+    def cxyt(self):
+        """Modelled concentration for all x, y and t, using the input parameters present in this object."""
+        return self._cxyt
+
+    @property
+    def relative_cxyt(self):
+        """Modelled concentration for all x, y and t, divided by the maximum source zone concentration."""
+        return self._relative_cxyt
+
+    @property
+    def cxyt_noBC(self):
+        """Concentration in domain without subtracting biodegradation capacity, in the instant reaction model."""
+        return self._cxyt_noBC
+
+    @property
+    def input_parameters(self):
+        """Return the input arguments for the model in the form of a dictionary, based on current values."""
+        return dict(
+            hydrological_parameters=self.hydrological_parameters,
+            attenuation_parameters=self.attenuation_parameters,
+            source_parameters=self.source_parameters,
+            model_parameters=self.model_parameters,
+        )
 
     def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
@@ -483,6 +621,34 @@ class Transport3D(ABC):
             self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs
         )
         return ax_or_anim
+
+    def mass_balance(self, time="all", verbose=False):
+        """Return a mass balance object with source and plume characteristics at given time(s).
+
+        Args:
+            time (float | str): Time at which to initially calculate the mass balance. Either as a value between 0 and
+                model end time. Or as 'all', which will calculate mass balance attributes for each time step as arrays.
+            verbose (bool, optional): Verbose mode. Defaults to False.
+
+        Returns:
+            mass_balance_object: Object of the MassBalance class. Output is accessed through object properties. Can be
+                called to change the time of the mass balance.
+
+        The mass balance object has the following properties:
+            plume_mass: Mass of the contaminant plume inside the model extent, at the given time(s), in [g].
+            source_mass: Mass of the contaminant source at the given time(s), in [g]. No values are given for models
+                with infinite source mass.
+            delta_source: Difference in mass between contaminant source at given time and source at t = 0, in [g].
+            degraded_mass: Mass of plume contaminant degradation at the given time(s), compared to a model without
+                degradation, in [g]. Has no value if model does not consider degradation.
+            model_without_degradation: Object of model without degradation. Has no value if model does not consider
+                degradation.
+            instant_reaction_degraded_mass(self): Difference in plume mass instant reaction with and without
+                biodegradation capacity subtracted, in [g].
+            electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
+                Only for instant reaction.
+        """
+        return MassBalance(self, time, verbose)
 
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):

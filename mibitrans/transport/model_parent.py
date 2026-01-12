@@ -201,7 +201,7 @@ class Transport3D(ABC):
 
     def _calculate_source_decay(self):
         """Calculate source decay/depletion."""
-        if isinstance(self._src_pars.total_mass, (float, int)):
+        if self._src_pars.total_mass != np.inf:
             Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self)
             k_source = Q * c0_avg / self._src_pars.total_mass
         # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.

@@ -341,7 +341,7 @@ testing_massbalance_instant_mbt = {
 testing_massbalance_instant_mbt_inf = {
     "t": np.array([365, 730, 1095]),
     "_plume_mass_t": np.array([5539.00845817, 9248.17128318, 12374.47283209]),
-    "_source_mass_t": "infinite",
+    "_source_mass_t": np.inf,
     "_delta_source_t": np.array([5023.71566351, 10047.43132702, 15071.14699053]),
     "_degraded_mass_t": np.array([1404.7379325, 1850.99155079, 1579.25170252]),
     "_electron_acceptor_change_t": {
@@ -360,7 +360,7 @@ testing_massbalance_instant_mbt_inf = {
 testing_massbalance_instant_ana_inf = {
     "t": np.array([365, 730, 1095]),
     "_plume_mass_t": np.array([5248.12131322, 8706.47934067, 11728.94763204]),
-    "_source_mass_t": "infinite",
+    "_source_mass_t": np.inf,
     "_delta_source_t": np.array([5023.71566351, 10047.43132702, 15071.14699053]),
     "_degraded_mass_t": np.array([1464.30682696, 1957.90718873, 1705.30840063]),
     "_electron_acceptor_change_t": {
@@ -418,12 +418,12 @@ testing_massbalance_instant_dom = {
 
 testing_massbalance_instant_dom_inf = {
     "time": np.int64(1095),
-    "source_mass_0": "infinite",
-    "source_mass_t": "infinite",
+    "source_mass_0": np.inf,
+    "source_mass_t": np.inf,
     "source_mass_change": np.float64(12750.0),
     "plume_mass_no_decay": np.float64(10943.20737211077),
     "transport_outside_extent_nodecay": np.float64(1806.79262788923),
-    "source_mass_instant_t": "infinite",
+    "source_mass_instant_t": np.inf,
     "source_mass_instant_change": np.float64(15071.146990534271),
     "plume_mass_no_decay_instant_reaction": np.float64(12810.491497436684),
     "plume_mass_instant_reaction": np.float64(8839.650498885221),
@@ -473,12 +473,12 @@ testing_massbalance_instant_kar = {
 
 testing_massbalance_instant_kar_inf = {
     "time": np.int64(1095),
-    "source_mass_0": "infinite",
-    "source_mass_t": "infinite",
+    "source_mass_0": np.inf,
+    "source_mass_t": np.inf,
     "source_mass_change": np.float64(12750.0),
     "plume_mass_no_decay": np.float64(13953.724534605748),
     "transport_outside_extent": 0,
-    "source_mass_instant_t": "infinite",
+    "source_mass_instant_t": np.inf,
     "source_mass_instant_change": np.float64(15071.146990534271),
     "plume_mass_no_decay_instant_reaction": np.float64(16361.711921001373),
     "plume_mass_instant_reaction": np.float64(12374.472832085463),

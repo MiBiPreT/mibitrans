@@ -55,15 +55,13 @@ class MassBalance:
         self._instant_reaction_degraded_mass_t = None
         self._model_without_degradation = None
 
-        # Relative concentration considered to be boundary of the plume extent.
-        self.extent_threshold_value = 0.01
         # Volume of single cell, as dx * dy * source thickness
         self.cellsize = (
             abs(results.x[0] - results.x[1]) * abs(results.y[0] - results.y[1]) * results.source_parameters.depth
         )
 
-        # Mass balance output differs if the source as infinite mass
-        if self.results.source_parameters.total_mass == "infinite":
+        # Mass balance output differs if the source is represented as an infinite mass.
+        if self.results.source_parameters.total_mass == np.inf:
             self.source_mass_finite = False
         else:
             self.source_mass_finite = True
@@ -170,6 +168,8 @@ class MassBalance:
 
     def _check_model_extent(self):
         """Check if contaminant plume at given time is reasonably situated within the model extent."""
+        # Relative concentration considered to be boundary of the plume extent.
+        extent_threshold_value = 0.01
         if isinstance(self.t, np.ndarray):
             cxyt_y_boundary = self.results.relative_cxyt[:, [0, -1], :]
             cxyt_x_boundary = self.results.relative_cxyt[:, :, -1]
@@ -177,8 +177,8 @@ class MassBalance:
             cxyt_y_boundary = self.results.relative_cxyt[self._t_index, [0, -1], :]
             cxyt_x_boundary = self.results.relative_cxyt[self._t_index, :, -1]
 
-        y_boundary_above_threshold = np.where(cxyt_y_boundary > self.extent_threshold_value, cxyt_y_boundary, 0.0)
-        x_boundary_above_threshold = np.where(cxyt_x_boundary > self.extent_threshold_value, cxyt_x_boundary, 0.0)
+        y_boundary_above_threshold = np.where(cxyt_y_boundary > extent_threshold_value, cxyt_y_boundary, 0.0)
+        x_boundary_above_threshold = np.where(cxyt_x_boundary > extent_threshold_value, cxyt_x_boundary, 0.0)
         if np.sum(y_boundary_above_threshold) > 0:
             y_max = np.round(
                 np.max(y_boundary_above_threshold) * np.max(self.results.source_parameters.source_zone_concentration), 2
@@ -202,64 +202,66 @@ class MassBalance:
         """Calculate plume mass of input model, for the given time(s)."""
         # Plume mass of model; concentration is converted to mass by multiplying by cellsize and pore space.
         if isinstance(self.t, np.ndarray):
-            _plume_mass_t = np.sum(
+            plume_mass_t = np.sum(
                 model.cxyt[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity, axis=(1, 2)
             )
         else:
-            _plume_mass_t = np.sum(
+            plume_mass_t = np.sum(
                 model.cxyt[self._t_index, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity
             )
 
-        return _plume_mass_t
+        return plume_mass_t
 
     def _calculate_source_mass(self):
         """Calculate source mass of input model, for the given time(s)."""
         if self.source_mass_finite:
-            _source_mass_t = self.results.source_parameters.total_mass * np.exp(-self.results.k_source * self.t)
+            source_mass_t = self.results.source_parameters.total_mass * np.exp(-self.results.k_source * self.t)
         else:
-            _source_mass_t = "infinite"
+            source_mass_t = np.inf
 
-        return _source_mass_t
+        return source_mass_t
 
     def _calculate_delta_source(self):
         """Calculate difference in source mass between t=0 and given time(s)."""
         if self.source_mass_finite:
-            _delta_source_t = self.results.source_parameters.total_mass - self._source_mass_t
+            delta_source_t = self.results.source_parameters.total_mass - self._source_mass_t
         else:
             Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self.results)
-            _delta_source_t = Q * c0_avg * self.t
-        return _delta_source_t
+            delta_source_t = Q * c0_avg * self.t
+        return delta_source_t
 
     def _calculate_model_without_degradation(self):
         """Make a no degradation model for comparison, pass the input parameters to a new class instance as kwargs."""
-        _model_without_degradation = self.results.model_type(**self.results.input_parameters)
-        _model_without_degradation.attenuation_parameters.decay_rate = 0
-        _model_without_degradation.run()
-        return _model_without_degradation
+        model_without_degradation = self.results.model_type(**self.results.input_parameters)
+        model_without_degradation.attenuation_parameters.decay_rate = 0
+        model_without_degradation.run()
+        return model_without_degradation
 
     def _calculate_degraded_mass(self):
         """Calculate difference between input model plume mass and no degradation model, for a given time(s)."""
         no_degradation_plume_mass = self._calculate_plume_mass(self._model_without_degradation)
-        _degraded_mass_t = no_degradation_plume_mass - self._plume_mass_t
-        return _degraded_mass_t
+        degraded_mass_t = no_degradation_plume_mass - self._plume_mass_t
+        return degraded_mass_t
 
     def _calculate_instant_reaction_degraded_mass(self):
+        """Calculate difference between input model plume mass and no degradation model for instant reaction model."""
         if isinstance(self.t, np.ndarray):
-            _plume_mass_t_noBC = np.sum(
+            plume_mass_t_noBC = np.sum(
                 self.results.cxyt_noBC[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity,
                 axis=(1, 2),
             )
         else:
-            _plume_mass_t_noBC = np.sum(
+            plume_mass_t_noBC = np.sum(
                 self.results.cxyt_noBC[self._t_index, :, 1:]
                 * self.cellsize
                 * self.results.hydrological_parameters.porosity
             )
 
-        degraded_mass_instant_t = _plume_mass_t_noBC - self._plume_mass_t
+        degraded_mass_instant_t = plume_mass_t_noBC - self._plume_mass_t
         return degraded_mass_instant_t
 
     def _calculate_electron_acceptor_change(self):
+        """Calculate the change in electron acceptor mass for given time(s) for instant reaction model."""
         mass_fraction_degraded_acceptor = self.results.electron_acceptors.array / self.results.biodegradation_capacity
         electron_acceptor_change = {}
         electron_acceptors = ["oxygen", "nitrate", "ferrous_iron", "sulfate", "methane"]

@@ -128,17 +128,16 @@ def validate_source_zones(boundary, concentration):
 
 def _check_total_mass(parameter: str, value):
     """Check variable properties of total source mass specifically."""
-    if _check_numeric(parameter, value) is None:
+    if isinstance(value, str):
+        if "inf" not in value:
+            return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'np.inf'.")
+        else:
+            return None
+    elif _check_numeric(parameter, value) is None:
         if value >= 0:
             return None
         else:
             return DomainValueError(f"{parameter} must be >= 0, or set to 'infinite'.")
-    elif isinstance(value, str):
-        if value not in ["infinite", "inf", "INF", "Infinite", "Inf"]:
-            return ValueError(f"{value} is not understood. For infinite source mass, use 'infinite' or 'inf'.")
-        else:
-            return None
-
     else:
         return TypeError(f"{parameter} must be a float or 'infinite', but is {type(value)} instead.")
 

@@ -24,6 +24,7 @@ def animate_1d(
     n_frames = len(time_parameter)
 
     def update(frame):
+        """Update plot with values for the next time step in the animation."""
         for i, y in enumerate(y_axis_parameter):
             plot_bin[i].set_xdata(x_axis_parameter)
             plot_bin[i].set_ydata(y[frame, :])

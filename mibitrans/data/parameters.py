@@ -215,6 +215,8 @@ class SourceParameters:
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
+        if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
+            value = np.inf
         super().__setattr__(parameter, value)
         # When setting source zone boundary or concentration, and both present, check validity in respect to each other.
         if parameter in ["source_zone_boundary", "source_zone_concentration"] and (

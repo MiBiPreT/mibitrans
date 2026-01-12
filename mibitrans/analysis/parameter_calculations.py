@@ -26,7 +26,7 @@ def calculate_utilization(model):
 
 
 def calculate_discharge_and_average_source_zone_concentration(model):
-    """Calculate the average source zone concentration, and discharge through source zone."""
+    """Calculate discharge through source zone and average source zone concentration, returned in respective order."""
     if model.mode == "instant_reaction":
         bc = model.biodegradation_capacity
     else:

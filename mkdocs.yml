@@ -1,16 +1,16 @@
 site_name: mibitrans
 site_description: A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
-site_author: Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen 
+site_author: Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen
 site_url: https://MiBiPreT.github.io/mibitrans
-repo_name: MiBiPreT/mibitrans 
-repo_url: https://github.com/MiBiPreT/mibitrans/ 
+repo_name: MiBiPreT/mibitrans
+repo_url: https://github.com/MiBiPreT/mibitrans/
 edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2024 Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen
 
 nav:
   - Home: index.md
   - Introduction: introduction/introduction.md
-  - Background: 
+  - Background:
      - Bioscreen: background/bioscreen.md
   - Development: development/development.md
   - API Reference:
@@ -82,6 +82,8 @@ markdown_extensions:
       alternate_style: true
   - attr_list
   - smarty
+  - pymdownx.arithmatex:
+      generic: true
 
 
 extra_css:
@@ -90,6 +92,8 @@ extra_css:
 extra_javascript:
   - assets/fontawesome.min.js
   - assets/solid.min.js
+  - assets/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 extra:
   social:

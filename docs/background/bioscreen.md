@@ -25,7 +25,7 @@ $$
 
 Here $C(x,y,z,t)$ is the contaminant concentration in space $(x,y,z)$ and time $t$, $R$ is the linear equilibrium retardation factor, $v$ is the uniform groundwater velocity in $x$-direction, $D_{x}$, $D_{y}$ and $D_{y}$ are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. $r_{sinks}$ represents the sink term as result to decay/degradation. $r_{sinks} = 0$ represents no decay/degradation. For linear decay, $r_{sinks} = -\lambda C$. In the equation $\frac{\partial C}{\partial t}$ represents the change of the concentration over time. $-v\frac{\partial C}{\partial x}$ is the change of concentration in the direction of the groundwater gradient due to advection. $D_{x}\frac{\partial ^2 C}{\partial x^2} + D_{y}\frac{\partial ^2 C}{\partial y^2}+ + D_{z}\frac{\partial^2 C}{\partial z^2}$ represent the change in concentration to dispersion. 
 
-A specific solution of the ADE $\eqref{eq:01_ADE3D}$, depends on the specific form of the sink-term $r_{sinks}$ as well as initial and boundary conditions.
+A specific solution of the ADE $\ref{eq:01_ADE3D}$, depends on the specific form of the sink-term $r_{sinks}$ as well as initial and boundary conditions.
 Transport in *BIOSCREEN* is modelled based on the analytical model of *Domenico*, [1987]. 
 
 ### Domenico Model
@@ -44,9 +44,9 @@ The equation describing the solute distribution in time and space of the *Domeni
 $$
 \begin{align}
     C(x, y, z, t) &= \frac{C_{0}}{8} \exp \left[ \frac{x\left(1-\sqrt{1+4\lambda \alpha_x/v}\right)}{2\alpha_x}\right] \\
-    &\operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
+    &\quad \cdot \operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
     &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} \\
-    &\Biggl. \left\{ \operatorname{erf} \left[ \frac{z +Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{z-Z/2}{2\sqrt{\alpha_z x}} \right] \right\} \nonumber
+    &\quad \cdot \Biggl. \left\{ \operatorname{erf} \left[ \frac{z +Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{z-Z/2}{2\sqrt{\alpha_z x}} \right] \right\} \nonumber
 \end{align}
 $$
 
@@ -64,22 +64,29 @@ Bioscreen makes use of the *Domenico*-model in various adaptions (*Newell et al.
 Bioscreen does not directly use the Domenico model, but an extension regarding source handling and retardation. For the cases of linear decay of the contaminant ($\lambda \neq 0$) and the case of no decay ($\lambda = 0$), they include a source decay term accounting for reduction/depletion of the input concentration from the source in the form of $C_0(x,t) = C_0 \exp{\left( -k_s \left( t-\frac{x}{v}\right)\right)}$.
 
 The analytical expression used by BIOSCREEN for no-decay ($\lambda = 0$) and linear decay ($\lambda \neq 0$) reads (*Newell et al., 1997*):
+
+$$
 \begin{align}
-    C(x, y, z, t) & = \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)\right)}\cdot  \exp \left[ \frac{x\left(1-\sqrt{1+4\lambda \alpha_x/v}\right)}{2\alpha_x}\right]
-    \operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
-    &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} %\\
-    \Biggl. \left\{ \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x}} \right] \right\} \nonumber
+    C(x, y, z, t) & = \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)\right)} \\ 
+    &\quad \cdot  \exp \left[ \frac{x\left(1-\sqrt{1+4\lambda \alpha_x/v}\right)}{2\alpha_x}\right] 
+    \cdot \operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
+    &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} \\
+    &\quad \cdot \Biggl. \left\{ \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x}} \right] \right\} \nonumber
 \end{align}
-Note that here $z=0$ compared to Eq.\eqref{eq:02_domenico}, indicating that Bioscreen only evaluates the solution $z=0$ and does not provide a vertically resolved solution.
+$$
 
-Bioscreen also uses the Domenico model in Eq.\eqref{eq:02_domenico} as starting point for developing the model for the instantaneous reaction. 
+Note that here $z=0$ compared to Eq. $\eqref{eq:02_domenico}$, indicating that Bioscreen only evaluates the solution $z=0$ and does not provide a vertically resolved solution.
 
+Bioscreen also uses the Domenico model in Eq. $\eqref{eq:02_domenico}$ as starting point for developing the model for the instantaneous reaction. 
+
+$$
 \begin{align}\label{eq:05_bioscreen_inst}
-    C(x, y, z, t) & = \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)+BC\right)}\cdot  
-    \operatorname{erfc} \left[ \frac{x - vt}{2\sqrt{\alpha_x vt }} \right] \\
-    &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} %\\
-    \Biggl. \left\{ \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x}} \right] \right\} -BC \nonumber
+    C(x, y, z, t) &= \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)+BC\right)} \\
+    &\quad \cdot \operatorname{erfc} \left[ \frac{x - vt}{2\sqrt{\alpha_x vt }} \right] \\
+    &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} \\
+    &\quad \cdot \Biggl. \left\{ \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{Z/2}{2\sqrt{\alpha_z x}} \right] \right\} -BC \nonumber
 \end{align}
+$$
 
 #### BIOSCREEN Implementation of Instant reaction model
 
@@ -96,19 +103,26 @@ This procedure is implemented as a superposition of the reaction to the Domenico
 conservatively and then corrected at any location and time within the flow field by subtracting 1 mg/L organic mass for each mg/L of BC provided by all of the available electron acceptors.
 
 Specifically, the equation for the instant reaction model in BIOSCREEN reads:
-\begin{equation}
+
+$$
+\begin{align}
     C(x, y, t) + BC &= \sum_{i=0}^{n} \Biggl\{ \left( C^*_{0,i} \exp \left[-k_s^{inst} \left(t - \frac{xR}{v} \right)\right] + BC \right) \bigr. \\
     &\quad \quad \quad \cdot \left\{ \frac{1}{8} \operatorname{erfc} \left[ \frac{x - \frac{vt}{R}}{2\sqrt{\alpha_x \frac{vt}{R}}} \right] \right\}  \\
     &\quad \quad \quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y^*_i}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y^*_i}{2\sqrt{\alpha_y x)}} \right] \right\} \\
     &\quad \quad \quad \cdot \Biggl. \left\{ \operatorname{erf} \left[ \frac{Z}{2\sqrt{\alpha_z x)}} \right] - \operatorname{erf} \left[ \frac{-Z}{2\sqrt{\alpha_z x}} \right] \right\} \Biggr\} 
-\end{equation}
+\end{align}
+$$
 
 #### Biodegradation Capacity BC
 
 The Biodegradation capacity is calculated via:
+
+$$
 \begin{equation}
    BC = \sum_{O,N,S} (\bar C_i^\mathrm{upgradient} - C_i^\mathrm{source})/UF_i + \sum_{Fe2+,CH_4^+}  \bar C_j^\mathrm{source}/UF_j 
 \end{equation}
+$$
+
 here $\bar C_i^\mathrm{upgradient}$ is the average upgradient concentrations and $C_i^\mathrm{source})$ is the minimum source concentration of $i=$  oxygen, nitrate, sulfate. $\bar C_j^\mathrm{source}$ is the average source concentration of $j=Fe2+,CH_4^+$. 
 $UF_i$ and $UF_j$ are the utilization factors for each EA that was developed based on the stoichimetric ratios of the reactions (see below).
 

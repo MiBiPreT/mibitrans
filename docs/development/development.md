@@ -1,1 +1,1 @@
-mibiscreen/docs/development mibiscreen/docs/development/development.md
+--8<-- "README.dev.md"

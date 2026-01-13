@@ -79,6 +79,30 @@ You can enable automatic linting with `ruff` on commit by enabling the git hook 
 git config --local core.hooksPath .githooks
 ```
 
+## Cleaning notebooks
+
+The linter tests now also check that the example notebooks are "clean". This means they do not contain the output and execution metadata that
+Jupyter adds when you execute them. Removing this reduces the size and noisiness of the diffs and consequently makes reviewing changes easier.
+
+To clean the notebooks locally before each commit, you can use the `nb-clean` tool, which is listed as one of the `[dev]` dependencies of the project. They are installable
+with:
+```
+python -m pip install .[dev]
+```
+
+You can then run:
+```
+nb-clean add-filter
+```
+This adds a git hook that will automatically clean any staged notebooks before they are committed. If you would rather run this manually, you can instead use:
+```
+nb-clean clean mynotebook.ipynb
+```
+replacing with the name of the notebook in question.
+
+
+
+
 ## Testing docs locally
 
 To build the documentation locally, first make sure `mkdocs` and its dependencies are installed:
@@ -98,9 +122,9 @@ This will return a URL (e.g. `http://127.0.0.1:8000/mibitrans/`) where the docs 
 Bumping the version across all files is done with [bump-my-version](https://github.com/callowayproject/bump-my-version), e.g.
 
 ```shell
-bump-my-version major  # bumps from e.g. 0.3.2 to 1.0.0
-bump-my-version minor  # bumps from e.g. 0.3.2 to 0.4.0
-bump-my-version patch  # bumps from e.g. 0.3.2 to 0.3.3
+bump-my-version bump major  # bumps from e.g. 0.3.2 to 1.0.0
+bump-my-version bump minor  # bumps from e.g. 0.3.2 to 0.4.0
+bump-my-version bump patch  # bumps from e.g. 0.3.2 to 0.3.3
 ```
 
 ## Making a release

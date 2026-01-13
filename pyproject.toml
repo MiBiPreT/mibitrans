@@ -16,17 +16,16 @@ authors = [
     { name = "Jorrit Yvo Bakker" }
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "contourpy",
@@ -59,8 +58,8 @@ keywords = [
 license = {file = "LICENSE"}
 name = "mibitrans"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
-version = "0.3.0"
+requires-python = ">=3.10"
+version = "0.4.0"
 
 [project.optional-dependencies]
 dev = [
@@ -71,6 +70,7 @@ dev = [
     "pytest-cov",
     "ruff",
     "tox",
+    "nb-clean ==4.0.1",
 ]
 
 publishing = [
@@ -115,7 +115,7 @@ exclude = ["tests*"]
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py38,py39,py310,py311,py312
+envlist = py310,py311,py312
 skip_missing_interpreters = true
 [testenv]
 commands = pytest
@@ -188,7 +188,7 @@ lint.per-file-ignores = {"mibitrans/__init__.py"=["F401","I001"]}
 # Allow unused variables when underscore-prefixed.
 lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-target-version = "py39"
+target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint.isort]
@@ -197,7 +197,7 @@ force-single-line = true
 no-lines-before = ["future","standard-library","third-party","first-party","local-folder"]
 
 [tool.bumpversion]
-current_version = "0.3.0"
+current_version = "0.4.0"
 
 [[tool.bumpversion.files]]
 filename = "mibitrans/__init__.py"

@@ -17,7 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'windows-latest']
-        python-version: ['3.12']
+        python-version: ['3.13']
+    env:
+      MPLBACKEND: Agg # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -45,10 +47,10 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.9
+      - name: Set up Python 3.13
         uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: 3.13
       - name: Python info
         shell: bash -e {0}
         run: |
@@ -60,3 +62,5 @@ jobs:
           python -m pip install .[dev,publishing]
       - name: Check style against standards using ruff
         run: ruff check .
+      - name: Check cleanliness of notebooks
+        run: nb-clean check examples/ 

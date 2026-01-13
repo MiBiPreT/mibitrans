@@ -3,41 +3,110 @@
 File testing functionality of mass_balance module.
 """
 
+import numpy as np
 import pytest
-import mibitrans.analysis.mass_balance as mb
-from mibitrans.data.parameter_information import testing_dictionary
-from tests.test_example_results import testing_massbalance_instant
-from tests.test_example_results import testing_massbalance_lindecay
-from tests.test_example_results import testing_massbalance_nodecay
+from mibitrans.data.parameters import ModelParameters
+from mibitrans.data.parameters import SourceParameters
+from mibitrans.transport.models import Anatrans
+from mibitrans.transport.models import Bioscreen
+from mibitrans.transport.models import Mibitrans
+from tests.test_example_data import testing_massbalance_instant_ana_inf
+from tests.test_example_data import testing_massbalance_instant_mbt
+from tests.test_example_data import testing_massbalance_instant_mbt_inf
+from tests.test_example_data import testing_massbalance_lineardecay_ana
+from tests.test_example_data import testing_massbalance_nodecay_bio
+
+
+@pytest.fixture(scope="module")
+def test_model_pars():
+    """ModelParameters fixture with increased spatial resolution, specifically for testing mass balance."""
+    return ModelParameters(model_length=50, model_width=30, model_time=3 * 365, dx=1, dy=1, dt=1 * 365)
+
+
+@pytest.fixture(scope="module")
+def test_source_pars_inf():
+    """SourceParameters fixture with example data for tests."""
+    return SourceParameters(
+        source_zone_boundary=np.array([5, 10, 15]),
+        source_zone_concentration=np.array([10, 5, 2]),
+        depth=10,
+        total_mass="inf",
+    )
+
+
+@pytest.fixture(scope="module")
+def test_bioscreen_nodecay_model_mb(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+    """Bioscreen with linear decay fixture mass balance object for testing."""
+    obj = Bioscreen(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
+    res = obj.run()
+    return res.mass_balance()
+
+
+@pytest.fixture(scope="module")
+def test_anatrans_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Anatrans with linear decay fixture mass balance object for testing."""
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    res = obj.run()
+    return res.mass_balance()
+
+
+@pytest.fixture(scope="module")
+def test_mibitrans_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans with instant reaction fixture mass balance object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    res = obj.run()
+    return res.mass_balance()
+
+
+@pytest.fixture(scope="module")
+def test_mibitrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
+    """Mibitrans with instant reaction and infinite source mass fixture mass balance  object for testing."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    res = obj.run()
+    return res.mass_balance()
+
+
+@pytest.fixture(scope="module")
+def test_anatrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
+    """Anatrans with instant reaction and infinite source mass fixture mass balance  object for testing."""
+    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    res = obj.run()
+    return res.mass_balance()
 
 
 @pytest.mark.parametrize(
-    "input, time, dt, expected",
+    "model, expected",
     [
-        (testing_dictionary, 2, 1, 2),
-        (testing_dictionary, None, None, 3),
-        (testing_dictionary, 6, 1, 3),
-        (testing_dictionary, 1.7, 1, 2),
-    ])
+        ("test_bioscreen_nodecay_model_mb", testing_massbalance_nodecay_bio),
+        ("test_anatrans_lineardecay_model_mb", testing_massbalance_lineardecay_ana),
+        ("test_mibitrans_instantreaction_model_mb", testing_massbalance_instant_mbt),
+        ("test_mibitrans_instantreaction_model_mb_inf", testing_massbalance_instant_mbt_inf),
+        ("test_anatrans_instantreaction_model_mb_inf", testing_massbalance_instant_ana_inf),
+    ],
+)
+@pytest.mark.filterwarnings("ignore:Decay rate was set")
+@pytest.mark.filterwarnings("ignore:Contaminant plume extents")
+def test_balance_numerical_mibitrans(model, expected, request) -> None:
+    """Test if mass balance is correctly calculated by comparing to precomputed results for Mibitrans model."""
+    mb_object = request.getfixturevalue(model)
+    dictionary = mb_object.__dict__
+    for key, output_item in expected.items():
+        if isinstance(output_item, dict):
+            for key_2, value_2 in output_item.items():
+                assert value_2 == pytest.approx(dictionary[key][key_2])
+        else:
+            assert output_item == pytest.approx(dictionary[key]), f"mb_item {key}"
 
-def test_balance_time(input : dict, time, dt, expected) -> None:
-    """Tests time point determination of balance function."""
-    obj_mb = mb.MassBalance(input, dx=None, dy=None, dt=dt, mode="no_decay")
-    output = obj_mb.balance(time=time)
-    assert output["time"] == pytest.approx(expected)
-
-@pytest.mark.parametrize(
-    "input, stepsize, time, mode, expected",
-    [
-        (testing_dictionary, (1,1,1), 3, "no_decay", testing_massbalance_nodecay),
-        (testing_dictionary, (1,1,1), 3, "linear_decay", testing_massbalance_lindecay),
-        (testing_dictionary, (1,1,1), 3, "instant_reaction", testing_massbalance_instant),
-    ])
-
-def test_balance_results(input : dict, stepsize, time, mode : str, expected) -> None:
-    """Test if mass balance is correctly calculated by comparing to precomputed results."""
-    dx, dy, dt = stepsize
-    obj_mb = mb.MassBalance(input, dx=dx, dy=dy, dt=dt, mode=mode)
-    output = obj_mb.balance(time=time)
-    for key, output_item in output.items():
-        assert expected[key] == pytest.approx(output_item)
+    mb_object(2 * 365)
+    dictionary_single = mb_object.__dict__
+    for key, output_item in expected.items():
+        if isinstance(output_item, np.ndarray):
+            assert output_item[1] == pytest.approx(dictionary_single[key]), f"mb_item {key}"
+        elif isinstance(output_item, dict):
+            for key_2, value_2 in output_item.items():
+                assert value_2[1] == pytest.approx(dictionary_single[key][key_2]), f"mb_item {key}"
+        else:
+            assert output_item == pytest.approx(dictionary_single[key]), f"mb_item {key}"

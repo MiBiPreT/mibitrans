@@ -18,7 +18,7 @@ The spatial resolution of the plume is fixed to 11 steps over the plume length a
 Transport is modeled based on the three-dimensional advection-dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in $x$-direction:
 
 $$
-\begin{equation}\label{eq:01_ADE3D}
+\begin{equation}\tag{1}\label{eq:01_ADE3D}
     R\frac{\partial C}{\partial t} = -v\frac{\partial C}{\partial x} + D_{x}\frac{\partial ^2 C}{\partial x^2} + D_y \frac{\partial^2 C}{\partial y^2} + D_z \frac{\partial^2 C}{\partial z^2} + r_{sinks}
 \end{equation}
 $$

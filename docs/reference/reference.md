@@ -1,3 +1,0 @@
-# `mibitrans` API reference
-
-::: mibitrans

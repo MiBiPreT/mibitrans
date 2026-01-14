@@ -18,14 +18,14 @@ The spatial resolution of the plume is fixed to 11 steps over the plume length a
 Transport is modeled based on the three-dimensional advection-dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in $x$-direction:
 
 $$
-\begin{equation}\label{eq:01_ADE3D}
+\begin{equation}\tag{1}\label{eq:01_ADE3D}
     R\frac{\partial C}{\partial t} = -v\frac{\partial C}{\partial x} + D_{x}\frac{\partial ^2 C}{\partial x^2} + D_y \frac{\partial^2 C}{\partial y^2} + D_z \frac{\partial^2 C}{\partial z^2} + r_{sinks}
 \end{equation}
 $$
 
 Here $C(x,y,z,t)$ is the contaminant concentration in space $(x,y,z)$ and time $t$, $R$ is the linear equilibrium retardation factor, $v$ is the uniform groundwater velocity in $x$-direction, $D_{x}$, $D_{y}$ and $D_{y}$ are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. $r_{sinks}$ represents the sink term as result to decay/degradation. $r_{sinks} = 0$ represents no decay/degradation. For linear decay, $r_{sinks} = -\lambda C$. In the equation $\frac{\partial C}{\partial t}$ represents the change of the concentration over time. $-v\frac{\partial C}{\partial x}$ is the change of concentration in the direction of the groundwater gradient due to advection. $D_{x}\frac{\partial ^2 C}{\partial x^2} + D_{y}\frac{\partial ^2 C}{\partial y^2}+ + D_{z}\frac{\partial^2 C}{\partial z^2}$ represent the change in concentration to dispersion. 
 
-A specific solution of the ADE $\ref{eq:01_ADE3D}$, depends on the specific form of the sink-term $r_{sinks}$ as well as initial and boundary conditions.
+A specific solution of the ADE $\eqref{eq:01_ADE3D}$, depends on the specific form of the sink-term $r_{sinks}$ as well as initial and boundary conditions.
 Transport in *BIOSCREEN* is modelled based on the analytical model of *Domenico*, [1987]. 
 
 ### Domenico Model
@@ -42,7 +42,7 @@ Specifically, the *Domenico*-model takes the following assumption on initial and
 The equation describing the solute distribution in time and space of the *Domenico*-model reads:
 
 $$
-\begin{align}
+\begin{align}\tag{2}
     C(x, y, z, t) &= \frac{C_{0}}{8} \exp \left[ \frac{x\left(1-\sqrt{1+4\lambda \alpha_x/v}\right)}{2\alpha_x}\right] \\
     &\quad \cdot \operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
     &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} \\
@@ -66,7 +66,7 @@ Bioscreen does not directly use the Domenico model, but an extension regarding s
 The analytical expression used by BIOSCREEN for no-decay ($\lambda = 0$) and linear decay ($\lambda \neq 0$) reads (*Newell et al., 1997*):
 
 $$
-\begin{align}
+\begin{align}\tag{3}
     C(x, y, z, t) & = \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)\right)} \\ 
     &\quad \cdot  \exp \left[ \frac{x\left(1-\sqrt{1+4\lambda \alpha_x/v}\right)}{2\alpha_x}\right] 
     \cdot \operatorname{erfc} \left[ \frac{x - vt\sqrt{1+4\lambda \alpha_x/v}}{2\sqrt{\alpha_x vt }} \right] \\
@@ -80,7 +80,7 @@ Note that here $z=0$ compared to Eq. $\eqref{eq:02_domenico}$, indicating that B
 Bioscreen also uses the Domenico model in Eq. $\eqref{eq:02_domenico}$ as starting point for developing the model for the instantaneous reaction. 
 
 $$
-\begin{align}\label{eq:05_bioscreen_inst}
+\begin{align}\tag{4}
     C(x, y, z, t) &= \frac{C_{0}}{8}\exp{\left( -k_s \left( t-\frac{x}{v}\right)+BC\right)} \\
     &\quad \cdot \operatorname{erfc} \left[ \frac{x - vt}{2\sqrt{\alpha_x vt }} \right] \\
     &\quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y/2}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y/2}{2\sqrt{\alpha_y x)}} \right] \right\} \\
@@ -105,7 +105,7 @@ conservatively and then corrected at any location and time within the flow field
 Specifically, the equation for the instant reaction model in BIOSCREEN reads:
 
 $$
-\begin{align}
+\begin{align}\tag{5}
     C(x, y, t) + BC &= \sum_{i=0}^{n} \Biggl\{ \left( C^*_{0,i} \exp \left[-k_s^{inst} \left(t - \frac{xR}{v} \right)\right] + BC \right) \bigr. \\
     &\quad \quad \quad \cdot \left\{ \frac{1}{8} \operatorname{erfc} \left[ \frac{x - \frac{vt}{R}}{2\sqrt{\alpha_x \frac{vt}{R}}} \right] \right\}  \\
     &\quad \quad \quad \cdot \left\{ \operatorname{erf} \left[ \frac{y + Y^*_i}{2\sqrt{\alpha_y x}} \right] - \operatorname{erf} \left[ \frac{y - Y^*_i}{2\sqrt{\alpha_y x)}} \right] \right\} \\
@@ -118,7 +118,7 @@ $$
 The Biodegradation capacity is calculated via:
 
 $$
-\begin{equation}
+\begin{equation}\tag{6}
    BC = \sum_{O,N,S} (\bar C_i^\mathrm{upgradient} - C_i^\mathrm{source})/UF_i + \sum_{Fe2+,CH_4^+}  \bar C_j^\mathrm{source}/UF_j 
 \end{equation}
 $$

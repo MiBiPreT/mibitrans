@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/background/bioscreen/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/development/development/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/introduction/introduction/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/reference/reference_analysis/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/reference/reference_data/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/reference/reference_transport/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/v0.1/reference/reference_visualize/</loc>
+         <lastmod>2026-01-19</lastmod>
+    </url>
+</urlset>

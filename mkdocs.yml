@@ -102,3 +102,4 @@ extra:
   version:
     provider: mike
     default: latest
+    alias: true

@@ -1143,6 +1143,9 @@ replacing with the name of the notebook in question.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mkdocs<span class="w"> </span>serve
 </code></pre></div></p>
 <p>This will return a URL (e.g. <code>http://127.0.0.1:8000/mibitrans/</code>) where the docs site can be viewed.</p>
+<p>Note that this will only create the &ldquo;non-versioned&rdquo; documentation, which should be fine for testing changes to the docs.
+The versioned documentation is created using the python utility called <a href="https://github.com/jimporter/mike?tab=readme-ov-file#mike">mike</a> and its corresponding <a href="https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/">mkdocs integration</a>.
+In general it should not be necessary to test this, but if necessary, use <a href="https://github.com/jimporter/mike?tab=readme-ov-file#viewing-your-docs">the mike documentation</a> to inspect locally.</p>
 <h2 id="versioning">Versioning</h2>
 <p>Bumping the version across all files is done with <a href="https://github.com/callowayproject/bump-my-version">bump-my-version</a>, e.g.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>bump-my-version<span class="w"> </span>bump<span class="w"> </span>major<span class="w">  </span><span class="c1"># bumps from e.g. 0.3.2 to 1.0.0</span>

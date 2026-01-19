@@ -70,7 +70,9 @@ plugins:
           show_source: true
         options:
           show_submodules: true
-- mkdocs-jupyter
+- mkdocs-jupyter:
+    execute: true
+    include_source: True
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:

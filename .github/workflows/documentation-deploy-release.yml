@@ -21,7 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install ".[doc]"
-
+      - name: Setup Docs Deploy user
+        run: |
+          git config --global user.name "Docs Deploy"
+          git config --global user.email "docs.deploy@example.co.uk"
       - name: Deploy mkdocs on GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

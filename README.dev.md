@@ -117,6 +117,10 @@ mkdocs serve
 
 This will return a URL (e.g. `http://127.0.0.1:8000/mibitrans/`) where the docs site can be viewed.
 
+Note that this will only create the "non-versioned" documentation, which should be fine for testing changes to the docs.
+The versioned documentation is created using the python utility called [mike](https://github.com/jimporter/mike?tab=readme-ov-file#mike) and its corresponding [mkdocs integration](https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/).
+In general it should not be necessary to test this, but if necessary, use [the mike documentation](https://github.com/jimporter/mike?tab=readme-ov-file#viewing-your-docs) to inspect locally.
+
 ## Versioning
 
 Bumping the version across all files is done with [bump-my-version](https://github.com/callowayproject/bump-my-version), e.g.

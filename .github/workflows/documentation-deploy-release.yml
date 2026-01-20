@@ -1,4 +1,4 @@
-name: documentation-deploy
+name: Build/Publish Latest Release Docs
 
 permissions: write-all
 
@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -19,9 +20,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install ".[doc]" 
+          pip install ".[doc]"
+      - name: Setup Docs Deploy user
+        run: |
+          git config --global user.name "Docs Deploy"
+          git config --global user.email "docs.deploy@example.co.uk"
       - name: Deploy mkdocs on GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdocs gh-deploy --force
+          TAG_NAME=${{ github.event.release.tag_name }}
+          MAJ_MIN_VERSION=${TAG_NAME%.*}
+          mike deploy --push --update-aliases $MAJ_MIN_VERSION latest

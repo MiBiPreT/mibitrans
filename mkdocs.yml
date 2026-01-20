@@ -99,3 +99,7 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/MiBiPreT/mibitrans
+  version:
+    provider: mike
+    default: latest
+    alias: true

@@ -72,7 +72,7 @@ plugins:
           show_submodules: true
 - mkdocs-jupyter:
     execute: true
-    include_source: True
+    include_source: true
     custom_mathjax_url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types

@@ -1,4 +1,9 @@
-
+[data-md-color-scheme="default"] {
+    --md-primary-fg-color: #0071bc;
+}
+[data-md-color-scheme="slate"] {
+    --md-primary-fg-color:  #699812;
+}
 code.highlight {
     font-size: 18px;
 }

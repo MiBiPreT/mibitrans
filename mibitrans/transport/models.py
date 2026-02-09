@@ -385,9 +385,12 @@ class Anatrans(Transport3D):
         term[np.isnan(term)] = 0
         return term
 
+    def _equation_decay_sqrt(self):
+        return np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
-        decay_sqrt = np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+        decay_sqrt = self._equation_decay_sqrt()
         x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
         additional_x = self._equation_term_additional_x(xxx, ttt, decay_sqrt)
         z_term = self._equation_term_z(xxx)
@@ -482,7 +485,7 @@ class Bioscreen(Anatrans):
         # Difference with the Anatrans solution is the lack of additional term.
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            decay_sqrt = np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+            decay_sqrt = self._equation_decay_sqrt()
             x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
             z_term = self._equation_term_z(xxx)
             source_decay = self._equation_term_source_decay(xxx, ttt)

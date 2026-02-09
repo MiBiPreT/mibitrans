@@ -132,7 +132,7 @@ class Mibitrans(Transport3D):
                 / (t**3)
                 * (
                     np.exp(
-                        (-self.k_source - self._decay_rate) * t**4
+                        (self.k_source - self._decay_rate) * t**4
                         - (x_position - self.rv * t**4) ** 2 / (4 * self.disp_x * t**4)
                     )
                     * (
@@ -208,7 +208,7 @@ class Mibitrans(Transport3D):
 
     def _equation_term_x(self, t):
         term = np.exp(
-            (-self.k_source - self._decay_rate) * t - (self.xxx[:, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
+            (self.k_source - self._decay_rate) * t - (self.xxx[:, :, 1:] - self.rv * t) ** 2 / (4 * self.disp_x * t)
         )
         term[np.isnan(term)] = 0
         return term

@@ -23,6 +23,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install ".[doc]" 
+      - name: Set notebook execution to false (for docs testing)
+        run: |
+          pip install pyyaml
+          python __CI_convert_notebook_execute_false_mkdocs_yaml.py mkdocs.yml
       - name: Test mkdocs build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

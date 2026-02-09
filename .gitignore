@@ -15,6 +15,9 @@ coverage.xml
 .tox
 
 docs/_build
+docs/examples/*.gif
+
+site
 
 # ide
 .idea

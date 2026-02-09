@@ -1,0 +1,40 @@
+name: Build/Publish Latest Develop Docs
+
+permissions: write-all
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+
+jobs:
+  build-docs-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Install dependencies
+        run: |
+          pip install ".[doc]"
+      - name: Setup Docs Deploy user
+        run: |
+          git config --global user.name "Docs Deploy"
+          git config --global user.email "docs.deploy@example.co.uk"
+      - name: Deploy mkdocs on GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          MAJ_MIN_VERSION=${TAG_NAME%/*}
+          echo $MAJ_MIN_VERSION
+          mike deploy --push develop

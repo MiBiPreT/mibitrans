@@ -374,10 +374,8 @@ class Anatrans(Transport3D):
         inner_term = self._src_pars.depth / (2 * np.sqrt(self._hyd_pars.alpha_z * xxx))
         return erf(inner_term) - erf(-inner_term)
 
-    def _equation_term_source_decay(self, xxx, ttt):
-        term = np.exp(-self.k_source * (ttt - xxx / self.rv))
-        # Term can be max 1; can not have 'generation' of solute ahead of advection.
-        return np.where(term > 1, 1, term)
+    def _equation_term_source_depletion(self, xxx, ttt):
+        return np.exp(-self.k_source * ttt)
 
     def _equation_term_y(self, i, xxx, yyy):
         div_term = 2 * np.sqrt(self._hyd_pars.alpha_y * xxx)
@@ -386,7 +384,7 @@ class Anatrans(Transport3D):
         return term
 
     def _equation_decay_sqrt(self):
-        return np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+        return np.sqrt(1 + 4 * (self._decay_rate - self.k_source) * self._hyd_pars.alpha_x / self.rv)
 
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
         cxyt = 0
@@ -394,10 +392,10 @@ class Anatrans(Transport3D):
         x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
         additional_x = self._equation_term_additional_x(xxx, ttt, decay_sqrt)
         z_term = self._equation_term_z(xxx)
-        source_decay = self._equation_term_source_decay(xxx, ttt)
+        source_depletion = self._equation_term_source_depletion(xxx, ttt)
         for i in range(len(self.c_source)):
             y_term = self._equation_term_y(i, xxx, yyy)
-            cxyt_step = 1 / 8 * self.c_source[i] * source_decay * (x_term + additional_x) * y_term * z_term
+            cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * (x_term + additional_x) * y_term * z_term
             cxyt += cxyt_step
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
@@ -481,17 +479,25 @@ class Bioscreen(Anatrans):
         """Short description of model type."""
         return "Bioscreen model"
 
+    def _equation_term_source_depletion(self, xxx, ttt):
+        term = np.exp(-self.k_source * (ttt - xxx / self.rv))
+        # Term can be max 1; can not have 'generation' of solute ahead of advection.
+        return np.where(term > 1, 1, term)
+
+    def _equation_decay_sqrt(self):
+        return np.sqrt(1 + 4 * self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+
     def _calculate_concentration_for_all_xyt(self, xxx, yyy, ttt):
-        # Difference with the Anatrans solution is the lack of additional term.
+        # Difference with the Anatrans solution is the lack of additional term and alternative source decay
         cxyt = 0
         with np.errstate(divide="ignore", invalid="ignore"):
             decay_sqrt = self._equation_decay_sqrt()
             x_term = self._equation_term_x(xxx, ttt, decay_sqrt)
             z_term = self._equation_term_z(xxx)
-            source_decay = self._equation_term_source_decay(xxx, ttt)
+            source_depletion = self._equation_term_source_depletion(xxx, ttt)
             for i in range(len(self.c_source)):
                 y_term = self._equation_term_y(i, xxx, yyy)
-                cxyt_step = 1 / 8 * self.c_source[i] * source_decay * x_term * y_term * z_term
+                cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * x_term * y_term * z_term
                 cxyt += cxyt_step
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()

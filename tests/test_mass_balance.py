@@ -10,6 +10,7 @@ from mibitrans.data.parameters import SourceParameters
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen
 from mibitrans.transport.models import Mibitrans
+from tests.conftest import electron_acceptor_dict
 from tests.test_example_data import testing_massbalance_instant_ana_inf
 from tests.test_example_data import testing_massbalance_instant_mbt
 from tests.test_example_data import testing_massbalance_instant_mbt_inf
@@ -20,17 +21,24 @@ from tests.test_example_data import testing_massbalance_nodecay_bio
 @pytest.fixture(scope="module")
 def test_model_pars():
     """ModelParameters fixture with increased spatial resolution, specifically for testing mass balance."""
-    return ModelParameters(model_length=50, model_width=30, model_time=3 * 365, dx=1, dy=1, dt=1 * 365)
+    return ModelParameters(
+        model_length=100,  # [m]
+        model_width=40,  # [m]
+        model_time=5 * 365,  # [days]
+        dx=1,  # [m]
+        dy=1,  # [m]
+        dt=365,  # [days]
+    )
 
 
 @pytest.fixture(scope="module")
 def test_source_pars_inf():
     """SourceParameters fixture with example data for tests."""
     return SourceParameters(
-        source_zone_boundary=np.array([5, 10, 15]),
-        source_zone_concentration=np.array([10, 5, 2]),
-        depth=10,
-        total_mass="inf",
+        source_zone_boundary=np.array([2, 11, 20]),  # [m]
+        source_zone_concentration=np.array([13.68, 2.508, 0.057]),  # [g/m3]
+        depth=3,  # [m]
+        total_mass=np.inf,  # [g]
     )
 
 
@@ -54,7 +62,7 @@ def test_anatrans_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_sour
 def test_mibitrans_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
     """Mibitrans with instant reaction fixture mass balance object for testing."""
     obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.instant_reaction(electron_acceptor_dict)
     res = obj.run()
     return res.mass_balance()
 
@@ -63,16 +71,16 @@ def test_mibitrans_instantreaction_model_mb(test_hydro_pars, test_att_pars, test
 def test_mibitrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
     """Mibitrans with instant reaction and infinite source mass fixture mass balance  object for testing."""
     obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
-    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.instant_reaction(electron_acceptor_dict)
     res = obj.run()
     return res.mass_balance()
 
 
 @pytest.fixture(scope="module")
 def test_anatrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
-    """Anatrans with instant reaction and infinite source mass fixture mass balance  object for testing."""
+    """Anatrans with instant reaction and infinite source mass fixture mass balance object for testing."""
     obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
-    obj.instant_reaction(dict(delta_oxygen=0.5, delta_nitrate=0.5, ferrous_iron=0.5, delta_sulfate=0.5, methane=0.5))
+    obj.instant_reaction(electron_acceptor_dict)
     res = obj.run()
     return res.mass_balance()
 

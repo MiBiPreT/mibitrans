@@ -15,7 +15,7 @@ from mibitrans.visualize import plot_surface as psurf
 
 
 class Transport3D(ABC):
-    """Parent class for all 3-dimensional analytical solutions."""
+    """Parent class for all 3-dimensional analytical transport solutions."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -299,7 +299,7 @@ class Results:
     """Object that holds model results and input parameters for individual runs."""
 
     def __init__(self, model):
-        """Records input parameters and resulting output based given model.
+        """Records input parameters and resulting output of given model run.
 
         Args:
             model (Transport3D): Model object from which to initialize results. Should be child class of Transport3D.
@@ -652,6 +652,7 @@ class Results:
 
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
+    """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
     if isinstance(electron_acceptors, (list, np.ndarray)):
         electron_acceptors_out = ElectronAcceptors(*electron_acceptors)
     elif isinstance(electron_acceptors, dict):

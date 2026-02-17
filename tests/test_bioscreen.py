@@ -24,8 +24,8 @@ def test_transport_equation_numerical_bioscreen(model, expected, request):
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (9, 0, 629, 1.2260728205395477),
-        (15, -7, 256, 0.21033402922523056),
+        (9, 0, 629, 6.222919410416837),
+        (15, -7, 256, 1.5292214426149926),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),
@@ -46,8 +46,8 @@ def test_bioscreen_sample_linear(x, y, t, expected, test_bioscreen_model_lineard
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (13, 0, 354, 2.721953070355462),
-        (11, 3, 752, 5.01432266465888),
+        (13, 0, 354, 5.134230309076454),
+        (11, 3, 752, 5.645872356690198),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),

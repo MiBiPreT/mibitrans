@@ -32,6 +32,7 @@ dependencies = [
     "cycler",
     "fonttools",
     "iniconfig",
+    "ipympl",
     "kiwisolver",
     "matplotlib",
     "numpy",

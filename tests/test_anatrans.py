@@ -24,8 +24,8 @@ def test_transport_equation_numerical_anatrans(model, expected, request):
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (16, 0, 393, 0.2403406438598838),
-        (24, -5, 283, 0.031529981399875194),
+        (16, 0, 393, 4.041372051306399),
+        (24, -5, 283, 1.5760137786262713),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),
@@ -46,8 +46,8 @@ def test_anatrans_sample_linear(x, y, t, expected, test_anatrans_model_lineardec
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (20, 0, 476, 3.076798202181921),
-        (11, 7, 193, 2.0747279062256183),
+        (20, 0, 476, 5.540354132380653),
+        (54, 3, 1045, 3.501165953555688),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),

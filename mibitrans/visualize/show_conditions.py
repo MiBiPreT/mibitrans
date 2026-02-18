@@ -21,8 +21,6 @@ def source_zone(source_parameters):
     indexer = np.linspace(1, 0.3, len(source_y))
     colormap = matplotlib.colormaps["YlGnBu"]
 
-    plt.figure(dpi=300)
-
     for i, y in enumerate(source_y):
         if i == 0:
             plt.fill_betweenx(

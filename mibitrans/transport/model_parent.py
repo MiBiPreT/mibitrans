@@ -24,9 +24,9 @@ class Transport3D(ABC):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption
+                and degradation parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from

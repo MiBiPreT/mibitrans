@@ -43,9 +43,9 @@ class Mibitrans(Transport3D):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption
+                and degradation parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -164,9 +164,9 @@ class Mibitrans(Transport3D):
 
     def _pre_run_initialization_parameters(self):
         super()._pre_run_initialization_parameters()
-        self.disp_x = self._hyd_pars.alpha_x * self.rv + self._att_pars.diffusion
-        self.disp_y = self._hyd_pars.alpha_y * self.rv + self._att_pars.diffusion
-        self.disp_z = self._hyd_pars.alpha_z * self.rv + self._att_pars.diffusion
+        self.disp_x = self._hyd_pars.alpha_x * self.rv + self._hyd_pars.diffusion
+        self.disp_y = self._hyd_pars.alpha_y * self.rv + self._hyd_pars.diffusion
+        self.disp_z = self._hyd_pars.alpha_z * self.rv + self._hyd_pars.diffusion
         # self.integral_term = np.zeros(self.ttt.shape)
         # Stores integral error for each time step and source zone
         self.error_size = np.zeros((len(self._src_pars.source_zone_boundary), len(self.t)))
@@ -274,9 +274,9 @@ class Anatrans(Transport3D):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption
+                and degradation parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -315,7 +315,7 @@ class Anatrans(Transport3D):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-        if self._att_pars.diffusion != 0:
+        if self._hyd_pars.diffusion != 0:
             warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
 
     @property
@@ -437,9 +437,9 @@ class Bioscreen(Anatrans):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption
+                and degradation parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/icon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../background/bioscreen/" class="md-tabs__link">
+        <a href="../../background/transporttheory/" class="md-tabs__link">
           
   
   
@@ -467,6 +467,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -519,14 +527,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../../background/bioscreen/" class="md-nav__link">
+      <a href="../../background/transporttheory/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Bioscreen
+    Transport Theory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/modelsetup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transport Model Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/modelimplementations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model implementations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/instantreaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instant Reaction Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/massbalance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mass Balance
   
 
     
@@ -5215,9 +5335,9 @@ False.</p>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        Args:</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">                hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">                degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">                hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">                and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">                from SourceParameters.</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -5749,7 +5869,7 @@ False.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataclass object containing
-hydrological parameters from HydrologicalParameters.</p>
+hydrological parameters, dispersion and diffusion from HydrologicalParameters.</p>
               </div>
             </td>
             <td>
@@ -5764,8 +5884,8 @@ hydrological parameters from HydrologicalParameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dataclass object containing adsorption,
-degradation and diffusion parameters from AttenuationParameters.</p>
+                <p>Dataclass object containing adsorption
+and degradation parameters from AttenuationParameters.</p>
               </div>
             </td>
             <td>
@@ -5865,9 +5985,9 @@ ModelParameters.</p>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    Args:</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">        hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">            hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">            degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">            hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">            and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">            from SourceParameters.</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -6380,9 +6500,9 @@ system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
 <a id="__codelineno-0-274" name="__codelineno-0-274"></a>
 <a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">        Args:</span>
 <a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">                hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">                degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">                hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">                and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">                from SourceParameters.</span>
 <a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -6421,7 +6541,7 @@ system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
 <a id="__codelineno-0-315" name="__codelineno-0-315"></a>
 <a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-317" name="__codelineno-0-317"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">hydrological_parameters</span><span class="p">,</span> <span class="n">attenuation_parameters</span><span class="p">,</span> <span class="n">source_parameters</span><span class="p">,</span> <span class="n">model_parameters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_pars</span><span class="o">.</span><span class="n">diffusion</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">diffusion</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-319" name="__codelineno-0-319"></a>            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Domenico model does not consider molecular diffusion.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>
 <a id="__codelineno-0-321" name="__codelineno-0-321"></a>    <span class="nd">@property</span>
@@ -6579,7 +6699,7 @@ system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataclass object containing
-hydrological parameters from HydrologicalParameters.</p>
+hydrological parameters, dispersion and diffusion from HydrologicalParameters.</p>
               </div>
             </td>
             <td>
@@ -6594,8 +6714,8 @@ hydrological parameters from HydrologicalParameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dataclass object containing adsorption,
-degradation and diffusion parameters from AttenuationParameters.</p>
+                <p>Dataclass object containing adsorption
+and degradation parameters from AttenuationParameters.</p>
               </div>
             </td>
             <td>
@@ -6949,9 +7069,9 @@ attribute.</p>
 <a id="__codelineno-0-274" name="__codelineno-0-274"></a>
 <a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    Args:</span>
 <a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">        hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">            hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">            degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">            hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">            and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">            from SourceParameters.</span>
 <a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -6990,7 +7110,7 @@ attribute.</p>
 <a id="__codelineno-0-315" name="__codelineno-0-315"></a>
 <a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-317" name="__codelineno-0-317"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">hydrological_parameters</span><span class="p">,</span> <span class="n">attenuation_parameters</span><span class="p">,</span> <span class="n">source_parameters</span><span class="p">,</span> <span class="n">model_parameters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_pars</span><span class="o">.</span><span class="n">diffusion</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">diffusion</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Domenico model does not consider molecular diffusion.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7367,9 +7487,9 @@ system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
 <a id="__codelineno-0-437" name="__codelineno-0-437"></a>
 <a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        Args:</span>
 <a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">                hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">                degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">                hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">                and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">                from SourceParameters.</span>
 <a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -7505,7 +7625,7 @@ system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataclass object containing
-hydrological parameters from HydrologicalParameters.</p>
+hydrological parameters, dispersion and diffusion from HydrologicalParameters.</p>
               </div>
             </td>
             <td>
@@ -7520,8 +7640,8 @@ hydrological parameters from HydrologicalParameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dataclass object containing adsorption,
-degradation and diffusion parameters from AttenuationParameters.</p>
+                <p>Dataclass object containing adsorption
+and degradation parameters from AttenuationParameters.</p>
               </div>
             </td>
             <td>
@@ -7828,9 +7948,9 @@ attribute.</p>
 <a id="__codelineno-0-437" name="__codelineno-0-437"></a>
 <a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">    Args:</span>
 <a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">            hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">            degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">            hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">            and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">            from SourceParameters.</span>
 <a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -8176,9 +8296,9 @@ systems with uniform flow. US Government Printing Office.</p>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">        Args:</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">                hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">                degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">                hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">                and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">            source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">                from SourceParameters.</span>
 <a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">            model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>
@@ -8297,9 +8417,9 @@ systems with uniform flow. US Government Printing Office.</p>
 <a id="__codelineno-0-164" name="__codelineno-0-164"></a>
 <a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_pre_run_initialization_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <a id="__codelineno-0-166" name="__codelineno-0-166"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_pre_run_initialization_parameters</span><span class="p">()</span>
-<a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_pars</span><span class="o">.</span><span class="n">diffusion</span>
-<a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_pars</span><span class="o">.</span><span class="n">diffusion</span>
-<a id="__codelineno-0-169" name="__codelineno-0-169"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_pars</span><span class="o">.</span><span class="n">diffusion</span>
+<a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">diffusion</span>
+<a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">diffusion</span>
+<a id="__codelineno-0-169" name="__codelineno-0-169"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">disp_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">alpha_z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyd_pars</span><span class="o">.</span><span class="n">diffusion</span>
 <a id="__codelineno-0-170" name="__codelineno-0-170"></a>        <span class="c1"># self.integral_term = np.zeros(self.ttt.shape)</span>
 <a id="__codelineno-0-171" name="__codelineno-0-171"></a>        <span class="c1"># Stores integral error for each time step and source zone</span>
 <a id="__codelineno-0-172" name="__codelineno-0-172"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">error_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_src_pars</span><span class="o">.</span><span class="n">source_zone_boundary</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)))</span>
@@ -8441,7 +8561,7 @@ systems with uniform flow. US Government Printing Office.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataclass object containing
-hydrological parameters from HydrologicalParameters.</p>
+hydrological parameters, dispersion and diffusion from HydrologicalParameters.</p>
               </div>
             </td>
             <td>
@@ -8456,8 +8576,8 @@ hydrological parameters from HydrologicalParameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dataclass object containing adsorption,
-degradation and diffusion parameters from AttenuationParameters.</p>
+                <p>Dataclass object containing adsorption
+and degradation parameters from AttenuationParameters.</p>
               </div>
             </td>
             <td>
@@ -8783,9 +8903,9 @@ results = obj.run()
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Args:</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">        hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">            hydrological parameters from HydrologicalParameters.</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">            degradation and diffusion parameters from AttenuationParameters.</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">            hydrological parameters, dispersion and diffusion from HydrologicalParameters.</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">            and degradation parameters from AttenuationParameters.</span>
 <a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters</span>
 <a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">            from SourceParameters.</span>
 <a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from</span>

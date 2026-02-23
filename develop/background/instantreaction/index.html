@@ -12,29 +12,31 @@
         <meta name="author" content="Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/instantreaction/">
       
       
+        <link rel="prev" href="../modelimplementations/">
       
-        <link rel="next" href="introduction/introduction/">
+      
+        <link rel="next" href="../massbalance/">
       
       
         
       
       
-      <link rel="icon" href="assets/icon.png">
+      <link rel="icon" href="../../assets/icon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
-        <title>mibitrans</title>
+        <title>Instant Reaction Model - mibitrans</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="assets/custom.css">
+      <link rel="stylesheet" href="../../assets/custom.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#documention-for-mibitrans-python-package" class="md-skip">
+        <a href="#instantaneous-reaction-model" class="md-skip">
           Skip to content
         </a>
       
@@ -100,9 +102,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="mibitrans" class="md-header__button md-logo" aria-label="mibitrans" data-md-component="logo">
+    <a href="../.." title="mibitrans" class="md-header__button md-logo" aria-label="mibitrans" data-md-component="logo">
       
-  <img src="assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Instant Reaction Model
             
           </span>
         </div>
@@ -235,11 +237,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -258,7 +258,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="introduction/introduction/" class="md-tabs__link">
+      <a href="../../introduction/introduction/" class="md-tabs__link">
         
   
   
@@ -275,11 +275,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="background/transporttheory/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../transporttheory/" class="md-tabs__link">
           
   
   
@@ -301,7 +303,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="examples/example_walkthrough/" class="md-tabs__link">
+        <a href="../../examples/example_walkthrough/" class="md-tabs__link">
           
   
   
@@ -321,7 +323,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="development/development/" class="md-tabs__link">
+      <a href="../../development/development/" class="md-tabs__link">
         
   
   
@@ -342,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="reference/reference_data/" class="md-tabs__link">
+        <a href="../../reference/reference_data/" class="md-tabs__link">
           
   
   
@@ -378,9 +380,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="mibitrans" class="md-nav__button md-logo" aria-label="mibitrans" data-md-component="logo">
+    <a href="../.." title="mibitrans" class="md-nav__button md-logo" aria-label="mibitrans" data-md-component="logo">
       
-  <img src="assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     mibitrans
@@ -404,37 +406,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -450,48 +425,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-use-mibitrans" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to use mibitrans
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -503,7 +436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction/introduction/" class="md-nav__link">
+      <a href="../../introduction/introduction/" class="md-nav__link">
         
   
   
@@ -527,8 +460,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -546,19 +481,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -576,7 +514,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -594,7 +532,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/transporttheory/" class="md-nav__link">
+      <a href="../transporttheory/" class="md-nav__link">
         
   
   
@@ -622,7 +560,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/modelsetup/" class="md-nav__link">
+      <a href="../modelsetup/" class="md-nav__link">
         
   
   
@@ -650,7 +588,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/modelimplementations/" class="md-nav__link">
+      <a href="../modelimplementations/" class="md-nav__link">
         
   
   
@@ -675,10 +613,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="background/instantreaction/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instant Reaction Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -694,6 +659,115 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background / History
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#construction-of-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction of solution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Construction of solution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#biodegradation-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Biodegradation capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilization-factors-uf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilization Factors (UF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantaneous-reaction-solution-for-bioscreen-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instantaneous reaction solution for bioscreen model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instantaneous reaction solution for bioscreen model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instantaneous-reaction-source-depletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instantaneous reaction source depletion
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -706,7 +780,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/massbalance/" class="md-nav__link">
+      <a href="../massbalance/" class="md-nav__link">
         
   
   
@@ -799,7 +873,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/example_walkthrough/" class="md-nav__link">
+      <a href="../../examples/example_walkthrough/" class="md-nav__link">
         
   
   
@@ -827,7 +901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/example_mibitrans_anatrans_comparison/" class="md-nav__link">
+      <a href="../../examples/example_mibitrans_anatrans_comparison/" class="md-nav__link">
         
   
   
@@ -862,7 +936,7 @@
   
   
     <li class="md-nav__item">
-      <a href="development/development/" class="md-nav__link">
+      <a href="../../development/development/" class="md-nav__link">
         
   
   
@@ -951,7 +1025,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_data/" class="md-nav__link">
+      <a href="../../reference/reference_data/" class="md-nav__link">
         
   
   
@@ -979,7 +1053,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_transport/" class="md-nav__link">
+      <a href="../../reference/reference_transport/" class="md-nav__link">
         
   
   
@@ -1007,7 +1081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_analysis/" class="md-nav__link">
+      <a href="../../reference/reference_analysis/" class="md-nav__link">
         
   
   
@@ -1035,7 +1109,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_visualize/" class="md-nav__link">
+      <a href="../../reference/reference_visualize/" class="md-nav__link">
         
   
   
@@ -1090,10 +1164,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-mibitrans" class="md-nav__link">
+  <a href="#background-history" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to use mibitrans
+        Background / History
       
     </span>
   </a>
@@ -1101,10 +1175,77 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#construction-of-solution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Construction of solution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Construction of solution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#biodegradation-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Biodegradation capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilization-factors-uf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilization Factors (UF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantaneous-reaction-solution-for-bioscreen-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instantaneous reaction solution for bioscreen model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instantaneous reaction solution for bioscreen model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instantaneous-reaction-source-depletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instantaneous reaction source depletion
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
       
     </span>
   </a>
@@ -1131,15 +1272,142 @@
   
 
 
-<h1 id="documention-for-mibitrans-python-package">Documention for <code>mibitrans</code> python package</h1>
-<h2 id="how-to-use-mibitrans">How to use mibitrans</h2>
-<p>A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena</p>
-<h2 id="installation">Installation</h2>
-<p>To install mibitrans from GitHub repository, do:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">git clone git@github.com:MiBiPreT/mibitrans.git</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">cd mibitrans</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">python -m pip install .</span>
-</code></pre></div>
+<h1 id="instantaneous-reaction-model">Instantaneous reaction model</h1>
+<h2 id="background-history">Background / History</h2>
+<p>The <em>instantaneous reaction model</em> became popular through its implementation in <em>Bioscreen</em> <em>[Newell et al., 1996]</em>. It is based on the concept developed by <em>Connor et al., [1994]</em> using a solution for contaminant transport (advection, dispersion, retardation) and adapting it to account for the influence of chemical reactions during transport. Specifically, the effect of degradation is superimposed based on domain average electron acceptor (EA) concentrations. <em>Connor et al., [1994]</em> compared his method with results of the BIOPLUME II model <em>Rifai et al., [1990]</em> and determined that results are similar for biodegradable contaminants with retardation factors <span class="arithmatex">\(R \leq 6\)</span>.</p>
+<hr />
+<h2 id="construction-of-solution">Construction of solution</h2>
+<p>Starting point is the calculation of how much contaminant can be consumed by instantaneous reactions with all present EA&rsquo;s based on their global concentrations. This concentration is called the <em>biodegradation capacity</em> <span class="arithmatex">\(BC\)</span>. Details on the calculation of <span class="arithmatex">\(BC\)</span> are given below. <span class="arithmatex">\(BC\)</span> is a lumped value that reflects the potential contaminant mass removal of available EAs through all biodegradation reactions, including aerobic and anaerobic reactions during transport.</p>
+<p>In a second step, the spatial concentration distribution is calculated by combining <span class="arithmatex">\(BC\)</span> with an analytical model of the solute transport equation (mibitrans, anatrans, bioscreen) for no decay.
+When</p>
+<div class="arithmatex">\[
+C(x, y, z, t) = \frac{C_s}{8} f(x,y,z,t)
+\]</div>
+<p>is an analytical solution to the retarded, but non-decaying transport (<span class="arithmatex">\(\mu = 0\)</span>), then the instantaneous reaction model is constructed via</p>
+<div class="arithmatex">\[
+C_\mathrm{inst}(x, y, z, t)
+=
+\frac{(C_s + BC)}{8} f(x,y,z,t) - BC
+\]</div>
+<p>Note that <span class="arithmatex">\(C_s\)</span> implies that source depletion as an option. For the bioscreen model, this reads e.g. <span class="arithmatex">\(C_s = \exp{\left( -\gamma_s \left( t-\frac{xR}{v}\right)\right)}\)</span>.</p>
+<p>The Equation for <span class="arithmatex">\(C_\mathrm{inst}(x, y, z, t)\)</span> shows that first the actual source zone concentration is adapted by adding the biodegradation capacity <span class="arithmatex">\(BC\)</span>. This reflects the need of mass balance. The resulting transported spatially distributed contaminant concentration is then globally reduced with the biodegradation capacity <span class="arithmatex">\(BC\)</span>. This reflects that calculated concentrations are reduced at every location and time by what can be consumed by reactions.</p>
+<p>The Instantaneous reaction model is based on the assumption that degradation is fast, i.e. instantaneous compared to the time scale of other processes, such as transport. Specifically, the rate of biodegradation is not limited by microbial kinetics. For oxygen this is well accepted and shown by <em>Borden et al., [1986]</em>. For anaerobic degradation this is concluded from results of <em>Connor et al., [1994]</em>. The model further assumes that contaminants and EA&rsquo;s travel at the same transport rate, i.e. retardation is negligible. The validity of this assumption was shown by <em>Borden et al., [1986]</em> for oxygen and some hydrocarbon, but not for other EA&rsquo;s. <em>[Newell et al., 1996]</em> reports that the assumption holds for other EAs and retardation factors  <span class="arithmatex">\(R\leq6\)</span>.</p>
+<h3 id="biodegradation-capacity">Biodegradation capacity</h3>
+<p>The biodegradation capacity <span class="arithmatex">\(BC\)</span> is calculated from EA concentrations by</p>
+<div class="arithmatex">\[
+BC =
+\sum_{i=O,N,S}
+\frac{\bar C_i^\mathrm{upgradient} - C_i^\mathrm{source}}{UF_i}
+\sum_{j=Fe^{2+},CH_4}
+\frac{\bar C_j^\mathrm{source}}{UF_j}
+\]</div>
+<p>here <span class="arithmatex">\(\bar C_i^\mathrm{upgradient}\)</span> is the average upgradient concentrations and <span class="arithmatex">\(C_i^\mathrm{source}\)</span> is the minimum source concentration of electron acceptors <span class="arithmatex">\(i=\)</span> oxygen, nitrate, and sulfate. <span class="arithmatex">\(\bar C_j^\mathrm{source}\)</span> is the average source concentration of the metabolic by-products <span class="arithmatex">\(j=Fe2+,CH_4^+\)</span>. 
+<span class="arithmatex">\(UF_i\)</span> and <span class="arithmatex">\(UF_j\)</span> are the utilization factors for each EA that were developed by <em>Wiedemeier et al., [1995]</em> based on the stoichimetric ratios of the reactions (see below).</p>
+<table>
+<thead>
+<tr>
+<th>EA / Byproduct</th>
+<th>UF (gm/gm)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oxygen</td>
+<td>3.14</td>
+</tr>
+<tr>
+<td>Nitrate</td>
+<td>4.9</td>
+</tr>
+<tr>
+<td>Sulfate</td>
+<td>4.7</td>
+</tr>
+<tr>
+<td>Ferrous Iron</td>
+<td>21.8</td>
+</tr>
+<tr>
+<td>Methane</td>
+<td>0.78</td>
+</tr>
+</tbody>
+</table>
+<p>BTEX utilization factors (UF) for redox reactions.</p>
+<h3 id="utilization-factors-uf">Utilization Factors (UF)</h3>
+<p>Utilization factors as derived by <em>Wiedemeier et al., [1995]</em> and used by <em>Bioscreen</em> with values given in previous Table are based on the degradation reactions, here exemplified for benzene:</p>
+<div class="arithmatex">\[
+C_6H_6 + 7.5O_2 \to 6CO_2 + 3H_2O
+\]</div>
+<div class="arithmatex">\[
+6NO_3^- + 6H^+ + C_6H_6 \to 6CO_2 + 6H_2O + 3N_2
+\]</div>
+<div class="arithmatex">\[
+60H^+ + 30Fe(OH)_3 + C_6H_6 \to 6CO_2 + 6Fe^{2+} + 78H_2O
+\]</div>
+<div class="arithmatex">\[
+7.5H^+ + 3.75SO_4^{2-} + C_6H_6 \to 6CO_2 + 3.75H_2S + 3H_2O
+\]</div>
+<div class="arithmatex">\[
+C_6H_6 + 4.5H_2O \to 2.25CO_2 + 3.75CH_4
+\]</div>
+<p>The utilization factor for oxygen, nitrate, and sulfate can be developed showing the stoichiometric ratio of EA consumed to the mass of dissolved hydrocarbon degraded in the biodegradation reactions. Utilization factors for iron reduction and methanogenesis can be developed from the ratio of generated mass of metabolic by-products to mass of dissolved hydrocarbon degraded. Values represented in the Table are averages of stoichiometric ratios for all four BTEX constituents.</p>
+<p>Note that UFs are limited to reactions of EAs with BTEX constituents. When aiming to model other contaminants, the utilization factors would need to be adapted. Alternatively, available oxygen, nitrate, iron, sulfate, and methane concentrations could be adjusted accordingly to reflect alternate utilization factors. </p>
+<hr />
+<h2 id="instantaneous-reaction-solution-for-bioscreen-model">Instantaneous reaction solution for bioscreen model</h2>
+<p>Using the Bioscreen transport model without decay (<span class="arithmatex">\(\mu = 0\)</span>, thus <span class="arithmatex">\(P = 1\)</span>), the instantaneous reaction equation becomes:</p>
+<div class="arithmatex">\[
+\begin{aligned}
+C(x, y, t)
+&amp;=
+\sum_{i=1}^{n}
+\left[\frac{C^*_{0,i}}{8}
+\exp\left( -\gamma_s \left( t - \frac{x}{v_R} \right)\right) + BC \right]
+\operatorname{erfc}
+\left(
+\frac{x - v_R t}{2\sqrt{\alpha_x v_R t}}
+\right)
+\\
+&amp;\quad \cdot
+\left[
+\operatorname{erf}
+\left(
+\frac{y + Y_i}{2\sqrt{\alpha_y x}}
+\right) -
+\operatorname{erf}
+\left(
+\frac{y - Y_i}{2\sqrt{\alpha_y x}}
+\right)
+\right]
+\\
+&amp;\quad \cdot
+\left[
+\operatorname{erf}
+\left(
+\frac{Z}{2\sqrt{\alpha_z x}}
+\right)-
+\operatorname{erf}
+\left(
+\frac{-Z}{2\sqrt{\alpha_z x}}
+\right)
+\right]- BC
+\end{aligned}
+\]</div>
+<h3 id="instantaneous-reaction-source-depletion">Instantaneous reaction source depletion</h3>
+<p>The instant reaction model assumes that biodegradation takes place inside the source zone. Thus, the source depletion coefficient is calculated differently as</p>
+<div class="arithmatex">\[
+\gamma_s^{\mathrm{inst}}
+=
+\frac{Q \cdot (\bar C_0 + BC)}{m_{\mathrm{s,0}}}
+\]</div>
+<p>Here, the biodegradation capacity <span class="arithmatex">\(BC\)</span> is added to the average source zone contaminant concentration, resulting in a greater contaminant flux out of the source zone, and thus, faster source depletion.</p>
+<hr />
+<h2 id="references">References</h2>
+<p>Borden, R. C., and P. B. Bedient, <em>Transport of dissolved hydrocarbons influenced by oxygen-limited biodegradation: 1. Theoretical development</em>, Water Resources Research, 22 (13), 1973–1982, doi:10.1029/WR022i013p01973, 1986.</p>
+<p>Connor, J., C. Newell, J. Nevin, and H. Rifai, <em>Guidelines for use of groundwater spreadsheet models in risk-based corrective action design</em>, Tech. rep., National Ground Water Association, Proceedings of the Petroleum Hydrocarbons and Organic Chemicals in Ground Water Conference, Houston, Texas, 1994.</p>
+<p>Newell, C. J., R. K. McLeod, and J. R. Gonzales, <em>BIOSCREEN Natural Attenuation Decision Support System User’s Manual Version 1.3</em>, Tech. Rep. EPA/600/R-96/087, US EPA, 1996.</p>
+<p>Rifai, H. S., and P. B. Bedient, <em>Comparison of biodegradation kinetics with an instantaneous reaction model for groundwater</em>, Water Resources Research, 26 (4), 637–645, doi:10.1029/WR026i004p00637, 1990</p>
+<p>Wiedemeier, T. H., J. T. Wilson, D. H. Kampbell, R. N. Miller, and J. E. Hansen, <em>Technical protocol for implementing intrinsic remediation with long-term monitoring for natural attenuation of fuel contamination dissolved in groundwater</em>. Volume II, Tech. Rep. AD-A–324247/6/XAB, Parsons Engineering Science, Inc., Denver, CO (United States), 1995.</p>
 
 
 
@@ -1215,16 +1483,16 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["content.code.annotate", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="assets/fontawesome.min.js"></script>
+        <script src="../../assets/fontawesome.min.js"></script>
       
-        <script src="assets/solid.min.js"></script>
+        <script src="../../assets/solid.min.js"></script>
       
-        <script src="assets/mathjax.js"></script>
+        <script src="../../assets/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -12,29 +12,31 @@
         <meta name="author" content="Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/modelsetup/">
       
       
+        <link rel="prev" href="../transporttheory/">
       
-        <link rel="next" href="introduction/introduction/">
+      
+        <link rel="next" href="../modelimplementations/">
       
       
         
       
       
-      <link rel="icon" href="assets/icon.png">
+      <link rel="icon" href="../../assets/icon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
-        <title>mibitrans</title>
+        <title>Transport Model Setup - mibitrans</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="assets/custom.css">
+      <link rel="stylesheet" href="../../assets/custom.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#documention-for-mibitrans-python-package" class="md-skip">
+        <a href="#transport-model-setup" class="md-skip">
           Skip to content
         </a>
       
@@ -100,9 +102,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="mibitrans" class="md-header__button md-logo" aria-label="mibitrans" data-md-component="logo">
+    <a href="../.." title="mibitrans" class="md-header__button md-logo" aria-label="mibitrans" data-md-component="logo">
       
-  <img src="assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Transport Model Setup
             
           </span>
         </div>
@@ -235,11 +237,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -258,7 +258,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="introduction/introduction/" class="md-tabs__link">
+      <a href="../../introduction/introduction/" class="md-tabs__link">
         
   
   
@@ -275,11 +275,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="background/transporttheory/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../transporttheory/" class="md-tabs__link">
           
   
   
@@ -301,7 +303,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="examples/example_walkthrough/" class="md-tabs__link">
+        <a href="../../examples/example_walkthrough/" class="md-tabs__link">
           
   
   
@@ -321,7 +323,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="development/development/" class="md-tabs__link">
+      <a href="../../development/development/" class="md-tabs__link">
         
   
   
@@ -342,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="reference/reference_data/" class="md-tabs__link">
+        <a href="../../reference/reference_data/" class="md-tabs__link">
           
   
   
@@ -378,9 +380,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="mibitrans" class="md-nav__button md-logo" aria-label="mibitrans" data-md-component="logo">
+    <a href="../.." title="mibitrans" class="md-nav__button md-logo" aria-label="mibitrans" data-md-component="logo">
       
-  <img src="assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     mibitrans
@@ -404,6 +406,157 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Background
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transporttheory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transport Theory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -423,7 +576,7 @@
   <span class="md-ellipsis">
     
   
-    Home
+    Transport Model Setup
   
 
     
@@ -434,14 +587,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="." class="md-nav__link md-nav__link--active">
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Home
+    Transport Model Setup
   
 
     
@@ -467,10 +620,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-mibitrans" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to use mibitrans
+        Overview
       
     </span>
   </a>
@@ -478,10 +631,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#source-superposition" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Source Superposition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-depletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Depletion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Source Depletion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source-depletion-rate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Depletion Rate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-conditions-with-source-adaptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boundary conditions with Source Adaptions
       
     </span>
   </a>
@@ -495,124 +698,6 @@
     </li>
   
 
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="introduction/introduction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Introduction
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Background
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Background
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="background/transporttheory/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Transport Theory
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
               
             
               
@@ -622,35 +707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/modelsetup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Transport Model Setup
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="background/modelimplementations/" class="md-nav__link">
+      <a href="../modelimplementations/" class="md-nav__link">
         
   
   
@@ -678,7 +735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/instantreaction/" class="md-nav__link">
+      <a href="../instantreaction/" class="md-nav__link">
         
   
   
@@ -706,7 +763,7 @@
   
   
     <li class="md-nav__item">
-      <a href="background/massbalance/" class="md-nav__link">
+      <a href="../massbalance/" class="md-nav__link">
         
   
   
@@ -799,7 +856,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/example_walkthrough/" class="md-nav__link">
+      <a href="../../examples/example_walkthrough/" class="md-nav__link">
         
   
   
@@ -827,7 +884,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/example_mibitrans_anatrans_comparison/" class="md-nav__link">
+      <a href="../../examples/example_mibitrans_anatrans_comparison/" class="md-nav__link">
         
   
   
@@ -862,7 +919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="development/development/" class="md-nav__link">
+      <a href="../../development/development/" class="md-nav__link">
         
   
   
@@ -951,7 +1008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_data/" class="md-nav__link">
+      <a href="../../reference/reference_data/" class="md-nav__link">
         
   
   
@@ -979,7 +1036,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_transport/" class="md-nav__link">
+      <a href="../../reference/reference_transport/" class="md-nav__link">
         
   
   
@@ -1007,7 +1064,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_analysis/" class="md-nav__link">
+      <a href="../../reference/reference_analysis/" class="md-nav__link">
         
   
   
@@ -1035,7 +1092,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/reference_visualize/" class="md-nav__link">
+      <a href="../../reference/reference_visualize/" class="md-nav__link">
         
   
   
@@ -1090,10 +1147,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-mibitrans" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to use mibitrans
+        Overview
       
     </span>
   </a>
@@ -1101,10 +1158,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#source-superposition" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Source Superposition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-depletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Depletion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Source Depletion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source-depletion-rate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Depletion Rate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-conditions-with-source-adaptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boundary conditions with Source Adaptions
       
     </span>
   </a>
@@ -1131,15 +1238,64 @@
   
 
 
-<h1 id="documention-for-mibitrans-python-package">Documention for <code>mibitrans</code> python package</h1>
-<h2 id="how-to-use-mibitrans">How to use mibitrans</h2>
-<p>A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena</p>
-<h2 id="installation">Installation</h2>
-<p>To install mibitrans from GitHub repository, do:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">git clone git@github.com:MiBiPreT/mibitrans.git</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">cd mibitrans</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">python -m pip install .</span>
-</code></pre></div>
+<h1 id="transport-model-setup">Transport Model Setup</h1>
+<h2 id="overview">Overview</h2>
+<p>The implemented models in the <em>mibitrans</em> package extend the solutions provided in the section <strong>Transport Theory</strong> in various aspects:</p>
+<ul>
+<li>Source superposition</li>
+<li>Source depletion</li>
+<li>instant reaction for degredation </li>
+</ul>
+<p>These adaptions can be applied to each of the transport models. The first two are outlined here, while the last one is outlined in a separate section on the <em>Instant Reaction Model</em>.</p>
+<hr />
+<h2 id="source-superposition">Source Superposition</h2>
+<p>Source geometry of PHC contamination after spill events typically shows a spatially extended source zone where concentrations decrease towards the margin. This effect can be accounted for in analytical modeling making use of the concept of source superposition. </p>
+<p>The source is split into <span class="arithmatex">\(n\)</span> zones of width <span class="arithmatex">\(2Y_i\)</span> and source concentration <span class="arithmatex">\(C_{0,i}\)</span> (<span class="arithmatex">\(i\)</span> represents the zone index). Specifically, the spatially extended source patch located at <span class="arithmatex">\(x=0\)</span> and <span class="arithmatex">\(Y&lt; y &lt; Y\)</span> is split into <span class="arithmatex">\(n\)</span> symmetric source zones in <span class="arithmatex">\(y\)</span> direction, where each source zone <span class="arithmatex">\(i\)</span> has a width <span class="arithmatex">\(2Y_i\)</span> (centered around <span class="arithmatex">\(y=0\)</span>) and a source strength <span class="arithmatex">\(C_i\)</span>. Consequently <span class="arithmatex">\(\sum_i Y_i = Y\)</span>. The values of <span class="arithmatex">\(C_i\)</span> are assumed to gradually decrease. We deliberately chose the source width and source thickness to be <span class="arithmatex">\(2Y\)</span> and <span class="arithmatex">\(2Z\)</span> centered around <span class="arithmatex">\(y=0\)</span> and <span class="arithmatex">\(z=0\)</span>, respectively. This is different from other source boundary definitions (using source dimensions of <span class="arithmatex">\(Y/2&lt; y &lt; Y/2\)</span>) often found in respective literature.</p>
+<p>The linear character of the ADE allows to apply the principle of superposition. The concentration distribution of the overall plume <span class="arithmatex">\(C(x,y,t)\)</span> can be calculated as sum of the individual concentration calculated for each source zone as outlined below. </p>
+<hr />
+<h2 id="source-depletion">Source Depletion</h2>
+<h3 id="concept">Concept</h3>
+<p>The source strength <span class="arithmatex">\(C_s(t)\)</span>, as defined in the boundary conditions of the ADE (section <strong>Transport Theory</strong>) accounts for a potential change of source concentration over time. Assuming a source depletion rate (also called source decay rate) <span class="arithmatex">\(\gamma_s\)</span> and a source concentration of <span class="arithmatex">\(C_0\)</span> at <span class="arithmatex">\(t=0\)</span>, it is defined as</p>
+<div class="arithmatex">\[
+C_s(t) = C_0 \exp{\left(\gamma_s t\right)}    
+\]</div>
+<p>In literature, this process is also often called source decay - we prefer depletion to avoid mix up of decay processes within the contaminant plume.</p>
+<h3 id="source-depletion-rate">Source Depletion Rate</h3>
+<p>The source depletion coefficient <span class="arithmatex">\(\gamma_s\)</span> is dependent on the amount of contaminant flux out of the source zone. If an initial source mass <span class="arithmatex">\(m_\mathrm{s,0}\)</span> is defined and the source concentration <span class="arithmatex">\(C_{0,i}\)</span> for each source zone <span class="arithmatex">\(i\)</span>, i.e. the contaminant concentration released to the groundwater, then the source depletion coefficient is calculated accordingly:</p>
+<div class="arithmatex">\[
+\gamma_s = \frac{Q \cdot \bar{C_{0}}}{m_\mathrm{s,0}}
+\]</div>
+<p>where <span class="arithmatex">\(\bar{C_{0}} = \frac{1}{Y}\sum_i Y_i\cdot C_{0,i}\)</span> is the (weighted) average source concentration, <span class="arithmatex">\(Q = 4\cdot v \cdot \theta_e \cdot Y \cdot Z\)</span> is the volumetric flow rate (other quantities see Table~XX.</p>
+<p>If the source mass is considered to be infinite, <span class="arithmatex">\(\gamma_s\)</span> resolves to zero, and therefore, no source depletion is considered.</p>
+<hr />
+<h2 id="boundary-conditions-with-source-adaptions">Boundary conditions with Source Adaptions</h2>
+<p>The implemented transport models in the <em>mibitrans</em> package make use of boundary conditions including the source adaptions. Starting point remains the 3D advection–dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in the <span class="arithmatex">\(x\)</span>-direction within a homogeneous isotropic porous medium:</p>
+<div class="arithmatex">\[
+R\frac{\partial C}{\partial t}
+=
+- v\frac{\partial C}{\partial x}
++ D_x \frac{\partial^2 C}{\partial x^2}
++ D_y \frac{\partial^2 C}{\partial y^2}
++ D_z \frac{\partial^2 C}{\partial z^2}
+- \mu C
+\]</div>
+<p>We have <span class="arithmatex">\(n\)</span> zones of width <span class="arithmatex">\(2Y_i\)</span> and source concentration <span class="arithmatex">\(C_{0,i}\)</span> in each of the zones <span class="arithmatex">\(i\)</span>. The actual boundary condition for each source zone <span class="arithmatex">\(i\)</span> reads</p>
+<div class="arithmatex">\[
+C_i(x=0, -Y_i^*&lt;y&lt;Y_i^*, -Z&lt;z&lt;Z; t) = C_{0,i}^*\,\exp{\left(\gamma_s t\right)}
+\]</div>
+<p>where <span class="arithmatex">\(Y_i^*\)</span> is  the net source width and <span class="arithmatex">\(C_{0,i}^*\)</span> is the net source concentration defined as:</p>
+<div class="arithmatex">\[
+Y_i^* = \sum_j^i Y_j 
+\]</div>
+<p>and</p>
+<div class="arithmatex">\[
+C_{0,i}^* = C_{0,i} - C_{0,i+1}
+\]</div>
+<p>where the latter does not apply to the most outer source zone, where <span class="arithmatex">\(C_n^* = C_n\)</span>.</p>
+<p>The contaminant concentration <span class="arithmatex">\(C_i\)</span> for each source zone <span class="arithmatex">\(i\)</span> as result of transport can be calculated with any of the ADE solutions as presented in section <strong>Transport Theory</strong>. The concentration distribution of the overall plume <span class="arithmatex">\(C(x,y,t)\)</span> is the sum of the individual concentrations calculated for each source zone:</p>
+<div class="arithmatex">\[
+C(x,y,t) = \sum_i^n C_i(x,y,t)
+\]</div>
 
 
 
@@ -1215,16 +1371,16 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["content.code.annotate", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="assets/fontawesome.min.js"></script>
+        <script src="../../assets/fontawesome.min.js"></script>
       
-        <script src="assets/solid.min.js"></script>
+        <script src="../../assets/solid.min.js"></script>
       
-        <script src="assets/mathjax.js"></script>
+        <script src="../../assets/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

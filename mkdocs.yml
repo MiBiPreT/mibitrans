@@ -11,7 +11,11 @@ nav:
   - Home: index.md
   - Introduction: introduction/introduction.md
   - Background:
-    - Bioscreen: background/bioscreen.md
+    - Transport Theory: background/transporttheory.md
+    - Transport Model Setup: background/modelsetup.md
+    - Model implementations: background/modelimplementations.md
+    - Instant Reaction Model: background/instantreaction.md
+    - Mass Balance: background/massbalance.md
   - Examples:
     - Walkthrough: examples/example_walkthrough.ipynb
     - Comparison Mibitrans-Anatrans: examples/example_mibitrans_anatrans_comparison.ipynb 

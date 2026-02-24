@@ -313,6 +313,16 @@ class Anatrans(Transport3D):
         Raises:
             TypeError : If input is not of the correct Dataclass.
 
+        Example::
+
+            obj = Anatrans(
+                hydrological_parameters=HydrologicalParameters(),
+                attenuation_parameters=AttenuationParameters(),
+                source_parameters=SourceParameters(),
+                model_parameters=ModelParameters()
+            )
+            results = obj.run()
+
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if self._hyd_pars.diffusion != 0:
@@ -470,6 +480,16 @@ class Bioscreen(Anatrans):
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
+
+        Example::
+
+            obj = Bioscreen(
+                hydrological_parameters=HydrologicalParameters(),
+                attenuation_parameters=AttenuationParameters(),
+                source_parameters=SourceParameters(),
+                model_parameters=ModelParameters()
+            )
+            results = obj.run()
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)

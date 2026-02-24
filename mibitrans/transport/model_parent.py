@@ -348,6 +348,12 @@ class Results:
             plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
             plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
             mass_balance : Return a mass balance object with source and plume characteristics at given time(s).
+
+        Example::
+
+            results = model_object.run()
+            print(results.centerline())
+
         """
         self._model_type = model.__class__
         self._short_description = model.short_description
@@ -647,6 +653,12 @@ class Results:
                 biodegradation capacity subtracted, in [g].
             electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
                 Only for instant reaction.
+
+        Example::
+
+            mb = results.mass_balance(time = 365)
+            print(mb.plume_mass)
+
         """
         return MassBalance(self, time, verbose)
 

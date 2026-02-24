@@ -6,7 +6,7 @@ The implemented models in the *mibitrans* package extend the solutions provided 
 
 * Source superposition
 * Source depletion
-* instant reaction for degredation 
+* Instant reaction for degradation 
 
 These adaptions can be applied to each of the transport models. The first two are outlined here, while the last one is outlined in a separate section on the *Instant Reaction Model*.
 
@@ -15,7 +15,7 @@ These adaptions can be applied to each of the transport models. The first two ar
 ## Source Superposition
 Source geometry of PHC contamination after spill events typically shows a spatially extended source zone where concentrations decrease towards the margin. This effect can be accounted for in analytical modeling making use of the concept of source superposition. 
 
-The source is split into $n$ zones of width $2Y_i$ and source concentration $C_{0,i}$ ($i$ represents the zone index). Specifically, the spatially extended source patch located at $x=0$ and $Y< y < Y$ is split into $n$ symmetric source zones in $y$ direction, where each source zone $i$ has a width $2Y_i$ (centered around $y=0$) and a source strength $C_i$. Consequently $\sum_i Y_i = Y$. The values of $C_i$ are assumed to gradually decrease. We deliberately chose the source width and source thickness to be $2Y$ and $2Z$ centered around $y=0$ and $z=0$, respectively. This is different from other source boundary definitions (using source dimensions of $Y/2< y < Y/2$) often found in respective literature.
+The source is split into $n$ zones of width $2Y_i$ and source concentration $C_{0,i}$ ($i$ represents the zone index). Specifically, the spatially extended source patch located at $x=0$ and $Y \lt y \lt Y$ is split into $n$ symmetric source zones in $y$ direction, where each source zone $i$ has a width $2Y_i$ (centered around $y=0$) and a source strength $C_i$. Consequently $\sum_i Y_i = Y$. The values of $C_i$ are assumed to gradually decrease. We deliberately chose the source width and source thickness to be $2Y$ and $2Z$ centered around $y=0$ and $z=0$, respectively. This is different from other source boundary definitions (using source dimensions of $Y/2 \lt y \lt Y/2$) often found in respective literature.
 
 The linear character of the ADE allows to apply the principle of superposition. The concentration distribution of the overall plume $C(x,y,t)$ can be calculated as sum of the individual concentration calculated for each source zone as outlined below. 
 
@@ -41,7 +41,7 @@ $$
 \gamma_s = \frac{Q \cdot \bar{C_{0}}}{m_\mathrm{s,0}}
 $$
 
-where $\bar{C_{0}} = \frac{1}{Y}\sum_i Y_i\cdot C_{0,i}$ is the (weighted) average source concentration, $Q = 4\cdot v \cdot \theta_e \cdot Y \cdot Z$ is the volumetric flow rate (other quantities see Table~XX.
+where $\bar{C_{0}} = \frac{1}{Y}\sum_i Y_i\cdot C_{0,i}$ is the (weighted) average source concentration, $Q = 4\cdot v \cdot \theta_e \cdot Y \cdot Z$ is the volumetric flow rate (other quantities see the parameters section).
 
 If the source mass is considered to be infinite, $\gamma_s$ resolves to zero, and therefore, no source depletion is considered.
 
@@ -54,17 +54,17 @@ The implemented transport models in the *mibitrans* package make use of boundary
 $$
 R\frac{\partial C}{\partial t}
 =
-- v\frac{\partial C}{\partial x}
-+ D_x \frac{\partial^2 C}{\partial x^2}
-+ D_y \frac{\partial^2 C}{\partial y^2}
-+ D_z \frac{\partial^2 C}{\partial z^2}
-- \mu C
+-v\frac{\partial C}{\partial x}
++D_x \frac{\partial^2 C}{\partial x^2}
++D_y \frac{\partial^2 C}{\partial y^2}
++D_z \frac{\partial^2 C}{\partial z^2}
+-\mu C
 $$
 
 We have $n$ zones of width $2Y_i$ and source concentration $C_{0,i}$ in each of the zones $i$. The actual boundary condition for each source zone $i$ reads
 
 $$
-C_i(x=0, -Y_i^*<y<Y_i^*, -Z<z<Z; t) = C_{0,i}^*\,\exp{\left(\gamma_s t\right)}
+C_i(x=0, -Y_i^* \lt y \lt Y_i^*, -Z \lt z \lt Z; t) = C_{0,i}^*\,\exp{\left(\gamma_s t\right)}
 $$
 
 where $Y_i^*$ is  the net source width and $C_{0,i}^*$ is the net source concentration defined as:
@@ -79,7 +79,7 @@ $$
 C_{0,i}^* = C_{0,i} - C_{0,i+1}
 $$
 
-where the latter does not apply to the most outer source zone, where $C_n^* = C_n$.
+where the latter does not apply to the most outer source zone, where $C_{0,n}^* = C_{0,n}$.
 
 The contaminant concentration $C_i$ for each source zone $i$ as result of transport can be calculated with any of the ADE solutions as presented in section **Transport Theory**. The concentration distribution of the overall plume $C(x,y,t)$ is the sum of the individual concentrations calculated for each source zone:
 

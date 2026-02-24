@@ -73,7 +73,6 @@ $$
 C(x,y,t)
 &=
 \sum_{i=1}^{n}
-% source term
 \left\{
 \frac{C^*_{0,i}}{8}
 \exp \left(
@@ -81,7 +80,6 @@ C(x,y,t)
 \right)
 \right.
 \\
-% x-direction advection and dispersion
 &\quad \cdot
 \left[
 \exp \left(
@@ -93,7 +91,6 @@ C(x,y,t)
 \right)
 \right.
 \\
-% second x-term
 &\quad \ \,+
 \left.
 \exp \left(
@@ -105,7 +102,6 @@ C(x,y,t)
 \right)
 \right]
 \\
-% y-direction dispersion term
 &\quad \cdot
 \left[
 \operatorname{erf} \left(
@@ -116,7 +112,6 @@ C(x,y,t)
 \right)
 \right]
 \\
-% z-direction dispersion term
 &\quad \cdot
 \left.
 \left[

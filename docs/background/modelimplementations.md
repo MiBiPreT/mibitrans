@@ -4,10 +4,9 @@ Find here the equations that have been implemented in the *mibitrans* package as
 
 ## *mibitrans* Model
 
-The fully exact solution of the ADE accounting for a non-constant, but time-dependent source of exponential decay has been presented in *Karanovic et al., 2007]* as extension of the solution of *Wexler, 1992*.  
+The fully exact solution of the ADE accounting for a non-constant, time-dependent source concentrations has been presented in *Karanovic et al., [2007]* as extension of the solution of *Wexler, [1992]*.  
 
-
-The equation implemented in the *mibitrans* model class, also accounts for the option of source superposition with different source values $C^*_{0,i}$, $i = 1,\ldots,n$. There is no resolution in $z$ direction implemented, but transport is always evaluated at $z=0$. The implemented equation reads:
+The equation implemented in the *mibitrans* model class, also accounts for the option of source superposition with different source values $C^*_{0,i}$, $i = 1,\ldots,n$. There is no resolution in $z$ direction implemented, thus transport is always evaluated at $z=0$. The implemented equation reads:
 
 The fully exact ADE solution accounting for time-dependent exponential source depletion is:
 
@@ -60,13 +59,13 @@ d\tau
 \end{aligned}
 $$
 
-with $v_R = \frac{v}{R}$ being the retarded velocity of contaminant transport with $v = \frac{Ki}{\theta_e}$ being the groundwater flow velocity. The meaning of the other parameters are repeated in the Table in **Overview Parameters**.
+with $v_R = \frac{v}{R}$ being the retarded velocity of contaminant transport with $v = \frac{Ki}{\theta_e}$ being the groundwater flow velocity. The meaning of the other parameters are repeated in the table in **Overview Parameters**.
 
 ---
 
 ## *anatrans* Model
 
-The equation implemented in the *anatrans* model class is based on the Intregral  solution (section Transport Theory) that uses a slightly simplified, closed analytical form. As the *mibitrans* model class, it does no resolve the $z$ direction, but transport is always evaluated at $z=0$ and accounts for source depletion and source superposition. The implemented equation reads:
+The equation implemented in the *anatrans* model class is based on the intregral solution (section Transport Theory) that uses a slightly simplified, closed analytical form. As the *mibitrans* model class, it does not resolve the $z$ direction, but transport is always evaluated at $z=0$ and accounts for source depletion and source superposition. The implemented equation reads:
 
 $$
 \begin{aligned}
@@ -134,7 +133,7 @@ $$
 
 that accounts for the advective components of the source depletion.
 
-The *anatrans* model equation is identical to Equation of the Integral Approximation when substituting $P$ with $\tilde P$ and $C_0$ with $C_0 \exp(\gamma_s t)$ and applying the source superposition.
+The *anatrans* model equation is identical to equation of the Integral Approximation when substituting $P$ with $\tilde P$ and $C_0$ with $C_0 \exp(\gamma_s t)$ and applying the source superposition.
 
 ---
 

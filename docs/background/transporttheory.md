@@ -20,7 +20,7 @@ $$
 
 Here $C(x,y,z,t)$ is the contaminant concentration in space $(x \in [0,\infty],y \in [-\infty,\infty],z \in [-\infty,\infty])$ and time $t\geq 0$, $R$ is the linear equilibrium retardation factor, $v$ is the uniform groundwater velocity in $x$-direction. $r_{sinks} = -\mu C$ represents a sink term as result to decay/degradation assuming linear decay at the rate  $\mu$. Note that no decay is naturally included by $\mu = 0$.
 
-$D_{x}$, $D_{y}$ and $D_{y}$ are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. Dispersion is modeled following the law of \cite{Scheidegger61}, simplified to the main flow directions, with $D_i = \alpha_i v$ ($i \in \{x,y,z\}$) where $\alpha_x$, $\alpha_y$ and $\alpha_z$ represent longitudinal, transverse horizontal and transverse vertical dispersivity, respectively.
+$D_{x}$, $D_{y}$ and $D_{y}$ are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. Dispersion is modeled following the law of *Scheidegger, [1961]*, simplified to the main flow directions, with $D_i = \alpha_i v$ ($i \in \{x,y,z\}$) where $\alpha_x$, $\alpha_y$ and $\alpha_z$ represent longitudinal, transverse horizontal and transverse vertical dispersivity, respectively.
 
 ---
 
@@ -74,7 +74,7 @@ $$
 
 ### Exact Solution
 
-*Wexler [1992]* presented an exact analytical solution to the transport equation (ADE) under the given boundary conditions given without adsorption and without source depletion. *West et al, [2007]* reports the solution including linear equilibrium adsorption with:
+*Wexler, [1992]* presented an exact analytical solution to the transport equation (ADE) under the given boundary conditions without adsorption and without source depletion. *West et al, [2007]* reports the solution including linear equilibrium adsorption with:
 
 $$
 \begin{equation}\tag{7}
@@ -123,7 +123,7 @@ with $\tau$ being the time integration variable and $\operatorname{erf}$ being t
 
 ### Integral Approximation
 
-The exact solution of the ADE in Eq.7 can be simplified into a fully analytical form by splitting the effect of time on the different directions following the principle $C(x,y,z,t)/C_0 = C(x,t)\cdot C(y,x)\cdot C(z,x)/C_0$. Specifically, we apply to Eq.7 the substitution $\tau = x/v$ (time traveled of advection front) in the error-function terms for the $y$ and $z$ directions. The remaining integral in $\tau$ in Eq.7 for the transport in $x$-direction can be solved as e.g. shown by *Bear [1979]*. The resulting approximate transport solution is:
+The exact solution of the ADE in Eq.7 can be simplified into a fully analytical form by splitting the effect of time on the different directions following the principle $C(x,y,z,t)/C_0 = C(x,t)\cdot C(y,x)\cdot C(z,x)/C_0$. Specifically, we apply to Eq.7 the substitution $\tau = x/v$ (time traveled of advection front) in the error-function terms for the $y$ and $z$ directions. The remaining integral in $\tau$ in Eq.7 for the transport in $x$-direction can be solved as e.g. shown by *Bear, [1979]*. The resulting approximate transport solution is:
 
 $$
 \begin{equation}\tag{8}
@@ -181,13 +181,11 @@ $$
 P = \sqrt{1 + \frac{4\mu R\alpha_x}{v}}
 $$
 
-The equation provides a closed-form analytical, but approximate solution to the ADE due to the approximation of concentrations in transverse direction. It is thus interesting for screening tool given speed up of calculation, particularly when concentrations in transverse direction are of minor interest.
-
-
+The equation provides a closed-form analytical, but approximate solution to the ADE due to the assumptions made for dispersion in the transverse direction. It is thus interesting for screening tool given speed up of calculation, particularly when concentrations in transverse direction are of minor interest.
 
 ### Bioscreen Solution
 
-*Bioscreen* *[Newell et al, 1996, 1997]* makes use of the approximate analytical solution of *Domenico [1987]* in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.
+*Bioscreen* *[Newell et al, 1996, 1997]* makes use of the approximate analytical solution of *Domenico, [1987]* in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.
 
 The equation of use in *Bioscreen* for the case of linear decay of the contaminant within the plume  is given by:
 
@@ -255,6 +253,8 @@ Newell, C. J., R. K. McLeod, and J. R. Gonzales, *BIOSCREEN Natural Attenuation 
 Newell, C. J., R. K. McLeod, and J. R. Gonzales, *BIOSCREEN Natural Attenuation Decision Support System Version 1.4 Revisions*, Tech. rep., US EPA, 1997.
 
 Sauty, J.-P., *An analysis of hydrodispersive transfer in aquifers*, Water Resour. Res., 16, 145–158, doi:10.1029/WR016i001p00145, 1980.
+
+Scheidegger, A. E., *General theory of dispersion in porous media*, Journal of Geophysical Research, 66(10), 3273-3278, 1961.
 
 West, M. R., B. H. Kueper, and M. J. Ungs, *On the use and error of approximation in
 the Domenico (1987) solution*, Groundwater, 45 (2), 126–135, doi:10.1111/j.1745-6584.2006.00280.x, 2007.

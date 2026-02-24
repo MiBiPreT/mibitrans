@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#transport-theory" class="md-skip">
+        <a href="#transport" class="md-skip">
           Skip to content
         </a>
       
@@ -1272,10 +1272,11 @@
   
 
 
-<h1 id="transport-theory">Transport Theory</h1>
+<h1 id="transport">Transport</h1>
 <h2 id="contaminant-transport-equation">Contaminant Transport Equation</h2>
 <p>Transport of contaminants in the subsurface is modeled based on the three-dimensional advection–dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in the <span class="arithmatex">\(x\)</span>-direction within a homogeneous isotropic porous medium:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{1}
 \begin{aligned}
 R\frac{\partial C}{\partial t}
 =
@@ -1285,141 +1286,155 @@ R\frac{\partial C}{\partial t}
 +D_z \frac{\partial^2 C}{\partial z^2}
 -\mu C
 \end{aligned}
+\end{equation}
 \]</div>
 <p>Here <span class="arithmatex">\(C(x,y,z,t)\)</span> is the contaminant concentration in space <span class="arithmatex">\((x \in [0,\infty],y \in [-\infty,\infty],z \in [-\infty,\infty])\)</span> and time <span class="arithmatex">\(t\geq 0\)</span>, <span class="arithmatex">\(R\)</span> is the linear equilibrium retardation factor, <span class="arithmatex">\(v\)</span> is the uniform groundwater velocity in <span class="arithmatex">\(x\)</span>-direction. <span class="arithmatex">\(r_{sinks} = -\mu C\)</span> represents a sink term as result to decay/degradation assuming linear decay at the rate  <span class="arithmatex">\(\mu\)</span>. Note that no decay is naturally included by <span class="arithmatex">\(\mu = 0\)</span>.</p>
-<p><span class="arithmatex">\(D_{x}\)</span>, <span class="arithmatex">\(D_{y}\)</span> and <span class="arithmatex">\(D_{y}\)</span> are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. Dispersion is modeled following the law of \cite{Scheidegger61}, simplified to the main flow directions, with <span class="arithmatex">\(D_i = \alpha_i v\)</span> (<span class="arithmatex">\(i \in \{x,y,z\}\)</span>) where <span class="arithmatex">\(\alpha_x\)</span>, <span class="arithmatex">\(\alpha_y\)</span> and <span class="arithmatex">\(\alpha_z\)</span> represent longitudinal, transverse horizontal and transverse vertical dispersivity, respectively.</p>
+<p><span class="arithmatex">\(D_{x}\)</span>, <span class="arithmatex">\(D_{y}\)</span> and <span class="arithmatex">\(D_{y}\)</span> are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. Dispersion is modeled following the law of <em>Scheidegger, [1961]</em>, simplified to the main flow directions, with <span class="arithmatex">\(D_i = \alpha_i v\)</span> (<span class="arithmatex">\(i \in \{x,y,z\}\)</span>) where <span class="arithmatex">\(\alpha_x\)</span>, <span class="arithmatex">\(\alpha_y\)</span> and <span class="arithmatex">\(\alpha_z\)</span> represent longitudinal, transverse horizontal and transverse vertical dispersivity, respectively.</p>
 <hr />
 <h3 id="boundary-conditions">Boundary Conditions</h3>
 <p>The contaminant source is modeled as a continuous planar block located at <span class="arithmatex">\(x=0\)</span> with width <span class="arithmatex">\(2Y\)</span> and thickness <span class="arithmatex">\(2Z\)</span>:</p>
 <div class="arithmatex">\[
-C(0, -Y&lt;y&lt;Y, -Z&lt;z&lt;Z; t) = C_s(t)
+\begin{equation}\tag{2}
+C(0, -Y \lt y \lt Y, -Z \lt z \lt Z; t) = C_s(t)
+\end{equation}
 \]</div>
 <p>Far-field condition:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{3}
 \lim_{\sqrt{x^2+y^2+z^2}\to\infty} C(r,t) = 0
+\end{equation}
 \]</div>
 <p>Zero-gradient conditions at infinity:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{4}
 \frac{\partial C}{\partial x} \to 0, \quad
 \frac{\partial C}{\partial y} \to 0, \quad
 \frac{\partial C}{\partial z} \to 0
+\end{equation}
 \]</div>
 <p>Initial condition:</p>
 <div class="arithmatex">\[
+\begin{equation} \tag{5}
 C(x,y,z,0)=0
+\end{equation}
 \]</div>
 <p>If no source depletion is assumed:</p>
 <div class="arithmatex">\[
+\begin{equation} \tag{6}
 C_s(t) = C_0
+\end{equation}
 \]</div>
 <hr />
 <h2 id="solutions-to-the-transport-equation">Solutions to the Transport Equation</h2>
 <h3 id="exact-solution">Exact Solution</h3>
-<p><em>Wexler [1992]</em> presented an exact analytical solution to the transport equation (ADE) under the given boundary conditions given without adsorption and without source depletion. <em>West et al, [2007]</em> reports the solution including linear equilibrium adsorption with:</p>
+<p><em>Wexler, [1992]</em> presented an exact analytical solution to the transport equation (ADE) under the given boundary conditions without adsorption and without source depletion. <em>West et al, [2007]</em> reports the solution including linear equilibrium adsorption with:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{7}
+\begin{aligned}
 C(x,y,z,t)
-=
+&amp;=
 \frac{C_0 x}{8\sqrt{\pi \alpha_x v/R}}
+\\
+&amp;\quad \cdot
 \int_0^t
 \tau^{-3/2}
 \exp\left(
 -\mu\tau
--
-\frac{(x-v\tau/R)^2}{4\alpha_x v\tau/R}
+-\frac{(x-v\tau/R)^2}{4\alpha_x v\tau/R}
 \right)
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp;\quad \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{y+Y}{2\sqrt{D_y\tau/R}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{y-Y}{2\sqrt{D_y\tau/R}}
 \right)
 \right]
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp;\quad \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{z+Z}{2\sqrt{D_z\tau/R}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{z-Z}{2\sqrt{D_z\tau/R}}
 \right)
 \right]
 d\tau
+\end{aligned}
+\end{equation}
 \]</div>
 <p>with <span class="arithmatex">\(\tau\)</span> being the time integration variable and <span class="arithmatex">\(\operatorname{erf}\)</span> being the error-function. The solution requires numerical integration which can make its application in screening tools less attractive given the higher computational effort and duration of calculation.</p>
 <h3 id="integral-approximation">Integral Approximation</h3>
-<p>The exact solution of the ADE in Eq.~\eqref{eq:03_wexler} can be simplified into a fully analytical form by splitting the effect of time on the different directions following the principle <span class="arithmatex">\(C(x,y,z,t)/C_0 = C(x,t)\cdot C(y,x)\cdot C(z,x)/C_0\)</span>. Specifically, we apply to Eq.~\eqref{eq:03_wexler} the substitution <span class="arithmatex">\(\tau = x/v\)</span> (time traveled of advection front) in the error-function terms for the <span class="arithmatex">\(y\)</span> and <span class="arithmatex">\(z\)</span> directions. The remaining integral in <span class="arithmatex">\(\tau\)</span> in Eq.~\eqref{eq:03_wexler} for the transport in <span class="arithmatex">\(x\)</span>-direction can be solved as e.g. shown by \cite{Bear79}. The resulting approximate transport solution is:</p>
+<p>The exact solution of the ADE in Eq.7 can be simplified into a fully analytical form by splitting the effect of time on the different directions following the principle <span class="arithmatex">\(C(x,y,z,t)/C_0 = C(x,t)\cdot C(y,x)\cdot C(z,x)/C_0\)</span>. Specifically, we apply to Eq.7 the substitution <span class="arithmatex">\(\tau = x/v\)</span> (time traveled of advection front) in the error-function terms for the <span class="arithmatex">\(y\)</span> and <span class="arithmatex">\(z\)</span> directions. The remaining integral in <span class="arithmatex">\(\tau\)</span> in Eq.7 for the transport in <span class="arithmatex">\(x\)</span>-direction can be solved as e.g. shown by <em>Bear, [1979]</em>. The resulting approximate transport solution is:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{8}
+\begin{aligned}
 C(x,y,z,t)
-=
+&amp;=
 \frac{C_0}{8}
 \left[
 \exp\left(\frac{x(1-P)}{2\alpha_x}\right)
-\operatorname{erfc
-}
+\operatorname{erfc}
 \left(
 \frac{x - P v t/R}
 {2\sqrt{\alpha_x v t/R}}
 \right)
-+
-\exp\left(\frac{x(1+P)}{2\alpha_x}\right)
+\right.
+\\
+&amp;\qquad \quad \ \left. +\exp\left(\frac{x(1+P)}{2\alpha_x}\right)
 \operatorname{erfc}
 \left(
 \frac{x + P v t/R}
 {2\sqrt{\alpha_x v t/R}}
 \right)
 \right]
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp;\qquad \ \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{y+Y}{2\sqrt{\alpha_y x}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{y-Y}{2\sqrt{\alpha_y x}}
 \right)
 \right]
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp; \qquad \ \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{z+Z}{2\sqrt{\alpha_z x}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{z-Z}{2\sqrt{\alpha_z x}}
 \right)
 \right]
+\end{aligned}
+\end{equation}
 \]</div>
 <p>with</p>
 <div class="arithmatex">\[
 P = \sqrt{1 + \frac{4\mu R\alpha_x}{v}}
 \]</div>
-<p>The equation provides a closed-form analytical, but approximate solution to the ADE due to the approximation of concentrations in transverse direction. It is thus interesting for screening tool given speed up of calculation, particularly when concentrations in transverse direction are of minor interest.</p>
+<p>The equation provides a closed-form analytical, but approximate solution to the ADE due to the assumptions made for dispersion in the transverse direction. It is thus interesting for screening tool given speed up of calculation, particularly when concentrations in transverse direction are of minor interest.</p>
 <h3 id="bioscreen-solution">Bioscreen Solution</h3>
-<p><em>Bioscreen</em> <em>[Newell et al, 1996, 1997]</em> makes use of the approximate analytical solution of <em>Domenico and &hellip;[1987]</em> in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.</p>
+<p><em>Bioscreen</em> <em>[Newell et al, 1996, 1997]</em> makes use of the approximate analytical solution of <em>Domenico, [1987]</em> in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.</p>
 <p>The equation of use in <em>Bioscreen</em> for the case of linear decay of the contaminant within the plume  is given by:</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{9}
+\begin{aligned}
 C(x,y,z,t)
-=
+&amp;=
 \frac{C_0}{8}
 \exp
 \left[
@@ -1430,42 +1445,46 @@ C(x,y,z,t)
 \frac{x - P v t/R}
 {2\sqrt{\alpha_x v t/R}}
 \right]
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp;\quad \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{y+Y}{2\sqrt{\alpha_y x}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{y-Y}{2\sqrt{\alpha_y x}}
 \right)
 \right]
-\]</div>
-<div class="arithmatex">\[
-\times
+\\
+&amp;\quad \cdot
 \left[
 \operatorname{erf}
 \left(
 \frac{z+Z}{2\sqrt{\alpha_z x}}
 \right)
--
-\operatorname{erf}
+-\operatorname{erf}
 \left(
 \frac{z-Z}{2\sqrt{\alpha_z x}}
 \right)
 \right]
+\end{aligned}
+\end{equation}
 \]</div>
-<p>The <em>Bioscreen</em>-Equation is a simplification of the Integral Solution as it truncates the second term in the sum that describes transport in horizontal direction due to advection and dispersion. Truncating the horizontal transport term was presented by <em>Sauty, [1980]</em> in the context of the one-dimensional ADE with constant input. He showed that the approximation is close to the non-truncated solution for Peclet-numbers greater then 100, but deviates for Peclet numbers &lt;100 which becomes significant with reducing Peclet numbers. Given that macrodispersion due to aquifer heterogeneity can have significant effect the amount of dispersion, Peclet numbers of <span class="arithmatex">\(&gt;100\)</span> are not guaranteed in field situation, making the approximation questionable as also discussed by <em>West et al., [2007]</em>. Modern options of computation also make it unnecessary.</p>
+<p>with</p>
+<div class="arithmatex">\[
+P = \sqrt{1 + \frac{4\mu R\alpha_x}{v}}
+\]</div>
+<p>The <em>Bioscreen</em>-Equation is a simplification of the Integral Solution as it truncates the second term in the sum that describes transport in horizontal direction due to advection and dispersion. Truncating the horizontal transport term was presented by <em>Sauty, [1980]</em> in the context of the one-dimensional ADE with constant input. He showed that the approximation is close to the non-truncated solution for Peclet-numbers greater then 100, but deviates for Peclet numbers <span class="arithmatex">\(\lt 100\)</span> which becomes significant with reducing Peclet numbers. Given that macrodispersion due to aquifer heterogeneity can have significant effect the amount of dispersion, Peclet numbers of <span class="arithmatex">\(&gt;100\)</span> are not guaranteed in field situation, making the approximation questionable as also discussed by <em>West et al., [2007]</em>. Modern options of computation also make it unnecessary.</p>
 <hr />
 <h2 id="references">References</h2>
+<p>Bear, K., <em>Hydraulics of groundwater</em>, London ; New York :: McGraw-Hill International Book Co., 1979.</p>
 <p>Domenico, P. A., <em>An analytical model for multidimensional transport of a decaying contaminant species</em>, Journal of Hydrology, 91 (1), 49–58, doi:10.1016/0022-1694(87)90127-2, 1987.</p>
 <p>Newell, C. J., R. K. McLeod, and J. R. Gonzales, <em>BIOSCREEN Natural Attenuation Decision Support System User’s Manual Version 1.3</em>, Tech. Rep. EPA/600/R-96/087, US EPA, 1996.</p>
 <p>Newell, C. J., R. K. McLeod, and J. R. Gonzales, <em>BIOSCREEN Natural Attenuation Decision Support System Version 1.4 Revisions</em>, Tech. rep., US EPA, 1997.</p>
 <p>Sauty, J.-P., <em>An analysis of hydrodispersive transfer in aquifers</em>, Water Resour. Res., 16, 145–158, doi:10.1029/WR016i001p00145, 1980.</p>
+<p>Scheidegger, A. E., <em>General theory of dispersion in porous media</em>, Journal of Geophysical Research, 66(10), 3273-3278, 1961.</p>
 <p>West, M. R., B. H. Kueper, and M. J. Ungs, <em>On the use and error of approximation in
 the Domenico (1987) solution</em>, Groundwater, 45 (2), 126–135, doi:10.1111/j.1745-6584.2006.00280.x, 2007.</p>
 <p>Wexler, E. J., <em>Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow</em>, Tech. Rep. 03-B7, U.S. G.P.O. ; doi:10.3133/twri03B7, 1992</p>

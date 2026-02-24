@@ -1197,8 +1197,8 @@
 <h1 id="transport-model-implementations">Transport Model Implementations</h1>
 <p>Find here the equations that have been implemented in the <em>mibitrans</em> package as model classes based on analytical solutions of the ADE under initial and boundary conditions as outlined in the section <strong>Model Setup</strong>.</p>
 <h2 id="mibitrans-model"><em>mibitrans</em> Model</h2>
-<p>The fully exact solution of the ADE accounting for a non-constant, but time-dependent source of exponential decay has been presented in <em>Karanovic et al., 2007]</em> as extension of the solution of <em>Wexler, 1992</em>.  </p>
-<p>The equation implemented in the <em>mibitrans</em> model class, also accounts for the option of source superposition with different source values <span class="arithmatex">\(C^*_{0,i}\)</span>, <span class="arithmatex">\(i = 1,\ldots,n\)</span>. There is no resolution in <span class="arithmatex">\(z\)</span> direction implemented, but transport is always evaluated at <span class="arithmatex">\(z=0\)</span>. The implemented equation reads:</p>
+<p>The fully exact solution of the ADE accounting for a non-constant, time-dependent source concentrations has been presented in <em>Karanovic et al., [2007]</em> as extension of the solution of <em>Wexler, [1992]</em>.  </p>
+<p>The equation implemented in the <em>mibitrans</em> model class, also accounts for the option of source superposition with different source values <span class="arithmatex">\(C^*_{0,i}\)</span>, <span class="arithmatex">\(i = 1,\ldots,n\)</span>. There is no resolution in <span class="arithmatex">\(z\)</span> direction implemented, thus transport is always evaluated at <span class="arithmatex">\(z=0\)</span>. The implemented equation reads:</p>
 <p>The fully exact ADE solution accounting for time-dependent exponential source depletion is:</p>
 <div class="arithmatex">\[
 \begin{aligned}
@@ -1248,16 +1248,15 @@ d\tau
 \right\}
 \end{aligned}
 \]</div>
-<p>with <span class="arithmatex">\(v_R = \frac{v}{R}\)</span> being the retarded velocity of contaminant transport with <span class="arithmatex">\(v = \frac{Ki}{\theta_e}\)</span> being the groundwater flow velocity. The meaning of the other parameters are repeated in the Table in <strong>Overview Parameters</strong>.</p>
+<p>with <span class="arithmatex">\(v_R = \frac{v}{R}\)</span> being the retarded velocity of contaminant transport with <span class="arithmatex">\(v = \frac{Ki}{\theta_e}\)</span> being the groundwater flow velocity. The meaning of the other parameters are repeated in the table in <strong>Overview Parameters</strong>.</p>
 <hr />
 <h2 id="anatrans-model"><em>anatrans</em> Model</h2>
-<p>The equation implemented in the <em>anatrans</em> model class is based on the Intregral  solution (section Transport Theory) that uses a slightly simplified, closed analytical form. As the <em>mibitrans</em> model class, it does no resolve the <span class="arithmatex">\(z\)</span> direction, but transport is always evaluated at <span class="arithmatex">\(z=0\)</span> and accounts for source depletion and source superposition. The implemented equation reads:</p>
+<p>The equation implemented in the <em>anatrans</em> model class is based on the intregral solution (section Transport Theory) that uses a slightly simplified, closed analytical form. As the <em>mibitrans</em> model class, it does not resolve the <span class="arithmatex">\(z\)</span> direction, but transport is always evaluated at <span class="arithmatex">\(z=0\)</span> and accounts for source depletion and source superposition. The implemented equation reads:</p>
 <div class="arithmatex">\[
 \begin{aligned}
 C(x,y,t)
 &amp;=
 \sum_{i=1}^{n}
-% source term
 \left\{
 \frac{C^*_{0,i}}{8}
 \exp \left(
@@ -1265,7 +1264,6 @@ C(x,y,t)
 \right)
 \right.
 \\
-% x-direction advection and dispersion
 &amp;\quad \cdot
 \left[
 \exp \left(
@@ -1277,7 +1275,6 @@ C(x,y,t)
 \right)
 \right.
 \\
-% second x-term
 &amp;\quad \ \,+
 \left.
 \exp \left(
@@ -1289,7 +1286,6 @@ C(x,y,t)
 \right)
 \right]
 \\
-% y-direction dispersion term
 &amp;\quad \cdot
 \left[
 \operatorname{erf} \left(
@@ -1300,7 +1296,6 @@ C(x,y,t)
 \right)
 \right]
 \\
-% z-direction dispersion term
 &amp;\quad \cdot
 \left.
 \left[
@@ -1319,7 +1314,7 @@ C(x,y,t)
 \tilde P = \sqrt{1+4 (\mu-\gamma_s) \alpha_x/v_R}
 \]</div>
 <p>that accounts for the advective components of the source depletion.</p>
-<p>The <em>anatrans</em> model equation is identical to Equation of the Integral Approximation when substituting <span class="arithmatex">\(P\)</span> with <span class="arithmatex">\(\tilde P\)</span> and <span class="arithmatex">\(C_0\)</span> with <span class="arithmatex">\(C_0 \exp(\gamma_s t)\)</span> and applying the source superposition.</p>
+<p>The <em>anatrans</em> model equation is identical to equation of the Integral Approximation when substituting <span class="arithmatex">\(P\)</span> with <span class="arithmatex">\(\tilde P\)</span> and <span class="arithmatex">\(C_0\)</span> with <span class="arithmatex">\(C_0 \exp(\gamma_s t)\)</span> and applying the source superposition.</p>
 <hr />
 <h2 id="bioscreen-model"><em>bioscreen</em> Model</h2>
 <p>The equation implemented in the <em>bioscreen</em> model class is based on the <em>Bioscreen solution</em> (section Transport Theory) and follows the same choices as used in the Excel based software BIOSCREEN <em>[Newell et al., 1996]</em>.</p>

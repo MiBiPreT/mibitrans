@@ -1274,40 +1274,44 @@
 
 <h1 id="instantaneous-reaction-model">Instantaneous reaction model</h1>
 <h2 id="background-history">Background / History</h2>
-<p>The <em>instantaneous reaction model</em> became popular through its implementation in <em>Bioscreen</em> <em>[Newell et al., 1996]</em>. It is based on the concept developed by <em>Connor et al., [1994]</em> using a solution for contaminant transport (advection, dispersion, retardation) and adapting it to account for the influence of chemical reactions during transport. Specifically, the effect of degradation is superimposed based on domain average electron acceptor (EA) concentrations. <em>Connor et al., [1994]</em> compared his method with results of the BIOPLUME II model <em>Rifai et al., [1990]</em> and determined that results are similar for biodegradable contaminants with retardation factors <span class="arithmatex">\(R \leq 6\)</span>.</p>
+<p>The <em>instantaneous reaction model</em> became popular through its implementation in <em>Bioscreen</em> <em>[Newell et al., 1996]</em>. It is based on the concept developed by <em>Connor et al., [1994]</em> using a solution for contaminant transport (advection, dispersion, retardation) and adapting it to account for the influence of chemical reactions during transport. Specifically, the effect of degradation is superimposed based on domain average electron acceptor (EA) concentrations. <em>Connor et al., [1994]</em> compared his method with results of the BIOPLUME II model <em>[Rifai et al., 1990]</em> and determined that results are similar for biodegradable contaminants with retardation factors <span class="arithmatex">\(R \leq 6\)</span>.</p>
 <hr />
 <h2 id="construction-of-solution">Construction of solution</h2>
-<p>Starting point is the calculation of how much contaminant can be consumed by instantaneous reactions with all present EA&rsquo;s based on their global concentrations. This concentration is called the <em>biodegradation capacity</em> <span class="arithmatex">\(BC\)</span>. Details on the calculation of <span class="arithmatex">\(BC\)</span> are given below. <span class="arithmatex">\(BC\)</span> is a lumped value that reflects the potential contaminant mass removal of available EAs through all biodegradation reactions, including aerobic and anaerobic reactions during transport.</p>
-<p>In a second step, the spatial concentration distribution is calculated by combining <span class="arithmatex">\(BC\)</span> with an analytical model of the solute transport equation (mibitrans, anatrans, bioscreen) for no decay.
+<p>The Instantaneous reaction model is based on the assumption that degradation is fast, i.e. instantaneous compared to the time scale of other processes, such as transport. Specifically, the rate of biodegradation is not limited by microbial kinetics. For oxygen this is well accepted and shown by <em>Borden et al., [1986]</em>. For anaerobic degradation this is concluded from results of <em>Connor et al., [1994]</em>. The model further assumes that contaminants and EA&rsquo;s travel at the same transport rate, i.e. retardation is negligible. The validity of this assumption was shown by <em>Borden et al., [1986]</em> for oxygen and some hydrocarbon, but not for other EA&rsquo;s. <em>[Newell et al., 1996]</em> reports that the assumption holds for other EAs and retardation factors  <span class="arithmatex">\(R\leq6\)</span>.</p>
+<p>Starting point of the model is calculating the quantity of contaminant that can be consumed through biodegradation with all present EA&rsquo;s based on their global concentrations. This quantity is called the <em>biodegradation capacity</em> <span class="arithmatex">\(BC\)</span>. Details on the calculation of <span class="arithmatex">\(BC\)</span> are given below. <span class="arithmatex">\(BC\)</span> is a lumped value that reflects the potential contaminant mass removal of available EAs through all biodegradation reactions, including aerobic and anaerobic reactions during transport.</p>
+<p>In a second step, the spatial concentration distribution is calculated by combining <span class="arithmatex">\(BC\)</span> with an analytical model of the solute transport equation (<em>mibitrans</em>, <em>anatrans</em>, <em>bioscreen</em>) for no decay.
 When</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{1}
 C(x, y, z, t) = \frac{C_s}{8} f(x,y,z,t)
+\end{equation}
 \]</div>
-<p>is an analytical solution to the retarded, but non-decaying transport (<span class="arithmatex">\(\mu = 0\)</span>), then the instantaneous reaction model is constructed via</p>
+<p>is an analytical solution for retarded, but non-decaying solute transport (<span class="arithmatex">\(\mu = 0\)</span>), then the instantaneous reaction model is constructed via</p>
 <div class="arithmatex">\[
+\begin{equation}\tag{2}
 C_\mathrm{inst}(x, y, z, t)
 =
 \frac{(C_s + BC)}{8} f(x,y,z,t) - BC
+\end{equation}
 \]</div>
-<p>Note that <span class="arithmatex">\(C_s\)</span> implies that source depletion as an option. For the bioscreen model, this reads e.g. <span class="arithmatex">\(C_s = \exp{\left( -\gamma_s \left( t-\frac{xR}{v}\right)\right)}\)</span>.</p>
-<p>The Equation for <span class="arithmatex">\(C_\mathrm{inst}(x, y, z, t)\)</span> shows that first the actual source zone concentration is adapted by adding the biodegradation capacity <span class="arithmatex">\(BC\)</span>. This reflects the need of mass balance. The resulting transported spatially distributed contaminant concentration is then globally reduced with the biodegradation capacity <span class="arithmatex">\(BC\)</span>. This reflects that calculated concentrations are reduced at every location and time by what can be consumed by reactions.</p>
-<p>The Instantaneous reaction model is based on the assumption that degradation is fast, i.e. instantaneous compared to the time scale of other processes, such as transport. Specifically, the rate of biodegradation is not limited by microbial kinetics. For oxygen this is well accepted and shown by <em>Borden et al., [1986]</em>. For anaerobic degradation this is concluded from results of <em>Connor et al., [1994]</em>. The model further assumes that contaminants and EA&rsquo;s travel at the same transport rate, i.e. retardation is negligible. The validity of this assumption was shown by <em>Borden et al., [1986]</em> for oxygen and some hydrocarbon, but not for other EA&rsquo;s. <em>[Newell et al., 1996]</em> reports that the assumption holds for other EAs and retardation factors  <span class="arithmatex">\(R\leq6\)</span>.</p>
+<p>Note that <span class="arithmatex">\(C_s\)</span> implies that source depletion as an option. For the bioscreen model, this reads e.g. <span class="arithmatex">\(C_s = (C_0 + BC)\exp{\left( -\gamma_s \left( t-\frac{xR}{v}\right)\right)}\)</span>.</p>
+<p>Eq. 2 for <span class="arithmatex">\(C_\mathrm{inst}(x, y, z, t)\)</span> shows that the source conditions are adapted by adding the biodegradation capacity <span class="arithmatex">\(BC\)</span>. This reflects the source concentrations without any biodegradation. Consequently, the resulting transported and spatially distributed contaminant concentration is reduced with <span class="arithmatex">\(BC\)</span> over the entire domain. This reflects that calculated concentrations are reduced at every location and time by the capacity of biological activity to degrade contaminants, which is assumed to be constant.</p>
 <h3 id="biodegradation-capacity">Biodegradation capacity</h3>
-<p>The biodegradation capacity <span class="arithmatex">\(BC\)</span> is calculated from EA concentrations by</p>
+<p>The <span class="arithmatex">\(BC\)</span> is calculated from EA concentrations by</p>
 <div class="arithmatex">\[
 BC =
-\sum_{i=O,N,S}
-\frac{\bar C_i^\mathrm{upgradient} - C_i^\mathrm{source}}{UF_i}
-\sum_{j=Fe^{2+},CH_4}
-\frac{\bar C_j^\mathrm{source}}{UF_j}
+\sum_{j=O_2,NO_3^-,SO_4^{2-}}
+\frac{\bar C_j^\mathrm{upgradient} - C_j^\mathrm{source}}{UF_j}
++\sum_{k=Fe^{2+},CH_4}
+\frac{\bar C_j^\mathrm{source}}{UF_k}
 \]</div>
-<p>here <span class="arithmatex">\(\bar C_i^\mathrm{upgradient}\)</span> is the average upgradient concentrations and <span class="arithmatex">\(C_i^\mathrm{source}\)</span> is the minimum source concentration of electron acceptors <span class="arithmatex">\(i=\)</span> oxygen, nitrate, and sulfate. <span class="arithmatex">\(\bar C_j^\mathrm{source}\)</span> is the average source concentration of the metabolic by-products <span class="arithmatex">\(j=Fe2+,CH_4^+\)</span>. 
-<span class="arithmatex">\(UF_i\)</span> and <span class="arithmatex">\(UF_j\)</span> are the utilization factors for each EA that were developed by <em>Wiedemeier et al., [1995]</em> based on the stoichimetric ratios of the reactions (see below).</p>
+<p>here <span class="arithmatex">\(\bar C_j^\mathrm{upgradient}\)</span> is the average upgradient concentrations and <span class="arithmatex">\(C_j^\mathrm{source}\)</span> is the minimum source concentration of electron acceptors <span class="arithmatex">\(j=O_2, NO_3^-, SO_4^{2-}\)</span>. <span class="arithmatex">\(\bar C_k^\mathrm{source}\)</span> is the average source concentration of the metabolic by-products <span class="arithmatex">\(k=Fe^{2+},CH_4\)</span>. 
+<span class="arithmatex">\(UF_j\)</span> and <span class="arithmatex">\(UF_k\)</span> are the utilization factors for each EA that were developed by <em>Wiedemeier et al., [1995]</em> based on the stoichiometric ratios of the reactions (see below).</p>
 <table>
 <thead>
 <tr>
 <th>EA / Byproduct</th>
-<th>UF (gm/gm)</th>
+<th>UF (<span class="arithmatex">\(gm/gm\)</span>)</th>
 </tr>
 </thead>
 <tbody>
@@ -1355,18 +1359,24 @@ C_6H_6 + 4.5H_2O \to 2.25CO_2 + 3.75CH_4
 <p>Note that UFs are limited to reactions of EAs with BTEX constituents. When aiming to model other contaminants, the utilization factors would need to be adapted. Alternatively, available oxygen, nitrate, iron, sulfate, and methane concentrations could be adjusted accordingly to reflect alternate utilization factors. </p>
 <hr />
 <h2 id="instantaneous-reaction-solution-for-bioscreen-model">Instantaneous reaction solution for bioscreen model</h2>
-<p>Using the Bioscreen transport model without decay (<span class="arithmatex">\(\mu = 0\)</span>, thus <span class="arithmatex">\(P = 1\)</span>), the instantaneous reaction equation becomes:</p>
+<p>Using the <em>bioscreen</em> transport model without decay (<span class="arithmatex">\(\mu = 0\)</span>, thus <span class="arithmatex">\(P = 1\)</span>), the instantaneous reaction equation becomes:</p>
 <div class="arithmatex">\[
 \begin{aligned}
 C(x, y, t)
 &amp;=
 \sum_{i=1}^{n}
-\left[\frac{C^*_{0,i}}{8}
-\exp\left( -\gamma_s \left( t - \frac{x}{v_R} \right)\right) + BC \right]
+\left\{
+\left[
+\frac{C^*_{0,i} + BC_n}{8}
+\exp\left(
+-\gamma_s \left( t - \frac{x}{v_R} \right)
+\right)
+\right]
 \operatorname{erfc}
 \left(
 \frac{x - v_R t}{2\sqrt{\alpha_x v_R t}}
 \right)
+\right.
 \\
 &amp;\quad \cdot
 \left[
@@ -1381,6 +1391,7 @@ C(x, y, t)
 \right]
 \\
 &amp;\quad \cdot
+\left.
 \left[
 \operatorname{erf}
 \left(
@@ -1390,9 +1401,12 @@ C(x, y, t)
 \left(
 \frac{-Z}{2\sqrt{\alpha_z x}}
 \right)
-\right]- BC
+\right]
+\right\}
+-BC
 \end{aligned}
 \]</div>
+<p>Here, <span class="arithmatex">\(BC_n\)</span> indicates that for a model with multiple source zones, the biodegradation capacity is only added to the outermost source zone. These adaptation are the same for the <em>anatrans</em> and <em>mibitrans</em> equations.</p>
 <h3 id="instantaneous-reaction-source-depletion">Instantaneous reaction source depletion</h3>
 <p>The instant reaction model assumes that biodegradation takes place inside the source zone. Thus, the source depletion coefficient is calculated differently as</p>
 <div class="arithmatex">\[

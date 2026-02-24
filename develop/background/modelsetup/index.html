@@ -1244,13 +1244,13 @@
 <ul>
 <li>Source superposition</li>
 <li>Source depletion</li>
-<li>instant reaction for degredation </li>
+<li>Instant reaction for degradation </li>
 </ul>
 <p>These adaptions can be applied to each of the transport models. The first two are outlined here, while the last one is outlined in a separate section on the <em>Instant Reaction Model</em>.</p>
 <hr />
 <h2 id="source-superposition">Source Superposition</h2>
 <p>Source geometry of PHC contamination after spill events typically shows a spatially extended source zone where concentrations decrease towards the margin. This effect can be accounted for in analytical modeling making use of the concept of source superposition. </p>
-<p>The source is split into <span class="arithmatex">\(n\)</span> zones of width <span class="arithmatex">\(2Y_i\)</span> and source concentration <span class="arithmatex">\(C_{0,i}\)</span> (<span class="arithmatex">\(i\)</span> represents the zone index). Specifically, the spatially extended source patch located at <span class="arithmatex">\(x=0\)</span> and <span class="arithmatex">\(Y&lt; y &lt; Y\)</span> is split into <span class="arithmatex">\(n\)</span> symmetric source zones in <span class="arithmatex">\(y\)</span> direction, where each source zone <span class="arithmatex">\(i\)</span> has a width <span class="arithmatex">\(2Y_i\)</span> (centered around <span class="arithmatex">\(y=0\)</span>) and a source strength <span class="arithmatex">\(C_i\)</span>. Consequently <span class="arithmatex">\(\sum_i Y_i = Y\)</span>. The values of <span class="arithmatex">\(C_i\)</span> are assumed to gradually decrease. We deliberately chose the source width and source thickness to be <span class="arithmatex">\(2Y\)</span> and <span class="arithmatex">\(2Z\)</span> centered around <span class="arithmatex">\(y=0\)</span> and <span class="arithmatex">\(z=0\)</span>, respectively. This is different from other source boundary definitions (using source dimensions of <span class="arithmatex">\(Y/2&lt; y &lt; Y/2\)</span>) often found in respective literature.</p>
+<p>The source is split into <span class="arithmatex">\(n\)</span> zones of width <span class="arithmatex">\(2Y_i\)</span> and source concentration <span class="arithmatex">\(C_{0,i}\)</span> (<span class="arithmatex">\(i\)</span> represents the zone index). Specifically, the spatially extended source patch located at <span class="arithmatex">\(x=0\)</span> and <span class="arithmatex">\(-Y \lt y \lt Y\)</span> is split into <span class="arithmatex">\(n\)</span> symmetric source zones in <span class="arithmatex">\(y\)</span> direction, where each source zone <span class="arithmatex">\(i\)</span> has a width <span class="arithmatex">\(2Y_i\)</span> (centered around <span class="arithmatex">\(y=0\)</span>) and a source strength <span class="arithmatex">\(C_i\)</span>. Consequently <span class="arithmatex">\(\sum_i Y_i = Y\)</span>. The values of <span class="arithmatex">\(C_i\)</span> are assumed to gradually decrease. We deliberately chose the source width and source thickness to be <span class="arithmatex">\(2Y\)</span> and <span class="arithmatex">\(2Z\)</span> centered around <span class="arithmatex">\(y=0\)</span> and <span class="arithmatex">\(z=0\)</span>, respectively. This is different from other source boundary definitions (using source dimensions of <span class="arithmatex">\(Y/2 \lt y \lt Y/2\)</span>) often found in respective literature.</p>
 <p>The linear character of the ADE allows to apply the principle of superposition. The concentration distribution of the overall plume <span class="arithmatex">\(C(x,y,t)\)</span> can be calculated as sum of the individual concentration calculated for each source zone as outlined below. </p>
 <hr />
 <h2 id="source-depletion">Source Depletion</h2>
@@ -1265,7 +1265,7 @@ C_s(t) = C_0 \exp{\left(\gamma_s t\right)}
 <div class="arithmatex">\[
 \gamma_s = \frac{Q \cdot \bar{C_{0}}}{m_\mathrm{s,0}}
 \]</div>
-<p>where <span class="arithmatex">\(\bar{C_{0}} = \frac{1}{Y}\sum_i Y_i\cdot C_{0,i}\)</span> is the (weighted) average source concentration, <span class="arithmatex">\(Q = 4\cdot v \cdot \theta_e \cdot Y \cdot Z\)</span> is the volumetric flow rate (other quantities see Table~XX.</p>
+<p>where <span class="arithmatex">\(\bar{C_{0}} = \frac{1}{Y}\sum_i Y_i\cdot C_{0,i}\)</span> is the (weighted) average source concentration, <span class="arithmatex">\(Q = 4\cdot v \cdot \theta_e \cdot Y \cdot Z\)</span> is the volumetric flow rate (other quantities see the parameters section).</p>
 <p>If the source mass is considered to be infinite, <span class="arithmatex">\(\gamma_s\)</span> resolves to zero, and therefore, no source depletion is considered.</p>
 <hr />
 <h2 id="boundary-conditions-with-source-adaptions">Boundary conditions with Source Adaptions</h2>
@@ -1273,15 +1273,15 @@ C_s(t) = C_0 \exp{\left(\gamma_s t\right)}
 <div class="arithmatex">\[
 R\frac{\partial C}{\partial t}
 =
-- v\frac{\partial C}{\partial x}
-+ D_x \frac{\partial^2 C}{\partial x^2}
-+ D_y \frac{\partial^2 C}{\partial y^2}
-+ D_z \frac{\partial^2 C}{\partial z^2}
-- \mu C
+-v\frac{\partial C}{\partial x}
++D_x \frac{\partial^2 C}{\partial x^2}
++D_y \frac{\partial^2 C}{\partial y^2}
++D_z \frac{\partial^2 C}{\partial z^2}
+-\mu C
 \]</div>
 <p>We have <span class="arithmatex">\(n\)</span> zones of width <span class="arithmatex">\(2Y_i\)</span> and source concentration <span class="arithmatex">\(C_{0,i}\)</span> in each of the zones <span class="arithmatex">\(i\)</span>. The actual boundary condition for each source zone <span class="arithmatex">\(i\)</span> reads</p>
 <div class="arithmatex">\[
-C_i(x=0, -Y_i^*&lt;y&lt;Y_i^*, -Z&lt;z&lt;Z; t) = C_{0,i}^*\,\exp{\left(\gamma_s t\right)}
+C_i(x=0, -Y_i^* \lt y \lt Y_i^*, -Z \lt z \lt Z; t) = C_{0,i}^*\,\exp{\left(\gamma_s t\right)}
 \]</div>
 <p>where <span class="arithmatex">\(Y_i^*\)</span> is  the net source width and <span class="arithmatex">\(C_{0,i}^*\)</span> is the net source concentration defined as:</p>
 <div class="arithmatex">\[
@@ -1291,7 +1291,7 @@ Y_i^* = \sum_j^i Y_j
 <div class="arithmatex">\[
 C_{0,i}^* = C_{0,i} - C_{0,i+1}
 \]</div>
-<p>where the latter does not apply to the most outer source zone, where <span class="arithmatex">\(C_n^* = C_n\)</span>.</p>
+<p>where the latter does not apply to the most outer source zone, where <span class="arithmatex">\(C_{0,n}^* = C_{0,n}\)</span>.</p>
 <p>The contaminant concentration <span class="arithmatex">\(C_i\)</span> for each source zone <span class="arithmatex">\(i\)</span> as result of transport can be calculated with any of the ADE solutions as presented in section <strong>Transport Theory</strong>. The concentration distribution of the overall plume <span class="arithmatex">\(C(x,y,t)\)</span> is the sum of the individual concentrations calculated for each source zone:</p>
 <div class="arithmatex">\[
 C(x,y,t) = \sum_i^n C_i(x,y,t)

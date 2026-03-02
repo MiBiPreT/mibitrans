@@ -3018,7 +3018,7 @@ fake_hydro = HydrologicalParameters(velocity = 1)</div>
 
 <span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">&lt;string&gt;:12</span>, in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, velocity, h_gradient, h_conductivity, porosity, alpha_x, alpha_y, alpha_z, diffusion, verbose)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:53</span>, in <span class="ansi-cyan-fg">HydrologicalParameters.__post_init__</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:53</span>, in <span class="ansi-cyan-fg">HydrologicalParameters.__post_init__</span><span class="ansi-blue-fg">(self)</span>
 <span class="ansi-green-fg">     51</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">__post_init__</span>(<span style="color: rgb(0,135,0)">self</span>):
 <span class="ansi-green-fg">     52</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">"""Check argument presence, types and domain. Calculate velocity if not given."""</span>
 <span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">53</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_validate_input_presence</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
@@ -3026,7 +3026,7 @@ fake_hydro = HydrologicalParameters(velocity = 1)</div>
 <span class="ansi-green-fg">     56</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span>.h_gradient <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> <span style="color: rgb(0,135,0)">self</span>.h_conductivity:
 <span class="ansi-green-fg">     57</span>         <span style="color: rgb(95,135,135)"># Giving h_gradient &amp; h_conductivity more specific than giving velocity. Input velocity will be overridden.</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:77</span>, in <span class="ansi-cyan-fg">HydrologicalParameters._validate_input_presence</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:77</span>, in <span class="ansi-cyan-fg">HydrologicalParameters._validate_input_presence</span><span class="ansi-blue-fg">(self)</span>
 <span class="ansi-green-fg">     74</span>     missing_arguments.append(<span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">alpha_y</span><span class="ansi-yellow-fg">"</span>)
 <span class="ansi-green-fg">     76</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">len</span>(missing_arguments) &gt; <span class="ansi-green-fg">0</span>:
 <span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">77</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> MissingValueError(
@@ -3106,14 +3106,14 @@ fake_source = SourceParameters(
 
 <span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">&lt;string&gt;:4</span>, in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, source_zone_boundary, source_zone_concentration, depth, total_mass, verbose)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:217</span>, in <span class="ansi-cyan-fg">SourceParameters.__setattr__</span><span class="ansi-blue-fg">(self, parameter, value)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:217</span>, in <span class="ansi-cyan-fg">SourceParameters.__setattr__</span><span class="ansi-blue-fg">(self, parameter, value)</span>
 <span class="ansi-green-fg">    215</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">__setattr__</span>(<span style="color: rgb(0,135,0)">self</span>, parameter, value):
 <span class="ansi-green-fg">    216</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">"""Override parent method to validate input when attribute is set."""</span>
 <span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">217</span>     <span class="ansi-yellow-bg">validate_input_values</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">parameter</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">value</span><span class="ansi-yellow-bg">)</span>
 <span class="ansi-green-fg">    218</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> parameter == <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">total_mass</span><span class="ansi-yellow-fg">"</span> <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> (<span style="color: rgb(0,135,0)">isinstance</span>(value, <span style="color: rgb(0,135,0)">str</span>) <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> value == np.inf):
 <span class="ansi-green-fg">    219</span>         value = np.inf
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/check_input.py:277</span>, in <span class="ansi-cyan-fg">validate_input_values</span><span class="ansi-blue-fg">(parameter, value)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/check_input.py:277</span>, in <span class="ansi-cyan-fg">validate_input_values</span><span class="ansi-blue-fg">(parameter, value)</span>
 <span class="ansi-green-fg">    274</span>         error = _check_numeric_positive(parameter, value)
 <span class="ansi-green-fg">    276</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> error <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> (value <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>):
 <span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">277</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> error
@@ -3174,14 +3174,14 @@ fake_att = AttenuationParameters(
 
 <span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">&lt;string&gt;:3</span>, in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, retardation, decay_rate, half_life, bulk_density, partition_coefficient, fraction_organic_carbon, verbose)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:127</span>, in <span class="ansi-cyan-fg">AttenuationParameters.__setattr__</span><span class="ansi-blue-fg">(self, parameter, value)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/parameters.py:127</span>, in <span class="ansi-cyan-fg">AttenuationParameters.__setattr__</span><span class="ansi-blue-fg">(self, parameter, value)</span>
 <span class="ansi-green-fg">    125</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">__setattr__</span>(<span style="color: rgb(0,135,0)">self</span>, parameter, value):
 <span class="ansi-green-fg">    126</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">"""Override parent method to validate input when attribute is set."""</span>
 <span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">127</span>     <span class="ansi-yellow-bg">validate_input_values</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">parameter</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">value</span><span class="ansi-yellow-bg">)</span>
 <span class="ansi-green-fg">    128</span>     <span style="color: rgb(95,135,135)"># Separate setattr for decay rate and half life because they should always be equivalent</span>
 <span class="ansi-green-fg">    129</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> parameter == <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">decay_rate</span><span class="ansi-yellow-fg">"</span> <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> parameter == <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">half_life</span><span class="ansi-yellow-fg">"</span>:
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/data/check_input.py:277</span>, in <span class="ansi-cyan-fg">validate_input_values</span><span class="ansi-blue-fg">(parameter, value)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/data/check_input.py:277</span>, in <span class="ansi-cyan-fg">validate_input_values</span><span class="ansi-blue-fg">(parameter, value)</span>
 <span class="ansi-green-fg">    274</span>         error = _check_numeric_positive(parameter, value)
 <span class="ansi-green-fg">    276</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> error <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> (value <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>):
 <span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">277</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> error
@@ -3278,7 +3278,7 @@ mbt_results = mbt_object.run()
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:237: UserWarning: Source zone boundary is larger than model width. Model width adjusted to fit entire source zone.
+<pre>/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:237: UserWarning: Source zone boundary is larger than model width. Model width adjusted to fit entire source zone.
   warnings.warn(
 </pre>
 </div>
@@ -3781,14 +3781,14 @@ mbt_results = mbt_object.run()</div>
 <pre>integrating for source zone  0  and t = 73.0 days
 integrating for source zone  0  and t = 146.0 days
 integrating for source zone  0  and t = 219.0 days
+integrating for source zone  0  and t = 292.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  0  and t = 292.0 days
-integrating for source zone  0  and t = 365.0 days
+<pre>integrating for source zone  0  and t = 365.0 days
 integrating for source zone  0  and t = 438.0 days
 integrating for source zone  0  and t = 511.0 days
 integrating for source zone  0  and t = 584.0 days
@@ -3799,15 +3799,15 @@ integrating for source zone  0  and t = 876.0 days
 integrating for source zone  0  and t = 949.0 days
 integrating for source zone  0  and t = 1022.0 days
 integrating for source zone  0  and t = 1095.0 days
+integrating for source zone  0  and t = 1168.0 days
+integrating for source zone  0  and t = 1241.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  0  and t = 1168.0 days
-integrating for source zone  0  and t = 1241.0 days
-integrating for source zone  0  and t = 1314.0 days
+<pre>integrating for source zone  0  and t = 1314.0 days
 integrating for source zone  0  and t = 1387.0 days
 integrating for source zone  0  and t = 1460.0 days
 integrating for source zone  0  and t = 1533.0 days
@@ -3816,28 +3816,28 @@ integrating for source zone  0  and t = 1679.0 days
 integrating for source zone  0  and t = 1752.0 days
 integrating for source zone  0  and t = 1825.0 days
 integrating for source zone  0  and t = 1898.0 days
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  0  and t = 1971.0 days
+integrating for source zone  0  and t = 1971.0 days
 integrating for source zone  0  and t = 2044.0 days
 integrating for source zone  0  and t = 2117.0 days
 integrating for source zone  0  and t = 2190.0 days
-integrating for source zone  1  and t = 73.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  1  and t = 146.0 days
+<pre>integrating for source zone  1  and t = 73.0 days
+integrating for source zone  1  and t = 146.0 days
 integrating for source zone  1  and t = 219.0 days
 integrating for source zone  1  and t = 292.0 days
 integrating for source zone  1  and t = 365.0 days
-integrating for source zone  1  and t = 438.0 days
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>integrating for source zone  1  and t = 438.0 days
 integrating for source zone  1  and t = 511.0 days
 integrating for source zone  1  and t = 584.0 days
 integrating for source zone  1  and t = 657.0 days
@@ -3845,47 +3845,47 @@ integrating for source zone  1  and t = 730.0 days
 integrating for source zone  1  and t = 803.0 days
 integrating for source zone  1  and t = 876.0 days
 integrating for source zone  1  and t = 949.0 days
+integrating for source zone  1  and t = 1022.0 days
+integrating for source zone  1  and t = 1095.0 days
+integrating for source zone  1  and t = 1168.0 days
+integrating for source zone  1  and t = 1241.0 days
+integrating for source zone  1  and t = 1314.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  1  and t = 1022.0 days
-integrating for source zone  1  and t = 1095.0 days
-integrating for source zone  1  and t = 1168.0 days
-integrating for source zone  1  and t = 1241.0 days
-integrating for source zone  1  and t = 1314.0 days
-integrating for source zone  1  and t = 1387.0 days
+<pre>integrating for source zone  1  and t = 1387.0 days
 integrating for source zone  1  and t = 1460.0 days
 integrating for source zone  1  and t = 1533.0 days
 integrating for source zone  1  and t = 1606.0 days
 integrating for source zone  1  and t = 1679.0 days
 integrating for source zone  1  and t = 1752.0 days
 integrating for source zone  1  and t = 1825.0 days
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  1  and t = 1898.0 days
+integrating for source zone  1  and t = 1898.0 days
 integrating for source zone  1  and t = 1971.0 days
 integrating for source zone  1  and t = 2044.0 days
 integrating for source zone  1  and t = 2117.0 days
 integrating for source zone  1  and t = 2190.0 days
-integrating for source zone  2  and t = 73.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  2  and t = 146.0 days
+<pre>integrating for source zone  2  and t = 73.0 days
+integrating for source zone  2  and t = 146.0 days
 integrating for source zone  2  and t = 219.0 days
 integrating for source zone  2  and t = 292.0 days
 integrating for source zone  2  and t = 365.0 days
-integrating for source zone  2  and t = 438.0 days
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>integrating for source zone  2  and t = 438.0 days
 integrating for source zone  2  and t = 511.0 days
 integrating for source zone  2  and t = 584.0 days
 integrating for source zone  2  and t = 657.0 days
@@ -3893,31 +3893,25 @@ integrating for source zone  2  and t = 730.0 days
 integrating for source zone  2  and t = 803.0 days
 integrating for source zone  2  and t = 876.0 days
 integrating for source zone  2  and t = 949.0 days
+integrating for source zone  2  and t = 1022.0 days
+integrating for source zone  2  and t = 1095.0 days
+integrating for source zone  2  and t = 1168.0 days
+integrating for source zone  2  and t = 1241.0 days
+integrating for source zone  2  and t = 1314.0 days
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  2  and t = 1022.0 days
-integrating for source zone  2  and t = 1095.0 days
-integrating for source zone  2  and t = 1168.0 days
-integrating for source zone  2  and t = 1241.0 days
-integrating for source zone  2  and t = 1314.0 days
-integrating for source zone  2  and t = 1387.0 days
+<pre>integrating for source zone  2  and t = 1387.0 days
 integrating for source zone  2  and t = 1460.0 days
 integrating for source zone  2  and t = 1533.0 days
 integrating for source zone  2  and t = 1606.0 days
 integrating for source zone  2  and t = 1679.0 days
 integrating for source zone  2  and t = 1752.0 days
 integrating for source zone  2  and t = 1825.0 days
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>integrating for source zone  2  and t = 1898.0 days
+integrating for source zone  2  and t = 1898.0 days
 integrating for source zone  2  and t = 1971.0 days
 integrating for source zone  2  and t = 2044.0 days
 integrating for source zone  2  and t = 2117.0 days
@@ -4131,7 +4125,7 @@ fake_mbt = Mibitrans(
 <span class="ansi-green-fg">      6</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">model_parameters</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">model</span>
 <span class="ansi-green-fg">      7</span> <span class="ansi-yellow-bg">)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/transport/models.py:91</span>, in <span class="ansi-cyan-fg">Mibitrans.__init__</span><span class="ansi-blue-fg">(self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/transport/models.py:91</span>, in <span class="ansi-cyan-fg">Mibitrans.__init__</span><span class="ansi-blue-fg">(self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)</span>
 <span class="ansi-green-fg">     34</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">__init__</span>(
 <span class="ansi-green-fg">     35</span>     <span style="color: rgb(0,135,0)">self</span>,
 <span class="ansi-green-fg">     36</span>     hydrological_parameters,
@@ -4144,14 +4138,14 @@ fake_mbt = Mibitrans(
 <span class="ansi-green-fg">     90</span> <span class="ansi-yellow-fg">    """</span>
 <span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">91</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">super</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">.</span><span class="ansi-blue-fg ansi-yellow-bg">__init__</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">hydrological_parameters</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">attenuation_parameters</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">source_parameters</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">model_parameters</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">verbose</span><span class="ansi-yellow-bg">)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:39</span>, in <span class="ansi-cyan-fg">Transport3D.__init__</span><span class="ansi-blue-fg">(self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:39</span>, in <span class="ansi-cyan-fg">Transport3D.__init__</span><span class="ansi-blue-fg">(self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)</span>
 <span class="ansi-green-fg">     37</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> key, value <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> <span style="color: rgb(0,135,0)">locals</span>().items():
 <span class="ansi-green-fg">     38</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> key <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> [<span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">self</span><span class="ansi-yellow-fg">"</span>, <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">verbose</span><span class="ansi-yellow-fg">"</span>]:
 <span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">39</span>         <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_check_input_dataclasses</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">key</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">value</span><span class="ansi-yellow-bg">)</span>
 <span class="ansi-green-fg">     41</span> <span style="color: rgb(0,135,0)">self</span>._hyd_pars = copy.copy(hydrological_parameters)
 <span class="ansi-green-fg">     42</span> <span style="color: rgb(0,135,0)">self</span>._att_pars = copy.copy(attenuation_parameters)
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:223</span>, in <span class="ansi-cyan-fg">Transport3D._check_input_dataclasses</span><span class="ansi-blue-fg">(self, key, value)</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:223</span>, in <span class="ansi-cyan-fg">Transport3D._check_input_dataclasses</span><span class="ansi-blue-fg">(self, key, value)</span>
 <span class="ansi-green-fg">    215</span> dataclass_dict = {
 <span class="ansi-green-fg">    216</span>     <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">hydrological_parameters</span><span class="ansi-yellow-fg">"</span>: mibitrans.data.parameters.HydrologicalParameters,
 <span class="ansi-green-fg">    217</span>     <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">attenuation_parameters</span><span class="ansi-yellow-fg">"</span>: mibitrans.data.parameters.AttenuationParameters,
@@ -4833,9 +4827,9 @@ plt.show()</div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="ea383d39-fff9-448a-a14c-09afa52afe74" tabindex="0">
+<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="f22a7cff-c009-40e9-8618-e65574cdc629" tabindex="0">
 <script type="text/javascript">
-var element = document.getElementById('ea383d39-fff9-448a-a14c-09afa52afe74');
+var element = document.getElementById('f22a7cff-c009-40e9-8618-e65574cdc629');
 /* Put everything inside the global mpl namespace */
 /* global mpl */
 window.mpl = {};
@@ -5829,14 +5823,14 @@ if (IPython.notebook.kernel !== null) {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div id="b901e467-b099-4f8d-b48f-3b07e2120ba2"></div>
+<div id="a27c5191-cccb-4807-a655-6018adfd2868"></div>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="2251df6d-690c-490a-80d8-c6efe4a2c721" tabindex="0">
+<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="aa11c2c4-1c45-4cbc-ac41-589dcd593da4" tabindex="0">
 <script type="text/javascript">
-var element = document.getElementById('2251df6d-690c-490a-80d8-c6efe4a2c721');
+var element = document.getElementById('aa11c2c4-1c45-4cbc-ac41-589dcd593da4');
 /* Put everything inside the global mpl namespace */
 /* global mpl */
 window.mpl = {};
@@ -6830,14 +6824,14 @@ if (IPython.notebook.kernel !== null) {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div id="a19d7503-4a1e-4d83-b89b-0c2f59bc2c33"></div>
+<div id="c134ec19-e705-428f-86c4-02512963be63"></div>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="9a35c4b3-1fde-4323-89e2-9cf6af679c12" tabindex="0">
+<div class="jp-RenderedJavaScript jp-OutputArea-output" data-mime-type="application/javascript" id="d738e3c1-6f1a-4c94-ae86-49af3dc6ce5e" tabindex="0">
 <script type="text/javascript">
-var element = document.getElementById('9a35c4b3-1fde-4323-89e2-9cf6af679c12');
+var element = document.getElementById('d738e3c1-6f1a-4c94-ae86-49af3dc6ce5e');
 /* Put everything inside the global mpl namespace */
 /* global mpl */
 window.mpl = {};
@@ -7831,7 +7825,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div id="128b252b-4d27-4e21-bd9e-232c550fe57f"></div>
+<div id="cc24a6fa-805c-4ba4-9c08-5c462f90491d"></div>
 </div>
 </div>
 </div>
@@ -7927,9 +7921,9 @@ mb = mbt_instant.mass_balance()</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/analysis/mass_balance.py:194: UserWarning: Contaminant plume extents beyond the model length, with a maximum concentration at the boundary of 3.21g/m3. To ensure reliable mass balance, re-run the model with increased dimensions to include the entire plume length in the model extent.
+<pre>/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/analysis/mass_balance.py:194: UserWarning: Contaminant plume extents beyond the model length, with a maximum concentration at the boundary of 3.21g/m3. To ensure reliable mass balance, re-run the model with increased dimensions to include the entire plume length in the model extent.
   warnings.warn(
-/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:237: UserWarning: Source zone boundary is larger than model width. Model width adjusted to fit entire source zone.
+/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/transport/model_parent.py:237: UserWarning: Source zone boundary is larger than model width. Model width adjusted to fit entire source zone.
   warnings.warn(
 </pre>
 </div>
@@ -7985,7 +7979,7 @@ mb = results.mass_balance()</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages/mibitrans/analysis/mass_balance.py:194: UserWarning: Contaminant plume extents beyond the model length, with a maximum concentration at the boundary of 1.04g/m3. To ensure reliable mass balance, re-run the model with increased dimensions to include the entire plume length in the model extent.
+<pre>/opt/hostedtoolcache/Python/3.13.12/x64/lib/python3.13/site-packages/mibitrans/analysis/mass_balance.py:194: UserWarning: Contaminant plume extents beyond the model length, with a maximum concentration at the boundary of 1.04g/m3. To ensure reliable mass balance, re-run the model with increased dimensions to include the entire plume length in the model extent.
   warnings.warn(
 </pre>
 </div>

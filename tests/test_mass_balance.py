@@ -96,7 +96,7 @@ def test_anatrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, t
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")
-@pytest.mark.filterwarnings("ignore:Contaminant plume extents")
+@pytest.mark.filterwarnings("ignore:Contaminant plume extends")
 def test_balance_numerical_mibitrans(model, expected, request) -> None:
     """Test if mass balance is correctly calculated by comparing to precomputed results for Mibitrans model."""
     mb_object = request.getfixturevalue(model)

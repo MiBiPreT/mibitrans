@@ -183,7 +183,7 @@ class MassBalance:
                 np.max(y_boundary_above_threshold) * np.max(self.results.source_parameters.source_zone_concentration), 2
             )
             warnings.warn(
-                "Contaminant plume extents beyond the model width, with a maximum concentration at the "
+                "Contaminant plume extends beyond the model width, with a maximum concentration at the "
                 f"boundary of {y_max}g/m3. To ensure reliable mass balance, re-run the model with increased dimensions "
                 "to include the entire plume width in the model extent."
             )
@@ -192,7 +192,7 @@ class MassBalance:
                 np.max(x_boundary_above_threshold) * np.max(self.results.source_parameters.source_zone_concentration), 2
             )
             warnings.warn(
-                "Contaminant plume extents beyond the model length, with a maximum concentration at the "
+                "Contaminant plume extends beyond the model length, with a maximum concentration at the "
                 f"boundary of {x_max}g/m3. To ensure reliable mass balance, re-run the model with increased dimensions "
                 "to include the entire plume length in the model extent."
             )

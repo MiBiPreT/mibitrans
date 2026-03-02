@@ -87,8 +87,7 @@ class MassBalance:
 
     def __call__(self, time=None, method=None):
         """Recalculate the mass balance characteristics of input model for given time and method."""
-        if time:
-            self.t = self._time_check(time)
+        self.t = self._time_check(time)
 
         if self.verbose:
             print("Recalculating mass balance...")

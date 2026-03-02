@@ -20,7 +20,7 @@ from mibitrans.data.parameters import SourceParameters
     "parameters, error",
     [
         (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1), None),
-        (dict(h_gradient=1, h_conductivity=1, porosity=0.2, alpha_x=1, alpha_y=1), None),
+        (dict(h_gradient=1, h_conductivity=1, porosity=0.2, alpha_x=1, alpha_y=1, alpha_z=0.1, diffusion=0.0004), None),
         (dict(), MissingValueError),
         (dict(porosity=0.2, alpha_x=1, alpha_y=1), MissingValueError),
         (dict(velocity=1, alpha_x=1, alpha_y=1), MissingValueError),
@@ -33,6 +33,7 @@ from mibitrans.data.parameters import SourceParameters
         (dict(velocity=-1, porosity=0.2, alpha_x=1, alpha_y=1), DomainValueError),
         (dict(velocity=1, porosity=2, alpha_x=1, alpha_y=1), DomainValueError),
         (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1, alpha_z=-1), DomainValueError),
+        (dict(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1, diffusion=-0.1), DomainValueError),
     ],
 )
 def test_hyrologicalparameters_validation(parameters, error) -> None:
@@ -86,8 +87,7 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(decay_rate=0.2), None),
         (dict(half_life=2), None),
         (dict(retardation=1), None),
-        (dict(diffusion=0.00004), None),
-        (dict(decay_rate=0.2, retardation=2, diffusion=0.00002), None),
+        (dict(decay_rate=0.2, retardation=2), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(), None),

@@ -14,7 +14,7 @@ from mibitrans.visualize.show_conditions import source_zone
 
 @dataclass
 class HydrologicalParameters:
-    """Dataclass handling input of hydrological parameters.
+    """Dataclass handling input of hydrological parameters, dispersion and diffusion.
 
     Args:
         velocity (float) : Flow velocity in the direction of the groundwater gradient, in [m/d]. Optional if h_gradient
@@ -24,7 +24,8 @@ class HydrologicalParameters:
         porosity (float) : Effective soil porosity [-]
         alpha_x (float) : The dispersivity in the x (longitudinal) direction in [m]
         alpha_y (float) : The dispersivity in the y (transverse-horizontal) direction in [m]
-        alpha_z (float, optional) : The dispersivity in the z (transverse-vertical) direction in [m]. Defaults to 1e-10
+        alpha_z (float, optional) : The dispersivity in the z (transverse-vertical) direction in [m]. Defaults to 1e-10.
+        diffusion (float) : Molecular diffusion [m2/day]. Default is 0.
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Raises:
@@ -39,6 +40,7 @@ class HydrologicalParameters:
     alpha_x: float = None
     alpha_y: float = None
     alpha_z: float = 1e-10
+    diffusion: float = 0
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
@@ -88,7 +90,7 @@ class HydrologicalParameters:
 
 @dataclass
 class AttenuationParameters:
-    """Dataclass handling parameters related to adsorption, diffusion and degradation.
+    """Dataclass handling parameters related to adsorption and degradation.
 
     Args:
         retardation (float) : Retardation factor for transported contaminant [-]. Default is 1.
@@ -96,7 +98,6 @@ class AttenuationParameters:
             Default is 0. Also sets corresponding half life.
         half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
             linear decay models. Default is 0. Also sets corresponding decay_rate.
-        diffusion (float) : Molecular diffusion [m2/day]. Default is 0.
         bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
         partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
             in [m^3/g]. Optional if retardation is specified.
@@ -116,7 +117,6 @@ class AttenuationParameters:
     retardation: float = 1
     decay_rate: float = 0
     half_life: float = 0
-    diffusion: float = 0
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None

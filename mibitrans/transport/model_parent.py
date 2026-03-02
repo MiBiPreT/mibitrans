@@ -15,7 +15,7 @@ from mibitrans.visualize import plot_surface as psurf
 
 
 class Transport3D(ABC):
-    """Parent class for all 3-dimensional analytical solutions."""
+    """Parent class for all 3-dimensional analytical transport solutions."""
 
     def __init__(
         self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose=False
@@ -24,9 +24,9 @@ class Transport3D(ABC):
 
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
-                hydrological parameters from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption,
-                degradation and diffusion parameters from AttenuationParameters.
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters.
+            attenuation_parameters (mibitrans.data.read.AttenuationParameters) : Dataclass object containing adsorption
+                and degradation parameters from AttenuationParameters.
             source_parameters (mibitrans.data.read.SourceParameters) : Dataclass object containing source parameters
                 from SourceParameters.
             model_parameters (mibitrans.data.read.ModelParameters) : Dataclass object containing model parameters from
@@ -283,10 +283,16 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
         if self._mode == "linear":
             if self.biodegradation_capacity is not None:
-                warnings.warn(
-                    "Instant reaction parameters are present while model mode is linear. "
-                    "Make sure that this is indeed the desired model."
-                )
+                if self.verbose:
+                    print(
+                        "Instant reaction parameters are present while model mode is linear. "
+                        "Make sure that this is indeed the desired model."
+                    )
+                # No longer warns to avoid potential confusion
+                # warnings.warn(
+                #     "Instant reaction parameters are present while model mode is linear. "
+                #     "Make sure that this is indeed the desired model."
+                # )
         if self._mode == "instant_reaction":
             if self.biodegradation_capacity is None:
                 raise ValueError(
@@ -299,7 +305,7 @@ class Results:
     """Object that holds model results and input parameters for individual runs."""
 
     def __init__(self, model):
-        """Records input parameters and resulting output based given model.
+        """Records input parameters and resulting output of given model run.
 
         Args:
             model (Transport3D): Model object from which to initialize results. Should be child class of Transport3D.
@@ -348,6 +354,12 @@ class Results:
             plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
             plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
             mass_balance : Return a mass balance object with source and plume characteristics at given time(s).
+
+        Example::
+
+            results = model_object.run()
+            print(results.centerline())
+
         """
         self._model_type = model.__class__
         self._short_description = model.short_description
@@ -647,11 +659,18 @@ class Results:
                 biodegradation capacity subtracted, in [g].
             electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
                 Only for instant reaction.
+
+        Example::
+
+            mb = results.mass_balance(time = 365)
+            print(mb.plume_mass)
+
         """
         return MassBalance(self, time, verbose)
 
 
 def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
+    """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
     if isinstance(electron_acceptors, (list, np.ndarray)):
         electron_acceptors_out = ElectronAcceptors(*electron_acceptors)
     elif isinstance(electron_acceptors, dict):

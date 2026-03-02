@@ -24,8 +24,8 @@ def test_transport_equation_numerical_mibitrans(model, expected, request):
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (16, 0, 393, 0.2980583920684923),
-        (24, -5, 283, 0.03725197246248769),
+        (16, 0, 393, 4.6652115692165195),
+        (24, -5, 527, 1.7909410090260753),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),
@@ -46,8 +46,8 @@ def test_mibitrans_linear_sample(x, y, t, expected, test_mibitrans_model_lineard
 @pytest.mark.parametrize(
     "x, y, t, expected",
     [
-        (20, 0, 476, 3.8101869779573443),
-        (11, 7, 193, 2.0276832492832924),
+        (20, 0, 476, 6.3213083960634435),
+        (35, 7, 745, 2.5356628358944633),
         (-16, 0, 393, DomainValueError),
         ("nonsense", 0, 393, TypeError),
         (16, "nonsense", 393, TypeError),

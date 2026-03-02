@@ -18,6 +18,10 @@ nav:
     - Mass Balance: background/massbalance.md
   - Examples:
     - Walkthrough: examples/example_walkthrough.ipynb
+    - Bemidji oil pipeline burst: examples/example_bemidji.ipynb
+    - Keesler Air-Force Base: examples/example_keesler.ipynb
+    - Comparison with BIOSCREEN: examples/example_BIOSCREEN_comparison.ipynb
+
   - Development: development/development.md
   - API Reference:
     - Data: reference/reference_data.md

@@ -18,7 +18,6 @@ nav:
     - Mass Balance: background/massbalance.md
   - Examples:
     - Walkthrough: examples/example_walkthrough.ipynb
-    - Comparison Mibitrans-Anatrans: examples/example_mibitrans_anatrans_comparison.ipynb 
   - Development: development/development.md
   - API Reference:
     - Data: reference/reference_data.md

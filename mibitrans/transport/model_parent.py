@@ -283,10 +283,16 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
         if self._mode == "linear":
             if self.biodegradation_capacity is not None:
-                warnings.warn(
-                    "Instant reaction parameters are present while model mode is linear. "
-                    "Make sure that this is indeed the desired model."
-                )
+                if self.verbose:
+                    print(
+                        "Instant reaction parameters are present while model mode is linear. "
+                        "Make sure that this is indeed the desired model."
+                    )
+                # No longer warns to avoid potential confusion
+                # warnings.warn(
+                #     "Instant reaction parameters are present while model mode is linear. "
+                #     "Make sure that this is indeed the desired model."
+                # )
         if self._mode == "instant_reaction":
             if self.biodegradation_capacity is None:
                 raise ValueError(

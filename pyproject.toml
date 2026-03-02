@@ -9,11 +9,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    { name = "Jorrit Yvo Bakker" },
     { name = "Alraune Zech", email = "a.zech@uu.nl" },
     { name = "Sona Aseyednezhad" },
     { name = "Robin Richardson" },
     { name = "Jaro Camphuijsen" },
+    { name = "Jorrit Yvo Bakker" }
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

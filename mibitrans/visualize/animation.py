@@ -6,7 +6,24 @@ from matplotlib import animation
 def animate_1d(
     x_axis_parameter: np.ndarray, y_axis_parameter, time_parameter, y_names=None, y_colors=None, linestyle=None
 ):
-    """Animate any type and number of input 1D plottables."""
+    """Animate input arrays over time.
+
+    Args:
+        x_axis_parameter (np.ndarray): Array of x-axis values, should be 1-dimensional.
+        y_axis_parameter (list[np.ndarray]): List with arrays of y-axis values, arrays should be 2-dimensional and of
+            shape (len(time_parameter), len(x_axis_parameter)).
+        time_parameter (np.ndarray): Array of time values, should be 1-dimensional.
+        y_names (list[str]): Label names for each y_axis parameter, as list of the same length as the y_axis_parameter
+            list.
+        y_colors (list[str]): Colors for each line plot in the animation, as list of the same length as the
+            y_axis_parameter list.
+        linestyle (list[str]): Linestyles for each line plot in the animation, as list of the same length as the
+            y_axis_parameter list.
+
+    Returns:
+        Animation object
+
+    """
     if not isinstance(y_axis_parameter, list):
         y_axis_parameter = [y_axis_parameter]
     fig, ax = plt.subplots()

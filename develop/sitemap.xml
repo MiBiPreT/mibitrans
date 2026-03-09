@@ -2,74 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/bioscreen/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/instantreaction/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/massbalance/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/modelimplementations/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/modelsetup/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/parameters/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/background/transporttheory/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/development/development/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/animate_plume_plots/</loc>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/example_BIOSCREEN_comparison/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/example_bemidji/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/example_keesler/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/example_mibitrans_anatrans/</loc>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/examples/example_walkthrough/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/introduction/introduction/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/reference/reference_analysis/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/reference/reference_data/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/reference/reference_transport/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibitrans/develop/reference/reference_visualize/</loc>
-         <lastmod>2026-03-02</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
 </urlset>

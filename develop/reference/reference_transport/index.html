@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/icon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -684,6 +684,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -764,6 +768,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../examples/animate_plume_plots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough animations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../examples/example_bemidji/" class="md-nav__link">
         
   
@@ -800,6 +832,34 @@
     
   
     Keesler Air-Force Base
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/example_mibitrans_anatrans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exact solution versus untruncated solution
   
 
     
@@ -8700,10 +8760,10 @@ systems with uniform flow. US Government Printing Office.</p>
 <a id="__codelineno-0-221" name="__codelineno-0-221"></a>
 <a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_equation_term_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
 <a id="__codelineno-0-223" name="__codelineno-0-223"></a>        <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">disp_z</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a>            <span class="n">inner_term</span> <span class="o">=</span> <span class="mi">2</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a>            <span class="k">return</span> <span class="mi">2</span>
 <a id="__codelineno-0-225" name="__codelineno-0-225"></a>        <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-226" name="__codelineno-0-226"></a>            <span class="n">inner_term</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_src_pars</span><span class="o">.</span><span class="n">depth</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disp_z</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>        <span class="k">return</span> <span class="n">erfc</span><span class="p">(</span><span class="o">-</span><span class="n">inner_term</span><span class="p">)</span> <span class="o">-</span> <span class="n">erfc</span><span class="p">(</span><span class="n">inner_term</span><span class="p">)</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>            <span class="k">return</span> <span class="n">erfc</span><span class="p">(</span><span class="o">-</span><span class="n">inner_term</span><span class="p">)</span> <span class="o">-</span> <span class="n">erfc</span><span class="p">(</span><span class="n">inner_term</span><span class="p">)</span>
 <a id="__codelineno-0-228" name="__codelineno-0-228"></a>
 <a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_equation_term_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sz</span><span class="p">):</span>
 <a id="__codelineno-0-230" name="__codelineno-0-230"></a>        <span class="k">return</span> <span class="p">(</span>

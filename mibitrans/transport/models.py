@@ -221,10 +221,10 @@ class Mibitrans(Transport3D):
 
     def _equation_term_z(self, t):
         if t == 0 or self.disp_z == 0:
-            inner_term = 2
+            return 2
         else:
             inner_term = self._src_pars.depth / (2 * np.sqrt(self.disp_z * t))
-        return erfc(-inner_term) - erfc(inner_term)
+            return erfc(-inner_term) - erfc(inner_term)
 
     def _equation_term_source(self, sz):
         return (

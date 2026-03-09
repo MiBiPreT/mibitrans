@@ -18,8 +18,10 @@ nav:
     - Mass Balance: background/massbalance.md
   - Examples:
     - Walkthrough: examples/example_walkthrough.ipynb
+    - Walkthrough animations: examples/animate_plume_plots.py
     - Bemidji oil pipeline burst: examples/example_bemidji.ipynb
     - Keesler Air-Force Base: examples/example_keesler.ipynb
+    - Comparison Mibitrans with Anatrans: examples/example_mibitrans_anatrans.ipynb
     - Comparison with BIOSCREEN: examples/example_BIOSCREEN_comparison.ipynb
 
   - Development: development/development.md

@@ -9,6 +9,7 @@ import numpy as np
 from mibitrans.data.check_input import MissingValueError
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.check_input import validate_source_zones
+from mibitrans.visualize.show_conditions import source_depletion
 from mibitrans.visualize.show_conditions import source_zone
 
 
@@ -201,6 +202,7 @@ class SourceParameters:
             do not diminish over time.
         verbose (bool, optional): Verbose mode. Defaults to False.
 
+
     Raises:
         ValueError : If input parameters are incomplete or outside the valid domain.
         TypeError : If input parameters of incorrect datatype.
@@ -239,9 +241,33 @@ class SourceParameters:
         warnings.warn("This functionality is not implemented yet. Try again later.")
         return None
 
-    def visualize(self):
+    def visualize_source_zone(self):
         """Plot the source zone concentration distribution."""
         source_zone(self)
+
+    def visualize_source_depletion(
+        self, hydrological_parameters, electron_acceptors=None, utilization_factor=None, **kwargs
+    ):
+        """Plot source depletion over time.
+
+        Provide electron acceptor concentrations and utilization factor when plotting instant reaction source depletion.
+
+        Args:
+            hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
+                hydrological parameters, dispersion and diffusion from HydrologicalParameters. Needed for flow velocity
+                and porosity.
+            electron_acceptors (ElectronAcceptors): ElectronAcceptor dataclass containing electron acceptor
+                concentrations. Alternatively provided as list, numpy array or dictionary corresponding with
+                delta_oxygen, delta_nitrate, ferrous_iron, delta_sulfate and methane. For more information, see
+                documentation for ElectronAcceptors.
+            utilization_factor (UtilizationFactor, optional): UtilizationFactor dataclass containing electron acceptor
+                utilization factors. Alternatively provided as list, numpy array or dictionary corresponding with
+                information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
+                for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
+            **kwargs : Arguments to be passed to plt.plot().
+
+        """
+        source_depletion(hydrological_parameters, self, electron_acceptors, utilization_factor, **kwargs)
 
     def _validate_input_presence(self):
         # Check if all required arguments are present

@@ -326,7 +326,7 @@ class Anatrans(Transport3D):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if self._hyd_pars.diffusion != 0:
-            warnings.warn("Domenico model does not consider molecular diffusion.", UserWarning)
+            warnings.warn(f"{self.short_description} does not consider molecular diffusion.", UserWarning)
 
     @property
     def short_description(self):

@@ -234,7 +234,13 @@ def test_plume_3d(animate, expected, test_anatrans_model_nodecay):
 
 def test_source_zone(test_source_pars):
     """Test if plot object is generated in source zone function."""
-    test_source_pars.visualize()
+    test_source_pars.visualize_source_zone()
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+
+
+def test_source_depletion(test_hydro_pars, test_source_pars):
+    """Test if plot object is generated in source depletion function."""
+    test_source_pars.visualize_source_depletion(test_hydro_pars)
     assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
 
 

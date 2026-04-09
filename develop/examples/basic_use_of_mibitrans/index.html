@@ -3254,7 +3254,7 @@ The internally calculated contaminant half life (days) is:  182.50320709845846
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h4 id="source-zonation">Source zonation<a class="anchor-link" href="#source-zonation">¶</a></h4><p>The source is assumed to be symmetrical in $y$-direction with the center located at $y=0$. The width of the source is divided into $n$ zones, where $n$ is a free choice of the user. The array <code>source_zone_boundary</code> defines the boundaries between zones. The release concentration within each zone is defined in the array <code>source_zone_concentration</code>. Release concentrations decrease from the center to the fringes. The source depth is assumed to be constant over the entire width.</p>
 <p><strong>Second example:</strong> Consider a source of total width of $40$m. It has a very high concentration in the source center at $y \in [-2m,2m]$, a lower concentration up to the distance of $\pm 11$ m (specifically for $y \in [-11m,-2m]$ and $y \in [2m,11m]$) and the lowest concentration from $\pm 11m$ up to $\pm 20m$. This would be entered as array of $[2,11,20]$ for <code>source_zone_boundary</code> and an array of the same shape for the corresponding source zone concentrations.</p>
-<p>The shape of the source can be easily visualized with <code>source.visualize()</code></p>
+<p>The shape of the source can be easily visualized with <code>source.visualize_source_zone()</code></p>
 </div>
 </div>
 </div>
@@ -3285,7 +3285,7 @@ The internally calculated contaminant half life (days) is:  182.50320709845846
 <span class="p">)</span>
 
 <span class="c1"># Visualize what the source zone looks like to check your input:</span>
-<span class="n">source</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
+<span class="n">source</span><span class="o">.</span><span class="n">visualize_source_zone</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-10">source = mbt.SourceParameters(
@@ -3296,7 +3296,7 @@ The internally calculated contaminant half life (days) is:  182.50320709845846
 )
 
 # Visualize what the source zone looks like to check your input:
-source.visualize()
+source.visualize_source_zone()
 plt.show()</div>
 </div>
 </div>
@@ -3308,22 +3308,8 @@ plt.show()</div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">AttributeError</span>                            Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[10]</span><span class="ansi-green-fg">, line 9</span>
-<span class="ansi-green-fg">      1</span> source = mbt.SourceParameters(
-<span class="ansi-green-fg">      2</span>     source_zone_boundary=np.array([<span class="ansi-green-fg">5</span>, <span class="ansi-green-fg">10</span>, <span class="ansi-green-fg">20</span>]),     <span style="color: rgb(95,135,135)">#[m]</span>
-<span class="ansi-green-fg">      3</span>     source_zone_concentration=np.array([<span class="ansi-green-fg">10</span>, <span class="ansi-green-fg">4</span>, <span class="ansi-green-fg">0.5</span>]), <span style="color: rgb(95,135,135)">#[g/m3]</span>
-<span class="ansi-green-fg">      4</span>     depth=<span class="ansi-green-fg">2</span>,                                        <span style="color: rgb(95,135,135)">#[m]</span>
-<span class="ansi-green-fg">      5</span>     total_mass=np.inf                               <span style="color: rgb(95,135,135)">#[g]</span>
-<span class="ansi-green-fg">      6</span> )
-<span class="ansi-green-fg">      8</span> <span style="color: rgb(95,135,135)"># Visualize what the source zone looks like to check your input:</span>
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">9</span> <span class="ansi-yellow-bg">source</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">visualize</span>()
-<span class="ansi-green-fg">     10</span> plt.show()
-
-<span class="ansi-red-fg">AttributeError</span>: 'SourceParameters' object has no attribute 'visualize'</pre>
+<div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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IiLZYPAhIiIi2WDwISIiItlg8CEiIiLZYPAhIiIi2WDwISIiItlg8CEiIiLZYPAhIiIi2WDwISIiItlg8CEiIiLZYPAhIiIi2WDwISIiItmoVsFnz5496N27N3x9faFQKLBx40a9+UOHDoVCodB79OjRwzzFEhERUZVTrYJPXl4emjVrhiVLlpS5TI8ePXD16lXd47vvvqvEComIiKgqszJ3Acbo2bMnevbs+dhlVCoVvL29De6zoKAABQUFumm1Wl3h+oiIiKhqq1YjPobYtWsXPD090bBhQ4waNQo3b9587PKJiYlwdnbWPfz8/CqpUiIiIqpsNSr49OjRA1999RW2b9+OuXPnYvfu3ejZsyc0Gk2Zz4mLi0NOTo7ucfHixUqsmIiIiCpTtTrUVZ5Bgwbpfg4NDUXTpk0RFBSEXbt2oWvXrqU+R6VSQaVSVVaJREREZEY1asTnUfXq1YO7uzvOnj1r7lKIiIioCqjRwefSpUu4efMmfHx8zF0KERERVQHV6lBXbm6u3uhNRkYGUlNT4ebmBjc3NyQkJGDAgAHw9vbGuXPnMGnSJNSvXx/R0dFmrJqIiIiqimoVfA4fPozOnTvrpsePHw8AiImJwdKlS3Hs2DGsXr0ad+7cga+vL7p3746ZM2fyHB4iIiICUM2CT6dOnSCEKHP+77//XonVEBERUXVTo8/xISIiInoYgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREckGgw8RERHJBoMPERERyQaDDxEREclGtQo+e/bsQe/eveHr6wuFQoGNGzfqzRdCID4+Hj4+PrC1tUVUVBTS09PNUywRERFVORUKPl9//TUiIiLg6+uLCxcuAAAWLFiAn3/+WdLiHpWXl4dmzZphyZIlpc6fN28eFi1ahGXLliElJQX29vaIjo5Gfn6+SesiIiKi6sHK2CcsXboU8fHxGDt2LGbPng2NRgMAcHFxwYIFC/Dcc89JXmSx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OBBt27bFF198UeZyq1atQo8ePXTTZYUkIiIikp9qE3wSEhIAAF9++eVjl3NxcYG3t7fB/RYUFKCgoEA3rVarK1QfERERVX3V5lCXoWJjY+Hu7o42bdpg5cqVEEI8dvnExEQ4OzvrHn5+fpVUKREREVW2GhV8ZsyYgfXr12Pr1q0YMGAA3nrrLSxevPixz4mLi0NOTo7ucfHixUqqloiIiCqbWQ91TZ48GXPnzn3sMmlpaWjUqJFB/U2dOlX3c4sWLZCXl4cPP/wQo0ePLvM5KpUKKpXKsIKJiIioWjNr8Hn33XcxdOjQxy5Tr169CvcfHh6OmTNnoqCggOGGiIiIzBt8PDw84OHhYbL+U1NT4erqytBDREREAKrRVV2ZmZm4desWMjMzodFokJqaCgCoX78+HBwcsGnTJly7dg1PP/00bGxssHXrVnzwwQeYMGGCeQsnIiKiKqPaBJ/4+HisXr1aN92iRQsAwM6dO9GpUydYW1tjyZIlGDduHIQQqF+/PpKSkjBy5EhzlUxERERVjEKUd723zKjVajg7OyMnJwdOTk6S9Xvo+nFk5l6BgGl2d1vPFqht72WSvomIiKo6Qz+/a9Tl7ERERESPw+BDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyweBDREREssHgQ0RERLLB4ENERESyUS2Cz/nz5zF8+HAEBgbC1tYWQUFBmDZtGgoLC/WWO3bsGDp06AAbGxv4+flh3rx5ZqqYiIiIqiIrcxdgiFOnTkGr1eKzzz5D/fr1ceLECYwcORJ5eXn46KOPAABqtRrdu3dHVFQUli1bhuPHj2PYsGFwcXHB66+/buYtICIioqqgWgSfHj16oEePHrrpevXq4fTp01i6dKku+Hz77bcoLCzEypUroVQqERISgtTUVCQlJT02+BQUFKCgoEA3rVarTbYdAsJkfRMREVH5qsWhrtLk5OTAzc1NN52cnIyOHTtCqVTq2qKj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"/>
 </div>
 </div>
 </div>
@@ -3336,7 +3322,7 @@ plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>By giving the total solid-phase contaminant source mass (<code>total_mass</code>) a finite amount, the source will not stay constant in strength but deplete over time. Consequently during simulation, the source mass and the source zone concentrations will diminish over time. This aspect is implemented as source depletion at the rate $\gamma_s$ in $1/day$. The rate $\gamma_s$ depends on the flow velocity, size of the source zone and source zone concentrations. When the source mass is considered infinite, contaminant source concentrations will not diminish over time (i.e. $\gamma_s = 0$). For more information about source depletion, see the theory documentation.</p>
+<p>By giving the total solid-phase contaminant source mass (<code>total_mass</code>) a finite amount, the source will not stay constant in strength but deplete over time. Consequently during simulation, the source mass and the source zone concentrations will diminish over time. This aspect is implemented as source depletion at the rate $\gamma_s$ in $1/day$. The rate $\gamma_s$ depends on the flow velocity, size of the source zone and source zone concentrations. When the source mass is considered infinite, contaminant source concentrations will not diminish over time (i.e. $\gamma_s = 0$). For more information about source depletion, see the theory section of the documentation.</p>
 </div>
 </div>
 </div>
@@ -3361,17 +3347,69 @@ plt.show()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">source</span> <span class="o">=</span> <span class="n">mbt</span><span class="o">.</span><span class="n">SourceParameters</span><span class="p">(</span>
     <span class="n">source_zone_boundary</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]),</span>      <span class="c1">#[m]</span>
-    <span class="n">source_zone_concentration</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">15</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]),</span>  <span class="c1">#[g/m3]</span>
+    <span class="n">source_zone_concentration</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]),</span>  <span class="c1">#[g/m3]</span>
     <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>                                            <span class="c1">#[m]</span>
     <span class="n">total_mass</span><span class="o">=</span><span class="mf">5e6</span>                                      <span class="c1">#[g]</span>
 <span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-11">source = mbt.SourceParameters(
     source_zone_boundary=np.array([2, 5, 10, 20]),      #[m]
-    source_zone_concentration=np.array([15,10, 4, 0.5]),  #[g/m3]
+    source_zone_concentration=np.array([15, 10, 4, 0.5]),  #[g/m3]
     depth=2,                                            #[m]
     total_mass=5e6                                      #[g]
 )</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The source depletion can be visualized using <code>source.visualize_source_depletion()</code>. And requires additional input of the hydrological parameters to calculate. For the instant reaction model, electron acceptor concentrations and (optionally) utilization factors are also needed. The input method for the latter two parameters is the same as described in the 'Instant reaction model' section below.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">source</span><span class="o">.</span><span class="n">visualize_source_depletion</span><span class="p">(</span><span class="n">hydro</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-12">source.visualize_source_depletion(hydro)
+plt.show()</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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"/>
 </div>
 </div>
 </div>
@@ -3402,10 +3440,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-13">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3424,7 +3462,7 @@ plt.show()</div>
     <span class="n">dt</span><span class="o">=</span><span class="mi">365</span><span class="o">/</span><span class="mi">5</span>                <span class="c1"># Model time discretization step size, in [days]</span>
 <span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-12">model = mbt.ModelParameters(
+<div class="clipboard-copy-txt" id="cell-13">model = mbt.ModelParameters(
     model_length=200,       # Model extent in the longitudinal (x) direction in [m].
     model_width=60,         # Model extent in the transverse horizontal (y) direction in [m].
     model_time=5 * 365,     # Model duration in [days].
@@ -3455,10 +3493,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-13">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-14">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3470,7 +3508,7 @@ plt.show()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># bad_hydro = mbt.HydrologicalParameters(velocity = 1)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-13"># bad_hydro = mbt.HydrologicalParameters(velocity = 1)</div>
+<div class="clipboard-copy-txt" id="cell-14"># bad_hydro = mbt.HydrologicalParameters(velocity = 1)</div>
 </div>
 </div>
 </div>
@@ -3493,10 +3531,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-14">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-15">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3513,7 +3551,7 @@ plt.show()</div>
 <span class="c1">#     total_mass = "inf",</span>
 <span class="c1"># )</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-14"># bad_source = mbt.SourceParameters(
+<div class="clipboard-copy-txt" id="cell-15"># bad_source = mbt.SourceParameters(
 #     source_zone_boundary = np.array([1,2,3]),
 #     source_zone_concentration = "this is a string, not an array",
 #     depth = 10,
@@ -3541,10 +3579,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-15">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-16">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3558,7 +3596,7 @@ plt.show()</div>
 <span class="c1">#     retardation = 0.1</span>
 <span class="c1"># )</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-15"># bad_att = mbt.AttenuationParameters(
+<div class="clipboard-copy-txt" id="cell-16"># bad_att = mbt.AttenuationParameters(
 #     retardation = 0.1
 # )</div>
 </div>
@@ -3614,10 +3652,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-16">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-17">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3636,7 +3674,7 @@ plt.show()</div>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span> <span class="c1">#Set to True to follow model calculation steps</span>
 <span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-16"># Initializing the model object
+<div class="clipboard-copy-txt" id="cell-17"># Initializing the model object
 mbt_object = mbt.Mibitrans(
     hydrological_parameters=hydro,
     attenuation_parameters=att,
@@ -3655,10 +3693,10 @@ mbt_object = mbt.Mibitrans(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-17">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-18">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3673,7 +3711,7 @@ mbt_object = mbt.Mibitrans(
 <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="s2">"x-steps,"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mbt_object</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="s2">"y-steps,"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mbt_object</span><span class="o">.</span><span class="n">t</span><span class="p">),</span> <span class="s2">"t-steps"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Input source mass: "</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">source_parameters</span><span class="o">.</span><span class="n">total_mass</span><span class="p">,</span> <span class="s2">"g"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-17"># Can use model object to request input and various attributes
+<div class="clipboard-copy-txt" id="cell-18"># Can use model object to request input and various attributes
 print("Retarded flow velocity: ", mbt_object.rv, r"r$m/day$")
 print(len(mbt_object.x), "x-steps,", len(mbt_object.y), "y-steps,", len(mbt_object.t), "t-steps")
 print("Input source mass: ", mbt_object.source_parameters.total_mass, "g")</div>
@@ -3703,10 +3741,10 @@ Input source mass:  5000000.0 g
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-18">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-19">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3719,7 +3757,7 @@ Input source mass:  5000000.0 g
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Run the model once initialized and obtain the results object</span>
 <span class="n">mbt_results</span> <span class="o">=</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-18"># Run the model once initialized and obtain the results object
+<div class="clipboard-copy-txt" id="cell-19"># Run the model once initialized and obtain the results object
 mbt_results = mbt_object.run()</div>
 </div>
 </div>
@@ -3744,10 +3782,10 @@ mbt_results = mbt_object.run()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-19">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-20">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3773,7 +3811,7 @@ mbt_results = mbt_object.run()</div>
 <span class="n">mbt_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-19"># Concentration distribution is contained in the cxyt attribute
+<div class="clipboard-copy-txt" id="cell-20"># Concentration distribution is contained in the cxyt attribute
 model_cxyt = mbt_results.cxyt
 
 # The Results object also contains all information of parameters used to generate the output contained within
@@ -3830,10 +3868,10 @@ The first 3 concentrations at the plume center are:  [14.94425883 14.3056162  13
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-20">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-21">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3854,7 +3892,7 @@ The first 3 concentrations at the plume center are:  [14.94425883 14.3056162  13
 <span class="n">ana_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-20">ana_object = mbt.Anatrans(
+<div class="clipboard-copy-txt" id="cell-21">ana_object = mbt.Anatrans(
     hydrological_parameters=hydro,
     attenuation_parameters=att,
     source_parameters=source,
@@ -3898,10 +3936,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-21">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-22">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3921,7 +3959,7 @@ plt.show()</div>
 <span class="n">bio_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-21">bio_object = mbt.Bioscreen(
+<div class="clipboard-copy-txt" id="cell-22">bio_object = mbt.Bioscreen(
     hydrological_parameters=hydro,
     attenuation_parameters=att,
     source_parameters=source,
@@ -3966,10 +4004,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-22">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-23">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3994,7 +4032,7 @@ plt.show()</div>
 <span class="p">)</span>
 <span class="n">mbt_object</span><span class="o">.</span><span class="n">instant_reaction</span><span class="p">(</span><span class="n">electron_acceptors</span><span class="o">=</span><span class="n">ea</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-22"># For streamlined input, use the ElectronAcceptor dataclass;
+<div class="clipboard-copy-txt" id="cell-23"># For streamlined input, use the ElectronAcceptor dataclass;
 ea = mbt.ElectronAcceptors(
     # Difference between background oxygen and current oxygen concentration in groundwater, in [g/m^3]
     delta_oxygen=9,
@@ -4019,10 +4057,10 @@ mbt_object.instant_reaction(electron_acceptors=ea)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-23">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-24">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4047,7 +4085,7 @@ mbt_object.instant_reaction(electron_acceptors=ea)</div>
 <span class="p">)</span>
 <span class="n">mbt_object</span><span class="o">.</span><span class="n">instant_reaction</span><span class="p">(</span><span class="n">electron_acceptors</span><span class="o">=</span><span class="n">ea</span><span class="p">,</span> <span class="n">utilization_factor</span><span class="o">=</span><span class="n">uf</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-23"># Can adapt utilization factors if needed
+<div class="clipboard-copy-txt" id="cell-24"># Can adapt utilization factors if needed
 uf = mbt.UtilizationFactor(
     # utilization factor of oxygen, as mass of oxygen consumed per mass of biodegraded contaminant [g/g].
     util_oxygen=2,
@@ -4072,10 +4110,10 @@ mbt_object.instant_reaction(electron_acceptors=ea, utilization_factor=uf)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-24">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-25">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4111,7 +4149,7 @@ mbt_object.instant_reaction(electron_acceptors=ea, utilization_factor=uf)</div>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"electron acceptor concentrations: "</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">electron_acceptors</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"electron acceptor utilization factors: "</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">utilization_factor</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-24"># Alternatively, electron acceptors and/or utilization factors can be entered as a dictionary
+<div class="clipboard-copy-txt" id="cell-25"># Alternatively, electron acceptors and/or utilization factors can be entered as a dictionary
 mbt_object.instant_reaction(
     electron_acceptors={
         # Difference between background oxygen and current oxygen concentration in groundwater, in [g/m^3]
@@ -4172,10 +4210,10 @@ electron acceptor utilization factors:  {'util_oxygen': 3.14, 'util_nitrate': 4.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-25">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-26">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4193,7 +4231,7 @@ electron acceptor utilization factors:  {'util_oxygen': 3.14, 'util_nitrate': 4.
 <span class="n">mbt_object</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">"instant_reaction"</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"The current model mode is: "</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-25"># Switch between instant reaction and linear model
+<div class="clipboard-copy-txt" id="cell-26"># Switch between instant reaction and linear model
 mbt_object.mode = "linear"
 print("The current model mode is: ", mbt_object.mode)
 # Running now will show the results of the linear model
@@ -4236,10 +4274,10 @@ The current model mode is:  instant_reaction
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-26">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-27">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4256,7 +4294,7 @@ The current model mode is:  instant_reaction
     <span class="n">time</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"The concentration at 20m downstream from the source after 1 year is:"</span><span class="p">,</span> <span class="n">concentration</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"g/m^3"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-26"># Instead of distribution, sample a specific location at any point along the plume and any point in time
+<div class="clipboard-copy-txt" id="cell-27"># Instead of distribution, sample a specific location at any point along the plume and any point in time
 concentration = mbt_object.sample(
     x_position=20,
     y_position=0,
@@ -4298,10 +4336,10 @@ print("The concentration at 20m downstream from the source after 1 year is:", co
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-27">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-28">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4341,7 +4379,7 @@ print("The concentration at 20m downstream from the source after 1 year is:", co
 <span class="n">bio_object</span><span class="o">.</span><span class="n">instant_reaction</span><span class="p">(</span><span class="n">electron_acceptors</span><span class="o">=</span><span class="n">ea</span><span class="p">)</span>
 <span class="n">bio_instant</span> <span class="o">=</span> <span class="n">bio_object</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-27">#Mibitrans model
+<div class="clipboard-copy-txt" id="cell-28">#Mibitrans model
 mbt_object = mbt.Mibitrans(hydro, att, source, model)
 mbt_lineardecay = mbt_object.run()
 
@@ -4393,10 +4431,10 @@ bio_instant = bio_object.run()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-28">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-29">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4410,7 +4448,7 @@ bio_instant = bio_object.run()</div>
 <span class="n">mbt</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">mbt_nodecay</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-28"># Pass result object to plotting function, using default time and
+<div class="clipboard-copy-txt" id="cell-29"># Pass result object to plotting function, using default time and
 mbt.centerline(mbt_nodecay)
 plt.show()</div>
 </div>
@@ -4447,10 +4485,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-29">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-30">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4463,7 +4501,7 @@ plt.show()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">mbt</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">mbt_nodecay</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="n">y_position</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-29">mbt.centerline(mbt_nodecay, time=5*365, y_position=7)
+<div class="clipboard-copy-txt" id="cell-30">mbt.centerline(mbt_nodecay, time=5*365, y_position=7)
 plt.show()</div>
 </div>
 </div>
@@ -4500,10 +4538,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-30">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-31">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4517,7 +4555,7 @@ plt.show()</div>
 <span class="n">mbt</span><span class="o">.</span><span class="n">centerline</span><span class="p">([</span><span class="n">mbt_nodecay</span><span class="p">,</span> <span class="n">mbt_lineardecay</span><span class="p">,</span> <span class="n">mbt_instant</span><span class="p">],</span> <span class="n">time</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="mi">365</span><span class="p">,</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">legend</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-30">legend = ["no degradation", "linear decay", "instant reaction"]
+<div class="clipboard-copy-txt" id="cell-31">legend = ["no degradation", "linear decay", "instant reaction"]
 mbt.centerline([mbt_nodecay, mbt_lineardecay, mbt_instant], time=5*365, legend_names=legend)
 plt.show()</div>
 </div>
@@ -4554,10 +4592,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [32]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-31">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-32">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4575,7 +4613,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">150</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-31">legend = ["mibitrans", "anatrans", "bioscreen"]
+<div class="clipboard-copy-txt" id="cell-32">legend = ["mibitrans", "anatrans", "bioscreen"]
 mbt.centerline([mbt_nodecay, ana_nodecay, bio_nodecay], time=3*365, legend_names=legend)
 plt.title("Better title than the one generated automatically")
 plt.xlabel("I have changed!")
@@ -4616,10 +4654,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [32]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-32">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-33">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4641,7 +4679,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Concentration distribution $C(x,y,t=</span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">y) [g/m^3]$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-32">time = 5 #[years]
+<div class="clipboard-copy-txt" id="cell-33">time = 5 #[years]
 y0, y1, y2, y3 = 0, 6, 9, 20
 mbt.centerline(mbt_nodecay, time = time*365, y_position = y0, linestyle="-", color="blue", label = f"y={y0}m")
 mbt.centerline(mbt_nodecay, time = time*365, y_position = y1, linestyle="--", color="orange", label = f"y={y1}m")
@@ -4686,10 +4724,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [34]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-33">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-34">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4710,7 +4748,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-33">linestyles = ["-", "--", "-.", ":", "-"]
+<div class="clipboard-copy-txt" id="cell-34">linestyles = ["-", "--", "-.", ":", "-"]
 cmap = plt.get_cmap('Dark2')
 colors = cmap.colors   # list of RGB tuples
 
@@ -4755,10 +4793,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [34]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-34">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-35">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4771,7 +4809,7 @@ plt.show()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">mbt</span><span class="o">.</span><span class="n">transverse</span><span class="p">(</span><span class="n">mbt_lineardecay</span><span class="p">,</span> <span class="n">x_position</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-34">mbt.transverse(mbt_lineardecay, x_position=100)
+<div class="clipboard-copy-txt" id="cell-35">mbt.transverse(mbt_lineardecay, x_position=100)
 plt.show()</div>
 </div>
 </div>
@@ -4807,10 +4845,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-35">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-36">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4826,7 +4864,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-35">mbt.transverse(ana_nodecay, x_position=20, time=365, linestyle="--", color="green", label="no degradation")
+<div class="clipboard-copy-txt" id="cell-36">mbt.transverse(ana_nodecay, x_position=20, time=365, linestyle="--", color="green", label="no degradation")
 mbt.transverse(ana_instant, x_position=20, time=365, linestyle="-.", color="red", label="instant reaction")
 plt.title("No degradation and instant reaction Domenico model at x=80m, t=6years")
 plt.legend()
@@ -4854,10 +4892,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [37]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-36">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-37">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4876,7 +4914,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Cross section concentration at various $x$ for Mibitrans instant reaction model, $t=20$y"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-36">mbt_instant.transverse(5, label="x = 5m", color="darkolivegreen")
+<div class="clipboard-copy-txt" id="cell-37">mbt_instant.transverse(5, label="x = 5m", color="darkolivegreen")
 mbt_instant.transverse(20, label="x = 20m", color="yellowgreen")
 mbt_instant.transverse(50, label="x = 100m", color="greenyellow")
 mbt_instant.transverse(100, label="x = 300m", color="palegreen")
@@ -4919,10 +4957,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [37]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [38]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-37">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-38">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4938,7 +4976,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Breakthrough curve of Bioscreen model for different degradation settings, at x=80m"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-37"># Concentration distribution can also be plotted in the transverse direction
+<div class="clipboard-copy-txt" id="cell-38"># Concentration distribution can also be plotted in the transverse direction
 mbt.breakthrough([bio_nodecay, bio_lineardecay, bio_instant], x_position=150,
              legend_names=["no degradation", "linear decay", "instant reaction"])
 plt.title("Breakthrough curve of Bioscreen model for different degradation settings, at x=80m")
@@ -4966,10 +5004,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [38]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [39]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-38">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-39">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4982,7 +5020,7 @@ plt.show()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">mbt_nodecay</span><span class="o">.</span><span class="n">breakthrough</span><span class="p">(</span><span class="n">x_position</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">marker</span> <span class="o">=</span> <span class="s1">'o'</span><span class="p">,</span><span class="n">mec</span> <span class="o">=</span> <span class="s1">'k'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-38">mbt_nodecay.breakthrough(x_position=50,marker = 'o',mec = 'k', color="red")
+<div class="clipboard-copy-txt" id="cell-39">mbt_nodecay.breakthrough(x_position=50,marker = 'o',mec = 'k', color="red")
 plt.show()</div>
 </div>
 </div>
@@ -5019,10 +5057,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [39]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [40]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-39">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-40">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5035,7 +5073,7 @@ plt.show()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">mbt</span><span class="o">.</span><span class="n">plume_2d</span><span class="p">(</span><span class="n">mbt_nodecay</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-39">mbt.plume_2d(mbt_nodecay)
+<div class="clipboard-copy-txt" id="cell-40">mbt.plume_2d(mbt_nodecay)
 plt.show()</div>
 </div>
 </div>
@@ -5060,10 +5098,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [40]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [41]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-40">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-41">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5077,7 +5115,7 @@ plt.show()</div>
 <span class="n">mbt</span><span class="o">.</span><span class="n">plume_2d</span><span class="p">(</span><span class="n">mbt_lineardecay</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"plasma"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-40"># Function passes plt.colormesh keyword arguments
+<div class="clipboard-copy-txt" id="cell-41"># Function passes plt.colormesh keyword arguments
 mbt.plume_2d(mbt_lineardecay, cmap="plasma")
 plt.show()</div>
 </div>
@@ -5103,10 +5141,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [41]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-41">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-42">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5121,7 +5159,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Contaminant concentration for anatrans instant reaction model, at t=5y"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-41"># Once again also can be accessed through the class method
+<div class="clipboard-copy-txt" id="cell-42"># Once again also can be accessed through the class method
 ana_instant.plume_2d(time=5*365, cmap="Spectral", shading="gouraud")
 plt.title("Contaminant concentration for anatrans instant reaction model, at t=5y")
 plt.show()</div>
@@ -5160,10 +5198,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-42">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-43">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5178,7 +5216,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Contaminant plume with no degradation Anatrans model, t = 5 years"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-42"># Plot the x and y concentration distribution for no degradation decay model, uses plot_surface
+<div class="clipboard-copy-txt" id="cell-43"># Plot the x and y concentration distribution for no degradation decay model, uses plot_surface
 ana_nodecay.plume_3d(time=5*365)
 plt.title("Contaminant plume with no degradation Anatrans model, t = 5 years")
 plt.show()</div>
@@ -5205,10 +5243,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-43">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-44">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5223,7 +5261,7 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Contaminant plume with linear degradation Anatrans model, t = 5 years"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-43"># Function passes plot_surface keyword arguments
+<div class="clipboard-copy-txt" id="cell-44"># Function passes plot_surface keyword arguments
 mbt.plume_3d(ana_lineardecay, cmap="summer")
 plt.title("Contaminant plume with linear degradation Anatrans model, t = 5 years")
 plt.show()</div>
@@ -5261,10 +5299,10 @@ plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-44">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-45">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5279,7 +5317,7 @@ plt.show()</div>
 <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elev</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">340</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-44">ax = ana_instant.plume_3d(cmap="cividis")
+<div class="clipboard-copy-txt" id="cell-45">ax = ana_instant.plume_3d(cmap="cividis")
 plt.title("Contaminant plume with instant reaction Anatrans model, t = 5 years")
 ax.view_init(elev=15, azim=340)
 plt.show()</div>
@@ -5338,10 +5376,10 @@ It operates as method <code>mass_balance</code> on the results object of the mod
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-45">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-46">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5355,7 +5393,7 @@ It operates as method <code>mass_balance</code> on the results object of the mod
 <span class="n">mb</span> <span class="o">=</span> <span class="n">mbt_lineardecay</span><span class="o">.</span><span class="n">mass_balance</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="mi">365</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">mb</span><span class="o">.</span><span class="n">plume_mass</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-45"># Get mass balance for a specified point in time
+<div class="clipboard-copy-txt" id="cell-46"># Get mass balance for a specified point in time
 mb = mbt_lineardecay.mass_balance(time=5*365)
 print(mb.plume_mass)</div>
 </div>
@@ -5393,10 +5431,10 @@ print(mb.plume_mass)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-46">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-47">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5409,7 +5447,7 @@ print(mb.plume_mass)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">mb</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">mb</span><span class="o">.</span><span class="n">plume_mass</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-46">mb(time="all")
+<div class="clipboard-copy-txt" id="cell-47">mb(time="all")
 print(mb.plume_mass)</div>
 </div>
 </div>
@@ -5450,10 +5488,10 @@ print(mb.plume_mass)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [48]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-47">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-48">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5475,7 +5513,7 @@ print(mb.plume_mass)</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-47">mb_nd = mbt_nodecay.mass_balance()
+<div class="clipboard-copy-txt" id="cell-48">mb_nd = mbt_nodecay.mass_balance()
 
 plt.plot(mb.t, mb.plume_mass, color="green", label=r"$m_{plume}$ decay")
 plt.plot(mb.t, mb_nd.plume_mass, color="blue", label=r"$m_{plume}$ no decay")

@@ -232,10 +232,6 @@ class SourceParameters:
         """Check argument presence, types and domain."""
         self._validate_input_presence()
 
-        # Make sure naming for infinite source mass is consistent from this point onward
-        if isinstance(self.total_mass, str):
-            self.total_mass = "infinite"
-
     def interpolate(self, n_zones, method):
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""
         warnings.warn("This functionality is not implemented yet. Try again later.")
@@ -267,6 +263,9 @@ class SourceParameters:
             **kwargs : Arguments to be passed to plt.plot().
 
         """
+        if self.total_mass == np.inf:
+            raise ValueError("Source mass is set to infinite, there is no source depletion to be visualized.")
+
         source_depletion(hydrological_parameters, self, electron_acceptors, utilization_factor, **kwargs)
 
     def _validate_input_presence(self):

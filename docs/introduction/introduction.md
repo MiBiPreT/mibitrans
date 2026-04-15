@@ -27,21 +27,9 @@ Processes relevant for general biodegradation and bioremediation prediction are:
 
 Modeling all these processes at the same time, requires a high level of model detail, spatially resolved parameter information and knowledge on initial and boundary conditions. This is typically not feasible in the field. Thus, we follow the approach to select and combine most relevant processes and have modeling sub-modules (repositories within the MiBiPreT organization) which can be used for data analysis and predictive modeling of individual or combined processes. At the same time, modules are designed to allow for coupling of processes and (modeling) sub-modules at a advanced stage of tool development.
 
-## Functionality
+## Purpose
 
 `mibitrans` is supposed to serve as hydrogeological transport screening model based on field data for biodegredation and bioremediation. In parts `mibitrans` reproduces - and extends- the functionality of the *Excel*-based screening tool [`BIOSCREEN`](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) [Newell et al., 1996]. Thus, transport is modelled based on the 3D advection dispersion equation considering linear equilibrium adsorption and various options for biodegradation. The option of no decay is also available. `mibitrans` is validated by comparing example field data with results from `BIOSCREEN`. 
-
-## Structure
-
-The core elements and folders for users of `mibitrans` are:
-
-* The folder `mibitrans` contains the main functionality split up into folders for:
-    * `data`
-    * `transport`
-    * `analysis` 
-    * `visualization`
-* The folder `examples` contains example workflows in the form of Jupyter-Notebooks outlining application of functionality on example data.
-
 
 ## References
 

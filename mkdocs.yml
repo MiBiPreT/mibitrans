@@ -12,6 +12,7 @@ nav:
   - Introduction: introduction/introduction.md
   - Background:
     - Transport Theory: background/transporttheory.md
+    - Parameter Overview: background/parameters.md
     - Transport Model Setup: background/modelsetup.md
     - Model implementations: background/modelimplementations.md
     - Instant Reaction Model: background/instantreaction.md

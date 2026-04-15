@@ -5,7 +5,7 @@ site_url: https://MiBiPreT.github.io/mibitrans
 repo_name: MiBiPreT/mibitrans
 repo_url: https://github.com/MiBiPreT/mibitrans/
 edit_uri: "edit/main/docs/"
-copyright: Copyright &copy; 2024 Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen
+copyright: Copyright &copy; 2026 Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen
 
 nav:
   - Home: index.md
@@ -16,6 +16,10 @@ nav:
     - Model implementations: background/modelimplementations.md
     - Instant Reaction Model: background/instantreaction.md
     - Mass Balance: background/massbalance.md
+    - BIOSCREEN: background/bioscreen.md
+  - Implementation: 
+    - Implementation: implementation/implemenation.md
+    - Example data: implementation/exampledata.md
   - Examples:
     - Walkthrough: examples/basic_use_of_mibitrans.ipynb
     - Walkthrough animations: examples/animate_plume_plots.py

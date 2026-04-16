@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 10 11:33:06 2026
+"""Created on Fri Apr 10 11:33:06 2026.
 
 @author: alraune
 """

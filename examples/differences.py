@@ -5,9 +5,10 @@
 @author: alraune
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import mibitrans as mbt
-import matplotlib.pyplot as plt
+
 
 def mask(a, b, cutoff):
     """Set values in arrays a and b to NaN if both are below the provided cutoff."""
@@ -281,4 +282,3 @@ def comparison_plot(
     ax.set_ylabel(first_y_label)
     ax2.set_ylabel(second_y_label)
     fig.colorbar(im, label=colorbar_label)
-    #plt.savefig("mbt_ana_comp_dual_axis.png", dpi=500, bbox_inches="tight")

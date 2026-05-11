@@ -8,7 +8,13 @@ Compared to conventional numerical approaches, `mibitrans` enables fast model se
 
 ## How to use mibitrans
 
-A collection of analytical and semi-semianalytical solutions for hydrogeological transport phenomena
+Using your preferred Python IDE, install Mibitrans, specify the field conditions and visualize the contaminant distribution.
+
+<img src="assets/model_comparison_trans.svg" alt="Comparison between different mibitrans" width="500">
+
+<img src="assets/plume_animation.gif" alt="Overview of `mibitrans` package structure and functionalities." width="500">
+
+Look at the examples section for detailed explanation on how to use mibitrans.
 
 ## Installation
 

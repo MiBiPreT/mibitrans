@@ -2,7 +2,7 @@
 
 ## General
 
-[*BIOSCREEN*](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) has been developed by the U.S. Environmental Protection Agency (EPA) in collaboration with the U.S. Air Force as natural attenuation decision support tool [Newell et al, 1996, 1997]. Its is meant as screening tool to determine if a full-scale evaluation of a contaminated site is needed. Thereby it is not replacing a more involved numerical model, but serves as preliminary step to evaluate the necessity of an involved numerical model. 
+[*BIOSCREEN*](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) has been developed by the U.S. Environmental Protection Agency (EPA) in collaboration with the U.S. Air Force as natural attenuation decision support tool [Newell et al, 1996, 1997]. It is meant as screening tool to determine if a full-scale evaluation of a contaminated site is needed. Thereby it is not replacing a more involved numerical model, but serves as preliminary step to evaluate the necessity of an involved numerical model. 
 
 *BIOSCREEN* calculates contaminant concentration distributions in 3D for a constant source under uniform flow conditions using an empirical solution of the advection dispersion equation. The source domain can contain several zones of different concentrations. Three modes of decay can be chose to represent degradation processes:
 
@@ -19,7 +19,7 @@ The spatial resolution of the plume is fixed to 11 steps over the plume length a
 
 Transport in *BIOSCREEN* is modelled based on the analytical model of *Domenico*, [1987]. The actual implementation is the same as the equation for the *Bioscreen* Model Class in the `mibitrans` package (see section **Model Implementations**).
 
-The *Domenico*-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes. As *Domenico*, [1987] writes, *"an exact solution to this problem cannot avaid some form of numerical integration"*. The provided analytical expression approximates the concentration distribution of a decaying species that is released to the aquifer as an extended pulse. *West et al., 2007* provides a detailed overview on the effects of the approximations in the *Domenico*-solution and potential error it can introduce to solute transport predictions.
+The *Domenico*-solution has not been derived with mathematical rigor as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes. As *Domenico*, [1987] writes, *"an exact solution to this problem cannot avoid some form of numerical integration"*. The provided analytical expression approximates the concentration distribution of a decaying species that is released to the aquifer as an extended pulse. *West et al., 2007* provides a detailed overview on the effects of the approximations in the *Domenico*-solution and potential error it can introduce to solute transport predictions.
 
 Specifically, the *Domenico*-model takes the following assumption on initial and boundary conditions:
 

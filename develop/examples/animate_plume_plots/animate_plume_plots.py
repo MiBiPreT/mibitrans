@@ -2,11 +2,6 @@
 
 # The two lines below allow animations to be displayed.
 
-import matplotlib
-
-matplotlib.use("TkAgg")
-
-import matplotlib.pyplot as plt
 import numpy as np
 import mibitrans as mbt
 
@@ -53,11 +48,11 @@ mbt_model.instant_reaction(electron_acceptors=[9, 6, 8, 5, 4], utilization_facto
 mbt_results_instant = mbt_model.run()
 
 
-# To produce an animation, set `animate` to True. Also put the animation object to a variable, use show to display the
-# animation
+# To produce an animation, set `animate` to True. Also assign the animation object to a variable. To view the animation
+# save it to a .gif file, with the fps as an optional argument.
 
 anim = mbt_results_nodecay.centerline(animate=True)
-plt.show()
+anim.save("plume_nd_animation.gif", fps=10)
 
 # Combine multiple models by using list input
 
@@ -66,7 +61,7 @@ anim2 = mbt.centerline(
     legend_names=["no decay", "linear decay", "instant reaction"],
     animate=True,
 )
-plt.show()
+anim2.save("plume_center_animation.gif", fps=10)
 
 # Also works for transverse plots
 
@@ -76,7 +71,7 @@ anim3 = mbt.transverse(
     legend_names=["no decay", "linear decay", "instant reaction"],
     animate=True,
 )
-plt.show()
+anim3.save("plume_trans_animation.gif", fps=10)
 
 # For breakthrough curve, animation draws the next point for each time step.
 
@@ -86,20 +81,23 @@ anim4 = mbt.breakthrough(
     legend_names=["no decay", "linear decay", "instant reaction"],
     animate=True,
 )
-plt.show()
+anim4.save("plume_btc_animation.gif", fps=10)
 
 # Animate 2-dimensional and 3-dimensional plots as well
 
 anim5 = mbt_results_instant.plume_2d(animate=True, cmap="viridis")
-plt.show()
+anim5.save("plume_2d_animation.gif", fps=10)
 
 anim6 = mbt_results_nodecay.plume_3d(animate=True, cmap="viridis")
-plt.show()
-
-# Animation can be saved to file as .gif, optional argument to adjust amount of frames per second.
-
-anim6.save("plume_animation.gif", fps=10)
+anim6.save("plume_3d_animation.gif", fps=10)
 
 # Currently it is not possible to adjust individual line colors/styles when animating multiple models in a single plot.
 # A first version of this functionality is found in `mibitrans.visualize.animation.animate_1d`. However, this is still
 # under development and needs improvement to become a core feature of the mibitrans package.
+
+# To display animations inside a python IDE, use the import statement below. Then after assignment of the animation
+# object to a variable, use plt.show() to display the animation. This however might require additional setup with TkAgg.
+
+# import matplotlib
+#
+# matplotlib.use("TkAgg")

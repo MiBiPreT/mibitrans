@@ -12,7 +12,7 @@
         <meta name="author" content="Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/implementation/implemenation/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/implementation/implementation/">
       
       
         <link rel="prev" href="../../background/bioscreen/">
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#implemenation" class="md-skip">
+        <a href="#implementation" class="md-skip">
           Skip to content
         </a>
       
@@ -1461,22 +1461,22 @@
   
 
 
-<h1 id="implemenation">Implemenation</h1>
+<h1 id="implementation">Implementation</h1>
 <h2 id="architecture">Architecture</h2>
 <p>The code is structured in a modular fashion to ensure easy extension of functionality by the (future) development team as well as outside collaborators. To stimulate embedding in the scientific community, users are encouraged to report bugs and suggest extensions and issues on the GitHub issue tracker, or even self-implemented features, through pull requests.</p>
-<p><img src="mibitrans_schematics_structure.png" alt="Overview of <code>mibitrans</code> package structure and functionalities." width="500"></p>
+<p><img alt="Overview of mibitrans package structure and functionalities." src="../../assets/mibitrans_schematics_structure.svg" /></p>
 <p>The general structure follows the split between input (data module), process control (transport module), and output (visualize module). Input data follows in sorting the related processes: hydrological/aquifer parameters, attenuation parameters, source parameters, and model specific parameters. </p>
 <p>Transport of contaminants is solved analytically with a choice of 3 model options, corresponding to the solutions outlined in section <strong>Background/Model implementations</strong>. Each model is implemented in a separate class:</p>
 <ul>
 <li><code>Mibitrans</code>: this model class provides the concentration distribution according to the fully exact solution. This solution requires numerical integration which causes slightly higher computational effort and duration of calculation but provides the most accurate results. Note the deliberate choice of naming the model class for the exact solution <code>Mibitrans</code> similar to the python package name <code>mibitrans</code> as we consider this model to be the default option.     </li>
-<li>`Anatrans: this model class provides the concentration distribution according to the analytical approximation. This makes numerical integration no longer necessary. However, it introduces an error whose size dependings on field conditions. The purpose of this model is to fasten up repeated model use, e.g. when used for parameter calibration.</li>
-<li>`Bioscreen: this model class provides the concentration distribution according to the approximate equation implemented in <em>BIOSCREEN</em>. The purpose of this model class is mostly benchmarking and comparison.</li>
+<li><code>Anatrans</code>: this model class provides the concentration distribution according to the analytical approximation. This makes numerical integration no longer necessary. However, it introduces an error whose size dependings on field conditions. The purpose of this model is to fasten up repeated model use, e.g. when used for parameter calibration.</li>
+<li><code>Bioscreen</code>: this model class provides the concentration distribution according to the approximate equation implemented in <em>BIOSCREEN</em>. The purpose of this model class is mostly benchmarking and comparison.</li>
 </ul>
 <p>Transport models are implemented as classes, each inheriting base functionality, such as data input and results handling. This setup allows to simply define other transport model solutions, as we show in the discussion section. </p>
 <p>Currently, two options for modeling contaminant degradation are available: (i) linear decay and (ii) instant reaction (section <strong>Background/Instant Reactin Model</strong>). Standard degradation process is linear decay. The case of no decay is naturally included in this model implementation using a zero decay rate or half life time. The handling of degradation options is also implemented at transport parent class level. Both degradation options are thus available for each of the implemented transport classes.</p>
 <p>A broad range of visualization options is implemented within the package. This does not only include display of calculated concentrations in various forms, but also visualization of the source settings. Examples will be provided for each visualization option in the following sections.</p>
 <p>The <code>mibitrans</code> package provides the feature of calculating the mass balances within the source and mass within the plume. For instance, the remaining mass in the plume and the degraded mass can be calculated at each time.</p>
-<p>In the section <strong>examples</strong>, various example workflows, including application examples, provide inside into the application of <code>mibitrans</code>-functionalityin in the form of commented Jupyter-Notebooks.</p>
+<p>In the section <strong>examples</strong>, various example workflows, including application examples, provide inside into the application of <code>mibitrans</code>-functionality in in the form of commented Jupyter-Notebooks.</p>
 <h2 id="research-software-management">Research Software Management</h2>
 <p>We wish to reach with <code>mibitrans</code> a wide range of academic researchers with their research and education as well as societal stakeholders, like remediation consultants, to quickly evaluate contaminated field sites. To achieve that we follow in the development of <code>mibitrans</code>, the three aspects:</p>
 <ul>
@@ -1486,7 +1486,7 @@
 </ul>
 <p><code>mibitrans</code> is written in Python, to align with the predominant trend of using Python for geoscientific modeling and data analysis. To further instigate adoption by the scientific community and other stakeholders, the development team follows the latest standards for the development and management of research software.</p>
 <p>The open-source software package is being developed on a public GitHub repository, licensed under the permissive Apache 2.0 license. It applies version control, with released versions published on Zenodo and the Python Package Index (PyPI). 
-This last publication type enables a single-line installation with the \texttt{pip} tool, resulting in a very low usage threshold. </p>
+This last publication type enables a single-line installation with the <code>pip</code> tool, resulting in a very low usage threshold. </p>
 <p>To ensure high quality and consistent code style and scientific correctness, new additions are only integrated after passing automated unit tests and code quality checks and after passing a code review by a second research software engineer. 
 The package has extensive documentation, for both users and developers, which is updated and published with every (minor) software release. </p>
 

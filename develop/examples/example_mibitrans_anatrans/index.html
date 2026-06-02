@@ -301,7 +301,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../implementation/implemenation/" class="md-tabs__link">
+        <a href="../../implementation/implementation/" class="md-tabs__link">
           
   
   
@@ -814,7 +814,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../implementation/implemenation/" class="md-nav__link">
+      <a href="../../implementation/implementation/" class="md-nav__link">
         
   
   
@@ -2338,7 +2338,7 @@ $$</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The approximation (see notebook <code>example_validity_substitution</code>, for more information) for the transverse dispersivity terms in the Anatrans solution introduces an error, of which the size depends on parameter choices. For the Domenico (1987) (Bioscreen in this package) solution specifically, the error size is dependent on the Peclet number defined as $Pe = \frac{vx_R}{D_x}$, where $x_R$ is the characteristic travel distance (Guyonnet and Neville, 2004). $D_x$ is the longitudinal dispersion coefficient, defined as $D_{eff} + \alpha_x v$. If diffusion is considered to be negligible, the expression becomes, $Pe = \frac{x_R}{\alpha_x}$, and thus is mainly dependent on the dispersivity. For the Anatrans solution however, the longitudinal component of the equation is nearly identical to that of the Mibitrans solution. Thus, if $\alpha_y$ and $\alpha_z = 0$, the Mibitrans and Anatrans solutions resolve to the same concentration distribution. Which is shown below.</p>
+<p>The approximation (see notebook <code>example_validity_substitution</code>, for more information) for the transverse dispersivity terms in the Anatrans solution introduces an error, of which the size depends on parameter choices. For the Domenico (1987) (Bioscreen in this package) solution specifically, the error size is dependent on the Peclet number defined as $Pe = \frac{vx_R}{D_x}$, where $x_R$ is the characteristic travel distance (Guyonnet and Neville, 2004). $D_x$ is the longitudinal dispersion coefficient, defined as $D_{eff} + \alpha_x v$. If diffusion is considered to be negligible, the expression becomes, $Pe = \frac{x_R}{\alpha_x}$, and thus is mainly dependent on the dispersivity. For the Anatrans solution however, the longitudinal component of the equation is nearly identical to that of the Mibitrans solution. Thus, if $\alpha_y$ and $\alpha_z = 0$, the Mibitrans and Anatrans solutions resolve to the same concentration distribution, which is shown below.</p>
 </div>
 </div>
 </div>
@@ -2525,6 +2525,7 @@ bio_results_longitudinal = bio_object.run()</div>
         <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"bio, $t=</span><span class="si">{</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">$d"</span>
     <span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Temporal evolution of plume centerline for various mibitrans models"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -2556,6 +2557,7 @@ for i in range(len(times)):
         label=f"bio, $t={times[i]}$d"
     )
     plt.legend(bbox_to_anchor=(1,1))
+    plt.title("Temporal evolution of plume centerline for various mibitrans models")
 
 plt.show()</div>
 </div>
@@ -2705,7 +2707,7 @@ ana_results = ana_object.run()</div>
         <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"ana, $t=</span><span class="si">{</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="mi">365</span><span class="si">}</span><span class="s2">$y"</span>
     <span class="p">)</span>
-
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Differences between Mibitrans and Anatrans models in plume centerline"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -2726,7 +2728,7 @@ for i in range(len(times)):
         linestyle="--",
         label=f"ana, $t={times[i]/365}$y"
     )
-
+plt.title("Differences between Mibitrans and Anatrans models in plume centerline")
 plt.legend()
 plt.show()</div>
 </div>
@@ -2795,6 +2797,7 @@ plt.show()</div>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Differences between Mibitrans and Anatrans models transverse to plume"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -2819,6 +2822,7 @@ for i in range(len(times)):
 
 plt.ylim((0, 5))
 plt.xlim((-50,50))
+plt.title("Differences between Mibitrans and Anatrans models transverse to plume")
 plt.legend(bbox_to_anchor=(1,1))
 plt.show()</div>
 </div>
@@ -2954,7 +2958,7 @@ plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="comparing-model-differences-for-various-flow-velocities-and-dispersivities">Comparing model differences for various flow velocities and dispersivities<a class="anchor-link" href="#comparing-model-differences-for-various-flow-velocities-and-dispersivities">¶</a></h4><p><span style="color:red;">Assuming that diffusion is negligible, the flow velocity is of no influence on the differences between the Anatrans and Mibitrans models.</span> --&gt; Statement at very least questionable, but probably false, as quantification of differences indicates. Possible effects still caused by particularities in calculating the mean of differences, needs a bit of further investigation.</p>
+<h4 id="comparing-model-differences-for-various-flow-velocities-and-dispersivities">Comparing model differences for various flow velocities and dispersivities<a class="anchor-link" href="#comparing-model-differences-for-various-flow-velocities-and-dispersivities">¶</a></h4><p>Assuming that diffusion is negligible, the flow velocity is of little influence on the differences between the Anatrans and Mibitrans models.</p>
 </div>
 </div>
 </div>
@@ -3273,7 +3277,7 @@ for i in range(len(alpha_y_list)):
         <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">"ana, $\alpha_y=</span><span class="si">{</span><span class="n">alpha_y_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m, \alpha_z=</span><span class="si">{</span><span class="n">alpha_z_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m$"</span>
     <span class="p">)</span>
-
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Plume centerline of Mibitrans and Anatrans models for various transverse dispersivities"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">700</span><span class="p">))</span>
 </pre></div>
@@ -3291,7 +3295,7 @@ for i in range(len(alpha_y_list)):
         lw=2,
         label=fr"ana, $\alpha_y={alpha_y_list[i]}m, \alpha_z={alpha_z_list[i]}m$"
     )
-
+plt.title("Plume centerline of Mibitrans and Anatrans models for various transverse dispersivities")
 plt.legend(bbox_to_anchor=(1,1))
 plt.xlim((-10, 700))</div>
 </div>
@@ -3358,8 +3362,9 @@ plt.xlim((-10, 700))</div>
     <span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Transverse plot of Mibitrans and Anatrans models for various transverse dispersivities"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span><span class="mi">60</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">11.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-12">x_pos = 250
@@ -3380,8 +3385,9 @@ for i in range(len(alpha_y_list)):
     )
 
 plt.legend(bbox_to_anchor=(1,1))
+plt.title("Transverse plot of Mibitrans and Anatrans models for various transverse dispersivities")
 plt.xlim(-60,60)
-plt.ylim(-0.2,11)
+plt.ylim(-0.2,11.5)
 plt.show()</div>
 </div>
 </div>
@@ -3448,9 +3454,10 @@ plt.show()</div>
         <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">"ana, $\alpha_y=</span><span class="si">{</span><span class="n">alpha_y_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m, \alpha_z=</span><span class="si">{</span><span class="n">alpha_z_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m$"</span>
     <span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.01</span><span class="p">,</span><span class="mf">0.6</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">2000</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"BTC of Mibitrans and Anatrans models for various transverse dispersivities"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-13">x_pos = 250
@@ -3470,9 +3477,10 @@ for i in range(len(alpha_y_list)):
         label=fr"ana, $\alpha_y={alpha_y_list[i]}m, \alpha_z={alpha_z_list[i]}m$"
     )
 
-plt.legend(bbox_to_anchor=(1,1))
+plt.legend(bbox_to_anchor=(1.01,0.6))
 plt.xlim(-10,2000)
 plt.ylim(-0.2,12)
+plt.title("BTC of Mibitrans and Anatrans models for various transverse dispersivities")
 plt.show()</div>
 </div>
 </div>
@@ -4184,22 +4192,28 @@ for i in range(len(x_disp)):
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">)):</span>
         <span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyles</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Collection of plume centerlines with varying combination of $\alpha_x$, $\alpha_y$ and $\alpha_z$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">)):</span>
         <span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transverse</span><span class="p">(</span><span class="n">x_position</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyles</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Collection of transverse plots with varying combination of $\alpha_x$, $\alpha_y$ and $\alpha_z$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-20">colors=["red", "orange", "green", "blue", "darkorchid"]
 linestyles=["-", "--", ":", "-.", "--"]
 for i in range(len(x_disp)):
     for j in range(len(y_disp)):
         list_mbt[j][i].centerline(color=colors[i], linestyle=linestyles[j])
+plt.title(r"Collection of plume centerlines with varying combination of $\alpha_x$, $\alpha_y$ and $\alpha_z$")
 plt.show()
 for i in range(len(x_disp)):
     for j in range(len(y_disp)):
         list_mbt[j][i].transverse(x_position=600, color=colors[i], linestyle=linestyles[j])
-plt.ylim((0,4))</div>
+plt.ylim((0,4))
+plt.title(r"Collection of transverse plots with varying combination of $\alpha_x$, $\alpha_y$ and $\alpha_z$")
+plt.show()</div>
 </div>
 </div>
 </div>
@@ -4220,7 +4234,7 @@ plt.ylim((0,4))</div>
 <span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">3</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> i <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(x_disp)):
 <span class="ansi-green-fg">      4</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> j <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(y_disp)):
 <span class="ansi-green-fg">      5</span>         list_mbt[j][i].centerline(color=colors[i], linestyle=linestyles[j])
-<span class="ansi-green-fg">      6</span> plt.show()
+<span class="ansi-green-fg">      6</span> plt.title(<span class="ansi-yellow-fg">r"Collection of plume centerlines with varying combination of $\alpha_x$, $\alpha_y$ and $\alpha_z$"</span>)
 
 <span class="ansi-red-fg">NameError</span>: name 'x_disp' is not defined</pre>
 </div>
@@ -4691,8 +4705,6 @@ plt.ylim(0,6)</div>
 <span class="k">if</span> <span class="n">as_percentage</span><span class="p">:</span>
     <span class="n">diff_array_3</span> <span class="o">=</span> <span class="n">diff_array_3</span> <span class="o">*</span> <span class="mi">100</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">diff_array_3</span><span class="p">)</span>
-
 <span class="n">z_ticks_3</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp_3</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_disp_3</span><span class="p">)):</span>
@@ -4761,8 +4773,6 @@ for i in range(len(x_disp_3)):
 
 if as_percentage:
     diff_array_3 = diff_array_3 * 100
-
-print(diff_array_3)
 
 z_ticks_3 = []
 for i in range(len(y_disp_3)):

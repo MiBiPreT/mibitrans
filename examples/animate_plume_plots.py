@@ -2,6 +2,7 @@
 
 # The two lines below allow animations to be displayed.
 
+import matplotlib.pyplot as plt
 import numpy as np
 import mibitrans as mbt
 
@@ -53,6 +54,7 @@ mbt_results_instant = mbt_model.run()
 
 anim = mbt_results_nodecay.centerline(animate=True)
 anim.save("plume_nd_animation.gif", fps=10)
+plt.clf()
 
 # Combine multiple models by using list input
 
@@ -62,6 +64,7 @@ anim2 = mbt.centerline(
     animate=True,
 )
 anim2.save("plume_center_animation.gif", fps=10)
+plt.clf()
 
 # Also works for transverse plots
 
@@ -72,6 +75,7 @@ anim3 = mbt.transverse(
     animate=True,
 )
 anim3.save("plume_trans_animation.gif", fps=10)
+plt.clf()
 
 # For breakthrough curve, animation draws the next point for each time step.
 
@@ -82,14 +86,17 @@ anim4 = mbt.breakthrough(
     animate=True,
 )
 anim4.save("plume_btc_animation.gif", fps=10)
+plt.clf()
 
 # Animate 2-dimensional and 3-dimensional plots as well
 
 anim5 = mbt_results_instant.plume_2d(animate=True, cmap="viridis")
 anim5.save("plume_2d_animation.gif", fps=10)
+plt.clf()
 
 anim6 = mbt_results_nodecay.plume_3d(animate=True, cmap="viridis")
 anim6.save("plume_3d_animation.gif", fps=10)
+plt.close()
 
 # Currently it is not possible to adjust individual line colors/styles when animating multiple models in a single plot.
 # A first version of this functionality is found in `mibitrans.visualize.animation.animate_1d`. However, this is still

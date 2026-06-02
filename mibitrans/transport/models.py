@@ -94,9 +94,9 @@ class Mibitrans(Transport3D):
     def short_description(self):
         """Return short description of model type."""
         if self.biodegradation_capacity:
-            return "Mibitrans Instant Reaction"
+            return "Mibitrans instant reaction"
         else:
-            return "Mibitrans Linear"
+            return "Mibitrans linear"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
@@ -330,8 +330,11 @@ class Anatrans(Transport3D):
 
     @property
     def short_description(self):
-        """Short description of model type."""
-        return "Anatrans model"
+        """Return short description of model type."""
+        if self.biodegradation_capacity:
+            return "Anatrans instant reaction"
+        else:
+            return "Anatrans linear"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
@@ -496,8 +499,11 @@ class Bioscreen(Anatrans):
 
     @property
     def short_description(self):
-        """Short description of model type."""
-        return "Bioscreen model"
+        """Return short description of model type."""
+        if self.biodegradation_capacity:
+            return "Bioscreen instant reaction"
+        else:
+            return "Bioscreen linear"
 
     def _equation_term_source_depletion(self, xxx, ttt):
         term = np.exp(-self.k_source * (ttt - xxx / self.rv))

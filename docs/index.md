@@ -10,9 +10,9 @@ Compared to conventional numerical approaches, `mibitrans` enables fast model se
 
 Using your preferred Python IDE, install Mibitrans, specify the field conditions and visualize the contaminant distribution.
 
-<img src="assets/model_comparison_trans.svg" alt="Comparison between different mibitrans" width="500">
+![Comparison between different mibitrans models](assets/model_comparison_trans.svg)
 
-<img src="assets/plume_animation.gif" alt="Overview of `mibitrans` package structure and functionalities." width="500">
+![Plume animation of Mibitrans model](assets/plume_animation.gif)
 
 Look at the examples section for detailed explanation on how to use mibitrans.
 

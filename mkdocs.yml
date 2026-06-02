@@ -19,7 +19,7 @@ nav:
     - Mass Balance: background/massbalance.md
     - BIOSCREEN: background/bioscreen.md
   - Implementation: 
-    - Implementation: implementation/implemenation.md
+    - Implementation: implementation/implementation.md
     - Example data: implementation/exampledata.md
   - Examples:
     - Walkthrough: examples/basic_use_of_mibitrans.ipynb

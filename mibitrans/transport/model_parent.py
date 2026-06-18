@@ -654,32 +654,3 @@ class Results:
 
         """
         return MassBalance(self, time, verbose)
-
-
-# def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
-#     """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
-#     if isinstance(electron_acceptors, (list, np.ndarray)):
-#         electron_acceptors_out = ElectronAcceptors(*electron_acceptors)
-#     elif isinstance(electron_acceptors, dict):
-#         electron_acceptors_out = ElectronAcceptors(**electron_acceptors)
-#     elif isinstance(electron_acceptors, mibitrans.data.parameter_information.ElectronAcceptors):
-#         electron_acceptors_out = electron_acceptors
-#     else:
-#         raise TypeError(
-#             f"electron_acceptors must be a list, dictionary or ElectronAcceptors dataclass, but is "
-#             f"{type(electron_acceptors)} instead."
-#         )
-#
-#     if isinstance(utilization_factor, (list, np.ndarray)):
-#         utilization_factor_out = UtilizationFactor(*utilization_factor)
-#     elif isinstance(utilization_factor, dict):
-#         utilization_factor_out = UtilizationFactor(**utilization_factor)
-#     elif isinstance(utilization_factor, mibitrans.data.parameter_information.UtilizationFactor):
-#         utilization_factor_out = utilization_factor
-#     else:
-#         raise TypeError(
-#             f"utilization_factor must be a list, dictionary or UtilizationFactor dataclass, but is "
-#             f"{type(utilization_factor)} instead."
-#         )
-#
-#     return electron_acceptors_out, utilization_factor_out

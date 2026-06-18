@@ -2235,12 +2235,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">differences</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">df</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">differences</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">diff</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">mibitrans</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mbt</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1">import differences as df
+<div class="clipboard-copy-txt" id="cell-1">import differences as diff
 import matplotlib.pyplot as plt
 import numpy as np
 import mibitrans as mbt</div>
@@ -2259,7 +2259,7 @@ import mibitrans as mbt</div>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
 <span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[1]</span><span class="ansi-green-fg">, line 1</span>
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> differences <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> df
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> differences <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> diff
 <span class="ansi-green-fg">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> matplotlib.pyplot <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> plt
 <span class="ansi-green-fg">      3</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> numpy <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> np
 <span class="ansi-green-fg">      4</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> mibitrans <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> mbt
@@ -3547,10 +3547,10 @@ plt.show()</div>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"plotting at t ="</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">time_step</span><span class="p">]</span> <span class="o">/</span> <span class="mi">365</span><span class="p">,</span> <span class="s2">"years and a y-position ="</span><span class="p">,</span> <span class="n">mbt_object</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">y_position</span><span class="p">],</span> <span class="s2">"m"</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alpha_y_list</span><span class="p">)):</span>
-    <span class="n">diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">)</span> <span class="o">/</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span>
+    <span class="n">diff_ana_mbt</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">)</span> <span class="o">/</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
         <span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">diff</span><span class="p">[</span><span class="n">time_step</span><span class="p">,</span><span class="n">y_position</span><span class="p">,:],</span>
+        <span class="n">diff_ana_mbt</span><span class="p">[</span><span class="n">time_step</span><span class="p">,</span><span class="n">y_position</span><span class="p">,:],</span>
         <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
         <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">"$\alpha_y=</span><span class="si">{</span><span class="n">alpha_y_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m, \alpha_z=</span><span class="si">{</span><span class="n">alpha_z_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m$"</span>
@@ -3563,10 +3563,10 @@ plt.show()</div>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alpha_y_list</span><span class="p">)):</span>
-    <span class="n">diff</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span>
+    <span class="n">diff_ana_mbt</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
         <span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">diff</span><span class="p">[</span><span class="n">time_step</span><span class="p">,</span><span class="n">y_position</span><span class="p">,:],</span>
+        <span class="n">diff_ana_mbt</span><span class="p">[</span><span class="n">time_step</span><span class="p">,</span><span class="n">y_position</span><span class="p">,:],</span>
         <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
         <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">"$\alpha_y=</span><span class="si">{</span><span class="n">alpha_y_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m, \alpha_z=</span><span class="si">{</span><span class="n">alpha_z_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m$"</span>
@@ -3584,10 +3584,10 @@ y_position = len(mbt_object.y)//2
 print("plotting at t =", mbt_object.t[time_step] / 365, "years and a y-position =", mbt_object.y[y_position], "m")
 
 for i in range(len(alpha_y_list)):
-    diff = (output_ana[i].cxyt - output_mbt[i].cxyt) / output_mbt[i].cxyt
+    diff_ana_mbt = (output_ana[i].cxyt - output_mbt[i].cxyt) / output_mbt[i].cxyt
     plt.plot(
         mbt_object.x,
-        diff[time_step,y_position,:],
+        diff_ana_mbt[time_step,y_position,:],
         color=colors[i],
         lw=2,
         label=fr"$\alpha_y={alpha_y_list[i]}m, \alpha_z={alpha_z_list[i]}m$"
@@ -3600,10 +3600,10 @@ plt.legend()
 plt.show()
 
 for i in range(len(alpha_y_list)):
-    diff = output_ana[i].cxyt - output_mbt[i].cxyt
+    diff_ana_mbt = output_ana[i].cxyt - output_mbt[i].cxyt
     plt.plot(
         mbt_object.x,
-        diff[time_step,y_position,:],
+        diff_ana_mbt[time_step,y_position,:],
         color=colors[i],
         lw=2,
         label=fr"$\alpha_y={alpha_y_list[i]}m, \alpha_z={alpha_z_list[i]}m$"
@@ -3668,11 +3668,11 @@ plt.show()</div>
 
 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])):</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])):</span>
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span>
+        <span class="n">diff_ana_mbt</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span>
         <span class="n">plot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
-            <span class="n">diff</span><span class="p">[</span><span class="n">time_step</span><span class="p">,:,:],</span>
+            <span class="n">diff_ana_mbt</span><span class="p">[</span><span class="n">time_step</span><span class="p">,:,:],</span>
             <span class="n">vmin</span><span class="o">=-</span><span class="mf">0.15</span><span class="p">,</span>
             <span class="n">vmax</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
             <span class="n">cmap</span><span class="o">=</span><span class="s2">"seismic"</span><span class="p">,</span>
@@ -3699,11 +3699,11 @@ i=0
 
 for j in range(len(ax[:,0])):
     for k in range(len(ax[0,:])):
-        diff = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
+        diff_ana_mbt = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
         plot_list.append(ax[j,k].pcolormesh(
             mbt_object.x,
             mbt_object.y,
-            diff[time_step,:,:],
+            diff_ana_mbt[time_step,:,:],
             vmin=-0.15,
             vmax=0.15,
             cmap="seismic",
@@ -3785,15 +3785,14 @@ Below trying out if plotting this logarithmically would show clearer results. Wh
 
 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])):</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])):</span>
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span>
+        <span class="n">diff_ana_mbt</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span>
         <span class="n">plot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">[</span><span class="n">time_step</span><span class="p">,:,:])),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">diff_ana_mbt</span><span class="p">[</span><span class="n">time_step</span><span class="p">,:,:])),</span>
             <span class="n">vmin</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span>
             <span class="n">vmax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">cmap</span><span class="o">=</span><span class="s2">"inferno"</span><span class="p">,</span><span class="c1">#"seismic",</span>
-            <span class="c1">#shading="gouraud"</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">"inferno"</span><span class="p">,</span>
         <span class="p">))</span>
         <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">fr</span><span class="s2">"$\alpha_y=</span><span class="si">{</span><span class="n">alpha_y_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m, \alpha_z=</span><span class="si">{</span><span class="n">alpha_z_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">m$"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
         <span class="c1"># To show differences more clearly, x-limit is 1/4 of model extent</span>
@@ -3815,15 +3814,14 @@ i=0
 
 for j in range(len(ax[:,0])):
     for k in range(len(ax[0,:])):
-        diff = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
+        diff_ana_mbt = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
         plot_list.append(ax[j,k].pcolormesh(
             mbt_object.x,
             mbt_object.y,
-            np.log(abs(diff[time_step,:,:])),
+            np.log(abs(diff_ana_mbt[time_step,:,:])),
             vmin=-20,
             vmax=0,
-            cmap="inferno",#"seismic",
-            #shading="gouraud"
+            cmap="inferno",
         ))
         ax[j,k].set_title(fr"$\alpha_y={alpha_y_list[i]}m, \alpha_z={alpha_z_list[i]}m$", fontsize=9)
         # To show differences more clearly, x-limit is 1/4 of model extent
@@ -3883,16 +3881,16 @@ plt.show()</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">)):</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">diff</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
                                                           <span class="n">mean_axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">,</span> <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cxyt</span><span class="p">,</span> <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-17">for i in range(len(output_mbt)):
-    plt.plot(output_mbt[i].t, df.mean_absolute_difference(output_mbt[i].relative_cxyt, output_ana[i].relative_cxyt,
+    plt.plot(output_mbt[i].t, diff.mean_absolute_difference(output_mbt[i].relative_cxyt, output_ana[i].relative_cxyt,
                                                           mean_axis=(1,2), concentration_cutoff=1e-5))
 for i in range(len(output_mbt)):
-    print(df.mean_absolute_difference(output_mbt[i].cxyt, output_ana[i].cxyt, concentration_cutoff=1e-5))</div>
+    print(diff.mean_absolute_difference(output_mbt[i].cxyt, output_ana[i].cxyt, concentration_cutoff=1e-5))</div>
 </div>
 </div>
 </div>
@@ -3923,11 +3921,11 @@ for i in range(len(output_mbt)):
 
 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])):</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])):</span>
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span> <span class="o">-</span> <span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span>
+        <span class="c1">#diff_ana_mbt = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt</span>
         <span class="n">plot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
             <span class="n">mbt_object</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
+            <span class="n">diff</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">output_mbt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">output_ana</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
                                         <span class="n">mean_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
             <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">vmax</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
@@ -3953,11 +3951,11 @@ i=0
 
 for j in range(len(ax[:,0])):
     for k in range(len(ax[0,:])):
-        diff = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
+        #diff_ana_mbt = output_ana[i].relative_cxyt - output_mbt[i].relative_cxyt
         plot_list.append(ax[j,k].pcolormesh(
             mbt_object.x,
             mbt_object.t,
-            df.mean_absolute_difference(output_mbt[i].relative_cxyt, output_ana[i].relative_cxyt,
+            diff.mean_absolute_difference(output_mbt[i].relative_cxyt, output_ana[i].relative_cxyt,
                                         mean_axis=1, concentration_cutoff=0),
             vmin=0,
             vmax=0.01,
@@ -4264,7 +4262,7 @@ plt.show()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">diff_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">)):</span>
-        <span class="n">diff_array</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">list_ana</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
+        <span class="n">diff_array</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span><span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">list_ana</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
                                                       <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">diff_array</span><span class="p">)</span>
 
@@ -4290,7 +4288,7 @@ plt.show()</div>
 <div class="clipboard-copy-txt" id="cell-21">diff_array = np.zeros((len(y_disp), len(x_disp)))
 for i in range(len(x_disp)):
     for j in range(len(y_disp)):
-        diff_array[j,i] = df.mean_absolute_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
+        diff_array[j,i] = diff.mean_absolute_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
                                                       concentration_cutoff=1e-5)*100
 print(diff_array)
 
@@ -4331,7 +4329,7 @@ plt.savefig("mbt_ana_comp.png", dpi =300)
 <span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> diff_array = np.zeros((len(y_disp), len(x_disp)))
 <span class="ansi-green-fg">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> i <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(x_disp)):
 <span class="ansi-green-fg">      3</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> j <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(y_disp)):
-<span class="ansi-green-fg">      4</span>         diff_array[j,i] = df.mean_absolute_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
+<span class="ansi-green-fg">      4</span>         diff_array[j,i] = diff.mean_absolute_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
 
 <span class="ansi-red-fg">NameError</span>: name 'np' is not defined</pre>
 </div>
@@ -4361,7 +4359,7 @@ plt.savefig("mbt_ana_comp.png", dpi =300)
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">diff_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_disp</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp</span><span class="p">)):</span>
-        <span class="n">diff_array</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">mean_relative_difference</span><span class="p">(</span><span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">list_ana</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
+        <span class="n">diff_array</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">mean_relative_difference</span><span class="p">(</span><span class="n">list_mbt</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">list_ana</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
                                                       <span class="n">concentration_cutoff</span><span class="o">=</span><span class="mf">5e-3</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">diff_array</span><span class="p">)</span>
 
@@ -4386,7 +4384,7 @@ plt.savefig("mbt_ana_comp.png", dpi =300)
 <div class="clipboard-copy-txt" id="cell-22">diff_array = np.zeros((len(y_disp), len(x_disp)))
 for i in range(len(x_disp)):
     for j in range(len(y_disp)):
-        diff_array[j,i] = df.mean_relative_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
+        diff_array[j,i] = diff.mean_relative_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
                                                       concentration_cutoff=5e-3)
 print(diff_array)
 
@@ -4425,7 +4423,7 @@ fig.colorbar(im, label="mean relative difference in relative concentration")</di
 <span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> diff_array = np.zeros((len(y_disp), len(x_disp)))
 <span class="ansi-green-fg">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> i <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(x_disp)):
 <span class="ansi-green-fg">      3</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> j <span class="ansi-bold" style="color: rgb(0,135,0)">in</span> range(len(y_disp)):
-<span class="ansi-green-fg">      4</span>         diff_array[j,i] = df.mean_relative_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
+<span class="ansi-green-fg">      4</span>         diff_array[j,i] = diff.mean_relative_difference(list_mbt[j][i].relative_cxyt, list_ana[j][i].relative_cxyt,
 
 <span class="ansi-red-fg">NameError</span>: name 'np' is not defined</pre>
 </div>
@@ -4697,7 +4695,7 @@ plt.ylim(0,6)</div>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_disp_3</span><span class="p">)):</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_disp_3</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_disp_3</span><span class="p">)):</span>
-            <span class="n">diff_array_3</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_disp_3</span><span class="p">)</span><span class="o">*</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span>
+            <span class="n">diff_array_3</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_disp_3</span><span class="p">)</span><span class="o">*</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">mean_absolute_difference</span><span class="p">(</span>
                 <span class="n">list_mbt_3</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span> <span class="n">list_ana_3</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">relative_cxyt</span><span class="p">,</span>
                 <span class="n">concentration_cutoff</span><span class="o">=</span><span class="n">cutoff</span>
             <span class="p">)</span>
@@ -4766,7 +4764,7 @@ diff_array_3 = np.zeros((len(y_disp_3) * len(z_disp_3), len(x_disp_3)))
 for i in range(len(x_disp_3)):
     for j in range(len(y_disp_3)):
         for k in range(len(z_disp_3)):
-            diff_array_3[len(z_disp_3)*j+k,i] = df.mean_absolute_difference(
+            diff_array_3[len(z_disp_3)*j+k,i] = diff.mean_absolute_difference(
                 list_mbt_3[k][j][i].relative_cxyt, list_ana_3[k][j][i].relative_cxyt,
                 concentration_cutoff=cutoff
             )

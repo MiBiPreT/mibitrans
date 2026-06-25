@@ -2,7 +2,7 @@
 
 Find here the equations that have been implemented in the *mibitrans* package as model classes based on analytical solutions of the ADE under initial and boundary conditions as outlined in the section **Model Setup**.
 
-## *mibitrans* Model
+## *Mibitrans* Model
 
 The fully exact solution of the ADE accounting for a non-constant, time-dependent source concentrations has been presented in *Karanovic et al., [2007]* as extension of the solution of *Wexler, [1992]*.  
 
@@ -63,7 +63,7 @@ with $v_R = \frac{v}{R}$ being the retarded velocity of contaminant transport wi
 
 ---
 
-## *anatrans* Model
+## *Anatrans* Model
 
 The equation implemented in the *anatrans* model class is based on the intregral solution (section Transport Theory) that uses a slightly simplified, closed analytical form. As the *mibitrans* model class, it does not resolve the $z$ direction, but transport is always evaluated at $z=0$ and accounts for source depletion and source superposition. The implemented equation reads:
 
@@ -137,7 +137,7 @@ The *anatrans* model equation is identical to equation of the Integral Approxima
 
 ---
 
-## *bioscreen* Model
+## *Bioscreen* Model
 
 The equation implemented in the *bioscreen* model class is based on the *Bioscreen solution* (section Transport Theory) and follows the same choices as used in the Excel based software BIOSCREEN *[Newell et al., 1996]*.
 

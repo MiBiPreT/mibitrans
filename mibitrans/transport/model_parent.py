@@ -6,10 +6,11 @@ import numpy as np
 import mibitrans
 import mibitrans.data.parameters
 from mibitrans.analysis.mass_balance import MassBalance
-from mibitrans.analysis.parameter_calculations import calculate_discharge_and_average_source_zone_concentration
+from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
-from mibitrans.data.parameter_information import util_to_conc_name
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
 
@@ -38,18 +39,21 @@ class Transport3D(ABC):
             if key not in ["self", "verbose"]:
                 self._check_input_dataclasses(key, value)
 
+        # Copy to ensure dataclasses inside model class are independent
         self._hyd_pars = copy.copy(hydrological_parameters)
         self._att_pars = copy.copy(attenuation_parameters)
         self._src_pars = copy.copy(source_parameters)
         self._mod_pars = copy.copy(model_parameters)
+
         self._decay_rate = self._att_pars.decay_rate
 
         self.verbose = verbose
         self._mode = "linear"
         self._electron_acceptors = None
         self._utilization_factor = None
-        self.biodegradation_capacity = None
+        self.biodegradation_capacity = 0
         self.cxyt_noBC = None
+
         self._pre_run_initialization_parameters()
 
     @property
@@ -188,7 +192,7 @@ class Transport3D(ABC):
         self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
 
         # Calculate retardation if not already specified in adsorption_parameters
-        self.k_source = self._calculate_source_decay()
+        self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
@@ -198,17 +202,6 @@ class Transport3D(ABC):
             self._decay_rate = 0
         else:
             self._decay_rate = self._att_pars.decay_rate
-
-    def _calculate_source_decay(self):
-        """Calculate source decay/depletion."""
-        if self._src_pars.total_mass != np.inf:
-            Q, c0_avg = calculate_discharge_and_average_source_zone_concentration(self)
-            k_source = Q * c0_avg / self._src_pars.total_mass
-        # If source mass is not a float, it is an infinite source, therefore, no source decay takes place.
-        else:
-            k_source = 0
-
-        return k_source
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -239,14 +232,6 @@ class Transport3D(ABC):
             )
         return y
 
-    def _calculate_biodegradation_capacity(self):
-        """Determine biodegradation capacity based on electron acceptor concentrations and utilization factor."""
-        biodegradation_capacity = 0
-        for key, item in self._utilization_factor.dictionary.items():
-            biodegradation_capacity += getattr(self._electron_acceptors, util_to_conc_name[key]) / item
-
-        return biodegradation_capacity
-
     def instant_reaction(
         self,
         electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,
@@ -271,11 +256,13 @@ class Transport3D(ABC):
                 information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
                 for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
         """
-        self._electron_acceptors, self._utilization_factor = _check_instant_reaction_acceptor_input(
+        self._electron_acceptors, self._utilization_factor = check_instant_reaction_acceptor_input(
             electron_acceptors, utilization_factor
         )
         self._mode = "instant_reaction"
-        self.biodegradation_capacity = self._calculate_biodegradation_capacity()
+        self.biodegradation_capacity = calculate_biodegradation_capacity(
+            self._electron_acceptors, self._utilization_factor
+        )
         self.cxyt_noBC = 0
         self._pre_run_initialization_parameters()
 
@@ -667,32 +654,3 @@ class Results:
 
         """
         return MassBalance(self, time, verbose)
-
-
-def _check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
-    """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
-    if isinstance(electron_acceptors, (list, np.ndarray)):
-        electron_acceptors_out = ElectronAcceptors(*electron_acceptors)
-    elif isinstance(electron_acceptors, dict):
-        electron_acceptors_out = ElectronAcceptors(**electron_acceptors)
-    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.ElectronAcceptors):
-        electron_acceptors_out = electron_acceptors
-    else:
-        raise TypeError(
-            f"electron_acceptors must be a list, dictionary or ElectronAcceptors dataclass, but is "
-            f"{type(electron_acceptors)} instead."
-        )
-
-    if isinstance(utilization_factor, (list, np.ndarray)):
-        utilization_factor_out = UtilizationFactor(*utilization_factor)
-    elif isinstance(utilization_factor, dict):
-        utilization_factor_out = UtilizationFactor(**utilization_factor)
-    elif isinstance(utilization_factor, mibitrans.data.parameter_information.UtilizationFactor):
-        utilization_factor_out = utilization_factor
-    else:
-        raise TypeError(
-            f"utilization_factor must be a list, dictionary or UtilizationFactor dataclass, but is "
-            f"{type(utilization_factor)} instead."
-        )
-
-    return electron_acceptors_out, utilization_factor_out

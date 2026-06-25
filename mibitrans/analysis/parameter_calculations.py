@@ -5,24 +5,11 @@ can be used in transport equations.
 """
 
 import numpy as np
-from mibitrans.data.parameter_information import util_to_conc_name
 
 
-def calculate_utilization(model):
-    """Function that calculates relative use of electron acceptors in biodegradation of BTEX."""
-    util_factor = model._utilization_factor.dictionary
-    biodeg_array = np.zeros(len(list(util_factor.keys())))
-    util_array = np.zeros(len(biodeg_array))
-
-    for i, (key, value) in enumerate(util_factor.items()):
-        biodeg_array[i] = getattr(model._electron_acceptors, util_to_conc_name[key]) / value
-        util_array[i] = value
-
-    biodegradation_capacity = np.sum(biodeg_array)
-    fraction_total = biodeg_array / biodegradation_capacity
-    mass_fraction = fraction_total * util_array
-
-    return mass_fraction
+def calculate_biodegradation_capacity(electron_acceptors, utilization_factor):
+    """Determine biodegradation capacity based on electron acceptor concentrations and utilization factor."""
+    return np.sum(electron_acceptors.array / utilization_factor.array)
 
 
 def calculate_discharge_and_average_source_zone_concentration(model):
@@ -49,3 +36,41 @@ def calculate_discharge_and_average_source_zone_concentration(model):
     c0_avg = bc + np.sum(weighted_conc) / np.max(y_src)
 
     return Q, c0_avg
+
+
+def _calculate_discharge_and_average_source_zone_concentration(
+    hydrological_parameters, source_parameters, biodegradation_capacity=0
+):
+    """Calculate discharge through source zone and average source zone concentration, returned in respective order."""
+    y_src = np.zeros(len(source_parameters.source_zone_boundary) + 1)
+    y_src[1:] = source_parameters.source_zone_boundary
+    c_src = source_parameters.source_zone_concentration
+    Q = (
+        hydrological_parameters.velocity
+        * hydrological_parameters.porosity
+        * source_parameters.depth
+        * np.max(y_src)
+        * 2
+    )
+
+    weighted_conc = np.zeros(len(source_parameters.source_zone_boundary))
+    for i in range(len(source_parameters.source_zone_boundary)):
+        weighted_conc[i] = (y_src[i + 1] - y_src[i]) * c_src[i]
+
+    c0_avg = biodegradation_capacity + np.sum(weighted_conc) / np.max(y_src)
+
+    return Q, c0_avg
+
+
+def calculate_source_depletion(hydrological_parameters, source_parameters, biodegradation_capacity=0):
+    """Calculate source depletion rate based on input parameters."""
+    if source_parameters.total_mass != np.inf:
+        Q, c0_avg = _calculate_discharge_and_average_source_zone_concentration(
+            hydrological_parameters, source_parameters, biodegradation_capacity
+        )
+        k_source = Q * c0_avg / source_parameters.total_mass
+    # If source mass is infinite, no source depletion is considered
+    else:
+        k_source = 0
+
+    return k_source

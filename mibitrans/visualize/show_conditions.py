@@ -6,6 +6,10 @@ Module including various methods to visualize (input) parameter conditions, inte
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.data.check_input import check_instant_reaction_acceptor_input
+from mibitrans.data.parameter_information import UtilizationFactor
 
 
 def source_zone(source_parameters):
@@ -44,6 +48,32 @@ def source_zone(source_parameters):
     plt.xlabel(r"Source zone concentration $g/m^3$")
     plt.ylabel("Source zone y-coordinate")
     plt.title("Concentration distribution in the source zone")
+
+
+def source_depletion(
+    hydrological_parameters,
+    source_parameters,
+    electron_acceptors=None,
+    utilization_factor=UtilizationFactor(
+        util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
+    ),
+    **kwargs,
+):
+    """Visualize source depletion."""
+    if electron_acceptors is not None:
+        ea, uf = check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor)
+        biodegradation_capacity = calculate_biodegradation_capacity(ea, uf)
+    else:
+        biodegradation_capacity = 0
+
+    k_source = calculate_source_depletion(hydrological_parameters, source_parameters, biodegradation_capacity)
+    source_half_time = np.log(2) / k_source
+
+    t = np.linspace(0, source_half_time * 5, 500)
+    source_conc_time = np.exp(-k_source * t)
+    plt.plot(t, source_conc_time, **kwargs)
+    plt.xlabel("Time [days]")
+    plt.ylabel(r"Relative source concentration [$C/C_0$]")
 
 
 def model_grid(model_parameters):

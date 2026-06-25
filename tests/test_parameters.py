@@ -285,10 +285,18 @@ def test_sourceparameters_output(test, param, expected) -> None:
     assert source.__dict__[param] == pytest.approx(expected)
 
 
-def test_sourceparameters_visualize():
+def test_sourceparameters_visualize_zone():
     """Test if source zone visualization creates a plot."""
     source = SourceParameters(np.array([1, 2, 3]), np.array([3, 2, 1]), 10, 1000)
-    source.visualize()
+    source.visualize_source_zone()
+    assert isinstance(plt.gca(), plt.Axes)
+
+
+def test_sourceparameters_visualize_depletion():
+    """Test if source depletion visualization creates a plot."""
+    source = SourceParameters(np.array([1, 2, 3]), np.array([3, 2, 1]), 10, 1000)
+    hydro = HydrologicalParameters(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1)
+    source.visualize_source_depletion(hydro)
     assert isinstance(plt.gca(), plt.Axes)
 
 

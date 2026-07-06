@@ -72,9 +72,8 @@ def mean_relative_difference(
     cxyt_a_masked, cxyt_b_masked = mask(cxyt_a, cxyt_b, concentration_cutoff)
     return np.nanmean(relative_error(cxyt_a_masked, cxyt_b_masked), axis=mean_axis)
 
-def mean_sum_absolute_difference(
-    cxyt_a: np.ndarray, cxyt_b: np.ndarray, concentration_cutoff: float = 1e-5
-):
+
+def mean_sum_absolute_difference(cxyt_a: np.ndarray, cxyt_b: np.ndarray, concentration_cutoff: float = 1e-5):
     """Calculate the mean absolute difference of the sum of differences in the y-direction between two input arrays.
 
     Args:
@@ -85,15 +84,16 @@ def mean_sum_absolute_difference(
             Default is 1e-5.
     """
     check_shape(cxyt_a, cxyt_b)
-    y_length = len(cxyt_a[0,:,0])
-    cxyt_a_center, cxyt_b_center = cxyt_a[:,y_length//2,:], cxyt_b[:,y_length//2,:]
+    y_length = len(cxyt_a[0, :, 0])
+    cxyt_a_center, cxyt_b_center = cxyt_a[:, y_length // 2, :], cxyt_b[:, y_length // 2, :]
     mask = (cxyt_a_center >= concentration_cutoff) | (cxyt_b_center >= concentration_cutoff)
-    a, b = np.where(mask[:,None,:], cxyt_a, np.nan), np.where(mask[:,None,:], cxyt_b, np.nan)
+    a, b = np.where(mask[:, None, :], cxyt_a, np.nan), np.where(mask[:, None, :], cxyt_b, np.nan)
     error = absolute_error(a, b)
     sum_error_xt = np.sum(error, axis=1)
     mean_sum_error_t = np.nanmean(sum_error_xt, axis=1)
     mean_sum_error = np.nanmean(mean_sum_error_t)
     return mean_sum_error
+
 
 def rmse(
     cxyt_a: np.ndarray,
@@ -107,41 +107,35 @@ def rmse(
     return np.sqrt(np.nanmean((absolute_error(cxyt_a_masked, cxyt_b_masked)) ** 2, axis=axis))
 
 
-
 def sensitivity_models(
-        hydrological_parameters,
-        attenuation_parameters,
-        source_parameters,
-        model_parameters,
-        x_dispersivity,
-        y_dispersivity,
-        z_dispersivity,
+    hydrological_parameters,
+    attenuation_parameters,
+    source_parameters,
+    model_parameters,
+    x_dispersivity,
+    y_dispersivity,
+    z_dispersivity,
 ):
     """Repeatedly run models with different dispersivities for sensitivity analysis."""
-    list_mibitrans = [[[0]*len(x_dispersivity)
-                        for _ in range(len(y_dispersivity))]
-                        for _ in range(len(z_dispersivity))]
-    list_anatrans = [[[0]*len(x_dispersivity)
-                        for _ in range(len(y_dispersivity))]
-                        for _ in range(len(z_dispersivity))]
-    list_bioscreen = [[[0]*len(x_dispersivity)
-                        for _ in range(len(y_dispersivity))]
-                        for _ in range(len(z_dispersivity))]
+    list_mibitrans = [
+        [[0] * len(x_dispersivity) for _ in range(len(y_dispersivity))] for _ in range(len(z_dispersivity))
+    ]
+    list_anatrans = [
+        [[0] * len(x_dispersivity) for _ in range(len(y_dispersivity))] for _ in range(len(z_dispersivity))
+    ]
+    list_bioscreen = [
+        [[0] * len(x_dispersivity) for _ in range(len(y_dispersivity))] for _ in range(len(z_dispersivity))
+    ]
 
-    mibitrans_object = mbt.Mibitrans(hydrological_parameters,
-                                     attenuation_parameters,
-                                     source_parameters,
-                                     model_parameters)
+    mibitrans_object = mbt.Mibitrans(
+        hydrological_parameters, attenuation_parameters, source_parameters, model_parameters
+    )
 
-    anatrans_object = mbt.Anatrans(hydrological_parameters,
-                                   attenuation_parameters,
-                                   source_parameters,
-                                   model_parameters)
+    anatrans_object = mbt.Anatrans(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters)
 
-    bioscreen_object = mbt.Bioscreen(hydrological_parameters,
-                                     attenuation_parameters,
-                                     source_parameters,
-                                     model_parameters)
+    bioscreen_object = mbt.Bioscreen(
+        hydrological_parameters, attenuation_parameters, source_parameters, model_parameters
+    )
 
     velocity = hydrological_parameters.velocity
     porosity = hydrological_parameters.porosity
@@ -158,7 +152,7 @@ def sensitivity_models(
                     alpha_z=z_dispersivity[k],
                     diffusion=diffusion,
                 )
-                print(i,j,k) # Print to track progress
+                print(i, j, k)  # Print to track progress
                 mibitrans_object.hydrological_parameters = hydro_dispersivity
                 list_mibitrans[k][j][i] = mibitrans_object.run()
                 anatrans_object.hydrological_parameters = hydro_dispersivity
@@ -168,8 +162,13 @@ def sensitivity_models(
 
     return list_mibitrans, list_anatrans, list_bioscreen
 
+
 def comparison_plot(
-    list_mibitrans, list_compare, x_dispersivity, y_dispersivity, z_dispersivity,
+    list_mibitrans,
+    list_compare,
+    x_dispersivity,
+    y_dispersivity,
+    z_dispersivity,
     time_index=None,
     difference_method="absolute",
     cutoff=1e-5,
@@ -181,7 +180,7 @@ def comparison_plot(
     """Plot difference between models, averaged over model domain, for all combinations of dispersivity."""
     ##### Plotting preferences #####
     value_decimals = 4
-    figuresize = (7,5)
+    figuresize = (7, 5)
     colormap = "viridis"
     second_y_axis_location = -0.24
     x_label = r"Longitudinal dispersivity ($\alpha_L$) [m]"
@@ -189,12 +188,12 @@ def comparison_plot(
     second_y_label = r"Transverse horizontal dispersivity $\alpha_T$ [m]"
     #################################
     if time_index is None:
-        time_index =  len(list_mibitrans[0][0][0].t)
+        time_index = len(list_mibitrans[0][0][0].t)
 
     if relative_concentration:
         c_mode = "relative_cxyt"
     else:
-        c_mode ="cxyt"
+        c_mode = "cxyt"
 
     difference_array = np.zeros((len(y_dispersivity) * len(z_dispersivity), len(x_dispersivity)))
     if difference_method not in ["relative", "rmse", "absolute", "sum_mean"]:
@@ -204,28 +203,28 @@ def comparison_plot(
         for j in range(len(y_dispersivity)):
             for k in range(len(z_dispersivity)):
                 if difference_method == "relative":
-                    difference_array[len(z_dispersivity)*j+k,i] = mean_relative_difference(
-                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index,:,:],
-                        getattr(list_compare[k][j][i], c_mode)[:time_index,:,:],
-                        concentration_cutoff=cutoff
+                    difference_array[len(z_dispersivity) * j + k, i] = mean_relative_difference(
+                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index, :, :],
+                        getattr(list_compare[k][j][i], c_mode)[:time_index, :, :],
+                        concentration_cutoff=cutoff,
                     )
                 elif difference_method == "rmse":
-                    difference_array[len(z_dispersivity)*j+k,i] = rmse(
-                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index,:,:],
-                        getattr(list_compare[k][j][i], c_mode)[:time_index,:,:],
-                        concentration_cutoff=cutoff
+                    difference_array[len(z_dispersivity) * j + k, i] = rmse(
+                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index, :, :],
+                        getattr(list_compare[k][j][i], c_mode)[:time_index, :, :],
+                        concentration_cutoff=cutoff,
                     )
                 elif difference_method == "sum_mean":
-                    difference_array[len(z_dispersivity)*j+k,i] = mean_sum_absolute_difference(
-                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index,:,:],
-                        getattr(list_compare[k][j][i], c_mode)[:time_index,:,:],
-                        concentration_cutoff=cutoff
+                    difference_array[len(z_dispersivity) * j + k, i] = mean_sum_absolute_difference(
+                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index, :, :],
+                        getattr(list_compare[k][j][i], c_mode)[:time_index, :, :],
+                        concentration_cutoff=cutoff,
                     )
                 else:
-                    difference_array[len(z_dispersivity)*j+k,i] = mean_absolute_difference(
-                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index,:,:],
-                        getattr(list_compare[k][j][i], c_mode)[:time_index,:,:],
-                        concentration_cutoff=cutoff
+                    difference_array[len(z_dispersivity) * j + k, i] = mean_absolute_difference(
+                        getattr(list_mibitrans[k][j][i], c_mode)[:time_index, :, :],
+                        getattr(list_compare[k][j][i], c_mode)[:time_index, :, :],
+                        concentration_cutoff=cutoff,
                     )
 
     if as_percentage:
@@ -239,43 +238,36 @@ def comparison_plot(
             z_ticks.append(f"{z_dispersivity[j]}")
 
     fig, ax = plt.subplots(figsize=figuresize)
-    imshow_aspect = str(1/len(z_dispersivity))
-    im = ax.imshow(
-        difference_array,
-        cmap=colormap,
-        aspect=imshow_aspect
-    )
+    imshow_aspect = str(1 / len(z_dispersivity))
+    im = ax.imshow(difference_array, cmap=colormap, aspect=imshow_aspect)
     ax2 = ax.secondary_yaxis(second_y_axis_location)
-    middle_z_dispersivity_axis = len(z_dispersivity)/2-0.5
+    middle_z_dispersivity_axis = len(z_dispersivity) / 2 - 0.5
 
     second_y_tick_location = np.linspace(
         middle_z_dispersivity_axis,
-        (len(y_dispersivity)-1)*len(z_dispersivity) + middle_z_dispersivity_axis,
-        len(y_dispersivity))
+        (len(y_dispersivity) - 1) * len(z_dispersivity) + middle_z_dispersivity_axis,
+        len(y_dispersivity),
+    )
 
     ax.set_xticks(range(len(x_dispersivity)), labels=x_dispersivity)
     ax.set_yticks(range(len(z_ticks)), labels=z_ticks)
     ax2.set_yticks(second_y_tick_location, labels=y_dispersivity)
 
-    ax.hlines(second_y_tick_location[:-1]+len(z_dispersivity)/2,
-              -0.5,
-              len(x_dispersivity)-0.5,
-              color="white",
-              lw=2)
+    ax.hlines(
+        second_y_tick_location[:-1] + len(z_dispersivity) / 2, -0.5, len(x_dispersivity) - 0.5, color="white", lw=2
+    )
     ax.vlines(
-        np.arange(0.5,len(x_dispersivity)-1,1),
-        -0.5, len(y_dispersivity)*len(z_dispersivity)-0.5,
+        np.arange(0.5, len(x_dispersivity) - 1, 1),
+        -0.5,
+        len(y_dispersivity) * len(z_dispersivity) - 0.5,
         color="white",
-        lw=2
+        lw=2,
     )
 
     for i in range(len(x_dispersivity)):
-        for j in range(len(y_dispersivity)*len(z_dispersivity)):
+        for j in range(len(y_dispersivity) * len(z_dispersivity)):
             ax.text(
-                i, j, np.round(difference_array[j, i], decimals=value_decimals),
-                ha="center",
-                va="center",
-                color="w"
+                i, j, np.round(difference_array[j, i], decimals=value_decimals), ha="center", va="center", color="w"
             )
 
     ax.set_xlabel(x_label)

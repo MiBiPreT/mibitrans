@@ -115,6 +115,7 @@ def sensitivity_models(
     x_dispersivity,
     y_dispersivity,
     z_dispersivity,
+    verbose=False,
 ):
     """Repeatedly run models with different dispersivities for sensitivity analysis."""
     list_mibitrans = [
@@ -152,7 +153,8 @@ def sensitivity_models(
                     alpha_z=z_dispersivity[k],
                     diffusion=diffusion,
                 )
-                print(i, j, k)  # Print to track progress
+                if verbose:
+                    print(i, j, k)  # Print to track progress
                 mibitrans_object.hydrological_parameters = hydro_dispersivity
                 list_mibitrans[k][j][i] = mibitrans_object.run()
                 anatrans_object.hydrological_parameters = hydro_dispersivity

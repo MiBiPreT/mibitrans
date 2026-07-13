@@ -3786,8 +3786,8 @@ plt.show()</div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=720f57be-0825-4d4c-a8b4-c75f54355a94">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=720f57be-0825-4d4c-a8b4-c75f54355a94">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3806,29 +3806,10 @@ plt.show()</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1">###  Functions for quantitative comparison</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">differences</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">diff</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mibitrans.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">differences</span> <span class="k">as</span> <span class="n">diff</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-22">###  Functions for quantitative comparison
-import differences as diff</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[22]</span><span class="ansi-green-fg">, line 2</span>
-<span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)">###  Functions for quantitative comparison</span>
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> differences <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> diff
-
-<span class="ansi-red-fg">ModuleNotFoundError</span>: No module named 'differences'</pre>
+from mibitrans.analysis import differences as diff</div>
 </div>
 </div>
 </div>
@@ -4041,8 +4022,8 @@ print(np.sum(abs(bat_t - mbt_results_comp_linear.t)))</div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=daff407c-da3d-496a-a295-b0d2f606aa1a">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=daff407c-da3d-496a-a295-b0d2f606aa1a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -4087,29 +4068,6 @@ mad_bio_bio_lindec = diff.mean_absolute_difference(
 mad_bio_bio_instant = diff.mean_absolute_difference(
     bioscreen_data.instant / max_source_conc, bio_results_comp_instant.relative_cxyt[bio_time_index,:,:]
 )</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[27]</span><span class="ansi-green-fg">, line 3</span>
-<span class="ansi-green-fg">      1</span> max_source_conc = bio_source.source_zone_concentration[<span class="ansi-green-fg">0</span>]
-<span class="ansi-green-fg">      2</span> 
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">3</span> mad_bio_bio_nd = diff.mean_absolute_difference(
-<span class="ansi-green-fg">      4</span>     bioscreen_data.nodecay / max_source_conc, bio_results_comp_nodecay.relative_cxyt[bio_time_index,:,:]
-<span class="ansi-green-fg">      5</span> )
-<span class="ansi-green-fg">      6</span> 
-
-<span class="ansi-red-fg">NameError</span>: name 'diff' is not defined</pre>
 </div>
 </div>
 </div>
@@ -4184,25 +4142,18 @@ print("Mean absolute difference in relative concentration between BIOSCREEN "
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[29]</span><span class="ansi-green-fg">, line 2</span>
-<span class="ansi-green-fg">      1</span> print("Mean absolute difference in relative concentration between BIOSCREEN "
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span>       <span class="ansi-yellow-fg">"and Bioscreen model class with no decay:"</span>,mad_bio_bio_nd)
-<span class="ansi-green-fg">      3</span> print("Mean absolute difference in relative concentration between BIOSCREEN "
-<span class="ansi-green-fg">      4</span>       <span class="ansi-yellow-fg">"and Bioscreen model class with linear decay:"</span>,mad_bio_bio_lindec)
-<span class="ansi-green-fg">      5</span> print("Mean absolute difference in relative concentration between BIOSCREEN "
-
-<span class="ansi-red-fg">NameError</span>: name 'mad_bio_bio_nd' is not defined</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Mean absolute difference in relative concentration between BIOSCREEN and Bioscreen model class with no decay: 2.4880399540013646e-06
+Mean absolute difference in relative concentration between BIOSCREEN and Bioscreen model class with linear decay: 8.033000606564948e-06
+Mean absolute difference in relative concentration between BIOSCREEN and Bioscreen model class with instant reaction: 6.444204434847127e-05
+</pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=66e6455d-cda5-4cd0-8b4b-2f513b42a91a">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=66e6455d-cda5-4cd0-8b4b-2f513b42a91a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -4247,29 +4198,6 @@ mad_bat_mibi_lindec = diff.mean_absolute_difference(
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[30]</span><span class="ansi-green-fg">, line 3</span>
-<span class="ansi-green-fg">      1</span> max_source_conc = bat_source.source_zone_concentration[<span class="ansi-green-fg">0</span>]
-<span class="ansi-green-fg">      2</span> 
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">3</span> mad_bat_mibi_nd = diff.mean_absolute_difference(
-<span class="ansi-green-fg">      4</span>     bioscreenAT_data.nodecay / max_source_conc,
-<span class="ansi-green-fg">      5</span>     mbt_results_comp_nodecay.relative_cxyt
-<span class="ansi-green-fg">      6</span> )
-
-<span class="ansi-red-fg">NameError</span>: name 'diff' is not defined</pre>
-</div>
-</div>
-</div>
-</div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=5bd3b3e700d6e7aa">
@@ -4309,17 +4237,10 @@ print("Mean absolute difference in relative concentration between BIOSCREEN-AT "
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[31]</span><span class="ansi-green-fg">, line 2</span>
-<span class="ansi-green-fg">      1</span> print("Mean absolute difference in relative concentration between BIOSCREEN-AT "
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span>       <span class="ansi-yellow-fg">"and Mibitrans model class with no decay:"</span>,mad_bat_mibi_nd)
-<span class="ansi-green-fg">      3</span> print("Mean absolute difference in relative concentration between BIOSCREEN-AT "
-<span class="ansi-green-fg">      4</span>       <span class="ansi-yellow-fg">"and Mibitrans model class with linear decay:"</span>,mad_bat_mibi_lindec)
-
-<span class="ansi-red-fg">NameError</span>: name 'mad_bat_mibi_nd' is not defined</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with no decay: 1.0600970801086523e-05
+Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with linear decay: 1.0865108469319337e-05
+</pre>
 </div>
 </div>
 </div>

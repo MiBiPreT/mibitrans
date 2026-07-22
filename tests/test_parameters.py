@@ -70,7 +70,7 @@ def test_hydrologicalparameters_setattribute(parameters, value, error) -> None:
         (dict(velocity=1, porosity=0.5, h_conductivity=2, h_gradient=2, alpha_x=2, alpha_y=3), "velocity", 8),
     ],
 )
-def test_hyrologicalparameters_output(test, param, expected) -> None:
+def test_hydrologicalparameters_output(test, param, expected) -> None:
     """Test output of HydrologicalParameters dataclass."""
     if "velocity" in test.keys() and "h_gradient" in test.keys():
         with pytest.warns(UserWarning):
@@ -196,7 +196,7 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         (dict(source_zone_boundary=(1, 2), source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (dict(source_zone_boundary=["one", 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (
-            dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([-3, 2]), depth=5, total_mass=2),
+            dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([3, -2]), depth=5, total_mass=2),
             DomainValueError,
         ),
         (
@@ -249,40 +249,42 @@ def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
             setattr(src, parameter, value)
 
 
-@pytest.mark.parametrize(
-    "test, param, expected",
-    [
-        (
-            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass=2),
-            "source_zone_boundary",
-            np.array([1, 2, 3]),
-        ),
-        (
-            dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-            "source_zone_boundary",
-            np.array([1, 2, 3]),
-        ),
-        (
-            dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-            "source_zone_concentration",
-            np.array([6, 4, 2]),
-        ),
-        (
-            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass="inf"),
-            "total_mass",
-            np.inf,
-        ),
-    ],
-)
-def test_sourceparameters_output(test, param, expected) -> None:
-    """Test output of SourceParameters dataclass."""
-    unordered = np.array(test["source_zone_boundary"]) < test["source_zone_boundary"][0]
-    if True in unordered:
-        with pytest.warns(UserWarning):
-            source = SourceParameters(**test)
-    else:
-        source = SourceParameters(**test)
-    assert source.__dict__[param] == pytest.approx(expected)
+# Decrepit test due to no longer reording source zone boundary in SourceParameters function.
+
+# @pytest.mark.parametrize(
+#     "test, param, expected",
+#     [
+#         (
+#             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass=2),
+#             "source_zone_boundary",
+#             np.array([1, 2, 3]),
+#         ),
+#         (
+#             dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
+#             "source_zone_boundary",
+#             np.array([1, 2, 3]),
+#         ),
+#         (
+#             dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
+#             "source_zone_concentration",
+#             np.array([6, 4, 2]),
+#         ),
+#         (
+#             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass="inf"),
+#             "total_mass",
+#             np.inf,
+#         ),
+#     ],
+# )
+# def test_sourceparameters_output(test, param, expected) -> None:
+#     """Test output of SourceParameters dataclass."""
+#     unordered = np.array(test["source_zone_boundary"]) < test["source_zone_boundary"][0]
+#     if True in unordered:
+#         with pytest.warns(UserWarning):
+#             source = SourceParameters(**test)
+#     else:
+#         source = SourceParameters(**test)
+#     assert source.__dict__[param] == pytest.approx(expected)
 
 
 def test_sourceparameters_visualize_zone():

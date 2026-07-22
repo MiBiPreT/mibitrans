@@ -52,76 +52,89 @@ def _check_numeric_retardation(parameter: str, value):
         return TypeError(f"{parameter} must be a float, but is {type(value)} instead.")
 
 
-def _check_array_list_numeric_positive(parameter: str, value):
-    """Check if variable is numpy array, list, or numerical, if it is positive and if an array is 1-dimensional."""
-    if isinstance(value, np.ndarray):
-        if len(value.shape) == 1:
-            if all(value >= 0):
-                return None
-            else:
-                return DomainValueError(f"All values in {parameter} should be >= 0.")
+def _check_list_array_positive(parameter: str, value, sublist_allowed):
+    """Check if variable contains numeric values or lists/arrays of numeric values if allowed."""
+    if all(isinstance(item, (list, np.ndarray)) for item in value) and sublist_allowed:
+        for item in value:
+            if not all(isinstance(elem, (int, float, np.floating, np.integer)) for elem in item):
+                return TypeError(f"All sub-elements of {parameter} should be a float.")
+            if not all(elem >= 0 for elem in item):
+                return DomainValueError(f"All sub-elements in {parameter} should be >= 0.")
+        return None
+    elif all(isinstance(item, (int, float, np.floating, np.integer)) for item in value):
+        if all(item >= 0 for item in value):
+            return None
         else:
-            return ValueError(
-                f"{parameter} should be a float, list or a 1-dimensional array,"
-                f"but input array is {len(value.shape)}-dimensional."
-            )
-
-    elif isinstance(value, list):
-        if all(isinstance(element, (float, int, np.floating, np.integer)) for element in value):
-            if all(element >= 0 for element in value):
-                return None
-            else:
-                return DomainValueError(f"All values in {parameter} should be >= 0.")
+            return DomainValueError(f"All elements of {parameter} should be >= 0.")
+    else:
+        if isinstance(value, np.ndarray):
+            if len(value.shape) != 1:
+                return ValueError(f"{parameter} must be a 1D array of floats or list of 1D-arrays/floats.")
+        if sublist_allowed:
+            return TypeError(f"All elements of {parameter} should either be a float or list/array of floats.")
         else:
             return TypeError(f"All elements of {parameter} should be a float.")
 
-    elif isinstance(value, (float, int, np.floating)):
-        if value >= 0:
-            return None
-        else:
-            return DomainValueError(f"{parameter} must be >= 0")
 
+def _check_array_list_numeric_positive(parameter: str, value, sublist_allowed):
+    """Check if variable is numpy array, list, or numerical, if it is positive and if an array is 1-dimensional."""
+    if isinstance(value, (np.ndarray, list)):
+        return _check_list_array_positive(parameter, value, sublist_allowed)
+    elif isinstance(value, (float, int, np.floating, np.integer)):
+        return _check_numeric_positive(parameter, value)
     else:
         return TypeError(f"{parameter} must be a float, list or numpy array, but is {type(value)} instead.")
 
 
 def validate_source_zones(boundary, concentration):
     """Validate and adapt input of source_zone_boundary and source_zone_concentration arrays."""
+    chain_exception = False
     # Ensure boundary and concentration are numpy arrays
     if isinstance(boundary, (float, int, np.floating, np.integer)):
         boundary = np.array([boundary])
     else:
         boundary = np.array(boundary)
 
-    if isinstance(concentration, (float, int, np.floating, np.integer)):
-        concentration = np.array([concentration], dtype=float)
+    if isinstance(concentration, list):
+        if isinstance(concentration[0], (list, np.ndarray)):
+            concentration = [np.array(conc) for conc in concentration]
+        else:
+            concentration = np.array(concentration)
+            if len(boundary) != len(concentration) and len(boundary) == 1:
+                # When only a single source zone boundary is given, but multiple (single) source zone concentrations,
+                # it is interpreted as varying single source concentrations for purpose of chain decay. Therefore, no
+                # error will be raised if length of boundary array != length concentration array.
+                chain_exception = True
+    elif isinstance(concentration, np.ndarray):
+        if len(boundary) != len(concentration) and len(boundary) == 1:
+            chain_exception = True
     else:
-        concentration = np.array(concentration, dtype=float)
+        concentration = np.array([concentration])
 
-    # Each given source zone boundary should have a given concentration, and vice versa
-    if boundary.shape != concentration.shape:
-        raise ValueError(
-            f"Length of source zone boundary ({len(boundary)}) and source zone concentration "
-            f"({len(concentration)}) do not match. Make sure they are of equal length."
-        )
-
-    # Reorder source zone locations if they are not given in order from close to far from source zone center
+    # Reording of source zone boundary if not in correct order decrepit from v1.1.0 due to conflict with chain decay
+    # Furthermore, it is considered good practice to purposefully set source zone boundary in correct order. To prevent
+    # unintended source discretization.
     if len(boundary) > 1:
         if not all(boundary[:-1] <= boundary[1:]):
-            sort_location = np.argsort(boundary)
             boundary.sort()
-            concentration = concentration[sort_location]
-            warnings.warn(
-                "Source zone boundary locations should be ordered by distance from source zone center. "
-                "Zone boundaries and concentrations have consequently been reordered as follows:"
-                f"Source zone boundaries: {boundary}"
-                f"Source zone concentrations: {concentration}"
+            raise ValueError(
+                "source_zone_boundary locations should be ordered by distance from source zone center. Thus, current "
+                f"input for source_zone_boundary is supposed to be {boundary}. source_zone_concentration should be re-"
+                f"ordered accordingly as well, with highest concentrations at the innermost source zone."
             )
-        # Superposition method only works if the zone closer to the center has higher concentration than outer zones
-        if not all(concentration[:-1] > concentration[1:]):
+    # Superposition method only works if the zone closer to the center has higher concentration than outer zones
+    check_conc = [concentration] if not isinstance(concentration, list) else concentration
+    for conc in check_conc:
+        if not all(conc[:-1] > conc[1:]) and not isinstance(conc, (float, int, np.floating, np.integer)):
             raise ValueError(
                 "Source zone concentrations should be in descending order; no source zone can have a concentration "
                 "higher than the concentration of a zone closer to source center, due to the superposition method."
+            )
+        # Each given source zone boundary should have a corresponding concentration, and vice versa
+        if boundary.shape != conc.shape and not chain_exception:
+            raise ValueError(
+                f"Length of source zone boundary (len={len(boundary)}, for {boundary}) and source zone concentration "
+                f"(len={len(conc)}, for {conc}) do not match. Make sure they are of equal length."
             )
     return boundary, concentration
 
@@ -294,8 +307,10 @@ def validate_input_values(parameter, value):
         case "porosity" | "fraction_organic_carbon":
             error = _check_numeric_fraction(parameter, value)
         # Parameters which are input as single values, lists or numpy arrays
-        case "source_zone_boundary" | "source_zone_concentration":
-            error = _check_array_list_numeric_positive(parameter, value)
+        case "source_zone_boundary" | "decay_rate" | "half_life" | "mass_ratios":
+            error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=False)
+        case "source_zone_concentration":
+            error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=True)
         case "electron_acceptors":
             error = _check_electron_acceptor(value)
         # All other parameters are checked as floats on positive domain

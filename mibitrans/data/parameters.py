@@ -95,15 +95,19 @@ class AttenuationParameters:
 
     Args:
         retardation (float) : Retardation factor for transported contaminant [-]. Default is 1.
-        decay_rate (float) : First order (linear) decay coefficient in [1/day]. Only required for linear decay models.
-            Default is 0. Also sets corresponding half life.
-        half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
-            linear decay models. Default is 0. Also sets corresponding decay_rate.
+        decay_rate (float | list | np.ndarray) : First order (linear) decay coefficient in [1/day]. Only required for
+            linear decay models. If given as iterable, interpreted as sequential decay rates for chain decay. Also sets
+            corresponding half life. Default is 0.
+        half_life (float | list | np.ndarray) : Contaminant half life for 1st order (linear) decay, in [days]. Only
+            required for linear decay models. If given as iterable, interpreted as sequential decay rates for chain
+            decay. Default is 0. Also sets corresponding decay_rate.
         bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
         partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
             in [m^3/g]. Optional if retardation is specified.
         fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
             Optional if retardation is specified.
+        mass_ratios (list | np.ndarray): Ratio between masses of sequential decay products for chain decay. Length
+            should be one less than length of decay_rate or half_life. Only required for chain decay. Default is None.
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Methods:
@@ -116,16 +120,21 @@ class AttenuationParameters:
     """
 
     retardation: float = 1
-    decay_rate: float = 0
-    half_life: float = 0
+    decay_rate: float | list[float] | np.ndarray[float] = 0
+    half_life: float | list[float] | np.ndarray[float] = 0
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
+    mass_ratios: list[float] | np.ndarray[float] = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
+        if parameter == "mass_ratios":
+            if len(value) != len(self.decay_rate) - 1:
+                raise ValueError("Length of mass_ratios array should be one less than length of decay_rate. As for the "
+                                 "degradation of the final compound in the chain decay, mass ratio is irrelevant.")
         # Separate setattr for decay rate and half life because they should always be equivalent
         if parameter == "decay_rate" or parameter == "half_life":
             decay_rate, half_life = self._set_decay(parameter, value)
@@ -151,15 +160,19 @@ class AttenuationParameters:
             raise MissingValueError("Linear reaction model requires decay rate or half life.")
 
     def _set_decay(self, parameter, value):
-        if parameter == "decay_rate" and (value != 0 or hasattr(self, "initialized")):
+        ar_value = np.array(value)
+        if isinstance(value, list):
+            value = np.array(value)
+
+        if parameter == "decay_rate" and (not ar_value.all() == 0 or hasattr(self, "initialized")):
             decay_rate = value
-            if value != 0:
+            if ar_value.all() != 0:
                 half_life = np.log(2) / value
             else:
                 half_life = 0
-        elif parameter == "half_life" and (value != 0 or hasattr(self, "initialized")):
+        elif parameter == "half_life" and (not ar_value.all() == 0 or hasattr(self, "initialized")):
             half_life = value
-            if value != 0:
+            if ar_value.all() != 0:
                 decay_rate = np.log(2) / value
             else:
                 decay_rate = 0
@@ -173,7 +186,12 @@ class AttenuationParameters:
             decay_rate = 0
             half_life = 0
 
-        if self.decay_rate != decay_rate and self.decay_rate != 0 and not hasattr(self, "initialized") and value != 0:
+        if (
+            not np.array(self.decay_rate) == np.array(decay_rate)
+            and not np.array(self.decay_rate).all() == 0
+            and not hasattr(self, "initialized")
+            and not ar_value.all() == 0
+        ):
             warnings.warn(
                 "Both contaminant decay rate and half life were defined, but are not equal. "
                 "Value for decay rate will be used.",
@@ -191,7 +209,7 @@ class SourceParameters:
 
     Args:
         source_zone_boundary (np.ndarray) : Outer boundary of each source zone, in transverse horizontal direction
-            (y-coordiante) [m]. y=0 is at the middle of the contaminant source. Input as numpy array of length equal
+            (y-coordinate) [m]. y=0 is at the middle of the contaminant source. Input as numpy array of length equal
             to the amount of source zone. Last value in the array is the limit of the source. For a source with a single
             source zone, only one value is required. Source is symmetrical in the x-axis.
         source_zone_concentration (np.ndarray) : Contaminant concentration in each source zone [g/m^3]. Input as numpy
@@ -209,27 +227,42 @@ class SourceParameters:
     """
 
     source_zone_boundary: np.ndarray = None
-    source_zone_concentration: np.ndarray = None
+    source_zone_concentration: list[np.ndarray] | np.ndarray = None
     depth: float = None
     total_mass: float | str = "infinite"
     verbose: bool = False
 
+    # For chain decay, source concentrations can be negative, set to True to make sure check_input does not raise error.
+    _check_input_parameters: bool = True
+    _initialized: bool = False
+
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
-        validate_input_values(parameter, value)
-        if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
-            value = np.inf
-        super().__setattr__(parameter, value)
-        # When setting source zone boundary or concentration, and both present, check validity in respect to each other.
-        if parameter in ["source_zone_boundary", "source_zone_concentration"] and (
-            self.source_zone_boundary is not None and self.source_zone_concentration is not None
-        ):
-            boundary, concentration = validate_source_zones(self.source_zone_boundary, self.source_zone_concentration)
-            super().__setattr__("source_zone_boundary", boundary)
-            super().__setattr__("source_zone_concentration", concentration)
+        if self._check_input_parameters and parameter != "_check_input_parameters" and self._initialized:
+            validate_input_values(parameter, value)
+            if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
+                value = np.inf
+            super().__setattr__(parameter, value)
+            # When setting source zone boundary or concentration, and both present, check validity in respect to each other.
+            if parameter in ["source_zone_boundary", "source_zone_concentration"] and (
+                self.source_zone_boundary is not None and self.source_zone_concentration is not None
+            ):
+                boundary, concentration = validate_source_zones(
+                    self.source_zone_boundary, self.source_zone_concentration
+                )
+                super().__setattr__("source_zone_boundary", boundary)
+                super().__setattr__("source_zone_concentration", concentration)
+
+        else:
+            super().__setattr__(parameter, value)
 
     def __post_init__(self):
         """Check argument presence, types and domain."""
+        self._initialized = True
+        # Input check must be skipped if _check_input_parameters is True, therefore input checked after initialization
+        for name, value in self.__dict__.items():
+            if name not in ["_check_input_parameters", "_initialized"]:
+                setattr(self, name, value)
         self._validate_input_presence()
 
     def interpolate(self, n_zones, method):

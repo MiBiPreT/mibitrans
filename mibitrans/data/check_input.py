@@ -55,6 +55,12 @@ def _check_numeric_retardation(parameter: str, value):
 def _check_list_array_positive(parameter: str, value, sublist_allowed):
     """Check if variable contains numeric values or lists/arrays of numeric values if allowed."""
     if all(isinstance(item, (list, np.ndarray)) for item in value) and sublist_allowed:
+        if isinstance(value, np.ndarray):
+            if len(value.shape) > 1:
+                return ValueError(
+                    f"{parameter} should either be a 1-dimensional array, a list of 1-dimensional arrays "
+                    f"or list of lists, but is {len(value.shape)}-dimensional array instead."
+                )
         for item in value:
             if not all(isinstance(elem, (int, float, np.floating, np.integer)) for elem in item):
                 return TypeError(f"All sub-elements of {parameter} should be a float.")
@@ -97,7 +103,10 @@ def validate_source_zones(boundary, concentration):
 
     if isinstance(concentration, list):
         if isinstance(concentration[0], (list, np.ndarray)):
-            concentration = [np.array(conc) for conc in concentration]
+            if len(concentration) == 1:
+                concentration = concentration[0]
+            else:
+                concentration = [np.array(conc) for conc in concentration]
         else:
             concentration = np.array(concentration)
             if len(boundary) != len(concentration) and len(boundary) == 1:
@@ -125,16 +134,26 @@ def validate_source_zones(boundary, concentration):
     # Superposition method only works if the zone closer to the center has higher concentration than outer zones
     check_conc = [concentration] if not isinstance(concentration, list) else concentration
     for conc in check_conc:
-        if not all(conc[:-1] > conc[1:]) and not isinstance(conc, (float, int, np.floating, np.integer)):
+        # Each given source zone boundary should have a corresponding concentration, and vice versa
+        if boundary.shape != conc.shape and not chain_exception:
+            try:
+                len_conc = len(conc)
+            except TypeError:
+                conc = np.array([conc])
+                len_conc = len(conc)
+
+            raise ValueError(
+                f"Length of source zone boundary (len={len(boundary)}, for {boundary}) and source zone concentration "
+                f"(len={len_conc}, for {conc}) do not match. Make sure they are of equal length."
+            )
+        if (
+            not all(conc[:-1] >= conc[1:])
+            and not isinstance(conc, (float, int, np.floating, np.integer))
+            and not chain_exception
+        ):
             raise ValueError(
                 "Source zone concentrations should be in descending order; no source zone can have a concentration "
                 "higher than the concentration of a zone closer to source center, due to the superposition method."
-            )
-        # Each given source zone boundary should have a corresponding concentration, and vice versa
-        if boundary.shape != conc.shape and not chain_exception:
-            raise ValueError(
-                f"Length of source zone boundary (len={len(boundary)}, for {boundary}) and source zone concentration "
-                f"(len={len(conc)}, for {conc}) do not match. Make sure they are of equal length."
             )
     return boundary, concentration
 

@@ -108,12 +108,14 @@ def validate_source_zones(boundary, concentration):
             else:
                 concentration = [np.array(conc) for conc in concentration]
         else:
-            concentration = np.array(concentration)
             if len(boundary) != len(concentration) and len(boundary) == 1:
                 # When only a single source zone boundary is given, but multiple (single) source zone concentrations,
                 # it is interpreted as varying single source concentrations for purpose of chain decay. Therefore, no
                 # error will be raised if length of boundary array != length concentration array.
                 chain_exception = True
+                concentration = [np.array([conc]) for conc in concentration]
+            else:
+                concentration = np.array(concentration)
     elif isinstance(concentration, np.ndarray):
         if len(boundary) != len(concentration) and len(boundary) == 1:
             chain_exception = True

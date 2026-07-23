@@ -157,6 +157,10 @@ class AttenuationParameters:
             decay_rate, half_life = self._set_decay(parameter, value)
             super().__setattr__("decay_rate", decay_rate)
             super().__setattr__("half_life", half_life)
+            if isinstance(self.decay_rate, (list, np.ndarray)):
+                self.chain_decay = True
+            else:
+                self.chain_decay = False
         else:
             super().__setattr__(parameter, value)
 

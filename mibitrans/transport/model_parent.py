@@ -3,11 +3,12 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
-import mibitrans
-import mibitrans.data.parameters
+import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
@@ -179,6 +180,7 @@ class Transport3D(ABC):
         self.yyy = self.y[None, :, None]
         self.ttt = self.t[:, None, None]
 
+        # Calculate retardation if not already specified in adsorption_parameters
         if (
             self._att_pars.bulk_density is not None
             and self._att_pars.partition_coefficient is not None
@@ -191,12 +193,21 @@ class Transport3D(ABC):
         # cxyt is concentration output array
         self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
 
-        # Calculate retardation if not already specified in adsorption_parameters
-        self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
+        if self._src_pars.chain_decay_source:
+            if self._src_pars.total_mass != np.inf:
+                warnings.warn("Source depletion does not work with chain decay. Source depletion rate is set to 0.")
+            self.k_source = 0
+        else:
+            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
-        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        if self._src_pars.chain_decay_source and self._mode != "chain_decay":
+            self.c_source = self.c_source[0]
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        elif not self._src_pars.chain_decay_source:
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
@@ -206,10 +217,10 @@ class Transport3D(ABC):
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
         dataclass_dict = {
-            "hydrological_parameters": mibitrans.data.parameters.HydrologicalParameters,
-            "attenuation_parameters": mibitrans.data.parameters.AttenuationParameters,
-            "source_parameters": mibitrans.data.parameters.SourceParameters,
-            "model_parameters": mibitrans.data.parameters.ModelParameters,
+            "hydrological_parameters": pars.HydrologicalParameters,  # mibitrans.data.parameters.HydrologicalParameters,
+            "attenuation_parameters": pars.AttenuationParameters,  # mibitrans.data.parameters.AttenuationParameters,
+            "source_parameters": pars.SourceParameters,  # mibitrans.data.parameters.SourceParameters,
+            "model_parameters": pars.ModelParameters,  # mibitrans.data.parameters.ModelParameters,
         }
 
         if not isinstance(value, dataclass_dict[key]):
@@ -231,6 +242,40 @@ class Transport3D(ABC):
                 "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
             )
         return y
+
+    def chain_decay(self, mass_ratios=None):
+        """Enable and set up chain decay model, calculating concentrations for each contaminant in the chain."""
+        if mass_ratios:
+            self._att_pars.mass_ratios = mass_ratios
+        if not self._att_pars.chain_decay:
+            raise ValueError(
+                "Attenuation parameters does not contain information for chain decay. Decay rate should be "
+                "provided as list or array of degradation rates."
+            )
+        elif not self._src_pars.chain_decay_source:
+            raise ValueError(
+                "Source parameters does not contain information for chain decay. Separate source zone "
+                "concentrations should be given for each compound in the chain."
+            )
+        self._mode = "chain_decay"
+
+    def _calculate_chain_decay(self):
+        """Calculates concentrations for chain decay by running model equations multiple times."""
+        decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._att_pars.mass_ratios)
+        transformed_source_concentrations = transform_chain_concentrations(
+            self._src_pars.source_zone_concentration, decay_ratios, inverse=False
+        )
+        self.k_source = 0
+        intermediate_cxyt = [0] * len(self._att_pars.decay_rate)
+        for i, rate in enumerate(self._att_pars.decay_rate):
+            self._decay_rate = rate / self._att_pars.retardation
+            self.c_source = transformed_source_concentrations[i]
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+            if self.__class__.__name__ == "Mibitrans":
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt()
+            else:
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        return transform_chain_concentrations(intermediate_cxyt, decay_ratios, inverse=True)
 
     def instant_reaction(
         self,

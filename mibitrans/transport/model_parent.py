@@ -10,6 +10,7 @@ from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
 from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
+from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
@@ -54,6 +55,8 @@ class Transport3D(ABC):
         self._utilization_factor = None
         self.biodegradation_capacity = 0
         self.cxyt_noBC = None
+
+        self._mass_ratios = None
 
         self._pre_run_initialization_parameters()
 
@@ -203,11 +206,10 @@ class Transport3D(ABC):
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
         if self._src_pars.chain_decay_source and self._mode != "chain_decay":
-            self.c_source = self.c_source[0]
+            self.c_source = self.c_source[0].copy()
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         elif not self._src_pars.chain_decay_source:
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
-
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
@@ -243,10 +245,15 @@ class Transport3D(ABC):
             )
         return y
 
-    def chain_decay(self, mass_ratios=None):
-        """Enable and set up chain decay model, calculating concentrations for each contaminant in the chain."""
-        if mass_ratios:
-            self._att_pars.mass_ratios = mass_ratios
+    def chain_decay(self, mass_ratios: list[float] | np.ndarray[float]):
+        """Enable and set up chain decay model, calculating concentrations for each contaminant in the chain.
+
+        Args:
+            mass_ratios (list | np.ndarray): Ratio between masses of sequential decay products for chain decay. Length
+                of iterable should be one less than length of decay_rate or half_life. Default is None.
+        """
+        validate_input_values("mass_ratios", mass_ratios)
+
         if not self._att_pars.chain_decay:
             raise ValueError(
                 "Attenuation parameters does not contain information for chain decay. Decay rate should be "
@@ -257,11 +264,22 @@ class Transport3D(ABC):
                 "Source parameters does not contain information for chain decay. Separate source zone "
                 "concentrations should be given for each compound in the chain."
             )
+        if not isinstance(mass_ratios, (list, np.ndarray)):
+            mass_ratios = np.array([mass_ratios])
+        else:
+            mass_ratios = np.array(mass_ratios)
+
+        if len(mass_ratios) != len(self._att_pars.decay_rate) - 1:
+            raise ValueError(
+                "Length of mass_ratios array should be one less than length of decay_rate. As for the "
+                "degradation of the final compound in the chain decay, mass ratio is irrelevant."
+            )
+        self._mass_ratios = mass_ratios
         self._mode = "chain_decay"
 
     def _calculate_chain_decay(self):
         """Calculates concentrations for chain decay by running model equations multiple times."""
-        decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._att_pars.mass_ratios)
+        decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._mass_ratios)
         transformed_source_concentrations = transform_chain_concentrations(
             self._src_pars.source_zone_concentration, decay_ratios, inverse=False
         )
@@ -361,6 +379,7 @@ class Results:
                 the model. Only for instant reaction, None for other models.
             utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
                 run the model. Only for instant reaction, None for other models.
+            mass_ratios (np.ndarray) : Ratio between masses of sequential decay products for chain decay
             mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
             rv (float) : Retarded flow velocity, as v / R [m/day].
             k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
@@ -407,6 +426,7 @@ class Results:
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
         self._utilization_factor = copy.copy(model._utilization_factor)
+        self._mass_ratios = copy.copy(model._mass_ratios)
 
         self._mode = model.mode
         self._rv = model.rv
@@ -472,6 +492,11 @@ class Results:
     def utilization_factor(self):
         """Utilization factor of the model used for the results."""
         return self._utilization_factor
+
+    @property
+    def mass_ratios(self):
+        """Ratio between masses of sequential decay products for chain decay."""
+        return self._mass_ratios
 
     @property
     def mode(self):

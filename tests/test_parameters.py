@@ -91,8 +91,8 @@ def test_hydrologicalparameters_output(test, param, expected) -> None:
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(), None),
-        (dict(decay_rate=[0.2, 0.1, 0.05], mass_ratios=[0.84, 0.71]), None),
-        (dict(half_life=np.array([100, 73, 11]), mass_ratios=[0.84, 0.71]), None),
+        (dict(decay_rate=[0.2, 0.1, 0.05]), None),
+        (dict(half_life=np.array([100, 73, 11])), None),
         (dict(decay_rate=[0.3]), None),
         (dict(decay_rate=1, half_life=1), UserWarning),
         (dict(half_life="one"), TypeError),
@@ -101,10 +101,8 @@ def test_hydrologicalparameters_output(test, param, expected) -> None:
         (dict(retardation=0.1), DomainValueError),
         (dict(retardation=1, fraction_organic_carbon="no"), TypeError),
         (dict(retardation=1, fraction_organic_carbon=2), DomainValueError),
-        (dict(mass_ratios=[0.45, 0.98]), ValueError),
-        (dict(decay_rate=[-2, 3], mass_ratios=0.66), DomainValueError),
-        (dict(half_life=[300, 200], mass_ratios=[0.84, 0.71]), ValueError),
-        (dict(half_life=[300, [200, 100]], mass_ratios=[0.84, 0.71]), TypeError),
+        (dict(decay_rate=[-2, 3]), DomainValueError),
+        (dict(half_life=[300, [200, 100]]), TypeError),
     ],
 )
 def test_attenuationparameters_validation(parameters, error) -> None:
@@ -129,8 +127,7 @@ def test_attenuationparameters_validation(parameters, error) -> None:
         (dict(half_life=2), "decay_rate", np.log(2) / 2),
         (dict(decay_rate=2, half_life=2), "decay_rate", 2),
         (dict(decay_rate=2, half_life=2), "half_life", np.log(2) / 2),
-        (dict(decay_rate=[2, 4], mass_ratios=0.34), "half_life", [np.log(2) / 2, np.log(2) / 4]),
-        (dict(half_life=[2, 4], mass_ratios=0.34), "decay_rate", [np.log(2) / 2, np.log(2) / 4]),
+        (dict(decay_rate=[2, 4]), "half_life", [np.log(2) / 2, np.log(2) / 4]),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Both contaminant decay rate")
@@ -157,7 +154,6 @@ def test_attenuationparameters_output(test, param, expected) -> None:
             DomainValueError,
         ),
         (dict(half_life=3), "half_life", 0, None),
-        (dict(decay_rate=4), "mass_ratios", 2, ValueError),
     ],
 )
 def test_attenuationparameters_setattribute(test, value, parameter, error) -> None:

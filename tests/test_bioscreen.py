@@ -1,5 +1,7 @@
 import pytest
 from mibitrans.data.check_input import DomainValueError
+from mibitrans.transport.model_parent import Results
+from mibitrans.transport.models import Bioscreen
 from tests.test_example_data import testingdata_instantreaction_bioscreen
 from tests.test_example_data import testingdata_lineardecay_bioscreen
 from tests.test_example_data import testingdata_nodecay_bioscreen
@@ -19,6 +21,14 @@ def test_transport_equation_numerical_bioscreen(model, expected, request):
     model, results = request.getfixturevalue(model)
     assert model.cxyt == pytest.approx(expected)
     assert results.cxyt == pytest.approx(expected)
+
+
+def test_transport_chain_decay_runs(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars):
+    """Test if running the chain decay method produces expected Results object."""
+    model_obj = Bioscreen(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars)
+    model_obj.chain_decay([0.8, 0.7])
+    results = model_obj.run()
+    assert isinstance(results, Results), "Result object is not of type Results"
 
 
 @pytest.mark.parametrize(

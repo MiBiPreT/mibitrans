@@ -106,8 +106,6 @@ class AttenuationParameters:
             in [m^3/g]. Optional if retardation is specified.
         fraction_organic_carbon (float) : Fraction of organic material in the soil [-].
             Optional if retardation is specified.
-        mass_ratios (list | np.ndarray): Ratio between masses of sequential decay products for chain decay. Length
-            should be one less than length of decay_rate or half_life. Only required for chain decay. Default is None.
         verbose (bool, optional): Verbose mode. Defaults to False.
 
     Methods:
@@ -125,33 +123,11 @@ class AttenuationParameters:
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
-    mass_ratios: list[float] | np.ndarray[float] = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
-        if parameter == "mass_ratios" and value is None:
-            if isinstance(self.decay_rate, (list, np.ndarray)):
-                raise ValueError(
-                    "If more than one decay rate is provided, mass ratios for each degradation reaction should be "
-                    "provided as well. The number of mass_ratios should be one less than the amount of decay rates."
-                )
-        if value is not None and (parameter == "mass_ratios"):
-            if not isinstance(value, (list, np.ndarray)):
-                value = np.array([value])
-            else:
-                value = np.array(value)
-            if isinstance(self.decay_rate, (float, int, np.floating, np.integer)):
-                raise ValueError(
-                    "mass_ratios is only a valid argument if more than one decay rate is provided. The "
-                    "number of mass_ratios should be one less than the amount of decay rates."
-                )
-            if len(value) != len(self.decay_rate) - 1:
-                raise ValueError(
-                    "Length of mass_ratios array should be one less than length of decay_rate. As for the "
-                    "degradation of the final compound in the chain decay, mass ratio is irrelevant."
-                )
         # Separate setattr for decay rate and half life because they should always be equivalent
         if parameter == "decay_rate" or parameter == "half_life":
             decay_rate, half_life = self._set_decay(parameter, value)

@@ -8,6 +8,7 @@ from mibitrans.data.parameters import SourceParameters
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen
 from mibitrans.transport.models import Mibitrans
+from tests.test_example_data import ExampleTestData
 
 # Test parameters loosely based on Keesler site. Some adaptations to allow for more robust tests.
 
@@ -195,3 +196,9 @@ def test_bioscreen_model_instantreaction(test_hydro_pars, test_att_pars, test_so
     obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
     res = obj.run()
     return obj, res
+
+
+@pytest.fixture(scope="session")
+def test_example_data():
+    """Example test data fixture for comparing with model output."""
+    return ExampleTestData()

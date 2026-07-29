@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """Created on Fri Apr 10 11:33:06 2026.
 
-@author: alraune
+@author: alraune, Jorrit Bakker
 """
+
 import importlib.resources
 import json
 import numpy as np
@@ -11,6 +12,7 @@ import numpy as np
 
 class BioscreenData:
     """Class loading .json file with example output data from BIOSCREEN to compare with mibitrans models."""
+
     def __init__(self):
         """Initialize the example data arrays. Corresponding with model input specified in benchmarking_BIOSCREEN.ipynb.
 
@@ -32,6 +34,7 @@ class BioscreenData:
 
 class BioscreenATData:
     """Class loading .json file with example output data from BIOSCREEN-AT to compare with mibitrans models."""
+
     def __init__(self):
         """Initialize the example data arrays. Corresponding with model input specified in benchmarking_BIOSCREEN.ipynb.
 

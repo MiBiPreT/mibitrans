@@ -137,6 +137,15 @@ def test_mibitrans_model_instantreaction(test_hydro_pars, test_att_pars, test_so
     return obj, res
 
 
+@pytest.fixture(scope="session")
+def test_mibitrans_model_chaindecay(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars):
+    """Mibitrans fixture model object for testing, with chain decay."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars)
+    obj.chain_decay(mass_ratios=[0.8, 0.7])
+    res = obj.run()
+    return obj, res
+
+
 @pytest.fixture(scope="module")
 def test_anatrans_model_nodecay(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
     """Anatrans fixture model object for testing, with no decay."""

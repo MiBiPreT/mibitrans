@@ -75,6 +75,16 @@ def test_parameter_check_centerline(y_pos, time, expected, test_anatrans_model_n
             centerline(results, y_pos, time)
 
 
+def test_plotting_chain_decay_line(test_mibitrans_model_chaindecay):
+    """Test if plot object is generated from chain_decay function, and raises error if multiple objects are passed."""
+    mod, res = test_mibitrans_model_chaindecay
+    centerline(res)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+    with pytest.raises(ValueError):
+        centerline([res, res])
+
+
 @pytest.mark.parametrize(
     "animate, expected",
     [
@@ -217,6 +227,14 @@ def test_plume_2d(animate, expected, test_anatrans_model_nodecay):
         assert isinstance(ani, expected)
 
 
+def test_plotting_chain_decay_2d(test_mibitrans_model_chaindecay):
+    """Test if plot object is generated from chain_decay function, and raises error if multiple objects are passed."""
+    mod, res = test_mibitrans_model_chaindecay
+    plume_2d(res)
+    assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
+    plt.clf()
+
+
 @pytest.mark.parametrize(
     "animate, expected",
     [
@@ -230,6 +248,14 @@ def test_plume_3d(animate, expected, test_anatrans_model_nodecay):
     model, results = test_anatrans_model_nodecay
     ax = plume_3d(results, animate=animate)
     assert isinstance(ax, expected)
+
+
+def test_plotting_chain_decay_3d(test_mibitrans_model_chaindecay):
+    """Test if plot object is generated from chain_decay function, and raises error if multiple objects are passed."""
+    mod, res = test_mibitrans_model_chaindecay
+    ax = plume_3d(res)
+    assert isinstance(ax, mpl_toolkits.mplot3d.axes3d.Axes3D)
+    plt.clf()
 
 
 def test_source_zone(test_source_pars):

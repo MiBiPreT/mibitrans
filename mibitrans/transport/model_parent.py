@@ -214,7 +214,10 @@ class Transport3D(ABC):
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
         else:
-            self._decay_rate = self._att_pars.decay_rate
+            if isinstance(self._att_pars.decay_rate, (np.ndarray, list)):
+                self._decay_rate = self._att_pars.decay_rate[0]
+            else:
+                self._decay_rate = self._att_pars.decay_rate
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
@@ -254,31 +257,18 @@ class Transport3D(ABC):
         """
         validate_input_values("mass_ratios", mass_ratios)
 
-        if not self._att_pars.chain_decay:
-            raise ValueError(
-                "Attenuation parameters does not contain information for chain decay. Decay rate should be "
-                "provided as list or array of degradation rates."
-            )
-        elif not self._src_pars.chain_decay_source:
-            raise ValueError(
-                "Source parameters does not contain information for chain decay. Separate source zone "
-                "concentrations should be given for each compound in the chain."
-            )
         if not isinstance(mass_ratios, (list, np.ndarray)):
             mass_ratios = np.array([mass_ratios])
         else:
             mass_ratios = np.array(mass_ratios)
 
-        if len(mass_ratios) != len(self._att_pars.decay_rate) - 1:
-            raise ValueError(
-                "Length of mass_ratios array should be one less than length of decay_rate. As for the "
-                "degradation of the final compound in the chain decay, mass ratio is irrelevant."
-            )
+        self._check_chain_decay_validity(mass_ratios)
         self._mass_ratios = mass_ratios
         self._mode = "chain_decay"
 
     def _calculate_chain_decay(self):
         """Calculates concentrations for chain decay by running model equations multiple times."""
+        self._check_chain_decay_validity(self._mass_ratios)
         decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._mass_ratios)
         transformed_source_concentrations = transform_chain_concentrations(
             self._src_pars.source_zone_concentration, decay_ratios, inverse=False
@@ -294,6 +284,24 @@ class Transport3D(ABC):
             else:
                 intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
         return transform_chain_concentrations(intermediate_cxyt, decay_ratios, inverse=True)
+
+    def _check_chain_decay_validity(self, mass_ratios):
+        """Check if input for chain decay is valid."""
+        if not self._att_pars.chain_decay:
+            raise ValueError(
+                "Attenuation parameters does not contain information for chain decay. Decay rate should be "
+                "provided as list or array of degradation rates."
+            )
+        elif not self._src_pars.chain_decay_source:
+            raise ValueError(
+                "Source parameters does not contain information for chain decay. Separate source zone "
+                "concentrations should be given for each compound in the chain."
+            )
+        if len(mass_ratios) != len(self._att_pars.decay_rate) - 1:
+            raise ValueError(
+                "Length of mass_ratios array should be one less than length of decay_rate. As for the "
+                "degradation of the final compound in the chain decay, mass ratio is irrelevant."
+            )
 
     def instant_reaction(
         self,

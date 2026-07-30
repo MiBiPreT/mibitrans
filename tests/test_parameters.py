@@ -200,18 +200,6 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         ),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2], [4, 3], [6, 5]], depth=5), None),
         (dict(source_zone_boundary=5, source_zone_concentration=[5, 4, 3, 2, 1], depth=5), None),
-        # For chain-decay, source concentrations can be negative when decay product degrades faster than precursor.
-        # When recieving such input, dataclass should not raise error.
-        (
-            dict(
-                source_zone_boundary=np.array([5]),
-                source_zone_concentration=[-5, -4, -3, -2, -1],
-                depth=5,
-                total_mass=2,
-                _check_input_parameters=False,
-            ),
-            None,
-        ),
         (dict(source_zone_boundary=(1, 2), source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (dict(source_zone_boundary=["one", 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (
@@ -278,44 +266,6 @@ def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
     else:
         with pytest.raises(error):
             setattr(src, parameter, value)
-
-
-# Decrepit test due to no longer reording source zone boundary in SourceParameters function.
-
-# @pytest.mark.parametrize(
-#     "test, param, expected",
-#     [
-#         (
-#             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass=2),
-#             "source_zone_boundary",
-#             np.array([1, 2, 3]),
-#         ),
-#         (
-#             dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-#             "source_zone_boundary",
-#             np.array([1, 2, 3]),
-#         ),
-#         (
-#             dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-#             "source_zone_concentration",
-#             np.array([6, 4, 2]),
-#         ),
-#         (
-#             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass="inf"),
-#             "total_mass",
-#             np.inf,
-#         ),
-#     ],
-# )
-# def test_sourceparameters_output(test, param, expected) -> None:
-#     """Test output of SourceParameters dataclass."""
-#     unordered = np.array(test["source_zone_boundary"]) < test["source_zone_boundary"][0]
-#     if True in unordered:
-#         with pytest.warns(UserWarning):
-#             source = SourceParameters(**test)
-#     else:
-#         source = SourceParameters(**test)
-#     assert source.__dict__[param] == pytest.approx(expected)
 
 
 def test_sourceparameters_visualize_zone():

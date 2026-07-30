@@ -233,62 +233,28 @@ class SourceParameters:
     total_mass: float | str = "infinite"
     verbose: bool = False
 
-    # For chain decay, source concentrations can be negative, set to True to make sure check_input does not raise error.
-    _check_input_parameters: bool = True
-    _initialized: str = False
-
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
-        if (
-            self._check_input_parameters
-            and parameter not in ["_check_input_parameters", "_initialized"]
-            and self._initialized is not False
+        validate_input_values(parameter, value)
+        if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
+            value = np.inf
+        super().__setattr__(parameter, value)
+        # When setting source zone boundary or concentration, and both present, check validity in respect to
+        # each other.
+        if parameter in ["source_zone_boundary", "source_zone_concentration"] and (
+            self.source_zone_boundary is not None and self.source_zone_concentration is not None
         ):
-            validate_input_values(parameter, value)
-            if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
-                value = np.inf
-            super().__setattr__(parameter, value)
-            # When setting source zone boundary or concentration, and both present, check validity in respect to
-            # each other.
-            if (
-                (parameter == "source_zone_concentration" and self._initialized == "pre-initialized")
-                or (
-                    parameter in ["source_zone_boundary", "source_zone_concentration"]
-                    and self._initialized == "post-initialized"
-                )
-                and (self.source_zone_boundary is not None and self.source_zone_concentration is not None)
-            ):
-                boundary, concentration = validate_source_zones(
-                    self.source_zone_boundary, self.source_zone_concentration
-                )
-                super().__setattr__("source_zone_boundary", boundary)
-                super().__setattr__("source_zone_concentration", concentration)
-                if (
-                    (len(boundary) == 1 and len(concentration) > 1)
-                    or (isinstance(concentration[0], (list, np.ndarray)))
-                ) and self._initialized == "post-initialized":
-                    self.chain_decay_source = True
-                elif self._initialized == "post-initialized":
-                    self.chain_decay_source = False
-
-        else:
-            super().__setattr__(parameter, value)
+            boundary, concentration = validate_source_zones(self.source_zone_boundary, self.source_zone_concentration)
+            super().__setattr__("source_zone_boundary", boundary)
+            super().__setattr__("source_zone_concentration", concentration)
+            if (len(boundary) == 1 and len(concentration) > 1) or (isinstance(concentration[0], (list, np.ndarray))):
+                self.chain_decay_source = True
+            else:
+                self.chain_decay_source = False
 
     def __post_init__(self):
         """Check argument presence, types and domain."""
-        self._initialized = "pre-initialized"
-        # Input check must be skipped if _check_input_parameters is True, therefore input checked after initialization
-        for name, value in self.__dict__.items():
-            if name not in ["_check_input_parameters", "_initialized"]:
-                setattr(self, name, value)
         self._validate_input_presence()
-        if (len(self.source_zone_boundary) == 1 and len(self.source_zone_concentration) > 1) or (
-            isinstance(self.source_zone_concentration[0], (list, np.ndarray))
-        ):
-            self.chain_decay_source = True
-        else:
-            self.chain_decay_source = False
-        self._initialized = "post-initialized"
 
     def interpolate(self, n_zones, method):
         """Rediscretize source to n zones. Either through linear interpolation or using a normal distribution."""

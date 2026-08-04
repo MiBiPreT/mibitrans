@@ -49,3 +49,28 @@ class BioscreenATData:
             example_data_bioscreenat = json.load(data)["bioscreenat"]
             self.nodecay = np.array(example_data_bioscreenat["nodecay"])
             self.lineardecay = np.array(example_data_bioscreenat["lineardecay"])
+
+
+class BiochlorData:
+    """Class loading .json file with example output data from BIOCHLOR to compare with mibitrans models."""
+
+    def __init__(self):
+        """Initialize the example data arrays. Corresponding with model input specified in benchmarking_BIOCHLOR.ipynb.
+
+        Properties:
+            nodecay (np.ndarray) : Three-dimensional array with concentrations for no decay model,
+                indexed as C(t,y,x).
+            lineardecay (np.ndarray) : Three-dimensional array with concentrations for linear decay model,
+                indexed as C(t,y,x).
+
+        """
+        with importlib.resources.open_text("mibitrans.data", "example_data.json") as data:
+            example_data_biochlor = json.load(data)["biochlor"]
+            self.pce = np.array(example_data_biochlor["pce"])
+            self.tce = np.array(example_data_biochlor["tce"])
+            self.dce = np.array(example_data_biochlor["dce"])
+            self.vc = np.array(example_data_biochlor["vc"])
+            self.eth = np.array(example_data_biochlor["eth"])
+            self.t = np.array(example_data_biochlor["t"])
+            self.y = np.array(example_data_biochlor["y"])
+            self.x = np.array(example_data_biochlor["x"])

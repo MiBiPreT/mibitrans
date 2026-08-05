@@ -15,6 +15,10 @@
         <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/chaindecay/">
       
       
+        <link rel="prev" href="../instantreaction/">
+      
+      
+        <link rel="next" href="../massbalance/">
       
       
         
@@ -25,7 +29,7 @@
     
     
       
-        <title>Chain decay - mibitrans</title>
+        <title>Chain Decay - mibitrans</title>
       
     
     
@@ -117,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Chain decay
+              Chain Decay
             
           </span>
         </div>
@@ -271,10 +275,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../transporttheory/" class="md-tabs__link">
           
   
@@ -476,8 +482,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -495,23 +503,28 @@
       
         
       
+        
+      
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -529,7 +542,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -675,6 +688,125 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Decay
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Decay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1391,6 +1523,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1413,8 +1567,15 @@
 
 <h1 id="chain-decay">Chain decay</h1>
 <h2 id="background">Background</h2>
+<p>For certain contaminants, like chlorinated solvents, it is required to track more than a single degradation process. 
+Dechlorination of perchloroethene (PCE) to the (relatively) save ethene involves consecutive degradation to trichloroethene (TCE), dichloroethene (DCE) and vinyl chloride (VC). </p>
+<p><span class="arithmatex">\(PCE \to TCE \to DCE \to VC \to Ethene\)</span></p>
+<p>All four of which are considered environmental contaminants and are known carcinogens, with the distribution of VC being the main interest.
+Various tools have been developed to model the fate of these contaminants, among which is BIOCHLOR [Aziz et al., 2000].
+In setup and design, it is the similar to BIOSCREEN [Newell et al., 1996], aside from including the additional term in the Domenico (1987) solution. (The same as the <code>anatrans</code> solution in this package).
+While BIOCHLOR is designed towards modeling chlorinated solvents, the procedure can be applied to any sequential degradation process.</p>
 <h2 id="solution">Solution</h2>
-<p>Consider the governing three-dimensional ADE for degradation of a single contaminant:</p>
+<p>Consider the governing three-dimensional ADE for degradation of a single contaminant (<span class="arithmatex">\(X_1\)</span>):</p>
 <div class="arithmatex">\[
 \begin{equation}\tag{1}
 \begin{aligned}
@@ -1424,11 +1585,98 @@ R_1\frac{\partial C_1}{\partial t}
 +D_x \frac{\partial^2 C_1}{\partial x^2}
 +D_y \frac{\partial^2 C_1}{\partial y^2}
 +D_z \frac{\partial^2 C_1}{\partial z^2}
--\mu C_1
+-\mu_1 C_1
 \end{aligned}
 \end{equation}
 \]</div>
-<p>For the decay product of this contaminant <span class="arithmatex">\(C_1\)</span>, concentrations depends on the concentrations of <span class="arithmatex">\(C_1\)</span> and on the rate of conversion to <span class="arithmatex">\(X_2\)</span> </p>
+<p>Here, the sink term <span class="arithmatex">\(-\mu C_1\)</span> represents first order degradation of the contaminant. 
+For the decay product (<span class="arithmatex">\(X_2\)</span>) of this contaminant, the ADE would contain a source term <span class="arithmatex">\(\omega_1 \mu_1 C_1\)</span>, 
+here, <span class="arithmatex">\(\omega\)</span> represents the molar weight ratio between daughter-parent compounds; <span class="arithmatex">\(\frac{mw_{X_2}}{mw_{X_1}}\)</span>.
+If compound <span class="arithmatex">\(X_2\)</span> would subsequently decay, the sink term is similar to <span class="arithmatex">\(X_1\)</span>; <span class="arithmatex">\(-\mu_2 C_2\)</span>. 
+Thus, for a chain of degradation reactions of length <span class="arithmatex">\(n\)</span>. The source-sink term would be <span class="arithmatex">\(\omega_{n-1} \mu_{n-1} C_{n-1} - \mu_n C_n\)</span>, for every compound other than the first.
+This results in a general ADE for chain decay:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{2}
+\begin{aligned}
+R_n\frac{\partial C_n}{\partial t}
+=
+-v\frac{\partial C_n}{\partial x}
++D_x \frac{\partial^2 C_n}{\partial x^2}
++D_y \frac{\partial^2 C_n}{\partial y^2}
++D_z \frac{\partial^2 C_n}{\partial z^2}
++\omega_{n-1} \mu_{n-1} C_{n-1} - \mu_n C_n
+\end{aligned}
+\end{equation}
+\]</div>
+<p>However, these are coupled equations, i.e. <span class="arithmatex">\(C_2\)</span> is dependent on <span class="arithmatex">\(C_1\)</span> and therefore cannot be solved as-is. 
+In the paper of Sun et al. (1999), a transformation procedure is used to express concentrations of subsequent daughter compounds in the concentration of the parent compound.
+A more detailed explanation and derivation of this procedure is given in Aziz et al. (2000) and the aforementioned paper of Sun et al. (1999).
+For <span class="arithmatex">\(X_2\)</span>, the transformed concentration (<span class="arithmatex">\(A_2\)</span>) would be:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{3}
+\begin{aligned}
+A_2 = C_2 + C_1\frac{\omega_1\mu_1}{\mu_1-\mu_2}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>And for the daughter compound of <span class="arithmatex">\(X_2\)</span>, it would be:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{4}
+\begin{aligned}
+A_3 = C_3 + C_2\frac{\omega_2\mu_2}{\mu_2-\mu_3} + C_1\frac{\omega_1\omega_2\mu_1\mu_2}{(\mu_1-\mu_3)(\mu_2-\mu_3)}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>It follows that for <span class="arithmatex">\(X_n\)</span>, the transformed equation is:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{5}
+\begin{aligned}
+A_n = C_n\sum^{n-1}_{i=1}C_i\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>Note that for <span class="arithmatex">\(X_1\)</span>, <span class="arithmatex">\(A_1 = C_1\)</span>. With this transformation, the ADE becomes:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{6}
+\begin{aligned}
+R_n\frac{\partial A_n}{\partial t}
+=
+-v\frac{\partial A_n}{\partial x}
++D_x \frac{\partial^2 A_n}{\partial x^2}
++D_y \frac{\partial^2 A_n}{\partial y^2}
++D_z \frac{\partial^2 A_n}{\partial z^2}
+-\mu_n A_n
+\end{aligned}
+\end{equation}
+\]</div>
+<p>The boundary value for <span class="arithmatex">\(x=0\)</span> (source zone concentrations) need to be similarly transformed;</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{7}
+\begin{aligned}
+A_{0,n} = C_{0,n}\sum^{n-1}_{i=1}C_{0,i}\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>Now the equations are uncoupled, they can be solved for <span class="arithmatex">\(A_n\)</span> as usual, using the analytical solution to equation 1 of choice.
+Afterward, the actual concentration <span class="arithmatex">\(C_n\)</span> is determined by inverting the transformation in sequence:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{5}
+\begin{aligned}
+C_n = A_n - \sum^{n-1}_{i=1}C_i\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<h2 id="limitations">Limitations</h2>
+<p>While retardation can be considered in this transport process, it can only be done so if R is equal for each species
+i.e. the equation can not take difference in transport velocity between species into consideration.
+A &lsquo;solution&rsquo; for this used in BIOCHLOR is to take the median retardation factor of all species.  </p>
+<p>Furthermore, source superposition and source depletion are mutually exclusive for the chain decay solution. 
+Currently, in this package, only source superposition without source depletion is available for chain decay.</p>
+<h2 id="references">References</h2>
+<p>[Aziz, C. E., Newell, C. J., Gonzales, J. R., Haas, P., Clement, T. P., &amp; Sun, Y. (2000). BIOCHLOR, Natural Attenuation Decision Support System User’s Manual Version 1.0 (p. 54) [Manual]. EPA.]</p>
+<p>[Domenico, P., An analytical model for multidimensional transport of a decaying contaminant species, Journal of Hydrology, 91, 49–58, doi:10.1016/0022-1694(87)90127-2, 1987.] (https://doi.org/10.1016/0022-1694(87)90127-2)</p>
+<p>[Newell, C. J., R. K. Mcleod, J. R. Gonzales, and J. T. Wilson, BIOSCREEN natural attenuation decision support system user’s manual version 1.3, Tech. rep., U.S. EPA, 1996.] https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P1007K50.TXT</p>
+<p>[Sun, Y., Petersen, J. N., &amp; Clement, T. P. (1999). Analytical solutions for multiple species reactive transport in multiple dimensions. Journal of Contaminant Hydrology, 35(4), 429–440.] https://doi.org/10.1016/S0169-7722(98)00105-3</p>
 
 
 

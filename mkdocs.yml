@@ -16,6 +16,7 @@ nav:
     - Transport Model Setup: background/modelsetup.md
     - Model implementations: background/modelimplementations.md
     - Instant Reaction Model: background/instantreaction.md
+    - Chain Decay: background/chaindecay.md
     - Mass Balance: background/massbalance.md
     - BIOSCREEN: background/bioscreen.md
   - Implementation: 

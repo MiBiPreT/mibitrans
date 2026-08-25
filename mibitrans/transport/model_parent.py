@@ -303,6 +303,12 @@ class Transport3D(ABC):
                 "degradation of the final compound in the chain decay, mass ratio is irrelevant."
             )
 
+        if len(self._src_pars.source_zone_concentration) != len(self._att_pars.decay_rate):
+            raise ValueError(
+                "Amount of provided source zone concentrations should be equal to the amount of provided decay rates."
+                "One for each compound in the chain decay."
+            )
+
     def instant_reaction(
         self,
         electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,

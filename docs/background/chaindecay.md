@@ -114,7 +114,7 @@ Now the equations are uncoupled, they can be solved for $A_n$ as usual, using th
 Afterward, the actual concentration $C_n$ is determined by inverting the transformation in sequence:
 
 $$
-\begin{equation}\tag{5}
+\begin{equation}\tag{8}
 \begin{aligned}
 C_n = A_n - \sum^{n-1}_{i=1}C_i\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
 \end{aligned}

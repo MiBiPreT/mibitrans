@@ -231,10 +231,16 @@ class SourceParameters:
     source_zone_concentration: list[np.ndarray] | np.ndarray = None
     depth: float = None
     total_mass: float | str = "infinite"
+    source_depletion_rate: float = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
+        if parameter == "source_depletion_rate" and value is not None:
+            raise NotImplementedError(
+                "Functionality of manually setting source_depletion_rate is not fully implemented yet."
+            )
+
         validate_input_values(parameter, value)
         if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
             value = np.inf
@@ -266,7 +272,7 @@ class SourceParameters:
         source_zone(self)
 
     def visualize_source_depletion(
-        self, hydrological_parameters, electron_acceptors=None, utilization_factor=None, **kwargs
+        self, hydrological_parameters=None, electron_acceptors=None, utilization_factor=None, **kwargs
     ):
         """Plot source depletion over time.
 
@@ -291,6 +297,11 @@ class SourceParameters:
             raise ValueError("Source mass is set to infinite, there is no source depletion to be visualized.")
         if self.chain_decay_source:
             raise Exception("Chain decay is incompatible with source depletion and therefore cannot be visualized.")
+        if not self.source_depletion_rate and not hydrological_parameters:
+            raise TypeError(
+                "Missing required argument hydrological parameters, as explicit source degradation rate is "
+                "not provided in the Dataclass."
+            )
 
         source_depletion(hydrological_parameters, self, electron_acceptors, utilization_factor, **kwargs)
 

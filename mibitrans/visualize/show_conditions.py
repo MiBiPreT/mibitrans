@@ -77,22 +77,27 @@ def source_zone(source_parameters):
 
 
 def source_depletion(
-    hydrological_parameters,
-    source_parameters,
+    hydrological_parameters=None,
+    source_parameters=None,
     electron_acceptors=None,
     utilization_factor=UtilizationFactor(
         util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
     ),
+    source_depletion_rate=None,
     **kwargs,
 ):
     """Visualize source depletion."""
-    if electron_acceptors is not None:
-        ea, uf = check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor)
-        biodegradation_capacity = calculate_biodegradation_capacity(ea, uf)
+    if source_depletion_rate:
+        k_source = source_depletion_rate
     else:
-        biodegradation_capacity = 0
+        if electron_acceptors is not None:
+            ea, uf = check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor)
+            biodegradation_capacity = calculate_biodegradation_capacity(ea, uf)
+        else:
+            biodegradation_capacity = 0
 
-    k_source = calculate_source_depletion(hydrological_parameters, source_parameters, biodegradation_capacity)
+        k_source = calculate_source_depletion(hydrological_parameters, source_parameters, biodegradation_capacity)
+
     source_half_time = np.log(2) / k_source
 
     t = np.linspace(0, source_half_time * 5, 500)

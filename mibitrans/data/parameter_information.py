@@ -90,7 +90,24 @@ class UtilizationFactor:
 
 @dataclass
 class FringeElectronAcceptors:
-    """"""
+    """Dataclass containing information about electron acceptor concentration and reaction stoichiometry.
+
+    Args:
+        electron_acceptor_concentration (float, list, np.ndarray): Concentration(s) of electron acceptor(s) involved in
+            fringe degradation. For multiple electron acceptors, enter as a list or numpy array of floats. In g/m3.
+        stoichiometric_ratio (float, list, np.ndarray): Stoichiometric ratio(s) of electron acceptor(s) with electron
+            donor in biodegradation reaction. As moles of electron acceptor per 1 mol of electron donor. For multiple
+            electron acceptors, enter as a list or numpy array of floats in corresponding order as the values entered
+            for electron_acceptor_concentration.
+        molecular_weight_electron_acceptor (float, list, np.ndarray): Molecular weight(s) of electron acceptor(s). For
+            multiple electron acceptors, enter as a list or numpy array of floats in corresponding order as the values
+            entered for electron_acceptor_concentration. In g/mol.
+
+    Methods:
+        calculate_bc: Calculate the biodegradation capacity (concentration of degradable electron donor based on
+            available electron acceptor).
+
+    """
 
     electron_acceptor_concentration: float | int | list[float] | np.ndarray[float]
     stoichiometric_ratio: float | int | list[float] | np.ndarray[float]
@@ -136,7 +153,12 @@ class FringeElectronAcceptors:
         ):
             raise ValueError("All input parameters should be equal length.")
 
-    def calculate_bc(self, molecular_weight_electron_donor) -> float:
+    def calculate_bc(self, molecular_weight_electron_donor: int | float) -> float:
+        """Calculate the concentration of degradable electron donor based on available electron acceptors.
+
+        Args:
+            molecular_weight_electron_donor (float): Molecular weight of electron donor. In g/mol.
+        """
         validate_input_values("molecular_weight_electron_donor", molecular_weight_electron_donor)
         util_factors = self.stoichiometric_ratio * (
             self.molecular_weight_electron_acceptor / molecular_weight_electron_donor

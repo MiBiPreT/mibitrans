@@ -45,6 +45,10 @@ def centerline(
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
 
     """
@@ -136,6 +140,10 @@ def transverse(
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
     """
     model, legend_names = _check_input_iterable(model, legend_names)
@@ -226,6 +234,10 @@ def breakthrough(
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
     """
     model, legend_names = _check_input_iterable(model, legend_names)

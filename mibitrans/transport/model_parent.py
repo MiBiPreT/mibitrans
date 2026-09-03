@@ -318,6 +318,20 @@ class Transport3D(ABC):
         electron_acceptor: mibitrans.data.parameter_information.FringeElectronAcceptors,
         molecular_weight_electron_donor: float,
     ):
+        """Add degradation at plume fringes to model based on available electron acceptors.
+
+        Under the assumption that electron acceptors (e.g. oxygen, nitrate) can not co-exist with electron donors
+        (i.e. contaminant), contaminant concentrations at the plume fringe are governed by concentration distribution
+        of electron acceptors. Using principles from Gutierrez-Neri et al. (2009) corrected by Hunkeler et al. (2010).
+        In case electron donor is a mixture of multiple contaminants, use average values along those contaminants for
+        each parameter involved.
+
+        Args:
+            electron_acceptor (mibitrans.data.parameter_information.FringeElectronAcceptors): FringeElectronAcceptors
+                dataclass containing information about electron acceptor concentrations and biodegradation
+                stoichiometry.
+            molecular_weight_electron_donor (float): Molecular weight of electron donor. In g/mol.
+        """
         for argument_key, argument_value in locals().items():
             if argument_key != "self":
                 validate_input_values(argument_key, argument_value)
@@ -603,9 +617,7 @@ class Results:
             model_parameters=self.model_parameters,
         )
 
-    def centerline(
-        self, y_position=0, time=None, relative_concentration=False, animate=False, plot_index=None, **kwargs
-    ):
+    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -617,6 +629,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
@@ -627,7 +643,8 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
-                plot_index=plot_index**kwargs,
+                plot_index=plot_index,
+                **kwargs,
             )
             return anim
         else:
@@ -642,7 +659,7 @@ class Results:
             )
             return None
 
-    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, plot_index=None, **kwargs):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -653,6 +670,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -679,7 +700,7 @@ class Results:
             return None
 
     def breakthrough(
-        self, x_position, y_position=0, relative_concentration=False, animate=False, plot_index=None, **kwargs
+        self, x_position, y_position=0, relative_concentration=False, animate=False, plot_index=0, **kwargs
     ):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
@@ -691,6 +712,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -726,6 +751,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.pcolormesh().
 
         Returns a matrix plot of the input plume as object.
@@ -750,6 +779,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot_surface().
 
         Returns:

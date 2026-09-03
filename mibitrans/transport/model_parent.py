@@ -3,6 +3,7 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
+import mibitrans.data.parameter_information
 import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
@@ -54,6 +55,7 @@ class Transport3D(ABC):
         self._electron_acceptors = None
         self._utilization_factor = None
         self.biodegradation_capacity = 0
+        self.bc = 0
         self.cxyt_noBC = None
 
         self._mass_ratios = None
@@ -129,6 +131,8 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
+            case "core-fringe":
+                self._mode = "core-fringe"
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
@@ -309,6 +313,42 @@ class Transport3D(ABC):
                 "One for each compound in the chain decay."
             )
 
+    def fringe_degradation(
+        self,
+        electron_acceptor: mibitrans.data.parameter_information.FringeElectronAcceptors,
+        molecular_weight_electron_donor: float,
+    ):
+        for argument_key, argument_value in locals().items():
+            if argument_key != "self":
+                validate_input_values(argument_key, argument_value)
+        self.mode = "core-fringe"
+        self.bc = electron_acceptor.calculate_bc(molecular_weight_electron_donor)
+
+    def _calculate_core_fringe(self):
+        if self.__class__.__name__ == "Mibitrans":
+            core_cxyt = self._calculate_concentration_for_all_xyt()
+        else:
+            core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+        self.c_source = np.array([self.bc])
+        self.y_source = np.array([self.y_source[-1]])
+        self._decay_rate = 0
+
+        if self.__class__.__name__ == "Mibitrans":
+            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt()
+        else:
+            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+        core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
+        core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
+
+        self._decay_rate = self._att_pars.decay_rate
+        self.y_source = self._src_pars.source_zone_boundary
+        self.c_source = self._src_pars.source_zone_concentration
+        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
+        return [core_fringe_cxyt, electron_acceptor_cxyt]
+
     def instant_reaction(
         self,
         electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,
@@ -447,6 +487,7 @@ class Results:
         self._k_source = model.k_source
         self._c_source = model.c_source
         self._biodegradation_capacity = model.biodegradation_capacity
+        self._bc = model.bc
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
@@ -562,7 +603,9 @@ class Results:
             model_parameters=self.model_parameters,
         )
 
-    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
+    def centerline(
+        self, y_position=0, time=None, relative_concentration=False, animate=False, plot_index=None, **kwargs
+    ):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -584,7 +627,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
-                **kwargs,
+                plot_index=plot_index**kwargs,
             )
             return anim
         else:
@@ -594,11 +637,12 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, plot_index=None, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -618,6 +662,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -628,11 +673,14 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
+    def breakthrough(
+        self, x_position, y_position=0, relative_concentration=False, animate=False, plot_index=None, **kwargs
+    ):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
@@ -652,6 +700,7 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -662,11 +711,12 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_2d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
 
         Args:
@@ -680,10 +730,17 @@ class Results:
 
         Returns a matrix plot of the input plume as object.
         """
-        anim = psurf.plume_2d(self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs)
+        anim = psurf.plume_2d(
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
+        )
         return anim
 
-    def plume_3d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_3d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 3D surface, at a specified time.
 
         Args:
@@ -701,7 +758,12 @@ class Results:
             anim (matplotib.animation.FuncAnimation) : Matplotlib FuncAnimation object of plume plot.
         """
         ax_or_anim = psurf.plume_3d(
-            self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
         )
         return ax_or_anim
 

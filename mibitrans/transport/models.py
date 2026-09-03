@@ -104,6 +104,8 @@ class Mibitrans(Transport3D):
         with np.errstate(divide="ignore", invalid="ignore"):
             if self._mode == "chain_decay":
                 self.cxyt = self._calculate_chain_decay()
+            elif self._mode == "core-fringe":
+                self.cxyt = self._calculate_core_fringe()
             else:
                 self.cxyt = self._calculate_concentration_for_all_xyt()
         return Results(self)
@@ -351,6 +353,8 @@ class Anatrans(Transport3D):
         with np.errstate(divide="ignore", invalid="ignore"):
             if self._mode == "chain_decay":
                 self.cxyt = self._calculate_chain_decay()
+            elif self._mode == "core-fringe":
+                self.cxyt = self._calculate_core_fringe()
             else:
                 self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
         return Results(self)

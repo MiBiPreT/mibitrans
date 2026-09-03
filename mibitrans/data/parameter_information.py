@@ -89,6 +89,62 @@ class UtilizationFactor:
 
 
 @dataclass
+class FringeElectronAcceptors:
+    """"""
+
+    electron_acceptor_concentration: float | int | list[float] | np.ndarray[float]
+    stoichiometric_ratio: float | int | list[float] | np.ndarray[float]
+    molecular_weight_electron_acceptor: float | int | list[float] | np.ndarray[float]
+
+    @property
+    def _initialized(self) -> bool:
+        return all(
+            (
+                hasattr(self, "electron_acceptor_concentration"),
+                hasattr(self, "stoichiometric_ratio"),
+                hasattr(self, "molecular_weight_electron_acceptor"),
+            )
+        )
+
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        super().__setattr__(parameter, value)
+        if self._initialized:
+            self._check_length()
+
+    def _check_length(self) -> None:
+        if all(
+            (
+                isinstance(self.electron_acceptor_concentration, (np.ndarray, list)),
+                isinstance(self.stoichiometric_ratio, (np.ndarray, list)),
+                isinstance(self.molecular_weight_electron_acceptor, (np.ndarray, list)),
+            )
+        ):
+            if not (
+                len(self.electron_acceptor_concentration)
+                == len(self.stoichiometric_ratio)
+                == len(self.molecular_weight_electron_acceptor)
+            ):
+                raise ValueError("All input parameters should be equal length.")
+        elif not all(
+            (
+                isinstance(self.electron_acceptor_concentration, (float, int)),
+                isinstance(self.stoichiometric_ratio, (float, int)),
+                isinstance(self.molecular_weight_electron_acceptor, (float, int)),
+            )
+        ):
+            raise ValueError("All input parameters should be equal length.")
+
+    def calculate_bc(self, molecular_weight_electron_donor) -> float:
+        validate_input_values("molecular_weight_electron_donor", molecular_weight_electron_donor)
+        util_factors = self.stoichiometric_ratio * (
+            self.molecular_weight_electron_acceptor / molecular_weight_electron_donor
+        )
+        return np.sum(self.electron_acceptor_concentration / util_factors)
+
+
+@dataclass
 class ElectronAcceptors:
     """Make object with concentrations of electron acceptors.
 

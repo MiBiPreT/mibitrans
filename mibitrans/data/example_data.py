@@ -9,6 +9,8 @@ import importlib.resources
 import json
 import numpy as np
 
+file_name = ["mibitrans.data", "example_data.json"]
+
 
 class BioscreenData:
     """Class loading .json file with example output data from BIOSCREEN to compare with mibitrans models."""
@@ -25,7 +27,7 @@ class BioscreenData:
                 indexed as C(t,y,x).
 
         """
-        with importlib.resources.open_text("mibitrans.data", "example_data.json") as data:
+        with importlib.resources.open_text(*file_name) as data:
             example_data_bioscreen = json.load(data)["bioscreen"]
             self.nodecay = np.array(example_data_bioscreen["nodecay"])
             self.lineardecay = np.array(example_data_bioscreen["lineardecay"])
@@ -45,7 +47,7 @@ class BioscreenATData:
                 indexed as C(t,y,x).
 
         """
-        with importlib.resources.open_text("mibitrans.data", "example_data.json") as data:
+        with importlib.resources.open_text(*file_name) as data:
             example_data_bioscreenat = json.load(data)["bioscreenat"]
             self.nodecay = np.array(example_data_bioscreenat["nodecay"])
             self.lineardecay = np.array(example_data_bioscreenat["lineardecay"])
@@ -64,7 +66,7 @@ class BiochlorData:
                 indexed as C(t,y,x).
 
         """
-        with importlib.resources.open_text("mibitrans.data", "example_data.json") as data:
+        with importlib.resources.open_text(*file_name) as data:
             example_data_biochlor = json.load(data)["biochlor"]
             self.pce = np.array(example_data_biochlor["pce"])
             self.tce = np.array(example_data_biochlor["tce"])

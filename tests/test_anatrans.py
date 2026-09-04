@@ -10,7 +10,7 @@ from mibitrans.transport.models import Anatrans
         ("test_anatrans_model_nodecay", "nodecay_anatrans"),
         ("test_anatrans_model_lineardecay", "lineardecay_anatrans"),
         ("test_anatrans_model_instantreaction", "instantreaction_anatrans"),
-        ("test_anatrans_model_fringe", "instantreaction_anatrans")
+        ("test_anatrans_model_fringe", "instantreaction_anatrans"),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")

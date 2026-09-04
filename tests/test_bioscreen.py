@@ -10,7 +10,7 @@ from mibitrans.transport.models import Bioscreen
         ("test_bioscreen_model_nodecay", "nodecay_bioscreen"),
         ("test_bioscreen_model_lineardecay", "lineardecay_bioscreen"),
         ("test_bioscreen_model_instantreaction", "instantreaction_bioscreen"),
-        ("test_bioscreen_model_fringe", "instantreaction_bioscreen")
+        ("test_bioscreen_model_fringe", "instantreaction_bioscreen"),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")

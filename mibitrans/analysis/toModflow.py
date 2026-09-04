@@ -1,14 +1,16 @@
 import os
+import tempfile
 import flopy
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-import tempfile
 
 
 class MibitransToModflow:
-    """Class that utilizes the Dataclass objects from a Mibitrans model to set up a MODFLOW model
-    (Langevin et al., 2026) by defining parameters and building and running the MODFLOW model.
+    """Set up and run a MODFLOW model based on Mibitrans model parameters.
+
+    This class utilizes the Dataclass objects from a Mibitrans model to define
+    parameters and build and run the MODFLOW model (Langevin et al., 2026).
 
     Langevin, C. D., Hughes, J. D., Provost, A. M., Russcher, M. J., Niswonger, R. G., Panday, S., Merrick, D., Morway,
     E. D., Reno, M. J., Bonelli, W. P., Boyce, S. E., & Banta, E. R. (2026). MODFLOW 6 modular hydrologic model
@@ -27,14 +29,13 @@ class MibitransToModflow:
         Args:
             hydrological_parameters (mibitrans.data.parameters.HydrologicalParameters) : Dataclass object containing
                 hydrological parameters, dispersion and diffusion from HydrologicalParameters.
-            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing adsorption
-                and degradation parameters from AttenuationParameters.
-            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source parameters
-                from SourceParameters.
-            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters from
-                ModelParameters.
+            attenuation_parameters (mibitrans.data.parameters.AttenuationParameters) : Dataclass object containing
+                adsorption and degradation parameters from AttenuationParameters.
+            source_parameters (mibitrans.data.parameters.SourceParameters) : Dataclass object containing source
+                parameters from SourceParameters.
+            model_parameters (mibitrans.data.parameters.ModelParameters) : Dataclass object containing model parameters
+                from ModelParameters.
         """
-
         self.hydro = hydrological_parameters
         self.att = attenuation_parameters
         self.source = source_parameters
@@ -109,7 +110,6 @@ class MibitransToModflow:
             percel (float) : Number of cells, or the fraction of a cell in which advection is allowed in any
                 direction in one transport step [-].
         """
-
         # Hydrological parameters
         self.v = self.hydro.velocity # [m/d]
         self.hk = self._get_parameter("hydraulic conductivity", self.hydro.h_conductivity, "m/d") # [m/d]
@@ -133,7 +133,13 @@ class MibitransToModflow:
         if self.att.retardation is not None:
             self.retardation = self.att.retardation
         elif self.att.partition_coefficient is not None and self.att.fraction_organic_carbon is not None:
-            self.retardation = 1 + (self.rhob * self.att.partition_coefficient * self.att.fraction_organic_carbon)/self.prsity
+            self.retardation = (
+                1
+                + self.rhob
+                * self.att.partition_coefficient
+                * self.att.fraction_organic_carbon
+                / self.prsity
+            )
 
             # Distribution coefficient [m3/g]
         if self.att.partition_coefficient is not None and self.att.fraction_organic_carbon is not None:
@@ -195,7 +201,6 @@ class MibitransToModflow:
 
     def _write_report(self):
         """Writes a short report after parameter initialization including assumptions and calculated values."""
-
         assumptions = []
 
         if self.hydro.alpha_z == 1e-10:
@@ -227,7 +232,10 @@ class MibitransToModflow:
         print(report)
 
     def _get_parameter(self, name, value, unit):
-        """Checks whether the parameter is part of the input data classes and prompts the user to provide the value if it is not.
+        """Check if parameter exists in the given input data classes.
+        
+        Checks whether the parameter is part of the input data classes and prompts the user to
+        provide the value if it is not.
 
         Args:
             name (str) : The name of the requested parameter.
@@ -237,7 +245,6 @@ class MibitransToModflow:
         Returns:
             value (float): The value corresponding to the requested parameter.
         """
-
         if value is None:
             print(f"Enter {name} in {unit}, using a period as the decimal separator")
             value = float(input())
@@ -247,10 +254,10 @@ class MibitransToModflow:
         """Generate MODFLOW and MT3DMS model objects.
 
         Args:
-            model_ws (str, optional) : Path to the working directory of the MODFLOW model. If not specified, a temporary working directory is used.
+            model_ws (str, optional) : Path to the working directory of the MODFLOW model.
+                If not specified, a temporary working directory is used.
             temporary (bool, optional) : Indicates whether a temporary working directory is used for the model.
         """
-
         if model_ws is not None:
             self.model_ws = model_ws
         elif temporary:
@@ -281,7 +288,6 @@ class MibitransToModflow:
         Returns:
             mf (model) : MODFLOW model object.
         """
-
         # Defining the name of the model and making the MODFLOW model
         modelname_mf = "modflow_mf"
         self.mf = flopy.modflow.Modflow(
@@ -322,7 +328,6 @@ class MibitransToModflow:
         Returns:
             mt (model) : MT3DMS model object.
         """
-
         # Defining the name and making the MT3DMS model (with the MODFLOW model as part of the input)
         modelname_mt = "mt3dms_mt"
         self.mt = flopy.mt3d.Mt3dms(
@@ -360,7 +365,7 @@ class MibitransToModflow:
         )
         flopy.mt3d.Mt3dSsm(self.mt)
         flopy.mt3d.Mt3dGcg(self.mt)
-    
+
     def run_modflow(self, verbose=True):
         """Calculate the concentration for all discretized z, y, x and t using MODFLOW and MT3DMS.
 
@@ -368,7 +373,6 @@ class MibitransToModflow:
             conc (float) : Array containing the concentration for all grid cells and simulation times [g/m3]
             times (float) : Array containing all of the simulation times [d]
         """
-
         self.mf.write_input()
         self.mf.run_model(silent=True)
         if verbose:
@@ -399,7 +403,6 @@ class MibitransToModflow:
         Args:
             label (str, optional) : Label used to identify the data series in the graph legend.
         """
-
         # Setting the size of figure
         mpl.rcParams["figure.figsize"] = (8, 8)
 
@@ -414,4 +417,3 @@ class MibitransToModflow:
         plt.title(f"Centerline plot of MODFLOW model, at t = {t} days")
         if label is not None:
             plt.legend()
-

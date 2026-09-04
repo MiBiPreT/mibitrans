@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
@@ -362,3 +363,86 @@ def test_calculation_optional_discretization():
     assert model.dx, "Model dx should have been calculated, but was not."
     assert model.dy, "Model dy should have been calculated, but was not."
     assert model.dt, "Model dt should have been calculated, but was not."
+
+
+@pytest.mark.parametrize(
+    "parameters, error",
+    [
+        (
+            dict(electron_acceptor_concentration=5, stoichiometric_ratio=3.4, electron_acceptor_molecular_weight=54),
+            None,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            None,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=54,
+            ),
+            ValueError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, -5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            DomainValueError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration="der",
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            TypeError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, "die", 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            TypeError,
+        ),
+    ],
+)
+def test_fringe_electron_acceptor(parameters, error) -> None:
+    """Test validation of FringeElectronAcceptor dataclass."""
+    if error is None:
+        FringeElectronAcceptors(**parameters)
+    else:
+        with pytest.raises(error):
+            FringeElectronAcceptors(**parameters)
+
+
+@pytest.mark.parametrize(
+    "parameters, expected",
+    [
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=1), 6),
+        (dict(ea=FringeElectronAcceptors(5, 7.5, 32), electron_donor_molecular_weight=78.11), 1.6272916666666666),
+        (
+            dict(ea=FringeElectronAcceptors([5, 6], [7.5, 6], [32, 62]), electron_donor_molecular_weight=78.11),
+            2.8871303763440856,
+        ),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight="heavy"), TypeError),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=[5, 4, 3]), TypeError),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=-10), DomainValueError),
+    ],
+)
+def test_fringe_electron_acceptor_calculate_bc(parameters, expected) -> None:
+    """Test calculation of biodegradation capacity from electron acceptors."""
+    ea = parameters["ea"]
+    if isinstance(expected, (int, float)):
+        bc = ea.calculate_bc(parameters["electron_donor_molecular_weight"])
+        assert bc == expected
+    else:
+        with pytest.raises(expected):
+            ea.calculate_bc(parameters["electron_donor_molecular_weight"])

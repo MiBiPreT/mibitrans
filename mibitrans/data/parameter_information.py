@@ -99,7 +99,7 @@ class FringeElectronAcceptors:
             donor in biodegradation reaction. As moles of electron acceptor per 1 mol of electron donor. For multiple
             electron acceptors, enter as a list or numpy array of floats in corresponding order as the values entered
             for electron_acceptor_concentration.
-        molecular_weight_electron_acceptor (float, list, np.ndarray): Molecular weight(s) of electron acceptor(s). For
+        electron_acceptor_molecular_weight (float, list, np.ndarray): Molecular weight(s) of electron acceptor(s). For
             multiple electron acceptors, enter as a list or numpy array of floats in corresponding order as the values
             entered for electron_acceptor_concentration. In g/mol.
 
@@ -111,7 +111,7 @@ class FringeElectronAcceptors:
 
     electron_acceptor_concentration: float | int | list[float] | np.ndarray[float]
     stoichiometric_ratio: float | int | list[float] | np.ndarray[float]
-    molecular_weight_electron_acceptor: float | int | list[float] | np.ndarray[float]
+    electron_acceptor_molecular_weight: float | int | list[float] | np.ndarray[float]
 
     @property
     def _initialized(self) -> bool:
@@ -119,13 +119,15 @@ class FringeElectronAcceptors:
             (
                 hasattr(self, "electron_acceptor_concentration"),
                 hasattr(self, "stoichiometric_ratio"),
-                hasattr(self, "molecular_weight_electron_acceptor"),
+                hasattr(self, "electron_acceptor_molecular_weight"),
             )
         )
 
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
+        if isinstance(value, list):
+            value = np.array(value)
         super().__setattr__(parameter, value)
         if self._initialized:
             self._check_length()
@@ -135,33 +137,33 @@ class FringeElectronAcceptors:
             (
                 isinstance(self.electron_acceptor_concentration, (np.ndarray, list)),
                 isinstance(self.stoichiometric_ratio, (np.ndarray, list)),
-                isinstance(self.molecular_weight_electron_acceptor, (np.ndarray, list)),
+                isinstance(self.electron_acceptor_molecular_weight, (np.ndarray, list)),
             )
         ):
             if not (
                 len(self.electron_acceptor_concentration)
                 == len(self.stoichiometric_ratio)
-                == len(self.molecular_weight_electron_acceptor)
+                == len(self.electron_acceptor_molecular_weight)
             ):
                 raise ValueError("All input parameters should be equal length.")
         elif not all(
             (
                 isinstance(self.electron_acceptor_concentration, (float, int)),
                 isinstance(self.stoichiometric_ratio, (float, int)),
-                isinstance(self.molecular_weight_electron_acceptor, (float, int)),
+                isinstance(self.electron_acceptor_molecular_weight, (float, int)),
             )
         ):
             raise ValueError("All input parameters should be equal length.")
 
-    def calculate_bc(self, molecular_weight_electron_donor: int | float) -> float:
+    def calculate_bc(self, electron_donor_molecular_weight: int | float) -> float:
         """Calculate the concentration of degradable electron donor based on available electron acceptors.
 
         Args:
-            molecular_weight_electron_donor (float): Molecular weight of electron donor. In g/mol.
+            electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
         """
-        validate_input_values("molecular_weight_electron_donor", molecular_weight_electron_donor)
+        validate_input_values("electron_donor_molecular_weight", electron_donor_molecular_weight)
         util_factors = self.stoichiometric_ratio * (
-            self.molecular_weight_electron_acceptor / molecular_weight_electron_donor
+            self.electron_acceptor_molecular_weight / electron_donor_molecular_weight
         )
         return np.sum(self.electron_acceptor_concentration / util_factors)
 

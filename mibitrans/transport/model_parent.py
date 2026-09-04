@@ -316,7 +316,7 @@ class Transport3D(ABC):
     def fringe_degradation(
         self,
         electron_acceptor: mibitrans.data.parameter_information.FringeElectronAcceptors,
-        molecular_weight_electron_donor: float,
+        electron_donor_molecular_weight: float,
     ):
         """Add degradation at plume fringes to model based on available electron acceptors.
 
@@ -330,13 +330,13 @@ class Transport3D(ABC):
             electron_acceptor (mibitrans.data.parameter_information.FringeElectronAcceptors): FringeElectronAcceptors
                 dataclass containing information about electron acceptor concentrations and biodegradation
                 stoichiometry.
-            molecular_weight_electron_donor (float): Molecular weight of electron donor. In g/mol.
+            electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
         """
         for argument_key, argument_value in locals().items():
             if argument_key != "self":
                 validate_input_values(argument_key, argument_value)
         self.mode = "core-fringe"
-        self.bc = electron_acceptor.calculate_bc(molecular_weight_electron_donor)
+        self.bc = electron_acceptor.calculate_bc(electron_donor_molecular_weight)
 
     def _calculate_core_fringe(self):
         if self.__class__.__name__ == "Mibitrans":
@@ -358,7 +358,7 @@ class Transport3D(ABC):
 
         self._decay_rate = self._att_pars.decay_rate
         self.y_source = self._src_pars.source_zone_boundary
-        self.c_source = self._src_pars.source_zone_concentration
+        self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
         return [core_fringe_cxyt, electron_acceptor_cxyt]

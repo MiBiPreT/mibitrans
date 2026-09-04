@@ -329,7 +329,7 @@ def validate_input_values(parameter, value):
         # Parameters which have domain [0,1]
         case "porosity" | "fraction_organic_carbon":
             error = _check_numeric_fraction(parameter, value)
-        # Parameters which are input as single values, lists or numpy arrays
+        # Parameters which are input as single values, lists or numpy arrays, depending on circumstances
         case (
             "source_zone_boundary"
             | "decay_rate"
@@ -337,7 +337,7 @@ def validate_input_values(parameter, value):
             | "mass_ratios"
             | "electron_acceptor_concentration"
             | "stoichiometric_ratio"
-            | "molecular_weight_electron_acceptor"
+            | "electron_acceptor_molecular_weight"
         ):
             error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=False)
         case "source_zone_concentration":

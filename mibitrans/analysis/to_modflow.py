@@ -17,13 +17,7 @@ class MibitransToModflow:
     (Version 6.8.0.dev0) [Computer software]. U.S. Geological Survey. https://doi.org/10.5066/F76Q1VQV
     """
 
-    def __init__(
-        self,
-        hydrological_parameters,
-        attenuation_parameters,
-        source_parameters,
-        model_parameters
-    ):
+    def __init__(self, hydrological_parameters, attenuation_parameters, source_parameters, model_parameters):
         """Initialize model object.
 
         Args:
@@ -111,34 +105,30 @@ class MibitransToModflow:
                 direction in one transport step [-].
         """
         # Hydrological parameters
-        self.v = self.hydro.velocity # [m/d]
-        self.hk = self._get_parameter("hydraulic conductivity", self.hydro.h_conductivity, "m/d") # [m/d]
-        self.prsity = self.hydro.porosity # [-]
-        self.al = self.hydro.alpha_x # [m]
-        self.trpt = self.hydro.alpha_y/self.al # [-]
-        self.trpv = self.hydro.alpha_z/self.al # [-]
+        self.v = self.hydro.velocity  # [m/d]
+        self.hk = self._get_parameter("hydraulic conductivity", self.hydro.h_conductivity, "m/d")  # [m/d]
+        self.prsity = self.hydro.porosity  # [-]
+        self.al = self.hydro.alpha_x  # [m]
+        self.trpt = self.hydro.alpha_y / self.al  # [-]
+        self.trpv = self.hydro.alpha_z / self.al  # [-]
 
         if self.hydro.h_gradient is not None:
             self.i = self.hydro.h_gradient
         else:
-            self.i = (self.v * self.prsity)/self.hk # [m/m]
+            self.i = (self.v * self.prsity) / self.hk  # [m/m]
 
-        self.laytyp = 0 # Confined layer [-]
+        self.laytyp = 0  # Confined layer [-]
 
         # Attenuation parameters
-        self.lambda1 = self.att.decay_rate # [1/d]
-        self.rhob = self._get_parameter("bulk density", self.att.bulk_density, "g/m3") # [g/m3]
+        self.lambda1 = self.att.decay_rate  # [1/d]
+        self.rhob = self._get_parameter("bulk density", self.att.bulk_density, "g/m3")  # [g/m3]
 
-            # Retardation [m]
+        # Retardation [m]
         if self.att.retardation is not None:
             self.retardation = self.att.retardation
         elif self.att.partition_coefficient is not None and self.att.fraction_organic_carbon is not None:
             self.retardation = (
-                1
-                + self.rhob
-                * self.att.partition_coefficient
-                * self.att.fraction_organic_carbon
-                / self.prsity
+                1 + self.rhob * self.att.partition_coefficient * self.att.fraction_organic_carbon / self.prsity
             )
 
             # Distribution coefficient [m3/g]
@@ -147,55 +137,55 @@ class MibitransToModflow:
         else:
             self.kd = (self.retardation - 1.0) * self.prsity / self.rhob
 
-        self.isothm = 1 # Linear isotherm [-]
-        self.ireact = 1 # First-order irreversible reaction [-]
-        self.igetsc = 0 # Initial concentration of the sorbed or immobile phase is not read [-]
+        self.isothm = 1  # Linear isotherm [-]
+        self.ireact = 1  # First-order irreversible reaction [-]
+        self.igetsc = 0  # Initial concentration of the sorbed or immobile phase is not read [-]
 
         # Model parameters
-        delv = self.source.depth # [m]
-        self.perlen = self.model.model_time # [d]
-        self.nstp = self.perlen/self.model.dt # [-]
-        self.delr = self.model.dx # [m]
-        self.delc = self.model.dy # [m]
-        self.nrow = int((2*self.model.model_width)/self.delc) # [-]
-        self.ncol = int(self.model.model_length/self.delr) # [-]
-        self.nlay = 1 # [-]
-        self.top = delv # [m]
-        self.botm = [0] # [m]
-        self.ipakcb = 53 # Cell-by-cell budget data is saved [-]
+        delv = self.source.depth  # [m]
+        self.perlen = self.model.model_time  # [d]
+        self.nstp = self.perlen / self.model.dt  # [-]
+        self.delr = self.model.dx  # [m]
+        self.delc = self.model.dy  # [m]
+        self.nrow = int((2 * self.model.model_width) / self.delc)  # [-]
+        self.ncol = int(self.model.model_length / self.delr)  # [-]
+        self.nlay = 1  # [-]
+        self.top = delv  # [m]
+        self.botm = [0]  # [m]
+        self.ipakcb = 53  # Cell-by-cell budget data is saved [-]
 
-        self.ibound = np.ones((self.nlay, self.nrow, self.ncol), dtype=int) # [-]
-        self.ibound[0, :, 0] = -1 # Constant head [-]
-        self.ibound[0, :, -1] = -1 # Constant head [-]
-        self.strt = np.zeros((self.nlay, self.nrow, self.ncol), dtype=float) # [m]
-        lx = (self.ncol-1) * self.delr # [m]
-        h1 = self.i * lx # [m]
-        self.strt[0, :, 0] = h1 + delv # [m]
-        self.strt[0, :, -1] = delv # [m]
+        self.ibound = np.ones((self.nlay, self.nrow, self.ncol), dtype=int)  # [-]
+        self.ibound[0, :, 0] = -1  # Constant head [-]
+        self.ibound[0, :, -1] = -1  # Constant head [-]
+        self.strt = np.zeros((self.nlay, self.nrow, self.ncol), dtype=float)  # [m]
+        lx = (self.ncol - 1) * self.delr  # [m]
+        h1 = self.i * lx  # [m]
+        self.strt[0, :, 0] = h1 + delv  # [m]
+        self.strt[0, :, -1] = delv  # [m]
 
         # Source parameters
-        sbound = self.source.source_zone_boundary # [m]
-        szoneconc = self.source.source_zone_concentration # [g/m3]
-        amount_zones = len(sbound) # [-]
-        self.icbund = np.ones((self.nlay, self.nrow, self.ncol), dtype=int) # [-]
-        self.icbund[0, :, 0] = -1 # Constant concentration [-]
-        self.sconc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=float) # [g/m3]
-        y = (np.arange(self.nrow) + 0.5)*self.delc # [m]
-        y_center = (self.nrow*self.delc)/2 # [m]
-            # Determining which cells fall within each source zone and assigning the concentration
+        sbound = self.source.source_zone_boundary  # [m]
+        szoneconc = self.source.source_zone_concentration  # [g/m3]
+        amount_zones = len(sbound)  # [-]
+        self.icbund = np.ones((self.nlay, self.nrow, self.ncol), dtype=int)  # [-]
+        self.icbund[0, :, 0] = -1  # Constant concentration [-]
+        self.sconc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=float)  # [g/m3]
+        y = (np.arange(self.nrow) + 0.5) * self.delc  # [m]
+        y_center = (self.nrow * self.delc) / 2  # [m]
+        # Determining which cells fall within each source zone and assigning the concentration
         for i in range(amount_zones - 1, -1, -1):
-            mask = np.abs(y - y_center) <= sbound[i] # boolean [-]
-            self.sconc[0,mask,0] = szoneconc[i] # [g/m3]
+            mask = np.abs(y - y_center) <= sbound[i]  # boolean [-]
+            self.sconc[0, mask, 0] = szoneconc[i]  # [g/m3]
 
         # Advection parameters
-        self.dceps = 1.0*10**-5 # [-]
-        self.nplane = 2 # 3D-simulations [-]
-        self.npl = 0 # [-]
-        self.nph = 4 # [-]
-        self.npmin = 0 # [-]
-        self.npmax = 8 # [-]
-        self.mixelm = 2 # Backward-tracking modified method of characteristics (MMOC) [-]
-        self.percel = 0.5 # [-]
+        self.dceps = 1.0 * 10**-5  # [-]
+        self.nplane = 2  # 3D-simulations [-]
+        self.npl = 0  # [-]
+        self.nph = 4  # [-]
+        self.npmin = 0  # [-]
+        self.npmax = 8  # [-]
+        self.mixelm = 2  # Backward-tracking modified method of characteristics (MMOC) [-]
+        self.percel = 0.5  # [-]
 
         self._write_report()
 
@@ -220,7 +210,7 @@ class MibitransToModflow:
         calculations.append(f"Hydraulic head left = {self.strt[0, 0, 0]} m")
         calculations.append(f"Hydraulic head right = {self.strt[0, 0, -1]} m")
 
-        report = ("Initialization completed.")
+        report = "Initialization completed."
 
         if assumptions:
             report += "\nThe following assumptions have been made:\n"
@@ -233,7 +223,7 @@ class MibitransToModflow:
 
     def _get_parameter(self, name, value, unit):
         """Check if parameter exists in the given input data classes.
-        
+
         Checks whether the parameter is part of the input data classes and prompts the user to
         provide the value if it is not.
 
@@ -250,7 +240,7 @@ class MibitransToModflow:
             value = float(input())
         return value
 
-    def to_modflow(self, model_ws = None, temporary = True):
+    def to_modflow(self, model_ws=None, temporary=True):
         """Generate MODFLOW and MT3DMS model objects.
 
         Args:
@@ -264,10 +254,7 @@ class MibitransToModflow:
             self._temp_dir = tempfile.TemporaryDirectory(prefix="mt3dms_")
             self.model_ws = self._temp_dir.name
         else:
-            self.model_ws = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "model"
-            )
+            self.model_ws = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
         os.makedirs(self.model_ws, exist_ok=True)
 
         self._generate_modflow()
@@ -291,10 +278,10 @@ class MibitransToModflow:
         # Defining the name of the model and making the MODFLOW model
         modelname_mf = "modflow_mf"
         self.mf = flopy.modflow.Modflow(
-            modelname = modelname_mf,
-            model_ws = self.model_ws,
-            exe_name = self.exe_name_mf,
-            )
+            modelname=modelname_mf,
+            model_ws=self.model_ws,
+            exe_name=self.exe_name_mf,
+        )
 
         # Adding all necessary MODFLOW Packages to the model
         flopy.modflow.ModflowDis(
@@ -307,7 +294,7 @@ class MibitransToModflow:
             top=self.top,
             botm=self.botm,
             perlen=self.perlen,
-            nstp = self.nstp,
+            nstp=self.nstp,
         )
         flopy.modflow.ModflowBas(self.mf, ibound=self.ibound, strt=self.strt)
         flopy.modflow.ModflowLpf(self.mf, ipakcb=self.ipakcb, hk=self.hk, laytyp=self.laytyp)
@@ -407,11 +394,11 @@ class MibitransToModflow:
         mpl.rcParams["figure.figsize"] = (8, 8)
 
         row = self.mf.modelgrid.nrow // 2
-        x = self.mf.modelgrid.xcellcenters[row,:]
+        x = self.mf.modelgrid.xcellcenters[row, :]
         y = self.conc[-1, 0, row, :]
         t = self.perlen
 
-        plt.plot(x, y, label = label)
+        plt.plot(x, y, label=label)
         plt.xlabel("Distance from source [m]")
         plt.ylabel("Concentration[g/m3]")
         plt.title(f"Centerline plot of MODFLOW model, at t = {t} days")

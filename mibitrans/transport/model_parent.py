@@ -3,12 +3,15 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
-import mibitrans
-import mibitrans.data.parameters
+import mibitrans.data.parameter_information
+import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
+from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
@@ -52,7 +55,10 @@ class Transport3D(ABC):
         self._electron_acceptors = None
         self._utilization_factor = None
         self.biodegradation_capacity = 0
+        self.bc = 0
         self.cxyt_noBC = None
+
+        self._mass_ratios = None
 
         self._pre_run_initialization_parameters()
 
@@ -125,6 +131,13 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
+            case "core-fringe":
+                if self.bc is None:
+                    raise ValueError(
+                        "Model mode was set to 'core-fringe', without electron acceptor parameters being "
+                        "provided. Use the fringe_degradation method to supply the missing parameters."
+                    )
+                self._mode = "core-fringe"
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
@@ -179,6 +192,7 @@ class Transport3D(ABC):
         self.yyy = self.y[None, :, None]
         self.ttt = self.t[:, None, None]
 
+        # Calculate retardation if not already specified in adsorption_parameters
         if (
             self._att_pars.bulk_density is not None
             and self._att_pars.partition_coefficient is not None
@@ -191,25 +205,36 @@ class Transport3D(ABC):
         # cxyt is concentration output array
         self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
 
-        # Calculate retardation if not already specified in adsorption_parameters
-        self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
+        if self._src_pars.chain_decay_source:
+            if self._src_pars.total_mass != np.inf:
+                warnings.warn("Source depletion does not work with chain decay. Source depletion rate is set to 0.")
+            self.k_source = 0
+        else:
+            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
-        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        if self._src_pars.chain_decay_source and self._mode != "chain_decay":
+            self.c_source = self.c_source[0].copy()
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        elif not self._src_pars.chain_decay_source:
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
         else:
-            self._decay_rate = self._att_pars.decay_rate
+            if isinstance(self._att_pars.decay_rate, (np.ndarray, list)):
+                self._decay_rate = self._att_pars.decay_rate[0]
+            else:
+                self._decay_rate = self._att_pars.decay_rate
 
     def _check_input_dataclasses(self, key, value):
         """Check if input parameters are the correct dataclasses. Raise an error if not."""
         dataclass_dict = {
-            "hydrological_parameters": mibitrans.data.parameters.HydrologicalParameters,
-            "attenuation_parameters": mibitrans.data.parameters.AttenuationParameters,
-            "source_parameters": mibitrans.data.parameters.SourceParameters,
-            "model_parameters": mibitrans.data.parameters.ModelParameters,
+            "hydrological_parameters": pars.HydrologicalParameters,  # mibitrans.data.parameters.HydrologicalParameters,
+            "attenuation_parameters": pars.AttenuationParameters,  # mibitrans.data.parameters.AttenuationParameters,
+            "source_parameters": pars.SourceParameters,  # mibitrans.data.parameters.SourceParameters,
+            "model_parameters": pars.ModelParameters,  # mibitrans.data.parameters.ModelParameters,
         }
 
         if not isinstance(value, dataclass_dict[key]):
@@ -231,6 +256,117 @@ class Transport3D(ABC):
                 "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
             )
         return y
+
+    def chain_decay(self, mass_ratios: list[float] | np.ndarray[float]):
+        """Enable and set up chain decay model, calculating concentrations for each contaminant in the chain.
+
+        Args:
+            mass_ratios (list | np.ndarray): Ratio between masses of sequential decay products for chain decay. Length
+                of iterable should be one less than length of decay_rate or half_life. Default is None.
+        """
+        validate_input_values("mass_ratios", mass_ratios)
+
+        if not isinstance(mass_ratios, (list, np.ndarray)):
+            mass_ratios = np.array([mass_ratios])
+        else:
+            mass_ratios = np.array(mass_ratios)
+
+        self._check_chain_decay_validity(mass_ratios)
+        self._mass_ratios = mass_ratios
+        self._mode = "chain_decay"
+
+    def _calculate_chain_decay(self):
+        """Calculates concentrations for chain decay by running model equations multiple times."""
+        self._check_chain_decay_validity(self._mass_ratios)
+        decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._mass_ratios)
+        transformed_source_concentrations = transform_chain_concentrations(
+            self._src_pars.source_zone_concentration, decay_ratios, inverse=False
+        )
+        self.k_source = 0
+        intermediate_cxyt = [0] * len(self._att_pars.decay_rate)
+        for i, rate in enumerate(self._att_pars.decay_rate):
+            self._decay_rate = rate / self._att_pars.retardation
+            self.c_source = transformed_source_concentrations[i]
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+            if self.__class__.__name__ == "Mibitrans":
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt()
+            else:
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        return transform_chain_concentrations(intermediate_cxyt, decay_ratios, inverse=True)
+
+    def _check_chain_decay_validity(self, mass_ratios):
+        """Check if input for chain decay is valid."""
+        if not self._att_pars.chain_decay:
+            raise ValueError(
+                "Attenuation parameters does not contain information for chain decay. Decay rate should be "
+                "provided as list or array of degradation rates."
+            )
+        elif not self._src_pars.chain_decay_source:
+            raise ValueError(
+                "Source parameters does not contain information for chain decay. Separate source zone "
+                "concentrations should be given for each compound in the chain."
+            )
+        if len(mass_ratios) != len(self._att_pars.decay_rate) - 1:
+            raise ValueError(
+                "Length of mass_ratios array should be one less than length of decay_rate. As for the "
+                "degradation of the final compound in the chain decay, mass ratio is irrelevant."
+            )
+
+        if len(self._src_pars.source_zone_concentration) != len(self._att_pars.decay_rate):
+            raise ValueError(
+                "Amount of provided source zone concentrations should be equal to the amount of provided decay rates."
+                "One for each compound in the chain decay."
+            )
+
+    def fringe_degradation(
+        self,
+        electron_acceptor: mibitrans.data.parameter_information.FringeElectronAcceptors,
+        electron_donor_molecular_weight: float,
+    ):
+        """Add degradation at plume fringes to model based on available electron acceptors.
+
+        Under the assumption that electron acceptors (e.g. oxygen, nitrate) can not co-exist with electron donors
+        (i.e. contaminant), contaminant concentrations at the plume fringe are governed by concentration distribution
+        of electron acceptors. Using principles from Gutierrez-Neri et al. (2009) corrected by Hunkeler et al. (2010).
+        In case electron donor is a mixture of multiple contaminants, use average values along those contaminants for
+        each parameter involved.
+
+        Args:
+            electron_acceptor (mibitrans.data.parameter_information.FringeElectronAcceptors): FringeElectronAcceptors
+                dataclass containing information about electron acceptor concentrations and biodegradation
+                stoichiometry.
+            electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
+        """
+        for argument_key, argument_value in locals().items():
+            if argument_key != "self":
+                validate_input_values(argument_key, argument_value)
+        self.mode = "core-fringe"
+        self.bc = electron_acceptor.calculate_bc(electron_donor_molecular_weight)
+
+    def _calculate_core_fringe(self):
+        if self.__class__.__name__ == "Mibitrans":
+            core_cxyt = self._calculate_concentration_for_all_xyt()
+        else:
+            core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+        self.c_source = np.array([self.bc])
+        self.y_source = np.array([self.y_source[-1]])
+        self._decay_rate = 0
+
+        if self.__class__.__name__ == "Mibitrans":
+            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt()
+        else:
+            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+        core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
+        core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
+
+        self._decay_rate = self._att_pars.decay_rate
+        self.y_source = self._src_pars.source_zone_boundary
+        self.c_source = self._src_pars.source_zone_concentration.copy()
+        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
+        return [core_fringe_cxyt, electron_acceptor_cxyt]
 
     def instant_reaction(
         self,
@@ -316,6 +452,7 @@ class Results:
                 the model. Only for instant reaction, None for other models.
             utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
                 run the model. Only for instant reaction, None for other models.
+            mass_ratios (np.ndarray) : Ratio between masses of sequential decay products for chain decay
             mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
             rv (float) : Retarded flow velocity, as v / R [m/day].
             k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
@@ -362,12 +499,14 @@ class Results:
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
         self._utilization_factor = copy.copy(model._utilization_factor)
+        self._mass_ratios = copy.copy(model._mass_ratios)
 
         self._mode = model.mode
         self._rv = model.rv
         self._k_source = model.k_source
         self._c_source = model.c_source
         self._biodegradation_capacity = model.biodegradation_capacity
+        self._bc = model.bc
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
@@ -429,6 +568,11 @@ class Results:
         return self._utilization_factor
 
     @property
+    def mass_ratios(self):
+        """Ratio between masses of sequential decay products for chain decay."""
+        return self._mass_ratios
+
+    @property
     def mode(self):
         """Model mode used for running the model."""
         return self._mode
@@ -478,7 +622,7 @@ class Results:
             model_parameters=self.model_parameters,
         )
 
-    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
+    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -490,6 +634,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
@@ -500,6 +648,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -510,11 +659,12 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -525,6 +675,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -534,6 +688,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -544,11 +699,14 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
+    def breakthrough(
+        self, x_position, y_position=0, relative_concentration=False, animate=False, plot_index=0, **kwargs
+    ):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
@@ -559,6 +717,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -568,6 +730,7 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -578,11 +741,12 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_2d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
 
         Args:
@@ -592,14 +756,25 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.pcolormesh().
 
         Returns a matrix plot of the input plume as object.
         """
-        anim = psurf.plume_2d(self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs)
+        anim = psurf.plume_2d(
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
+        )
         return anim
 
-    def plume_3d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_3d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 3D surface, at a specified time.
 
         Args:
@@ -609,6 +784,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot_surface().
 
         Returns:
@@ -617,7 +796,12 @@ class Results:
             anim (matplotib.animation.FuncAnimation) : Matplotlib FuncAnimation object of plume plot.
         """
         ax_or_anim = psurf.plume_3d(
-            self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
         )
         return ax_or_anim
 

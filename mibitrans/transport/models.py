@@ -102,7 +102,12 @@ class Mibitrans(Transport3D):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
-            self.cxyt = self._calculate_concentration_for_all_xyt()
+            if self._mode == "chain_decay":
+                self.cxyt = self._calculate_chain_decay()
+            elif self._mode == "core-fringe":
+                self.cxyt = self._calculate_core_fringe()
+            else:
+                self.cxyt = self._calculate_concentration_for_all_xyt()
         return Results(self)
 
     def sample(self, x_position, y_position, time):
@@ -121,6 +126,12 @@ class Mibitrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
+        if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
+            warnings.warn(
+                "The sample method does not (yet) support chain decay. Using first provided decay rate and "
+                "source concentration instead. Mode was set to linear."
+            )
+            self._mode = "linear"
 
         self._pre_run_initialization_parameters()
 
@@ -340,7 +351,12 @@ class Anatrans(Transport3D):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
-            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+            if self._mode == "chain_decay":
+                self.cxyt = self._calculate_chain_decay()
+            elif self._mode == "core-fringe":
+                self.cxyt = self._calculate_core_fringe()
+            else:
+                self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
         return Results(self)
 
     def sample(self, x_position, y_position, time):
@@ -358,6 +374,13 @@ class Anatrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
+
+        if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
+            warnings.warn(
+                "The sample method does not (yet) support chain decay. Using first provided decay rate and "
+                "source concentration instead. Mode was set to linear."
+            )
+            self._mode = "linear"
 
         self._pre_run_initialization_parameters()
 

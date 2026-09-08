@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
@@ -70,7 +71,7 @@ def test_hydrologicalparameters_setattribute(parameters, value, error) -> None:
         (dict(velocity=1, porosity=0.5, h_conductivity=2, h_gradient=2, alpha_x=2, alpha_y=3), "velocity", 8),
     ],
 )
-def test_hyrologicalparameters_output(test, param, expected) -> None:
+def test_hydrologicalparameters_output(test, param, expected) -> None:
     """Test output of HydrologicalParameters dataclass."""
     if "velocity" in test.keys() and "h_gradient" in test.keys():
         with pytest.warns(UserWarning):
@@ -91,6 +92,9 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(bulk_density=1, partition_coefficient=1, fraction_organic_carbon=1), None),
         (dict(), None),
+        (dict(decay_rate=[0.2, 0.1, 0.05]), None),
+        (dict(half_life=np.array([100, 73, 11])), None),
+        (dict(decay_rate=[0.3]), None),
         (dict(decay_rate=1, half_life=1), UserWarning),
         (dict(half_life="one"), TypeError),
         (dict(half_life=-1), DomainValueError),
@@ -98,6 +102,8 @@ def test_hyrologicalparameters_output(test, param, expected) -> None:
         (dict(retardation=0.1), DomainValueError),
         (dict(retardation=1, fraction_organic_carbon="no"), TypeError),
         (dict(retardation=1, fraction_organic_carbon=2), DomainValueError),
+        (dict(decay_rate=[-2, 3]), DomainValueError),
+        (dict(half_life=[300, [200, 100]]), TypeError),
     ],
 )
 def test_attenuationparameters_validation(parameters, error) -> None:
@@ -122,13 +128,14 @@ def test_attenuationparameters_validation(parameters, error) -> None:
         (dict(half_life=2), "decay_rate", np.log(2) / 2),
         (dict(decay_rate=2, half_life=2), "decay_rate", 2),
         (dict(decay_rate=2, half_life=2), "half_life", np.log(2) / 2),
+        (dict(decay_rate=[2, 4]), "half_life", [np.log(2) / 2, np.log(2) / 4]),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Both contaminant decay rate")
 def test_attenuationparameters_output(test, param, expected) -> None:
     """Test output of AttenuationParameters dataclass."""
     att = AttenuationParameters(**test)
-    assert getattr(att, param) == expected
+    assert getattr(att, param) == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -192,11 +199,12 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
             dict(source_zone_boundary=np.array([1, 2, 3]), source_zone_concentration=[3, 2, 1], depth=5, total_mass=2),
             None,
         ),
-        (dict(), MissingValueError),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2], [4, 3], [6, 5]], depth=5), None),
+        (dict(source_zone_boundary=5, source_zone_concentration=[5, 4, 3, 2, 1], depth=5), None),
         (dict(source_zone_boundary=(1, 2), source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (dict(source_zone_boundary=["one", 2], source_zone_concentration=[3, 2], depth=5, total_mass=2), TypeError),
         (
-            dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([-3, 2]), depth=5, total_mass=2),
+            dict(source_zone_boundary=[1, 2], source_zone_concentration=np.array([3, -2]), depth=5, total_mass=2),
             DomainValueError,
         ),
         (
@@ -212,6 +220,16 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=[2, 3]), TypeError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=-2), DomainValueError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="nons"), ValueError),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2], [4, 3], 1], depth=5), TypeError),
+        (
+            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=np.array([[3, 2, 1], [4, 3, 2]]), depth=5),
+            ValueError,
+        ),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2, 1], [4, 3, 2]], depth=5), ValueError),
+        (
+            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[[3, 2, 1], [4, 3, -2]], depth=5),
+            DomainValueError,
+        ),
     ],
 )
 def test_sourceparameters_validation(parameters, error) -> None:
@@ -232,9 +250,11 @@ def test_sourceparameters_validation(parameters, error) -> None:
         ("total_mass", 1000, None),
         ("total_mass", "infini", None),
         ("total_mass", np.inf, None),
+        ("source_zone_concentration", [[3, 2, 1], [4, 3, 2]], None),
         ("source_zone_concentration", [1, 2, 3], ValueError),
         ("source_zone_concentration", 1, ValueError),
         ("source_zone_concentration", "No", TypeError),
+        ("source_zone_concentration", [[3, 2], [4, 3]], ValueError),
     ],
 )
 def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
@@ -249,45 +269,13 @@ def test_sourceparameters_validation_setattr(parameter, value, error) -> None:
             setattr(src, parameter, value)
 
 
-@pytest.mark.parametrize(
-    "test, param, expected",
-    [
-        (
-            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass=2),
-            "source_zone_boundary",
-            np.array([1, 2, 3]),
-        ),
-        (
-            dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-            "source_zone_boundary",
-            np.array([1, 2, 3]),
-        ),
-        (
-            dict(source_zone_boundary=[2, 3, 1], source_zone_concentration=[4, 2, 6], depth=5, total_mass=2),
-            "source_zone_concentration",
-            np.array([6, 4, 2]),
-        ),
-        (
-            dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[6, 4, 2], depth=5, total_mass="inf"),
-            "total_mass",
-            np.inf,
-        ),
-    ],
-)
-def test_sourceparameters_output(test, param, expected) -> None:
-    """Test output of SourceParameters dataclass."""
-    unordered = np.array(test["source_zone_boundary"]) < test["source_zone_boundary"][0]
-    if True in unordered:
-        with pytest.warns(UserWarning):
-            source = SourceParameters(**test)
-    else:
-        source = SourceParameters(**test)
-    assert source.__dict__[param] == pytest.approx(expected)
-
-
 def test_sourceparameters_visualize_zone():
     """Test if source zone visualization creates a plot."""
     source = SourceParameters(np.array([1, 2, 3]), np.array([3, 2, 1]), 10, 1000)
+    source.visualize_source_zone()
+    assert isinstance(plt.gca(), plt.Axes)
+    plt.clf()
+    source = SourceParameters(np.array([1, 2, 3]), [np.array([6, 3, 1]), np.array([3, 2, 1])], 10)
     source.visualize_source_zone()
     assert isinstance(plt.gca(), plt.Axes)
 
@@ -298,6 +286,12 @@ def test_sourceparameters_visualize_depletion():
     hydro = HydrologicalParameters(velocity=1, porosity=0.2, alpha_x=1, alpha_y=1)
     source.visualize_source_depletion(hydro)
     assert isinstance(plt.gca(), plt.Axes)
+    source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, 1000)
+    with pytest.raises(Exception):
+        source.visualize_source_depletion(hydro)
+    source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, np.inf)
+    with pytest.raises(ValueError):
+        source.visualize_source_depletion(hydro)
 
 
 # Test ModelParameters
@@ -369,3 +363,86 @@ def test_calculation_optional_discretization():
     assert model.dx, "Model dx should have been calculated, but was not."
     assert model.dy, "Model dy should have been calculated, but was not."
     assert model.dt, "Model dt should have been calculated, but was not."
+
+
+@pytest.mark.parametrize(
+    "parameters, error",
+    [
+        (
+            dict(electron_acceptor_concentration=5, stoichiometric_ratio=3.4, electron_acceptor_molecular_weight=54),
+            None,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            None,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=54,
+            ),
+            ValueError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, 4, 3],
+                stoichiometric_ratio=[3.4, -5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            DomainValueError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration="der",
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            TypeError,
+        ),
+        (
+            dict(
+                electron_acceptor_concentration=[5, "die", 3],
+                stoichiometric_ratio=[3.4, 5.6, 2.1],
+                electron_acceptor_molecular_weight=[34.2, 67, 52.1],
+            ),
+            TypeError,
+        ),
+    ],
+)
+def test_fringe_electron_acceptor(parameters, error) -> None:
+    """Test validation of FringeElectronAcceptor dataclass."""
+    if error is None:
+        FringeElectronAcceptors(**parameters)
+    else:
+        with pytest.raises(error):
+            FringeElectronAcceptors(**parameters)
+
+
+@pytest.mark.parametrize(
+    "parameters, expected",
+    [
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=1), 6),
+        (dict(ea=FringeElectronAcceptors(5, 7.5, 32), electron_donor_molecular_weight=78.11), 1.6272916666666666),
+        (
+            dict(ea=FringeElectronAcceptors([5, 6], [7.5, 6], [32, 62]), electron_donor_molecular_weight=78.11),
+            2.8871303763440856,
+        ),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight="heavy"), TypeError),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=[5, 4, 3]), TypeError),
+        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=-10), DomainValueError),
+    ],
+)
+def test_fringe_electron_acceptor_calculate_bc(parameters, expected) -> None:
+    """Test calculation of biodegradation capacity from electron acceptors."""
+    ea = parameters["ea"]
+    if isinstance(expected, (int, float)):
+        bc = ea.calculate_bc(parameters["electron_donor_molecular_weight"])
+        assert bc == expected
+    else:
+        with pytest.raises(expected):
+            ea.calculate_bc(parameters["electron_donor_molecular_weight"])

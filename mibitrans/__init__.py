@@ -1,6 +1,7 @@
 """Documentation about mibitrans."""
 
 # Add some commonly used functions as top-level imports
+from mibitrans.data.example_data import BiochlorData
 from mibitrans.data.example_data import BioscreenATData
 from mibitrans.data.example_data import BioscreenData
 from mibitrans.data.parameters import HydrologicalParameters
@@ -8,6 +9,7 @@ from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen

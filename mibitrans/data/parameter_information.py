@@ -89,6 +89,86 @@ class UtilizationFactor:
 
 
 @dataclass
+class FringeElectronAcceptors:
+    """Dataclass containing information about electron acceptor concentration and reaction stoichiometry.
+
+    Args:
+        electron_acceptor_concentration (float, list, np.ndarray): Concentration(s) of electron acceptor(s) involved in
+            fringe degradation. For multiple electron acceptors, enter as a list or numpy array of floats. In g/m3.
+        stoichiometric_ratio (float, list, np.ndarray): Stoichiometric ratio(s) of electron acceptor(s) with electron
+            donor in biodegradation reaction. As moles of electron acceptor per 1 mol of electron donor. For multiple
+            electron acceptors, enter as a list or numpy array of floats in corresponding order as the values entered
+            for electron_acceptor_concentration.
+        electron_acceptor_molecular_weight (float, list, np.ndarray): Molecular weight(s) of electron acceptor(s). For
+            multiple electron acceptors, enter as a list or numpy array of floats in corresponding order as the values
+            entered for electron_acceptor_concentration. In g/mol.
+
+    Methods:
+        calculate_bc: Calculate the biodegradation capacity (concentration of degradable electron donor based on
+            available electron acceptor).
+
+    """
+
+    electron_acceptor_concentration: float | int | list[float] | np.ndarray[float]
+    stoichiometric_ratio: float | int | list[float] | np.ndarray[float]
+    electron_acceptor_molecular_weight: float | int | list[float] | np.ndarray[float]
+
+    @property
+    def _initialized(self) -> bool:
+        return all(
+            (
+                hasattr(self, "electron_acceptor_concentration"),
+                hasattr(self, "stoichiometric_ratio"),
+                hasattr(self, "electron_acceptor_molecular_weight"),
+            )
+        )
+
+    def __setattr__(self, parameter, value):
+        """Override parent method to validate input when attribute is set."""
+        validate_input_values(parameter, value)
+        if isinstance(value, list):
+            value = np.array(value)
+        super().__setattr__(parameter, value)
+        if self._initialized:
+            self._check_length()
+
+    def _check_length(self) -> None:
+        if all(
+            (
+                isinstance(self.electron_acceptor_concentration, (np.ndarray, list)),
+                isinstance(self.stoichiometric_ratio, (np.ndarray, list)),
+                isinstance(self.electron_acceptor_molecular_weight, (np.ndarray, list)),
+            )
+        ):
+            if not (
+                len(self.electron_acceptor_concentration)
+                == len(self.stoichiometric_ratio)
+                == len(self.electron_acceptor_molecular_weight)
+            ):
+                raise ValueError("All input parameters should be equal length.")
+        elif not all(
+            (
+                isinstance(self.electron_acceptor_concentration, (float, int)),
+                isinstance(self.stoichiometric_ratio, (float, int)),
+                isinstance(self.electron_acceptor_molecular_weight, (float, int)),
+            )
+        ):
+            raise ValueError("All input parameters should be equal length.")
+
+    def calculate_bc(self, electron_donor_molecular_weight: int | float) -> float:
+        """Calculate the concentration of degradable electron donor based on available electron acceptors.
+
+        Args:
+            electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
+        """
+        validate_input_values("electron_donor_molecular_weight", electron_donor_molecular_weight)
+        util_factors = self.stoichiometric_ratio * (
+            self.electron_acceptor_molecular_weight / electron_donor_molecular_weight
+        )
+        return np.sum(self.electron_acceptor_concentration / util_factors)
+
+
+@dataclass
 class ElectronAcceptors:
     """Make object with concentrations of electron acceptors.
 

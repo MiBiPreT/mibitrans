@@ -132,6 +132,11 @@ class Transport3D(ABC):
                     )
                 self._mode = "instant_reaction"
             case "core-fringe":
+                if self.bc is None:
+                    raise ValueError(
+                        "Model mode was set to 'core-fringe', without electron acceptor parameters being "
+                        "provided. Use the fringe_degradation method to supply the missing parameters."
+                    )
                 self._mode = "core-fringe"
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)

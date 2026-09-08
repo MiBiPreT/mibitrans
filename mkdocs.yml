@@ -28,6 +28,7 @@ nav:
     - Keesler Air-Force Base: examples/example_keesler.ipynb
     - Comparison Mibitrans with Anatrans: examples/example_mibitrans_anatrans.ipynb
     - Comparison with BIOSCREEN: examples/benchmarking_BIOSCREEN.ipynb
+    - Ghent fieldsite: examples/example_ghent.ipynb
 
   - Development: development/development.md
   - API Reference:

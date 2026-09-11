@@ -74,3 +74,30 @@ def calculate_source_depletion(hydrological_parameters, source_parameters, biode
         k_source = 0
 
     return k_source
+
+
+def calculate_decay_ratios(decay_rates, mass_ratios):
+    """Calculate decay ratios between contaminants in chain decay."""
+    n = len(decay_rates)
+    decay_ratios = np.full((n, n), np.nan)
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            decay_ratios[i, j] = mass_ratios[i] * decay_rates[i] / (decay_rates[i] - decay_rates[j])
+    return decay_ratios
+
+
+def transform_chain_concentrations(concentration_iterable: list[np.ndarray], decay_ratios: np.ndarray, inverse=False):
+    """Convert concentrations for chain decay into the transformed domain, or vice versa."""
+    ni = len(concentration_iterable) - 1
+    transformed_concentrations = [0] * (ni + 1)
+    transformed_concentrations[0] = concentration_iterable[0]
+    for k in range(ni):
+        transform_total = 0
+        for m in range(k + 1):
+            loop_iterable = transformed_concentrations[m] if inverse else concentration_iterable[m]
+            transform_total += loop_iterable * decay_ratios[m : k + 1, k + 1].prod()
+        if inverse:
+            transform_total *= -1
+        transformed_concentrations[k + 1] = concentration_iterable[k + 1] + transform_total
+
+    return transformed_concentrations

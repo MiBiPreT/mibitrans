@@ -296,7 +296,9 @@ class SourceParameters:
         if self.total_mass == np.inf:
             raise ValueError("Source mass is set to infinite, there is no source depletion to be visualized.")
         if self.chain_decay_source:
-            raise Exception("Chain decay is incompatible with source depletion and therefore cannot be visualized.")
+            raise NotImplementedError(
+                "Chain decay is incompatible with source depletion and therefore cannot be visualized."
+            )
         if not self.source_depletion_rate and not hydrological_parameters:
             raise TypeError(
                 "Missing required argument hydrological parameters, as explicit source degradation rate is "

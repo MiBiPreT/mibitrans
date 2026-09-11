@@ -97,12 +97,10 @@ def _check_numeric_retardation(parameter: str, value):
 
 def _check_array_list_numeric_positive(parameter: str, value, sublist_allowed):
     """Check if variable is numpy array, list, or numerical, if it is positive and if an array is 1-dimensional."""
-    if isinstance(value, np.ndarray):
-        if len(value.shape) != 1:
-            return ValueError(
-                f"{parameter} must be a 1D array/list of floats or list of 1D-arrays/floats, not a "
-                "multi-dimensional array."
-            )
+    if isinstance(value, np.ndarray) and len(value.shape) != 1:
+        return ValueError(
+            f"{parameter} must be a 1D array/list of floats or list of 1D-arrays/floats, not a multi-dimensional array."
+        )
     if isinstance(value, (np.ndarray, list)) and sublist_allowed:
         return _check_nested_list_array_positive(parameter, value)
     elif isinstance(value, (np.ndarray, list)):
@@ -191,14 +189,13 @@ def _check_source_concentrations_as_arrays(concentration):
 
 def _check_source_boundary_order(boundary: np.ndarray):
     """Check if source zone boundary is ordered from low to high values."""
-    if len(boundary) > 1:
-        if not all(boundary[:-1] <= boundary[1:]):
-            boundary.sort()
-            raise ValueError(
-                "source_zone_boundary locations should be ordered by distance from source zone center. Thus, current "
-                f"input for source_zone_boundary is supposed to be {boundary}. source_zone_concentration should be re-"
-                f"ordered accordingly as well, with highest concentrations at the innermost source zone."
-            )
+    if len(boundary) > 1 and (not all(boundary[:-1] <= boundary[1:])):
+        boundary.sort()
+        raise ValueError(
+            "source_zone_boundary locations should be ordered by distance from source zone center. Thus, current "
+            f"input for source_zone_boundary is supposed to be {boundary}. source_zone_concentration should be re-"
+            f"ordered accordingly as well, with highest concentrations at the innermost source zone."
+        )
 
 
 def _check_source_boundary_concentration_length(boundary: np.ndarray, conc: np.ndarray):

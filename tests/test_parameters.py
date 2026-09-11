@@ -288,7 +288,7 @@ def test_sourceparameters_visualize_depletion():
     source.visualize_source_depletion(hydro)
     assert isinstance(plt.gca(), plt.Axes)
     source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, 1000)
-    with pytest.raises(Exception):
+    with pytest.raises(NotImplementedError):
         source.visualize_source_depletion(hydro)
     source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, np.inf)
     with pytest.raises(ValueError):

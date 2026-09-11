@@ -125,11 +125,7 @@ class Mibitrans(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
         if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
-            warnings.warn(
-                "The sample method does not (yet) support chain decay. Using first provided decay rate and "
-                "source concentration instead. Mode was set to linear."
-            )
-            self._mode = "linear"
+            raise NotImplementedError("The sample method is not (yet) implemented for chain_decay.")
 
         self._pre_run_initialization_parameters()
 
@@ -372,11 +368,7 @@ class Anatrans(Transport3D):
                 validate_input_values(par, value)
 
         if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
-            warnings.warn(
-                "The sample method does not (yet) support chain decay. Using first provided decay rate and "
-                "source concentration instead. Mode was set to linear."
-            )
-            self._mode = "linear"
+            raise NotImplementedError("The sample method is not (yet) implemented for chain_decay.")
 
         self._pre_run_initialization_parameters()
 

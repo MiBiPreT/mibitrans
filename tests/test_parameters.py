@@ -194,6 +194,7 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="infint"), None),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=np.inf), None),
         (dict(source_zone_boundary=1, source_zone_concentration=[3], depth=5, total_mass=2), None),
+        (dict(source_zone_boundary=1, source_zone_concentration=3, depth=5, total_mass=2), None),
         (
             dict(source_zone_boundary=np.array([1, 2, 3]), source_zone_concentration=[3, 2, 1], depth=5, total_mass=2),
             None,
@@ -224,6 +225,7 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=np.array([[3, 2, 1], [4, 3, 2]]), depth=5),
             ValueError,
         ),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2, 1], [4, 3]], depth=5), ValueError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2, 1], [4, 3, 2]], depth=5), ValueError),
         (
             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[[3, 2, 1], [4, 3, -2]], depth=5),

@@ -161,13 +161,13 @@ class AttenuationParameters:
         if isinstance(value, list):
             value = np.array(value)
 
-        if parameter == "decay_rate" and (not ar_value.all() == 0 or hasattr(self, "initialized")):
+        if parameter == "decay_rate" and (ar_value.all() != 0 or hasattr(self, "initialized")):
             decay_rate = value
             if ar_value.all() != 0:
                 half_life = np.log(2) / value
             else:
                 half_life = 0
-        elif parameter == "half_life" and (not ar_value.all() == 0 or hasattr(self, "initialized")):
+        elif parameter == "half_life" and (ar_value.all() != 0 or hasattr(self, "initialized")):
             half_life = value
             if ar_value.all() != 0:
                 decay_rate = np.log(2) / value
@@ -182,12 +182,12 @@ class AttenuationParameters:
         else:
             decay_rate = 0
             half_life = 0
-        if not np.array(self.decay_rate).all() == 0:
+        if np.array(self.decay_rate).all() != 0:
             if not isinstance(self.decay_rate, (np.ndarray | list)):
                 decay_rate_equal = self.decay_rate == decay_rate
             else:
                 decay_rate_equal = all(np.array(self.decay_rate) == np.array(decay_rate))
-            if not decay_rate_equal and not hasattr(self, "initialized") and not ar_value.all() == 0:
+            if not decay_rate_equal and not hasattr(self, "initialized") and ar_value.all() != 0:
                 warnings.warn(
                     "Both contaminant decay rate and half life were defined, but are not equal. "
                     "Value for decay rate will be used.",

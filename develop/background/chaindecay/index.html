@@ -12,13 +12,13 @@
         <meta name="author" content="Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/bioscreen/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/chaindecay/">
       
       
-        <link rel="prev" href="../massbalance/">
+        <link rel="prev" href="../instantreaction/">
       
       
-        <link rel="next" href="../../implementation/implementation/">
+        <link rel="next" href="../massbalance/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>BIOSCREEN - mibitrans</title>
+        <title>Chain Decay - mibitrans</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bioscreen" class="md-skip">
+        <a href="#chain-decay" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              BIOSCREEN
+              Chain Decay
             
           </span>
         </div>
@@ -697,10 +697,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../chaindecay/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Decay
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -716,6 +743,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -753,37 +844,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    BIOSCREEN
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../bioscreen/" class="md-nav__link">
         
   
   
@@ -799,70 +863,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#general" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        General
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transport-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Transport model
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#minor-errors-in-bioscreen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Minor errors in BIOSCREEN
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1502,10 +1502,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#general" class="md-nav__link">
+  <a href="#background" class="md-nav__link">
     <span class="md-ellipsis">
       
-        General
+        Background
       
     </span>
   </a>
@@ -1513,10 +1513,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#transport-model" class="md-nav__link">
+  <a href="#solution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Transport model
+        Solution
       
     </span>
   </a>
@@ -1524,10 +1524,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#minor-errors-in-bioscreen" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minor errors in BIOSCREEN
+        Limitations
       
     </span>
   </a>
@@ -1565,38 +1565,118 @@
   
 
 
-<h1 id="bioscreen">BIOSCREEN</h1>
-<h2 id="general">General</h2>
-<p><a href="https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system"><em>BIOSCREEN</em></a> has been developed by the U.S. Environmental Protection Agency (EPA) in collaboration with the U.S. Air Force as natural attenuation decision support tool [Newell et al, 1996, 1997]. It is meant as screening tool to determine if a full-scale evaluation of a contaminated site is needed. Thereby it is not replacing a more involved numerical model, but serves as preliminary step to evaluate the necessity of an involved numerical model. </p>
-<p><em>BIOSCREEN</em> calculates contaminant concentration distributions in 3D for a constant source under uniform flow conditions using an empirical solution of the advection dispersion equation. The source domain can contain several zones of different concentrations. Three modes of decay can be chose to represent degradation processes:</p>
-<ul>
-<li>no decay</li>
-<li>linear decay</li>
-<li>instantaneous biodegradation reaction</li>
-</ul>
-<p>Version 1.4 provides the option to calculate mass balances of the plume and the source. <em>BIOSCREEN</em> comes with two sets of example data.</p>
-<p><em>BIOSCREEN</em> is implemented in Excel, and provides a graphical interface. The latest version is <em>BIOSCREEN</em> 1.4. It was released to be compatible with Microsoft Excel 5.0. Analysis is performed using macro scripts and cellular calculations. Calculations inside the Excel sheets are hidden in the background, and give insight into the actual calculations behind the model.
-The spatial resolution of the plume is fixed to 11 steps over the plume length and 5 steps lateral to the plume. Temporal resolution is fixed to 10 time steps. This resolution is relative to the set model extent and time. <em>BIOSCREEN</em> only evaluates the solution z=0 and does not provide a vertically resolved solution.</p>
-<h2 id="transport-model">Transport model</h2>
-<p>Transport in <em>BIOSCREEN</em> is modelled based on the analytical model of <em>Domenico</em>, [1987]. The actual implementation is the same as the equation for the <em>Bioscreen</em> Model Class in the <code>mibitrans</code> package (see section <strong>Model Implementations</strong>).</p>
-<p>The <em>Domenico</em>-solution has not been derived with mathematical rigor as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes. As <em>Domenico</em>, [1987] writes, <em>&ldquo;an exact solution to this problem cannot avoid some form of numerical integration&rdquo;</em>. The provided analytical expression approximates the concentration distribution of a decaying species that is released to the aquifer as an extended pulse. <em>West et al., 2007</em> provides a detailed overview on the effects of the approximations in the <em>Domenico</em>-solution and potential error it can introduce to solute transport predictions.</p>
-<p>Specifically, the <em>Domenico</em>-model takes the following assumption on initial and boundary conditions:</p>
-<ul>
-<li>Flow is uniform in <span class="arithmatex">\(x\)</span> direction with constant velocity <span class="arithmatex">\(v\)</span>.</li>
-<li>The contaminant decays continuously at a rate of <span class="arithmatex">\(\lambda\)</span> (independent of position).</li>
-<li>There is no adsorption/retardation of the contaminant.</li>
-<li>The contaminant is released to the aquifer within a source plane of width <span class="arithmatex">\(Y\)</span>, height <span class="arithmatex">\(Z\)</span>, located at <span class="arithmatex">\(x=0\)</span> and centered at <span class="arithmatex">\(y=0\)</span> and <span class="arithmatex">\(z=0\)</span>, so the center of plume is always located along the <span class="arithmatex">\(x\)</span>-axis.</li>
-<li>The input of contaminant at the source is constant over time with an amount of <span class="arithmatex">\(C_0\)</span> that does not change over time. Specifically, it assumes that the source is not subject to depletion or internal decay/degradation that reduced source concentrations.</li>
-</ul>
-<p><em>BIOSCREEN</em> does not directly use the Domenico model, but an extension regarding source handling and retardation. For the cases of linear decay of the contaminant (and the case of no decay), a source decay term is included that accounts for reduction/depletion of the input concentration from the source in the form.</p>
-<p>BIOSCREEN uses a superposition approach in combination with the <em>Domenico-model</em> to model instantaneous aerobic and anaerobic reactions in groundwater, based on available concentrations of electron acceptors (EAs). They argue that the comparison to more complex models resolving the processes shows good agreement (within the range of assumptions) justifying the use of this heuristic approach for reactive transport modelling. Details of this model approach are outlined in section <strong>Instant Reaction Model</strong>.</p>
-<h2 id="minor-errors-in-bioscreen">Minor errors in <em>BIOSCREEN</em></h2>
-<p>During the setup of <code>mibitrans</code>, <em>BIOSCREEN</em> has been thoroughly tested. It was found to be host to a minor erroneous calculation for the instant reaction model. <em>BIOSCREEN</em> uses calculations from the <em>no decay model</em> and corrects them for the different source decay coefficient and source zone concentrations. However, in these corrections, the wrong source decay coefficient is used, resulting in an underestimation of modelled biodegradation. The size of the error is determined by choice of parameters relating to source decay and biodegradation capacity.</p>
+<h1 id="chain-decay">Chain decay</h1>
+<h2 id="background">Background</h2>
+<p>For certain contaminants, like chlorinated solvents, it is required to track more than a single degradation process. 
+Dechlorination of perchloroethene (PCE) to the (relatively) safe ethene involves consecutive degradation to trichloroethene (TCE), dichloroethene (DCE) and vinyl chloride (VC). </p>
+<p><span class="arithmatex">\(PCE \to TCE \to DCE \to VC \to Ethene\)</span></p>
+<p>All four of which are considered environmental contaminants and are known carcinogens, with the distribution of VC being the main interest.
+Various tools have been developed to model the fate of these contaminants, among which is BIOCHLOR [Aziz et al., 2000].
+In setup and design, it is the similar to BIOSCREEN [Newell et al., 1996], aside from including the additional term in the Domenico (1987) solution. (The same as the <code>anatrans</code> solution in this package).
+While BIOCHLOR is designed towards modeling chlorinated solvents, the procedure can be applied to any sequential degradation process.</p>
+<h2 id="solution">Solution</h2>
+<p>Consider the governing three-dimensional ADE for degradation of a single contaminant (<span class="arithmatex">\(X_1\)</span>):</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{1}
+\begin{aligned}
+R_1\frac{\partial C_1}{\partial t}
+=
+-v\frac{\partial C_1}{\partial x}
++D_x \frac{\partial^2 C_1}{\partial x^2}
++D_y \frac{\partial^2 C_1}{\partial y^2}
++D_z \frac{\partial^2 C_1}{\partial z^2}
+-\mu_1 C_1
+\end{aligned}
+\end{equation}
+\]</div>
+<p>Here, the sink term <span class="arithmatex">\(-\mu C_1\)</span> represents first order degradation of the contaminant. 
+For the decay product (<span class="arithmatex">\(X_2\)</span>) of this contaminant, the ADE would contain a source term <span class="arithmatex">\(\omega_1 \mu_1 C_1\)</span>, 
+here, <span class="arithmatex">\(\omega\)</span> represents the molar weight ratio between daughter-parent compounds; <span class="arithmatex">\(\frac{mw_{X_2}}{mw_{X_1}}\)</span>.
+If compound <span class="arithmatex">\(X_2\)</span> would subsequently decay, the sink term is similar to <span class="arithmatex">\(X_1\)</span>; <span class="arithmatex">\(-\mu_2 C_2\)</span>. 
+Thus, for a chain of degradation reactions of length <span class="arithmatex">\(n\)</span>. The source-sink term would be <span class="arithmatex">\(\omega_{n-1} \mu_{n-1} C_{n-1} - \mu_n C_n\)</span>, for every compound other than the first.
+This results in a general ADE for chain decay:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{2}
+\begin{aligned}
+R_n\frac{\partial C_n}{\partial t}
+=
+-v\frac{\partial C_n}{\partial x}
++D_x \frac{\partial^2 C_n}{\partial x^2}
++D_y \frac{\partial^2 C_n}{\partial y^2}
++D_z \frac{\partial^2 C_n}{\partial z^2}
++\omega_{n-1} \mu_{n-1} C_{n-1} - \mu_n C_n
+\end{aligned}
+\end{equation}
+\]</div>
+<p>However, these are coupled equations, i.e. <span class="arithmatex">\(C_2\)</span> is dependent on <span class="arithmatex">\(C_1\)</span> and therefore cannot be solved as-is. 
+In the paper of Sun et al. (1999), a transformation procedure is used to express concentrations of subsequent daughter compounds in the concentration of the parent compound.
+A more detailed explanation and derivation of this procedure is given in Aziz et al. (2000) and the aforementioned paper of Sun et al. (1999).
+For <span class="arithmatex">\(X_2\)</span>, the transformed concentration (<span class="arithmatex">\(A_2\)</span>) would be:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{3}
+\begin{aligned}
+A_2 = C_2 + C_1\frac{\omega_1\mu_1}{\mu_1-\mu_2}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>And for the daughter compound of <span class="arithmatex">\(X_2\)</span>, it would be:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{4}
+\begin{aligned}
+A_3 = C_3 + C_2\frac{\omega_2\mu_2}{\mu_2-\mu_3} + C_1\frac{\omega_1\omega_2\mu_1\mu_2}{(\mu_1-\mu_3)(\mu_2-\mu_3)}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>It follows that for <span class="arithmatex">\(X_n\)</span>, the transformed equation is:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{5}
+\begin{aligned}
+A_n = C_n\sum^{n-1}_{i=1}C_i\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>Note that for <span class="arithmatex">\(X_1\)</span>, <span class="arithmatex">\(A_1 = C_1\)</span>. With this transformation, the ADE becomes:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{6}
+\begin{aligned}
+R_n\frac{\partial A_n}{\partial t}
+=
+-v\frac{\partial A_n}{\partial x}
++D_x \frac{\partial^2 A_n}{\partial x^2}
++D_y \frac{\partial^2 A_n}{\partial y^2}
++D_z \frac{\partial^2 A_n}{\partial z^2}
+-\mu_n A_n
+\end{aligned}
+\end{equation}
+\]</div>
+<p>The boundary value for <span class="arithmatex">\(x=0\)</span> (source zone concentrations) need to be similarly transformed;</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{7}
+\begin{aligned}
+A_{0,n} = C_{0,n}\sum^{n-1}_{i=1}C_{0,i}\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<p>Now the equations are uncoupled, they can be solved for <span class="arithmatex">\(A_n\)</span> as usual, using the analytical solution to equation 1 of choice.
+Afterward, the actual concentration <span class="arithmatex">\(C_n\)</span> is determined by inverting the transformation in sequence:</p>
+<div class="arithmatex">\[
+\begin{equation}\tag{8}
+\begin{aligned}
+C_n = A_n - \sum^{n-1}_{i=1}C_i\prod^{n-1}_{m=i}\frac{\omega_m\mu_m}{\mu_m-\mu_n}
+\end{aligned}
+\end{equation}
+\]</div>
+<h2 id="limitations">Limitations</h2>
+<p>While retardation can be considered in this transport process, it can only be done so if R is equal for each species
+i.e. the equation can not take difference in transport velocity between species into consideration.
+A &lsquo;solution&rsquo; for this used in BIOCHLOR is to take the median retardation factor of all species.  </p>
+<p>Furthermore, source superposition and source depletion are mutually exclusive for the chain decay solution. 
+Currently, in this package, only source superposition without source depletion is available for chain decay.</p>
 <h2 id="references">References</h2>
+<p>[Aziz, C. E., Newell, C. J., Gonzales, J. R., Haas, P., Clement, T. P., &amp; Sun, Y. (2000). BIOCHLOR, Natural Attenuation Decision Support System User’s Manual Version 1.0 (p. 54) [Manual]. EPA.]</p>
 <p>[Domenico, P., An analytical model for multidimensional transport of a decaying contaminant species, Journal of Hydrology, 91, 49–58, doi:10.1016/0022-1694(87)90127-2, 1987.] (https://doi.org/10.1016/0022-1694(87)90127-2)</p>
-<p><a href="https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P1007K50.TXT">Newell, C. J., R. K. Mcleod, J. R. Gonzales, and J. T. Wilson, BIOSCREEN natural attenuation decision support system user’s manual version 1.3, Tech. rep., U.S. EPA, 1996.</a></p>
-<p>Newell, C. J., R. K. Mcleod, J. R. Gonzales, and J. T. Wilson, BIOSCREEN Natural Attenuation Decision Support System Version 1.4 Revisions, U.S. EPA, 1997.</p>
-<p><a href="https://doi.org/10.1111/j.1745-6584.2006.00280.x">West, M. R., B. H. Kueper, and M. J. Ungs, On the use and error of approximation in the Domenico (1987) solution, Groundwater, 45 (2), 126–135, 2007</a></p>
+<p>[Newell, C. J., R. K. Mcleod, J. R. Gonzales, and J. T. Wilson, BIOSCREEN natural attenuation decision support system user’s manual version 1.3, Tech. rep., U.S. EPA, 1996.] https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P1007K50.TXT</p>
+<p>[Sun, Y., Petersen, J. N., &amp; Clement, T. P. (1999). Analytical solutions for multiple species reactive transport in multiple dimensions. Journal of Contaminant Hydrology, 35(4), 429–440.] https://doi.org/10.1016/S0169-7722(98)00105-3</p>
 
 
 

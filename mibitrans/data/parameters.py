@@ -95,10 +95,12 @@ class AttenuationParameters:
 
     Args:
         retardation (float) : Retardation factor for transported contaminant [-]. Default is 1.
-        decay_rate (float) : First order (linear) decay coefficient in [1/day]. Only required for linear decay models.
-            Default is 0. Also sets corresponding half life.
-        half_life (float) : Contaminant half life for 1st order (linear) decay, in [days]. Only required for
-            linear decay models. Default is 0. Also sets corresponding decay_rate.
+        decay_rate (float | list | np.ndarray) : First order (linear) decay coefficient in [1/day]. Only required for
+            linear decay models. If given as iterable, interpreted as sequential decay rates for chain decay. Also sets
+            corresponding half life. Default is 0.
+        half_life (float | list | np.ndarray) : Contaminant half life for 1st order (linear) decay, in [days]. Only
+            required for linear decay models. If given as iterable, interpreted as sequential decay rates for chain
+            decay. Default is 0. Also sets corresponding decay_rate.
         bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
         partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,
             in [m^3/g]. Optional if retardation is specified.
@@ -116,8 +118,8 @@ class AttenuationParameters:
     """
 
     retardation: float = 1
-    decay_rate: float = 0
-    half_life: float = 0
+    decay_rate: float | list[float] | np.ndarray[float] = 0
+    half_life: float | list[float] | np.ndarray[float] = 0
     bulk_density: float = None
     partition_coefficient: float = None
     fraction_organic_carbon: float = None
@@ -131,6 +133,10 @@ class AttenuationParameters:
             decay_rate, half_life = self._set_decay(parameter, value)
             super().__setattr__("decay_rate", decay_rate)
             super().__setattr__("half_life", half_life)
+            if isinstance(self.decay_rate, (list, np.ndarray)):
+                self.chain_decay = True
+            else:
+                self.chain_decay = False
         else:
             super().__setattr__(parameter, value)
 
@@ -151,15 +157,19 @@ class AttenuationParameters:
             raise MissingValueError("Linear reaction model requires decay rate or half life.")
 
     def _set_decay(self, parameter, value):
-        if parameter == "decay_rate" and (value != 0 or hasattr(self, "initialized")):
+        ar_value = np.array(value)
+        if isinstance(value, list):
+            value = np.array(value)
+
+        if parameter == "decay_rate" and (ar_value.all() != 0 or hasattr(self, "initialized")):
             decay_rate = value
-            if value != 0:
+            if ar_value.all() != 0:
                 half_life = np.log(2) / value
             else:
                 half_life = 0
-        elif parameter == "half_life" and (value != 0 or hasattr(self, "initialized")):
+        elif parameter == "half_life" and (ar_value.all() != 0 or hasattr(self, "initialized")):
             half_life = value
-            if value != 0:
+            if ar_value.all() != 0:
                 decay_rate = np.log(2) / value
             else:
                 decay_rate = 0
@@ -172,16 +182,25 @@ class AttenuationParameters:
         else:
             decay_rate = 0
             half_life = 0
+        if np.array(self.decay_rate).all() != 0:
+            if not isinstance(self.decay_rate, (np.ndarray | list)):
+                decay_rate_equal = self.decay_rate == decay_rate
+            else:
+                decay_rate_equal = all(np.array(self.decay_rate) == np.array(decay_rate))
+            if not decay_rate_equal and not hasattr(self, "initialized") and ar_value.all() != 0:
+                warnings.warn(
+                    "Both contaminant decay rate and half life were defined, but are not equal. "
+                    "Value for decay rate will be used.",
+                    UserWarning,
+                )
+                half_life = np.log(2) / self.decay_rate
+                decay_rate = self.decay_rate
 
-        if self.decay_rate != decay_rate and self.decay_rate != 0 and not hasattr(self, "initialized") and value != 0:
-            warnings.warn(
-                "Both contaminant decay rate and half life were defined, but are not equal. "
-                "Value for decay rate will be used.",
-                UserWarning,
-            )
-            half_life = np.log(2) / self.decay_rate
-            decay_rate = self.decay_rate
-
+        # Ensure that if half_life or decay_rate is given as single value, it is stored as float/int instead of iterable
+        if isinstance(half_life, (np.ndarray | list)) and isinstance(decay_rate, (np.ndarray | list)):
+            if len(half_life) == 1 and len(decay_rate) == 1:
+                half_life = half_life[0]
+                decay_rate = decay_rate[0]
         return decay_rate, half_life
 
 
@@ -191,7 +210,7 @@ class SourceParameters:
 
     Args:
         source_zone_boundary (np.ndarray) : Outer boundary of each source zone, in transverse horizontal direction
-            (y-coordiante) [m]. y=0 is at the middle of the contaminant source. Input as numpy array of length equal
+            (y-coordinate) [m]. y=0 is at the middle of the contaminant source. Input as numpy array of length equal
             to the amount of source zone. Last value in the array is the limit of the source. For a source with a single
             source zone, only one value is required. Source is symmetrical in the x-axis.
         source_zone_concentration (np.ndarray) : Contaminant concentration in each source zone [g/m^3]. Input as numpy
@@ -209,24 +228,35 @@ class SourceParameters:
     """
 
     source_zone_boundary: np.ndarray = None
-    source_zone_concentration: np.ndarray = None
+    source_zone_concentration: list[np.ndarray] | np.ndarray = None
     depth: float = None
     total_mass: float | str = "infinite"
+    source_depletion_rate: float = None
     verbose: bool = False
 
     def __setattr__(self, parameter, value):
         """Override parent method to validate input when attribute is set."""
+        if parameter == "source_depletion_rate" and value is not None:
+            raise NotImplementedError(
+                "Functionality of manually setting source_depletion_rate is not fully implemented yet."
+            )
+
         validate_input_values(parameter, value)
         if parameter == "total_mass" and (isinstance(value, str) or value == np.inf):
             value = np.inf
         super().__setattr__(parameter, value)
-        # When setting source zone boundary or concentration, and both present, check validity in respect to each other.
+        # When setting source zone boundary or concentration, and both present, check validity in respect to
+        # each other.
         if parameter in ["source_zone_boundary", "source_zone_concentration"] and (
             self.source_zone_boundary is not None and self.source_zone_concentration is not None
         ):
             boundary, concentration = validate_source_zones(self.source_zone_boundary, self.source_zone_concentration)
             super().__setattr__("source_zone_boundary", boundary)
             super().__setattr__("source_zone_concentration", concentration)
+            if (len(boundary) == 1 and len(concentration) > 1) or (isinstance(concentration[0], (list, np.ndarray))):
+                self.chain_decay_source = True
+            else:
+                self.chain_decay_source = False
 
     def __post_init__(self):
         """Check argument presence, types and domain."""
@@ -242,7 +272,7 @@ class SourceParameters:
         source_zone(self)
 
     def visualize_source_depletion(
-        self, hydrological_parameters, electron_acceptors=None, utilization_factor=None, **kwargs
+        self, hydrological_parameters=None, electron_acceptors=None, utilization_factor=None, **kwargs
     ):
         """Plot source depletion over time.
 
@@ -265,6 +295,15 @@ class SourceParameters:
         """
         if self.total_mass == np.inf:
             raise ValueError("Source mass is set to infinite, there is no source depletion to be visualized.")
+        if self.chain_decay_source:
+            raise NotImplementedError(
+                "Chain decay is incompatible with source depletion and therefore cannot be visualized."
+            )
+        if not self.source_depletion_rate and not hydrological_parameters:
+            raise TypeError(
+                "Missing required argument hydrological parameters, as explicit source degradation rate is "
+                "not provided in the Dataclass."
+            )
 
         source_depletion(hydrological_parameters, self, electron_acceptors, utilization_factor, **kwargs)
 

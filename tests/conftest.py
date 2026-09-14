@@ -8,6 +8,7 @@ from mibitrans.data.parameters import SourceParameters
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen
 from mibitrans.transport.models import Mibitrans
+from tests.test_example_data import ExampleTestData
 
 # Test parameters loosely based on Keesler site. Some adaptations to allow for more robust tests.
 
@@ -47,6 +48,15 @@ def test_att_pars_nodecay():
     )
 
 
+@pytest.fixture(scope="session")
+def test_att_pars_chain():
+    """AttenuationParameters fixture with example data for tests for chain decay."""
+    return AttenuationParameters(
+        retardation=2.9,  # [-]
+        decay_rate=np.array([2 / 365, 1 / 365, 0.7 / 365]),
+    )
+
+
 electron_acceptor_dict = dict(
     delta_oxygen=2.05 - 0.4,  # [g/m3]
     delta_nitrate=0.07 - 0,  # [g/m3]
@@ -64,6 +74,21 @@ def test_source_pars():
         source_zone_concentration=np.array([13.68, 2.508, 0.057]),  # [g/m3]
         depth=3,  # [m]
         total_mass=2000000,  # [g]
+    )
+
+
+@pytest.fixture(scope="session")
+def test_source_pars_chain():
+    """SourceParameters fixture with example data for tests for chain decay."""
+    return SourceParameters(
+        source_zone_boundary=np.array([2, 11, 20]),  # [m]
+        source_zone_concentration=[
+            np.array([10, 4, 0.3]),
+            np.array([15, 6, 0.5]),
+            np.array([2, 0.007, 0.001]),
+        ],  # [g/m^3]
+        depth=3,  # [m]
+        total_mass=np.inf,
     )
 
 
@@ -109,6 +134,15 @@ def test_mibitrans_model_instantreaction(test_hydro_pars, test_att_pars, test_so
     """Mibitrans fixture model object for testing, with instant reaction."""
     obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
+    res = obj.run()
+    return obj, res
+
+
+@pytest.fixture(scope="session")
+def test_mibitrans_model_chaindecay(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars):
+    """Mibitrans fixture model object for testing, with chain decay."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars)
+    obj.chain_decay(mass_ratios=[0.8, 0.7])
     res = obj.run()
     return obj, res
 
@@ -162,3 +196,9 @@ def test_bioscreen_model_instantreaction(test_hydro_pars, test_att_pars, test_so
     obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
     res = obj.run()
     return obj, res
+
+
+@pytest.fixture(scope="session")
+def test_example_data():
+    """Example test data fixture for comparing with model output."""
+    return ExampleTestData()

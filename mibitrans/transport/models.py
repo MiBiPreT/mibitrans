@@ -102,7 +102,10 @@ class Mibitrans(Transport3D):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
-            self.cxyt = self._calculate_concentration_for_all_xyt()
+            if self._mode == "chain_decay":
+                self.cxyt = self._calculate_chain_decay()
+            else:
+                self.cxyt = self._calculate_concentration_for_all_xyt()
         return Results(self)
 
     def sample(self, x_position, y_position, time):
@@ -121,6 +124,8 @@ class Mibitrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
+        if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
+            raise NotImplementedError("The sample method is not (yet) implemented for chain_decay.")
 
         self._pre_run_initialization_parameters()
 
@@ -340,7 +345,10 @@ class Anatrans(Transport3D):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
         self._check_model_mode_before_run()
         with np.errstate(divide="ignore", invalid="ignore"):
-            self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+            if self._mode == "chain_decay":
+                self.cxyt = self._calculate_chain_decay()
+            else:
+                self.cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
         return Results(self)
 
     def sample(self, x_position, y_position, time):
@@ -358,6 +366,9 @@ class Anatrans(Transport3D):
         for par, value in locals().items():
             if par != "self":
                 validate_input_values(par, value)
+
+        if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
+            raise NotImplementedError("The sample method is not (yet) implemented for chain_decay.")
 
         self._pre_run_initialization_parameters()
 

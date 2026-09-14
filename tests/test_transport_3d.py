@@ -54,7 +54,7 @@ def test_transport_parent(hydro, att, source, model, error, request) -> None:
         assert (len(parent.c_source) == len(args[2].source_zone_concentration)) and (
             len(parent.c_source) == len(args[2].source_zone_boundary)
         )
-        # Extent of y-domain should be at least the size of
+        # Extent of y-domain should be at least the size of total source zone
         assert (np.max(parent.y) + abs(np.min(parent.y))) >= (np.max(args[2].source_zone_boundary) * 2)
         assert parent.xxx.shape == (1, 1, len(parent.x))
         assert parent.yyy.shape == (1, len(parent.y), 1)
@@ -132,6 +132,48 @@ def test_instant_reaction_setup(
             model_object.instant_reaction(**pars)
 
 
+@pytest.mark.parametrize(
+    "pars, expected",
+    [
+        ({"mass_ratios": [0.2, 0.4]}, None),
+        ({"mass_ratios": [0.2, -0.3]}, DomainValueError),
+        ({"mass_ratios": "nonsense"}, TypeError),
+        ({"mass_ratios": [0.2]}, ValueError),
+        ({"mass_ratios": [0.2, 0.3, 0.1]}, ValueError),
+    ],
+)
+def test_chain_decay_setup(
+    pars, expected, test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars
+) -> None:
+    """Test if chain decay method accepts correct data and raises the intended errors if not."""
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars)
+    if expected is None:
+        model_object.chain_decay(**pars)
+        assert model_object.mode == "chain_decay", (
+            f"Model mode should be 'chain_decay', but is '{model_object.mode}' instead."
+        )
+    elif expected in [DomainValueError, ValueError, TypeError]:
+        with pytest.raises(expected):
+            model_object.chain_decay(**pars)
+
+
+def test_chain_decay_setup_dataclasses(
+    test_hydro_pars, test_att_pars, test_att_pars_chain, test_source_pars, test_source_pars_chain, test_model_pars
+) -> None:
+    """Test if chain decay method raises ValueError if att and/or source pars do not contain chain decay information."""
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars_chain, test_model_pars)
+    with pytest.raises(ValueError):
+        model_object.chain_decay(mass_ratios=[0.8, 0.7])
+
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars_chain, test_source_pars, test_model_pars)
+    with pytest.raises(ValueError):
+        model_object.chain_decay(mass_ratios=[0.8, 0.7])
+
+    model_object = Transport3DConcrete(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    with pytest.raises(ValueError):
+        model_object.chain_decay(mass_ratios=[0.8, 0.7])
+
+
 def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars) -> None:
     """Test if model correctly switches modes when using the mode property."""
     pars = {"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}
@@ -147,12 +189,14 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
     model_object.mode = "linear"
     assert model_object.mode == "linear", "Model mode was not switched to 'linear'."
 
+
 def test_model_results_independance(test_mibitrans_model_instantreaction):
     """Test to make sure that changing model parameters does not change result parameters."""
     model, results = test_mibitrans_model_instantreaction
     assert model.hydrological_parameters.velocity == results.hydrological_parameters.velocity
     model.hydrological_parameters.velocity += 1
     assert model.hydrological_parameters.velocity != results.hydrological_parameters.velocity
+
 
 def test_plotting_methods(test_anatrans_model_nodecay):
     """Test if plotting methods defined in parent model are working."""

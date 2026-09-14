@@ -192,8 +192,8 @@ class MibitransToModflow:
     def _write_report(self):
         """Writes a short report after parameter initialization including assumptions and calculated values."""
         assumptions = []
-
-        if self.hydro.alpha_z == 1e-10:
+        # Provide tolerance for alpha_z, since testing for ==1e-10 is considered bad practice by SonarCloud
+        if (self.hydro.alpha_z > 1e-10 - 1e-11) and (self.hydro.alpha_z < 1e-10 + 1e-11):
             assumptions.append("Transverse vertical dispersivity = 1e-10 m")
         if self.lambda1 == 0:
             assumptions.append("Decay rate = 0 [1/d]")

@@ -195,6 +195,7 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass="infint"), None),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[3, 2], depth=5, total_mass=np.inf), None),
         (dict(source_zone_boundary=1, source_zone_concentration=[3], depth=5, total_mass=2), None),
+        (dict(source_zone_boundary=1, source_zone_concentration=3, depth=5, total_mass=2), None),
         (
             dict(source_zone_boundary=np.array([1, 2, 3]), source_zone_concentration=[3, 2, 1], depth=5, total_mass=2),
             None,
@@ -225,6 +226,7 @@ def test_attenuationparameters_utilization(test, expected, test_att_pars) -> Non
             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=np.array([[3, 2, 1], [4, 3, 2]]), depth=5),
             ValueError,
         ),
+        (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2, 1], [4, 3]], depth=5), ValueError),
         (dict(source_zone_boundary=[1, 2], source_zone_concentration=[[3, 2, 1], [4, 3, 2]], depth=5), ValueError),
         (
             dict(source_zone_boundary=[1, 2, 3], source_zone_concentration=[[3, 2, 1], [4, 3, -2]], depth=5),
@@ -287,7 +289,7 @@ def test_sourceparameters_visualize_depletion():
     source.visualize_source_depletion(hydro)
     assert isinstance(plt.gca(), plt.Axes)
     source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, 1000)
-    with pytest.raises(Exception):
+    with pytest.raises(NotImplementedError):
         source.visualize_source_depletion(hydro)
     source = SourceParameters(np.array([1, 2, 3]), [np.array([3, 2, 1]), np.array([4, 3, 2])], 10, np.inf)
     with pytest.raises(ValueError):

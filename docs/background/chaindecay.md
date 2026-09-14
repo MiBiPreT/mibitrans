@@ -3,7 +3,7 @@
 ## Background
 
 For certain contaminants, like chlorinated solvents, it is required to track more than a single degradation process. 
-Dechlorination of perchloroethene (PCE) to the (relatively) save ethene involves consecutive degradation to trichloroethene (TCE), dichloroethene (DCE) and vinyl chloride (VC). 
+Dechlorination of perchloroethene (PCE) to the (relatively) safe ethene involves consecutive degradation to trichloroethene (TCE), dichloroethene (DCE) and vinyl chloride (VC). 
 
 $PCE \to TCE \to DCE \to VC \to Ethene$
 

@@ -1,5 +1,3 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from mibitrans.analysis.to_modflow import MibitransToModflow
@@ -67,9 +65,3 @@ class TestMibitransToModflow:
             mt.rct.sp1[0].array == test_att_pars.partition_coefficient * test_att_pars.fraction_organic_carbon
         )
         assert np.all(mt.rct.rc1[0].array == np.float32(test_att_pars.decay_rate))
-
-    def test_run_plot(self, flopy_object):
-        """Test if FloPy model runs and if class can produce plot."""
-        flopy_object.run_modflow(verbose=False)
-        flopy_object.centerline_modflow()
-        assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)

@@ -22,7 +22,14 @@ def allowed_model_types():
 
 
 def centerline(
-    model, y_position=0, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs
+    model,
+    y_position=0,
+    time=None,
+    relative_concentration=False,
+    legend_names=None,
+    animate=False,
+    plot_index=None,
+    **kwargs,
 ):
     """Plot center of contaminant plume of one or multiple models as a line, at a specified time and y position.
 
@@ -38,6 +45,10 @@ def centerline(
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
 
     """
@@ -51,7 +62,7 @@ def centerline(
         y_pos = check_y_in_domain(mod, y_position)
         t_pos = check_time_in_domain(mod, time)
 
-    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration)
+    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration, plot_index)
 
     for cxyt in plot_iterable:
         if animate:
@@ -106,7 +117,16 @@ def centerline(
         return ani
 
 
-def transverse(model, x_position, time=None, relative_concentration=False, legend_names=None, animate=False, **kwargs):
+def transverse(
+    model,
+    x_position,
+    time=None,
+    relative_concentration=False,
+    legend_names=None,
+    animate=False,
+    plot_index=None,
+    **kwargs,
+):
     """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
     Args:
@@ -120,6 +140,10 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
     """
     model, legend_names = _check_input_iterable(model, legend_names)
@@ -132,7 +156,7 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
         x_pos = check_x_in_domain(mod, x_position)
         t_pos = check_time_in_domain(mod, time)
 
-    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration)
+    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration, plot_index)
 
     for cxyt in plot_iterable:
         if animate:
@@ -188,7 +212,14 @@ def transverse(model, x_position, time=None, relative_concentration=False, legen
 
 
 def breakthrough(
-    model, x_position, y_position=0, relative_concentration=False, legend_names=None, animate=False, **kwargs
+    model,
+    x_position,
+    y_position=0,
+    relative_concentration=False,
+    legend_names=None,
+    animate=False,
+    plot_index=None,
+    **kwargs,
 ):
     """Plot contaminant breakthrough curve at given x and y position in model domain.
 
@@ -203,6 +234,10 @@ def breakthrough(
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
+        plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+            As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+            0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+            Default is None.
         **kwargs : Arguments to be passed to plt.plot().
     """
     model, legend_names = _check_input_iterable(model, legend_names)
@@ -216,7 +251,7 @@ def breakthrough(
         x_pos = check_x_in_domain(mod, x_position)
         y_pos = check_y_in_domain(mod, y_position)
 
-    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration)
+    model, plot_iterable, y_label = _construct_plot_iterable(model, relative_concentration, plot_index)
 
     for cxyt in plot_iterable:
         plot_array_list.append(cxyt[:, y_pos, x_pos])
@@ -312,10 +347,15 @@ def _check_input_iterable(model, legend_names):
     return model, legend_names
 
 
-def _construct_plot_iterable(model, relative_concentration):
+def _construct_plot_iterable(model, relative_concentration, plot_index):
     """Generate iterables to use for plotting."""
     if isinstance(model[0].cxyt, list):
-        plot_iterable = model[0].cxyt
+        if isinstance(plot_index, (list, np.ndarray)):
+            plot_iterable = [model[0].cxyt[i] for i in plot_index]
+        elif isinstance(plot_index, int):
+            plot_iterable = [model[0].cxyt[plot_index]]
+        else:
+            plot_iterable = model[0].cxyt
         y_label = absolute_conc_ylabel
         model *= len(plot_iterable)
     else:

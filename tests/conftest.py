@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 import pytest
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import ModelParameters
@@ -105,6 +106,9 @@ def test_model_pars():
     )
 
 
+fringe_ea = FringeElectronAcceptors(14.528727219547314, 1, 1)
+
+
 @pytest.fixture(scope="session")
 def test_model_pars_short(test_source_pars, test_model_pars):
     """Model Parameters fixture with smaller model width for testing."""
@@ -147,6 +151,15 @@ def test_mibitrans_model_chaindecay(test_hydro_pars, test_att_pars_chain, test_s
     return obj, res
 
 
+@pytest.fixture(scope="session")
+def test_mibitrans_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with fringe biodegradation."""
+    obj = Mibitrans(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
+    obj.fringe_degradation(fringe_ea, 1)
+    res = obj.run()
+    return obj, res
+
+
 @pytest.fixture(scope="module")
 def test_anatrans_model_nodecay(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
     """Anatrans fixture model object for testing, with no decay."""
@@ -173,6 +186,15 @@ def test_anatrans_model_instantreaction(test_hydro_pars, test_att_pars, test_sou
 
 
 @pytest.fixture(scope="session")
+def test_anatrans_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with fringe biodegradation."""
+    obj = Anatrans(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
+    obj.fringe_degradation(fringe_ea, 1)
+    res = obj.run()
+    return obj, res
+
+
+@pytest.fixture(scope="session")
 def test_bioscreen_model_nodecay(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
     """Bioscreen fixture model object for testing, with no decay."""
     test_att_pars_nodecay.decay_rate = 0
@@ -194,6 +216,15 @@ def test_bioscreen_model_instantreaction(test_hydro_pars, test_att_pars, test_so
     """Bioscreen fixture model object for testing, with instant reaction."""
     obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
+    res = obj.run()
+    return obj, res
+
+
+@pytest.fixture(scope="session")
+def test_bioscreen_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+    """Mibitrans fixture model object for testing, with fringe biodegradation."""
+    obj = Bioscreen(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
+    obj.fringe_degradation(fringe_ea, 1)
     res = obj.run()
     return obj, res
 

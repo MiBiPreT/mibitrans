@@ -30,6 +30,7 @@ classifiers = [
 dependencies = [
     "contourpy",
     "cycler",
+    "flopy",
     "fonttools",
     "iniconfig",
     "ipympl",

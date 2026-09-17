@@ -319,7 +319,8 @@ class Transport3D(ABC):
         self.mode = "core-fringe"
         self.bc = electron_acceptor.calculate_bc(electron_donor_molecular_weight)
 
-    def _calculate_core_fringe(self):
+    def _calculate_core_fringe(self) -> list[np.ndarray]:
+        # Differentiate which class calls this method, as calculation for distribution is implemented differently.
         if self.__class__.__name__ == "Mibitrans":
             core_cxyt = self._calculate_concentration_for_all_xyt()
         else:
@@ -333,6 +334,8 @@ class Transport3D(ABC):
             electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt()
         else:
             electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        electron_acceptor_fringe_cxyt = electron_acceptor_cxyt - core_cxyt
+        electron_acceptor_fringe_cxyt = np.where(electron_acceptor_fringe_cxyt > 0, electron_acceptor_fringe_cxyt, 0)
 
         core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
         core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
@@ -342,7 +345,7 @@ class Transport3D(ABC):
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
-        return [core_fringe_cxyt, electron_acceptor_cxyt]
+        return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
 
     def instant_reaction(
         self,

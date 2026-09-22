@@ -10,7 +10,7 @@ relative_conc_zlabel = r"Relative concentration ($C/C_0$)"
 absolute_conc_zlabel = r"Concentration [g/$m^{3}$]"
 
 
-def plume_2d(model, time=None, relative_concentration=False, animate=False, **kwargs):
+def plume_2d(model, time=None, relative_concentration=False, animate=False, chain_decay_position=0, **kwargs):
     """Plot contaminant plume as a 2D colormesh, at a specified time.
 
     Args:
@@ -21,18 +21,24 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, **kw
             zone concentrations at t=0. By default, absolute concentrations are shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
             False.
+        chain_decay_position (int, optional): Which concentration distribution of chain decay to plot. As a zero-base
+            index in the same order as decay rates were provided. Default is 0.
         **kwargs : Arguments to be passed to plt.pcolormesh().
 
     Returns a matrix plot of the input plume as object.
     """
     check_model_type(model, allowed_model_types())
     t_pos = check_time_in_domain(model, time)
-    if relative_concentration:
-        model_concentration = model.relative_cxyt
-        z_label = relative_conc_zlabel
-    else:
-        model_concentration = model.cxyt
+    if isinstance(model.cxyt, list):
+        model_concentration = model.cxyt[chain_decay_position]
         z_label = absolute_conc_zlabel
+    else:
+        if relative_concentration:
+            model_concentration = model.relative_cxyt
+            z_label = relative_conc_zlabel
+        else:
+            model_concentration = model.cxyt
+            z_label = absolute_conc_zlabel
     # Non animated plot
     if not animate:
         plt.pcolormesh(model.x, model.y, model_concentration[t_pos, :, :], **kwargs)
@@ -62,7 +68,7 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, **kw
         return ani
 
 
-def plume_3d(model, time=None, relative_concentration=False, animate=False, **kwargs):
+def plume_3d(model, time=None, relative_concentration=False, animate=False, chain_decay_position=0, **kwargs):
     """Plot contaminant plume as a 3D surface, at a specified time.
 
     Args:
@@ -73,6 +79,8 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
             zone concentrations at t=0. By default, absolute concentrations are shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
             False.
+        chain_decay_position (int, optional): Which concentration distribution of chain decay to plot. As a zero-base
+            index in the same order as decay rates were provided. Default is 0.
         **kwargs : Arguments to be passed to plt.plot_surface().
 
     Returns:
@@ -80,12 +88,16 @@ def plume_3d(model, time=None, relative_concentration=False, animate=False, **kw
     """
     check_model_type(model, allowed_model_types())
     t_pos = check_time_in_domain(model, time)
-    if relative_concentration:
-        model_concentration = model.relative_cxyt
-        z_label = relative_conc_zlabel
-    else:
-        model_concentration = model.cxyt
+    if isinstance(model.cxyt, list):
+        model_concentration = model.cxyt[chain_decay_position]
         z_label = absolute_conc_zlabel
+    else:
+        if relative_concentration:
+            model_concentration = model.relative_cxyt
+            z_label = relative_conc_zlabel
+        else:
+            model_concentration = model.cxyt
+            z_label = absolute_conc_zlabel
 
     # Non animated plot
     xxx = np.tile(model.x, (len(model.t), len(model.y), 1))

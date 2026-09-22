@@ -3,12 +3,15 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
-import mibitrans
-import mibitrans.data.parameters
+import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
+from mibitrans.data.check_input import check_chain_decay_validity
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
+from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
@@ -35,9 +38,16 @@ class Transport3D(ABC):
             verbose (bool, optional): Verbose mode. Defaults to False.
         """
         # Check if input arguments are of the correct dataclass
+        self._expected_dataclass_types = {
+            "hydrological_parameters": pars.HydrologicalParameters,  # mibitrans.data.parameters.HydrologicalParameters,
+            "attenuation_parameters": pars.AttenuationParameters,  # mibitrans.data.parameters.AttenuationParameters,
+            "source_parameters": pars.SourceParameters,  # mibitrans.data.parameters.SourceParameters,
+            "model_parameters": pars.ModelParameters,  # mibitrans.data.parameters.ModelParameters,
+        }
+
         for key, value in locals().items():
             if key not in ["self", "verbose"]:
-                self._check_input_dataclasses(key, value)
+                validate_input_values(key, value, self._expected_dataclass_types[key])
 
         # Copy to ensure dataclasses inside model class are independent
         self._hyd_pars = copy.copy(hydrological_parameters)
@@ -53,6 +63,8 @@ class Transport3D(ABC):
         self._utilization_factor = None
         self.biodegradation_capacity = 0
         self.cxyt_noBC = None
+
+        self._mass_ratios = None
 
         self._pre_run_initialization_parameters()
 
@@ -74,7 +86,8 @@ class Transport3D(ABC):
 
     @hydrological_parameters.setter
     def hydrological_parameters(self, value):
-        self._check_input_dataclasses("hydrological_parameters", value)
+        name = "hydrological_parameters"
+        validate_input_values(name, value, self._expected_dataclass_types[name])
         self._hyd_pars = copy.copy(value)
 
     @property
@@ -84,7 +97,8 @@ class Transport3D(ABC):
 
     @attenuation_parameters.setter
     def attenuation_parameters(self, value):
-        self._check_input_dataclasses("attenuation_parameters", value)
+        name = "attenuation_parameters"
+        validate_input_values(name, value, self._expected_dataclass_types[name])
         self._att_pars = copy.copy(value)
 
     @property
@@ -94,7 +108,8 @@ class Transport3D(ABC):
 
     @source_parameters.setter
     def source_parameters(self, value):
-        self._check_input_dataclasses("source_parameters", value)
+        name = "source_parameters"
+        validate_input_values(name, value, self._expected_dataclass_types[name])
         self._src_pars = copy.copy(value)
 
     @property
@@ -104,7 +119,8 @@ class Transport3D(ABC):
 
     @model_parameters.setter
     def model_parameters(self, value):
-        self._check_input_dataclasses("model_parameters", value)
+        name = "model_parameters"
+        validate_input_values(name, value, self._expected_dataclass_types[name])
         self._mod_pars = copy.copy(value)
 
     @property
@@ -179,6 +195,7 @@ class Transport3D(ABC):
         self.yyy = self.y[None, :, None]
         self.ttt = self.t[:, None, None]
 
+        # Calculate retardation if not already specified in adsorption_parameters
         if (
             self._att_pars.bulk_density is not None
             and self._att_pars.partition_coefficient is not None
@@ -191,29 +208,28 @@ class Transport3D(ABC):
         # cxyt is concentration output array
         self.cxyt = np.zeros((len(self.t), len(self.y), len(self.x)))
 
-        # Calculate retardation if not already specified in adsorption_parameters
-        self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
+        if self._src_pars.chain_decay_source:
+            if self._src_pars.total_mass != np.inf:
+                warnings.warn("Source depletion does not work with chain decay. Source depletion rate is set to 0.")
+            self.k_source = 0
+        else:
+            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
-        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        if self._src_pars.chain_decay_source and self._mode != "chain_decay":
+            self.c_source = self.c_source[0].copy()
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        elif not self._src_pars.chain_decay_source:
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
         else:
-            self._decay_rate = self._att_pars.decay_rate
-
-    def _check_input_dataclasses(self, key, value):
-        """Check if input parameters are the correct dataclasses. Raise an error if not."""
-        dataclass_dict = {
-            "hydrological_parameters": mibitrans.data.parameters.HydrologicalParameters,
-            "attenuation_parameters": mibitrans.data.parameters.AttenuationParameters,
-            "source_parameters": mibitrans.data.parameters.SourceParameters,
-            "model_parameters": mibitrans.data.parameters.ModelParameters,
-        }
-
-        if not isinstance(value, dataclass_dict[key]):
-            raise TypeError(f"Input argument {key} should be {dataclass_dict[key]}, but is {type(value)} instead.")
+            if isinstance(self._att_pars.decay_rate, (np.ndarray, list)):
+                self._decay_rate = self._att_pars.decay_rate[0]
+            else:
+                self._decay_rate = self._att_pars.decay_rate
 
     def _calculate_y_discretization(self):
         """Calculate y-direction discretization."""
@@ -231,6 +247,43 @@ class Transport3D(ABC):
                 "Source zone boundary is larger than model width. Model width adjusted to fit entire source zone."
             )
         return y
+
+    def chain_decay(self, mass_ratios: list[float] | np.ndarray[float]):
+        """Enable and set up chain decay model, calculating concentrations for each contaminant in the chain.
+
+        Args:
+            mass_ratios (list | np.ndarray): Ratio between masses of sequential decay products for chain decay. Length
+                of iterable should be one less than length of decay_rate or half_life. Default is None.
+        """
+        validate_input_values("mass_ratios", mass_ratios)
+
+        if not isinstance(mass_ratios, (list, np.ndarray)):
+            mass_ratios = np.array([mass_ratios])
+        else:
+            mass_ratios = np.array(mass_ratios)
+
+        check_chain_decay_validity(self._att_pars, self._src_pars, mass_ratios)
+        self._mass_ratios = mass_ratios
+        self._mode = "chain_decay"
+
+    def _calculate_chain_decay(self):
+        """Calculates concentrations for chain decay by running model equations multiple times."""
+        check_chain_decay_validity(self._att_pars, self._src_pars, self._mass_ratios)
+        decay_ratios = calculate_decay_ratios(self._att_pars.decay_rate, self._mass_ratios)
+        transformed_source_concentrations = transform_chain_concentrations(
+            self._src_pars.source_zone_concentration, decay_ratios, inverse=False
+        )
+        self.k_source = 0
+        intermediate_cxyt = [0] * len(self._att_pars.decay_rate)
+        for i, rate in enumerate(self._att_pars.decay_rate):
+            self._decay_rate = rate / self._att_pars.retardation
+            self.c_source = transformed_source_concentrations[i]
+            self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+            if self.__class__.__name__ == "Mibitrans":
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt()
+            else:
+                intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+        return transform_chain_concentrations(intermediate_cxyt, decay_ratios, inverse=True)
 
     def instant_reaction(
         self,
@@ -267,6 +320,7 @@ class Transport3D(ABC):
         self._pre_run_initialization_parameters()
 
     def _check_model_mode_before_run(self):
+        """Make sure internal parameters are up to date with input."""
         self._pre_run_initialization_parameters()
         if self._mode == "linear":
             if self.biodegradation_capacity is not None:
@@ -275,11 +329,6 @@ class Transport3D(ABC):
                         "Instant reaction parameters are present while model mode is linear. "
                         "Make sure that this is indeed the desired model."
                     )
-                # No longer warns to avoid potential confusion
-                # warnings.warn(
-                #     "Instant reaction parameters are present while model mode is linear. "
-                #     "Make sure that this is indeed the desired model."
-                # )
         if self._mode == "instant_reaction":
             if self.biodegradation_capacity is None:
                 raise ValueError(
@@ -316,6 +365,7 @@ class Results:
                 the model. Only for instant reaction, None for other models.
             utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
                 run the model. Only for instant reaction, None for other models.
+            mass_ratios (np.ndarray) : Ratio between masses of sequential decay products for chain decay
             mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
             rv (float) : Retarded flow velocity, as v / R [m/day].
             k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
@@ -362,6 +412,7 @@ class Results:
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
         self._utilization_factor = copy.copy(model._utilization_factor)
+        self._mass_ratios = copy.copy(model._mass_ratios)
 
         self._mode = model.mode
         self._rv = model.rv
@@ -427,6 +478,11 @@ class Results:
     def utilization_factor(self):
         """Utilization factor of the model used for the results."""
         return self._utilization_factor
+
+    @property
+    def mass_ratios(self):
+        """Ratio between masses of sequential decay products for chain decay."""
+        return self._mass_ratios
 
     @property
     def mode(self):

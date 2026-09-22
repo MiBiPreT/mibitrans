@@ -16,6 +16,7 @@ nav:
     - Transport Model Setup: background/modelsetup.md
     - Model implementations: background/modelimplementations.md
     - Instant Reaction Model: background/instantreaction.md
+    - Chain Decay: background/chaindecay.md
     - Mass Balance: background/massbalance.md
     - BIOSCREEN: background/bioscreen.md
   - Implementation: 
@@ -26,9 +27,10 @@ nav:
     - Walkthrough animations: examples/animate_plume_plots.py
     - Bemidji oil pipeline burst: examples/example_bemidji.ipynb
     - Keesler Air-Force Base: examples/example_keesler.ipynb
+    - Ghent fieldsite: examples/example_ghent.ipynb
     - Comparison Mibitrans with Anatrans: examples/example_mibitrans_anatrans.ipynb
     - Comparison with BIOSCREEN: examples/benchmarking_BIOSCREEN.ipynb
-    - Ghent fieldsite: examples/example_ghent.ipynb
+    - Comparison with BIOCHLOR: examples/benchmarking_BIOCHLOR.ipynb
 
   - Development: development/development.md
   - API Reference:

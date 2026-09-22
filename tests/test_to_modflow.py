@@ -3,6 +3,7 @@ import pytest
 from mibitrans.analysis.to_modflow import MibitransToModflow
 
 
+@pytest.mark.filterwarnings("ignore:Source depletion is not supported")
 class TestMibitransToModflow:
     """Tests conversion from Mibitrans input to FloPy model."""
 

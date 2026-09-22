@@ -9,6 +9,7 @@ from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen

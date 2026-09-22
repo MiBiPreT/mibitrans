@@ -13,6 +13,7 @@ from mibitrans.data.check_input import check_chain_decay_validity
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
@@ -62,6 +63,7 @@ class Transport3D(ABC):
         self._electron_acceptors = None
         self._utilization_factor = None
         self.biodegradation_capacity = 0
+        self.stoichiometric_concentration_electron_acceptors = 0
         self.cxyt_noBC = None
 
         self._mass_ratios = None
@@ -141,6 +143,18 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
+            case "core-fringe":
+                if self.stoichiometric_concentration_electron_acceptors is None:
+                    raise ValueError(
+                        "Model mode was set to 'core-fringe', without electron acceptor parameters being "
+                        "provided. Use the fringe_degradation method to supply the missing parameters."
+                    )
+                elif self.stoichiometric_concentration_electron_acceptors == 0:
+                    warnings.warn(
+                        "Mode set to core-fringe, but stoichiometric_concentration_electron_acceptors is 0. "
+                        "Make sure that this is intended."
+                    )
+                self._mode = "core-fringe"
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
@@ -285,6 +299,66 @@ class Transport3D(ABC):
                 intermediate_cxyt[i] = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
         return transform_chain_concentrations(intermediate_cxyt, decay_ratios, inverse=True)
 
+    def fringe_degradation(
+        self,
+        electron_acceptor: FringeElectronAcceptors,
+        electron_donor_molecular_weight: float,
+    ):
+        """Add degradation at plume fringes to model based on available electron acceptors.
+
+        Under the assumption that electron acceptors (e.g. oxygen, nitrate) can not co-exist with electron donors
+        (i.e. contaminant), contaminant concentrations at the plume fringe are governed by concentration distribution
+        of electron acceptors. Using principles from Gutierrez-Neri et al. (2009) corrected by Hunkeler et al. (2010).
+        In case electron donor is a mixture of multiple contaminants, use average values along those contaminants for
+        each parameter involved.
+
+        Args:
+            electron_acceptor (mibitrans.data.parameter_information.FringeElectronAcceptors): FringeElectronAcceptors
+                dataclass containing information about electron acceptor concentrations and biodegradation
+                stoichiometry.
+            electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
+        """
+        for argument_key, argument_value in locals().items():
+            if argument_key != "self":
+                validate_input_values(argument_key, argument_value)
+        self.stoichiometric_concentration_electron_acceptors = electron_acceptor.calculate_stoichiometric_concentration(
+            electron_donor_molecular_weight
+        )
+        self.mode = "core-fringe"
+
+    def _calculate_core_fringe(self) -> list[np.ndarray]:
+        # Differentiate which class calls this method, as calculation for distribution is implemented differently.
+        if self.__class__.__name__ == "Mibitrans":
+            core_cxyt = self._calculate_concentration_for_all_xyt()
+        else:
+            core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+
+        self.c_source = np.array([self.stoichiometric_concentration_electron_acceptors])
+        self.y_source = np.array([self.y_source[-1]])
+        self._decay_rate = 0
+
+        if self.__class__.__name__ == "Mibitrans":
+            electron_acceptor_cxyt = (
+                self.stoichiometric_concentration_electron_acceptors - self._calculate_concentration_for_all_xyt()
+            )
+        else:
+            electron_acceptor_cxyt = (
+                self.stoichiometric_concentration_electron_acceptors
+                - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+            )
+        electron_acceptor_fringe_cxyt = electron_acceptor_cxyt - core_cxyt
+        electron_acceptor_fringe_cxyt = np.where(electron_acceptor_fringe_cxyt > 0, electron_acceptor_fringe_cxyt, 0)
+
+        core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
+        core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
+
+        self._decay_rate = self._att_pars.decay_rate
+        self.y_source = self._src_pars.source_zone_boundary
+        self.c_source = self._src_pars.source_zone_concentration.copy()
+        self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+
+        return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
+
     def instant_reaction(
         self,
         electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,
@@ -419,6 +493,7 @@ class Results:
         self._k_source = model.k_source
         self._c_source = model.c_source
         self._biodegradation_capacity = model.biodegradation_capacity
+        self._stoichiometric_concentration_electron_acceptors = model.stoichiometric_concentration_electron_acceptors
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
@@ -510,6 +585,11 @@ class Results:
         return self._biodegradation_capacity
 
     @property
+    def stoichiometric_concentration_electron_acceptors(self):
+        """Concentration of degradable electron donor based on available electron acceptors."""
+        return self._stoichiometric_concentration_electron_acceptors
+
+    @property
     def cxyt(self):
         """Modelled concentration for all x, y and t, using the input parameters present in this object."""
         return self._cxyt
@@ -534,7 +614,7 @@ class Results:
             model_parameters=self.model_parameters,
         )
 
-    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, **kwargs):
+    def centerline(self, y_position=0, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot center of contaminant plume of this model, at a specified time and y position.
 
         Args:
@@ -546,6 +626,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
 
         """
@@ -556,6 +640,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -566,11 +651,12 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, **kwargs):
+    def transverse(self, x_position, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
         Args:
@@ -581,6 +667,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -590,6 +680,7 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -600,11 +691,14 @@ class Results:
                 time=time,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def breakthrough(self, x_position, y_position=0, relative_concentration=False, animate=False, **kwargs):
+    def breakthrough(
+        self, x_position, y_position=0, relative_concentration=False, animate=False, plot_index=0, **kwargs
+    ):
         """Plot contaminant breakthrough curve at given x and y position in model domain.
 
         Args:
@@ -615,6 +709,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot().
         """
         if animate:
@@ -624,6 +722,7 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return anim
@@ -634,11 +733,12 @@ class Results:
                 y_position=y_position,
                 relative_concentration=relative_concentration,
                 animate=animate,
+                plot_index=plot_index,
                 **kwargs,
             )
             return None
 
-    def plume_2d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_2d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
 
         Args:
@@ -648,14 +748,25 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.pcolormesh().
 
         Returns a matrix plot of the input plume as object.
         """
-        anim = psurf.plume_2d(self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs)
+        anim = psurf.plume_2d(
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
+        )
         return anim
 
-    def plume_3d(self, time=None, relative_concentration=False, animate=False, **kwargs):
+    def plume_3d(self, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
         """Plot contaminant plume as a 3D surface, at a specified time.
 
         Args:
@@ -665,6 +776,10 @@ class Results:
                 source zone concentrations at t=0. By default, absolute concentrations are shown.
             animate (bool, optional): If True, animation of contaminant plume until given time is shown. Default is
                 False.
+            plot_index (int, optional): Which concentration distribution to plot, if model has a list of multiple cxyt.
+                As a zero-base index in the same order as decay rates were provided for chain-decay. For core-fringe,
+                0-index contains electron donor distribution, 1-index contains electron acceptor distribution.
+                Default is 0.
             **kwargs : Arguments to be passed to plt.plot_surface().
 
         Returns:
@@ -673,7 +788,12 @@ class Results:
             anim (matplotib.animation.FuncAnimation) : Matplotlib FuncAnimation object of plume plot.
         """
         ax_or_anim = psurf.plume_3d(
-            self, time=time, relative_concentration=relative_concentration, animate=animate, **kwargs
+            self,
+            time=time,
+            relative_concentration=relative_concentration,
+            animate=animate,
+            plot_index=plot_index,
+            **kwargs,
         )
         return ax_or_anim
 

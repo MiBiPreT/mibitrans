@@ -1,5 +1,6 @@
 import os
 import tempfile
+import warnings
 import flopy
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -176,7 +177,11 @@ class MibitransToModflow:
         for i in range(amount_zones - 1, -1, -1):
             mask = np.abs(y - y_center) <= sbound[i]  # boolean [-]
             self.sconc[0, mask, 0] = szoneconc[i]  # [g/m3]
-
+        if self.source.total_mass != np.inf:
+            warnings.warn(
+                "Source depletion is not supported for conversion to MODFLOW model. Therefore, no source"
+                "depletion is assumed for the output model."
+            )
         # Advection parameters
         self.dceps = 1.0 * 10**-5  # [-]
         self.nplane = 2  # 3D-simulations [-]

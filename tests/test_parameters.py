@@ -443,8 +443,8 @@ def test_fringe_electron_acceptor_calculate_bc(parameters, expected) -> None:
     """Test calculation of biodegradation capacity from electron acceptors."""
     ea = parameters["ea"]
     if isinstance(expected, (int, float)):
-        bc = ea.calculate_bc(parameters["electron_donor_molecular_weight"])
+        bc = ea.calculate_stoichiometric_concentration(parameters["electron_donor_molecular_weight"])
         assert bc == expected
     else:
         with pytest.raises(expected):
-            ea.calculate_bc(parameters["electron_donor_molecular_weight"])
+            ea.calculate_stoichiometric_concentration(parameters["electron_donor_molecular_weight"])

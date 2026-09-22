@@ -155,8 +155,12 @@ class FringeElectronAcceptors:
         ):
             raise ValueError("All input parameters should be equal length.")
 
-    def calculate_bc(self, electron_donor_molecular_weight: int | float) -> float:
+    def calculate_stoichiometric_concentration(self, electron_donor_molecular_weight: int | float) -> float:
         """Calculate the concentration of degradable electron donor based on available electron acceptors.
+
+        Returned value is sum of all electron acceptors, expressed as concentration of electron donor it is able to
+        degrade using the biodegradation reaction stoichiometry. This expression is equivalent to the
+        'biodegradation capacity' from the instant reaction model (as implemented in e.g. BIOSCREEN).
 
         Args:
             electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.

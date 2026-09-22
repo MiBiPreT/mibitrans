@@ -3,7 +3,6 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 import numpy as np
-import mibitrans.data.parameter_information
 import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
 from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
@@ -14,6 +13,7 @@ from mibitrans.data.check_input import check_chain_decay_validity
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import FringeElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
@@ -63,7 +63,7 @@ class Transport3D(ABC):
         self._electron_acceptors = None
         self._utilization_factor = None
         self.biodegradation_capacity = 0
-        self.bc = 0
+        self.stoichiometric_concentration_electron_acceptors = 0
         self.cxyt_noBC = None
 
         self._mass_ratios = None
@@ -144,10 +144,15 @@ class Transport3D(ABC):
                     )
                 self._mode = "instant_reaction"
             case "core-fringe":
-                if self.bc is None:
+                if self.stoichiometric_concentration_electron_acceptors is None:
                     raise ValueError(
                         "Model mode was set to 'core-fringe', without electron acceptor parameters being "
                         "provided. Use the fringe_degradation method to supply the missing parameters."
+                    )
+                elif self.stoichiometric_concentration_electron_acceptors == 0:
+                    warnings.warn(
+                        "Mode set to core-fringe, but stoichiometric_concentration_electron_acceptors is 0. "
+                        "Make sure that this is intended."
                     )
                 self._mode = "core-fringe"
             case _:
@@ -296,7 +301,7 @@ class Transport3D(ABC):
 
     def fringe_degradation(
         self,
-        electron_acceptor: mibitrans.data.parameter_information.FringeElectronAcceptors,
+        electron_acceptor: FringeElectronAcceptors,
         electron_donor_molecular_weight: float,
     ):
         """Add degradation at plume fringes to model based on available electron acceptors.
@@ -316,8 +321,10 @@ class Transport3D(ABC):
         for argument_key, argument_value in locals().items():
             if argument_key != "self":
                 validate_input_values(argument_key, argument_value)
+        self.stoichiometric_concentration_electron_acceptors = electron_acceptor.calculate_stoichiometric_concentration(
+            electron_donor_molecular_weight
+        )
         self.mode = "core-fringe"
-        self.bc = electron_acceptor.calculate_bc(electron_donor_molecular_weight)
 
     def _calculate_core_fringe(self) -> list[np.ndarray]:
         # Differentiate which class calls this method, as calculation for distribution is implemented differently.
@@ -326,14 +333,19 @@ class Transport3D(ABC):
         else:
             core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
-        self.c_source = np.array([self.bc])
+        self.c_source = np.array([self.stoichiometric_concentration_electron_acceptors])
         self.y_source = np.array([self.y_source[-1]])
         self._decay_rate = 0
 
         if self.__class__.__name__ == "Mibitrans":
-            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt()
+            electron_acceptor_cxyt = (
+                self.stoichiometric_concentration_electron_acceptors - self._calculate_concentration_for_all_xyt()
+            )
         else:
-            electron_acceptor_cxyt = self.bc - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+            electron_acceptor_cxyt = (
+                self.stoichiometric_concentration_electron_acceptors
+                - self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
+            )
         electron_acceptor_fringe_cxyt = electron_acceptor_cxyt - core_cxyt
         electron_acceptor_fringe_cxyt = np.where(electron_acceptor_fringe_cxyt > 0, electron_acceptor_fringe_cxyt, 0)
 
@@ -481,7 +493,7 @@ class Results:
         self._k_source = model.k_source
         self._c_source = model.c_source
         self._biodegradation_capacity = model.biodegradation_capacity
-        self._bc = model.bc
+        self._stoichiometric_concentration_electron_acceptors = model.stoichiometric_concentration_electron_acceptors
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
@@ -571,6 +583,11 @@ class Results:
     def biodegradation_capacity(self):
         """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
         return self._biodegradation_capacity
+
+    @property
+    def stoichiometric_concentration_electron_acceptors(self):
+        """Concentration of degradable electron donor based on available electron acceptors."""
+        return self._stoichiometric_concentration_electron_acceptors
 
     @property
     def cxyt(self):

@@ -26,6 +26,8 @@ def validate_input_values(parameter, value, expectation=None):
         # Specific check for electron acceptor utilization factor, which should be UtilizationFactor dataclass
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
+        case "electron_acceptor":
+            error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.FringeElectronAcceptors)
         case "hydrological_parameters" | "attenuation_parameters" | "source_parameters" | "model_parameters":
             error = _check_dataclass(parameter, value, expectation)
         # Parameters which can be any float value
@@ -35,7 +37,15 @@ def validate_input_values(parameter, value, expectation=None):
         case "porosity" | "fraction_organic_carbon":
             error = _check_numeric_fraction(parameter, value)
         # Parameters which are input as single values, lists or numpy arrays
-        case "source_zone_boundary" | "decay_rate" | "half_life" | "mass_ratios":
+        case (
+            "source_zone_boundary"
+            | "decay_rate"
+            | "half_life"
+            | "mass_ratios"
+            | "electron_acceptor_concentration"
+            | "stoichiometric_ratio"
+            | "electron_acceptor_molecular_weight"
+        ):
             error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=False)
         # Parameters which are input as single values, lists or numpy arrays, and may contain nested lists/arrays
         case "source_zone_concentration":

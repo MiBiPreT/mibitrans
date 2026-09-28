@@ -117,7 +117,7 @@ class AttenuationParameters:
         TypeError : If input parameters of incorrect datatype.
     """
 
-    retardation: float = 1
+    retardation: float = None
     decay_rate: float | list[float] | np.ndarray[float] = 0
     half_life: float | list[float] | np.ndarray[float] = 0
     bulk_density: float = None
@@ -143,6 +143,22 @@ class AttenuationParameters:
     def __post_init__(self):
         """Check argument presence, types and domain."""
         self.initialized = True
+        # Make user aware of potential conflict if retardation and parameters which can calculate retardation are
+        # provided.
+        if (
+            self.retardation is not None
+            and self.bulk_density is not None
+            and self.partition_coefficient is not None
+            and self.fraction_organic_carbon is not None
+        ):
+            warnings.warn(
+                "Retardation is specified, while bulk density, partition coefficient and fraction organic "
+                "carbon are specified as well. The retardation factor calculated from bulk density, "
+                "partition coefficient and fraction organic carbon will be used instead of the provided "
+                "retardation. If this is not intended, only the retardation should be specified."
+            )
+        if self.retardation is None:
+            self.retardation = 1
 
     def calculate_retardation(self, porosity: float):
         """Calculate retardation factor from soil adsorption parametrers and porosity."""
@@ -151,10 +167,6 @@ class AttenuationParameters:
         )
         if self.verbose:
             print(f"Retardation factor has been calculated to be {self.retardation}.")
-
-    def _require_linear_decay(self):
-        if self.decay_rate is None and self.half_life is None:
-            raise MissingValueError("Linear reaction model requires decay rate or half life.")
 
     def _set_decay(self, parameter, value):
         ar_value = np.array(value)

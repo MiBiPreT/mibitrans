@@ -336,7 +336,7 @@ def _check_input_iterable(model, legend_names):
     if not isinstance(model, list):
         model = [model]
     else:
-        if any(isinstance(mod.cxyt, list) for mod in model):
+        if any(mod.mode == "chain_decay" for mod in model):
             raise ValueError(
                 "Input of multiple models is not supported if one of the models uses chain decay. "
                 "Call method multiple times instead."

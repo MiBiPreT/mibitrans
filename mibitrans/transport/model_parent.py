@@ -62,6 +62,8 @@ class Transport3D(ABC):
         self._mode = "linear"
         self._electron_acceptors = None
         self._utilization_factor = None
+        # Parameter biodegradation_capacity decrepit from version 2.0 onward, functionality replace by
+        # stoichiometric_concentration_electron_acceptors
         self.biodegradation_capacity = 0
         self.stoichiometric_concentration_electron_acceptors = 0
         self.cxyt_noBC = None
@@ -80,6 +82,23 @@ class Transport3D(ABC):
             model_parameters=self.model_parameters,
             verbose=self.verbose,
         )
+
+    @property
+    def short_description(self):
+        """Return short description of model type."""
+        name = self.__class__.__name__
+        match self.mode:
+            case "linear":
+                return f"{name} linear"
+            case "core-fringe":
+                if self._att_pars.decay_rate:
+                    return f"{name} core-fringe"
+                else:
+                    return f"{name} fringe"
+            case "chain_decay":
+                return f"{name} chain-decay"
+            case _:
+                return name
 
     @property
     def hydrological_parameters(self):
@@ -127,7 +146,7 @@ class Transport3D(ABC):
 
     @property
     def mode(self):
-        """Model mode property. Either 'linear' or 'instant_reaction'."""
+        """Model mode property. Either 'linear', 'core-fringe' or 'chain-decay'."""
         return self._mode
 
     @mode.setter
@@ -135,6 +154,7 @@ class Transport3D(ABC):
         match value:
             case "linear" | "linear decay" | "linear_decay" | 0:
                 self._mode = "linear"
+            # Case below will be decrepit from version 2.0 onward
             case "instant" | "instant_reaction" | "instant reaction" | 1:
                 if self._electron_acceptors is None or self._utilization_factor is None:
                     raise ValueError(
@@ -143,7 +163,7 @@ class Transport3D(ABC):
                         "concentrations."
                     )
                 self._mode = "instant_reaction"
-            case "core-fringe":
+            case "core-fringe" | "fringe":
                 if self.stoichiometric_concentration_electron_acceptors is None:
                     raise ValueError(
                         "Model mode was set to 'core-fringe', without electron acceptor parameters being "
@@ -155,6 +175,13 @@ class Transport3D(ABC):
                         "Make sure that this is intended."
                     )
                 self._mode = "core-fringe"
+            case "chain_decay" | "chain_degradation" | "chain":
+                if self._mass_ratios is None:
+                    raise ValueError(
+                        "Model mode was set to 'chain_decay', but no mass ratios are provided. Use the chain_decay "
+                        "method to supply this parameter."
+                    )
+                self._mode = "chain_decay"
             case _:
                 warnings.warn(f"Mode '{value}' not recognized. Defaulting to 'linear' instead.", UserWarning)
                 self._mode = "linear"
@@ -175,12 +202,6 @@ class Transport3D(ABC):
         maximum_concentration = np.max(self.source_parameters.source_zone_concentration)
         relative_cxyt = self.cxyt / maximum_concentration
         return relative_cxyt
-
-    @property
-    @abstractmethod
-    def short_description(self):
-        """Short string describing model type."""
-        pass
 
     @abstractmethod
     def run(self):
@@ -236,6 +257,7 @@ class Transport3D(ABC):
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         elif not self._src_pars.chain_decay_source:
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        # From version 2.0 onward, if condition decrepit, always resolve to else
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
@@ -333,10 +355,12 @@ class Transport3D(ABC):
         else:
             core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
+        # Set source zone and decay rate to conditions for electron acceptor
         self.c_source = np.array([self.stoichiometric_concentration_electron_acceptors])
         self.y_source = np.array([self.y_source[-1]])
         self._decay_rate = 0
 
+        # Calculate concentration distribution for electron acceptor using the adapted source and decay rate
         if self.__class__.__name__ == "Mibitrans":
             electron_acceptor_cxyt = (
                 self.stoichiometric_concentration_electron_acceptors - self._calculate_concentration_for_all_xyt()
@@ -352,6 +376,7 @@ class Transport3D(ABC):
         core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
         core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
 
+        # Return decay rate and source zone to prior conditions
         self._decay_rate = self._att_pars.decay_rate
         self.y_source = self._src_pars.source_zone_boundary
         self.c_source = self._src_pars.source_zone_concentration.copy()
@@ -383,6 +408,10 @@ class Transport3D(ABC):
                 information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
                 for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
         """
+        warnings.warn(
+            "This method will be decrepit from version 2.0 onwards. Use the fringe_degradation method instead.",
+            DeprecationWarning,
+        )
         self._electron_acceptors, self._utilization_factor = check_instant_reaction_acceptor_input(
             electron_acceptors, utilization_factor
         )
@@ -435,28 +464,25 @@ class Results:
                 the model.
             source_parameters (SourceParameters) : Dataclass holding the source parameters used to run the model.
             model_parameters (ModelParameters): Dataclass holding the model parameters used to run the model.
-            electron_acceptors (ElectronAcceptors): Dataclass holding the electron acceptor concentrations used to run
-                the model. Only for instant reaction, None for other models.
+            electron_acceptors (ElectronAcceptors): Dataclass holding the electron acceptor concentrations and
+                stoichiometry used to run the model. Only for (core-)fringe degradation, None for other models.
             utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
-                run the model. Only for instant reaction, None for other models.
+                run the model. Only for instant reaction, None for other models. Decrepit from version 2.0 onward.
             mass_ratios (np.ndarray) : Ratio between masses of sequential decay products for chain decay
-            mode (str) : Model mode of the used model. Either 'linear' or 'instant_reaction'
+            mode (str) : Model mode of the used model. Either 'linear', 'core-fringe' or 'chain_decay'.
             rv (float) : Retarded flow velocity, as v / R [m/day].
             k_source (float) : Source depletion rate [1/days]. For infinite source mass, k_source = 0, and therefore, no
                 source depletion takes place.
             c_source (np.ndarray) : Initial nett source zone concentrations. For multiple source zones, nett
-                concentration in nth source zone is original concentration minus concentration in source zone n - 1. For
-                instant reaction model, the biodegradation capacity is added to the outermost source zone.
+                concentration in nth source zone is original concentration minus concentration in source zone n - 1.
             biodegradation_capacity (float) : Maximum capacity of biodegradation taking place, based on electron
                 acceptor concentrations and utilization factor.
             cxyt (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t positions. Indexed
              as cxyt[t,y,x]. In [g/m3].
             relative_cxyt (np.ndarray) : Three-dimensional numpy array with relative concentrations for all x, y and t
                 positions. Compared to maximum source zone concentrations.
-            cxyt_noBC (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t of instant
-                reaction models, without subtracting the biodegradation capacity, in [g/m3].
-            input_parameters (dict) : Dictionary of input parameter dataclasses for the model. Does not include instant
-                reaction parameters.
+            input_parameters (dict) : Dictionary of input parameter dataclasses for the model. Does not include
+                core-fringe or chain-decay specific input.
 
         Methods:
             centerline : Plot center of contaminant plume, at a specified time and y position.
@@ -485,18 +511,23 @@ class Results:
         self._source_parameters = copy.copy(model.source_parameters)
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
+        # Line below decrepit from version 2.0 onward
         self._utilization_factor = copy.copy(model._utilization_factor)
+        ######
         self._mass_ratios = copy.copy(model._mass_ratios)
 
         self._mode = model.mode
         self._rv = model.rv
         self._k_source = model.k_source
         self._c_source = model.c_source
+        # Line below decrepit from version 2.0 onward
         self._biodegradation_capacity = model.biodegradation_capacity
+        ######
         self._stoichiometric_concentration_electron_acceptors = model.stoichiometric_concentration_electron_acceptors
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
+        # Line below decrepit from version 2.0 onward
         self._cxyt_noBC = model.cxyt_noBC
 
     @property
@@ -579,6 +610,7 @@ class Results:
         """Nett source zone concentration used in the model."""
         return self._c_source
 
+    # Property below decrepit from version 2.0 onward
     @property
     def biodegradation_capacity(self):
         """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
@@ -599,6 +631,7 @@ class Results:
         """Modelled concentration for all x, y and t, divided by the maximum source zone concentration."""
         return self._relative_cxyt
 
+    # Property decrepit from version 2.0 onward
     @property
     def cxyt_noBC(self):
         """Concentration in domain without subtracting biodegradation capacity, in the instant reaction model."""
@@ -819,9 +852,9 @@ class Results:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
             instant_reaction_degraded_mass(self): Difference in plume mass instant reaction with and without
-                biodegradation capacity subtracted, in [g].
+                biodegradation capacity subtracted, in [g]. Decrepit from version 2.0 onward
             electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
-                Only for instant reaction.
+                Only for instant reaction. Decrepit from version 2.0 onward.
 
         Example::
 

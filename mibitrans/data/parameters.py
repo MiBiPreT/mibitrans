@@ -283,6 +283,7 @@ class SourceParameters:
         """Plot the source zone concentration distribution."""
         source_zone(self)
 
+    # Inclusion of electron acceptors and utilization factor decrepit from version 2.0 onward.
     def visualize_source_depletion(
         self, hydrological_parameters=None, electron_acceptors=None, utilization_factor=None, **kwargs
     ):

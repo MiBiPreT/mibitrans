@@ -177,7 +177,7 @@ def test_attenuationparameters_setattribute(test, value, parameter, error) -> No
     ],
 )
 def test_attenuationparameters_utilization(test, expected, test_att_pars) -> None:
-    """Test set_utilization_factor method of AttenuationParameters dataclass."""
+    """Test UtilizationFactor dataclass input checking."""
     if expected is None:
         UtilizationFactor(**test)
     else:

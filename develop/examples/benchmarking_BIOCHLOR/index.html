@@ -503,6 +503,8 @@
       
         
       
+        
+      
     
     
     
@@ -675,6 +677,34 @@
     
   
     Instant Reaction Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/core-fringe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core-Fringe degradation
   
 
     
@@ -2627,17 +2657,17 @@ t = biochlor_data.t * 365</div>
 <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s2">"blue"</span><span class="p">,</span> <span class="s2">"orange"</span><span class="p">,</span> <span class="s2">"green"</span><span class="p">,</span> <span class="s2">"red"</span><span class="p">,</span> <span class="s2">"purple"</span><span class="p">]</span>
 <span class="n">kwargs_line</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
 <span class="n">kwargs_scatter</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">'+'</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
+<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">plot_index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>  <span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compounds</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">biochlor_data</span><span class="p">,</span> <span class="n">comp</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs_scatter</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
+<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">plot_index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compounds</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">biochlor_data</span><span class="p">,</span> <span class="n">comp</span><span class="p">)[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs_scatter</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
+<span class="n">biochlor_results</span><span class="o">.</span><span class="n">centerline</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">legend_names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">plot_index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span><span class="o">**</span><span class="n">kwargs_line</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compounds</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">biochlor_data</span><span class="p">,</span> <span class="n">comp</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs_scatter</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -2647,17 +2677,17 @@ names=["PCE", "TCE", "DCE", "VC", "ETH"]
 colors=["blue", "orange", "green", "red", "purple"]
 kwargs_line = dict(lw=4, alpha=0.6)
 kwargs_scatter = dict(marker='+', s=80, zorder=3)
-biochlor_results.centerline(time=t[0], legend_names=names, **kwargs_line)
+biochlor_results.centerline(time=t[0], legend_names=names, plot_index=[0,1,2,3,4],  **kwargs_line)
 for i, comp in enumerate(compounds):
     plt.scatter(x, getattr(biochlor_data, comp)[0, 2, :], color=colors[i], **kwargs_scatter)
 plt.show()
 
-biochlor_results.centerline(time=t[1], legend_names=names, **kwargs_line)
+biochlor_results.centerline(time=t[1], legend_names=names, plot_index=[0,1,2,3,4], **kwargs_line)
 for i, comp in enumerate(compounds):
     plt.scatter(x, getattr(biochlor_data, comp)[1, 2, :], color=colors[i], **kwargs_scatter)
 plt.show()
 
-biochlor_results.centerline(time=t[2], legend_names=names, **kwargs_line)
+biochlor_results.centerline(time=t[2], legend_names=names, plot_index=[0,1,2,3,4],**kwargs_line)
 for i, comp in enumerate(compounds):
     plt.scatter(x, getattr(biochlor_data, comp)[-1, 2, :], color=colors[i], **kwargs_scatter)
 plt.show()

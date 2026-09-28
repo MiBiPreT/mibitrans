@@ -12,13 +12,13 @@
         <meta name="author" content="Alraune Zech, Jorrit Bakker, Robin Richardson, Jaro Camphuijsen">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/massbalance/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibitrans/develop/background/core-fringe/">
       
       
-        <link rel="prev" href="../chaindecay/">
+        <link rel="prev" href="../instantreaction/">
       
       
-        <link rel="next" href="../bioscreen/">
+        <link rel="next" href="../chaindecay/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Mass Balance - mibitrans</title>
+        <title>Core-Fringe degradation - mibitrans</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mass-balance" class="md-skip">
+        <a href="#core-fringe-degradation-model" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Mass Balance
+              Core-Fringe degradation
             
           </span>
         </div>
@@ -699,10 +699,35 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../core-fringe/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core-Fringe degradation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -718,6 +743,74 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-fringe-degradation-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core-fringe degradation model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core-fringe degradation model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analytical-solution-fringe-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analytical solution fringe degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combined-core-fringe-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combined core-fringe degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -755,19 +848,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../massbalance/" class="md-nav__link">
         
   
   
@@ -783,7 +867,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1441,8 +1524,64 @@
   
   
   
-    
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-fringe-degradation-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core-fringe degradation model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core-fringe degradation model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analytical-solution-fringe-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analytical solution fringe degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combined-core-fringe-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combined core-fringe degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1462,27 +1601,39 @@
   
 
 
-<h1 id="mass-balance">Mass Balance</h1>
-<p>Mass balance is calculated based on determined concentrations based on the model choice. At any point in time <span class="arithmatex">\(t\)</span>, the current mass of pure phase contaminant in the source zone is calculated via</p>
-<div class="arithmatex">\[
-m_{\mathrm{s}}(t) = m_\mathrm{s,0}\cdot e^{-\gamma_s \cdot t}
-\]</div>
-<p>This Equations uses <span class="arithmatex">\(\gamma_{s}^{inst}\)</span> for the model option <em>Instant reaction</em> (find definition of <span class="arithmatex">\(\gamma_{s}^{inst}\)</span> in the particular section).</p>
-<p>The mass of contaminant that has left the source zone is thus:</p>
-<div class="arithmatex">\[
-\Delta m_{\mathrm{s}}(t) = m_\mathrm{s,0} - m_\mathrm{s}(t)
-\]</div>
-<p>The plume mass is calculated as</p>
-<div class="arithmatex">\[
-m_{\mathrm{p}}(t) = V_{cell} \cdot \sum_{i,j}C(x_{i},y_{j},t)
-\]</div>
-<p>where summation is over all numerical grid cells defined in <span class="arithmatex">\(x\)</span>- and <span class="arithmatex">\(y\)</span>-direction. <span class="arithmatex">\(V_{cell}=dx \cdot  dy \cdot  Z \cdot  \theta_e\)</span> is the effective pore volume of the cell with dimensions <span class="arithmatex">\(dx\)</span>, <span class="arithmatex">\(dy\)</span> and <span class="arithmatex">\(Z\)</span> being the model resolutions in the <span class="arithmatex">\(x\)</span> and <span class="arithmatex">\(y\)</span> direction, and the source depth, respectively. </p>
-<p>The plume mass is dependent on the model dimensions. If the extent of (significant) plume concentrations is larger than the model dimensions, the calculated plume mass does not reflect the actual plume mass. The code implementation checks on this aspect and returns a warning to the user when domain extension is recommended.</p>
-<p>In case of no decay during transport (<span class="arithmatex">\(\mu=0\)</span>) mass is conserved and therefore, all mass leaving the source is transported within the contaminant plume. This mass, <span class="arithmatex">\(m^\mathrm{no \, decay}_{\mathrm{p}} (t)\)</span>, can be calculated direct and can thus serve as checkup. The mass that has been transported out of the model zone and the calculated plume mass should be identical:</p>
-<div class="arithmatex">\[
-m^\mathrm{no \, decay}_{\mathrm{p}} (t)= \Delta m_{s}(t)
-\]</div>
-<p>In case of linear decay or instant reaction, contaminant mass in the plume is reduced due to degradation. Consequently, the mass that left the source zone <span class="arithmatex">\(\Delta m_{s}(t)\)</span> is the sum of the degraded mass and the plume mass. </p>
+  <h1>Core-Fringe degradation</h1>
+
+<h2 id="core-fringe-degradation-model">Core-fringe degradation model</h2>
+<p>The concept of a combined core and fringe analytical degradation model is first introduced in Gutierrez-Neri et al. (2009).
+Distinction is made between processes happening at the plume fringes, and in the plume interior (core).</p>
+<h3 id="background">Background</h3>
+<p>Borden et al. (1986), uses a numerical model of the 2D-ADE for a non-degrading, non-reactive tracer to model transport of both electron acceptor (EA) and electron donor (ED). 
+Provided velocity field and transport coefficients are the same, a superposition method can be used to determine resulting concentration distribution of a degradation reaction between EA and ED. 
+Defined as <span class="arithmatex">\(C_{ED} = C_{ED}^T - \frac{C_{EA}^T}{F}\)</span>.
+Where <span class="arithmatex">\(C_{ED}\)</span> is the electron donor concentration after biodegradation, 
+<span class="arithmatex">\(C_{ED}^T\)</span> is the total (pre-biodegradation) electron donor concentration, 
+<span class="arithmatex">\(C_{EA}^T\)</span> is the total (pre-biodegradation) electron acceptor concentration 
+and F is the mass ratio of EA to ED consumed in the biodegradation reaction.
+Note: For this equation to be correct, <span class="arithmatex">\(n_1\)</span>, <span class="arithmatex">\(n_2\)</span> and <span class="arithmatex">\(n_3\)</span> need to be 1 in biodegradation reaction <span class="arithmatex">\(n_1 ED + n_2 EA \to n_3 \text{Product}\)</span>. See <code>Biodegradation stoichiometry</code>.
+In case of Borden et al. (1986) specifically, Oxygen was used as electron acceptor.
+This method of superposition is only valid if the reaction between the EA and ED is rapid compared to the groundwater flow velocity, where EA concentration is the only limiting factor.
+Under this assumption, the biodegradation reaction is considered as an &lsquo;instantaneous&rsquo; reaction, where EA and ED cannot co-exist.
+Furthermore, for multiple EA species, it is assumed that there is no preference in the order in which they occur.
+And that there is no preference for a specific pair of ED and EA.</p>
+<h3 id="analytical-solution-fringe-degradation">Analytical solution fringe degradation</h3>
+<p>This approach was included in the BIOPLUME software, and later as the instantaneous reaction model in BIOSCREEN, where the same principle was applied to an analytical solution.
+The paper of Koussis et al. (2003) investigates the validity of the instantaneous reaction model, by comparing it to a kinetic numerical model.
+Concluding that in general it is valid except near the source zone or during initial plume development.
+Though, no analytical derivation of this approach was published until the paper of Ham et al. (2004).
+Discussing the mathematical derivation is somewhat beyond the scope, but importantly, the analysis of Ham et al. (2004) also highlights further boundary values and limitations of the approach.
+For the derivation of the solution, continuous injection at the origin <span class="arithmatex">\((x, y) \to (0,0)\)</span> is assumed and <span class="arithmatex">\(t \to \infty\)</span>.
+Due to the latter boundary condition, the derived analytical equation is for steady state, and for determining the plume length.
+Later in the paper, considerations are discussed for a non-steady state plume. For transient cases, the approach only valid where the retardation factor of the ED is equal to that of the EA.
+Though, as the retardation factor only affects transient development of contaminant plume, this assumption is not required for the steady state solution (Ham et al., 2004).</p>
+<h3 id="combined-core-fringe-degradation">Combined core-fringe degradation</h3>
+<p>In the case that reaction rate is considered the limiting factor instead of the electron acceptor concentration, the assumption of an instant reaction no longer holds.
+Specifically for anaerobic degradation like interactions with metal oxides or fermentation, this can be the case, usually in the plume center, where oxygen is largely absent.
+These processes can then be approximated by first-order, linear decay.</p>
 
 
 

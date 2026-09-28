@@ -503,6 +503,8 @@
       
         
       
+        
+      
     
     
     
@@ -675,6 +677,34 @@
     
   
     Instant Reaction Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/core-fringe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core-Fringe degradation
   
 
     
@@ -2598,7 +2628,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <p><strong>Authors:</strong> Jorrit Bakker, Alraune Zech</p>
 <h2 id="background">Background<a class="anchor-link" href="#background">¶</a></h2><p><em>BIOSCREEN-AT</em>$^{3}$ implements the exact solution of the transport equations for the general setting of the package, following the solution of Wexler, 1992$^4$. Calculations require numerical integration. The model class <code>Mibitrans</code> of the <em>mibitrans</em> package implements the same exact equation in python for contaminant transport modelling.</p>
 <p><em>BIOSCREEN</em>$^{1,2}$ implements an approximate, but fully closed-form, equation as solution of the contaminant transport, based on the empirical model of Domenico, 1987$^5$. West et al., 2007$^6$ discussed in detail the approximations and their effects. The same equation is implemented in the <em>mibitrans</em> package as <code>Bioscreen</code> model class. Mostly for comparison with BIOSCREEN.</p>
-<h3 id="bioscreen-example-dataset-and-bioscreen-results">BIOSCREEN example dataset and BIOSCREEN results<a class="anchor-link" href="#bioscreen-example-dataset-and-bioscreen-results">¶</a></h3><p>We use for comparison the set of transport and model parameters, those provided as <em>BIOSCREEN example dataset</em> in BIOSCREEN. We ran both, BIOSCREEN and BIOSCREEN-AT in Excel to retreive concentrations for comparison. Values are listed below in arrays.</p>
+<h3 id="bioscreen-example-dataset-and-bioscreen-results">BIOSCREEN example dataset and BIOSCREEN results<a class="anchor-link" href="#bioscreen-example-dataset-and-bioscreen-results">¶</a></h3><p>We use for comparison the set of transport and model parameters, those provided as <em>BIOSCREEN example dataset</em> in BIOSCREEN. We ran both, BIOSCREEN and BIOSCREEN-AT in Excel to retrieve concentrations for comparison. Values are listed below in arrays.</p>
 <h3 id="references">References<a class="anchor-link" href="#references">¶</a></h3><p>$^1$ Newell, C. J., R. K. McLeod, and J. R. Gonzales (1996), BIOSCREEN Natural Attenuation Decision Support System User’s Manual Version 1.3, Tech. Rep. EPA/600/R-96/087, US EPA</p>
 <p>$^2$ Newell, C. J., McLeod, R. K., &amp; Gonzales, J. R. (1997), BIOSCREEN natural attenuation decision support system version 1.4 revisions, Tech. rep., U.S. EPA.</p>
 <p>$^3$<a href="https://doi.org/doi:10.1111/j.1745-6584.2006.00296.x">Karanovic, M., C. J. Neville, and C. B. Andrews,(2007), BIOSCREEN-AT: BIOSCREEN with an exact analytical solution, Groundwater, 45 (2), 242–245.</a></p>
@@ -4298,8 +4328,8 @@ print("Mean absolute difference in relative concentration between BIOSCREEN-AT "
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with no decay: 1.0600970801086523e-05
-Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with linear decay: 1.0865108469319337e-05
+<pre>Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with no decay: 1.0600970801086973e-05
+Mean absolute difference in relative concentration between BIOSCREEN-AT and Mibitrans model class with linear decay: 1.086510846931969e-05
 </pre>
 </div>
 </div>

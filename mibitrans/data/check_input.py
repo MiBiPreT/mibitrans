@@ -27,7 +27,7 @@ def validate_input_values(parameter, value, expectation=None):
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
         case "electron_acceptor":
-            error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.FringeElectronAcceptors)
+            error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.ElectronAcceptors)
         case "hydrological_parameters" | "attenuation_parameters" | "source_parameters" | "model_parameters":
             error = _check_dataclass(parameter, value, expectation)
         # Parameters which can be any float value
@@ -50,8 +50,6 @@ def validate_input_values(parameter, value, expectation=None):
         # Parameters which are input as single values, lists or numpy arrays, and may contain nested lists/arrays
         case "source_zone_concentration":
             error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=True)
-        case "electron_acceptors":
-            error = _check_electron_acceptor(value)
         # All other parameters are checked as floats on positive domain
         case _:
             error = _check_numeric_positive(parameter, value)
@@ -256,37 +254,16 @@ def _check_dataclass(parameter, value, expected_type):
         return TypeError(f"{parameter} must be of type {expected_type}, but is {type(value)} instead.")
 
 
-def _check_electron_acceptor(value):
-    """Check if variable is an ElectronAcceptors dataclass, list, array or dictionary, raise an error if it is not."""
-    if isinstance(value, mibitrans.data.parameter_information.ElectronAcceptors):
-        return None
-    elif isinstance(value, (list, np.ndarray, dict)):
-        if len(value) != 5:
-            return ValueError(
-                f"Input for electron_acceptors as list, array or dictionary must have an entry for each electron "
-                f"acceptor, of which there are five utilized by this model. The current input has {len(value)} "
-                f"entries instead."
-            )
-        else:
-            return None
-    else:
-        return TypeError(
-            f"electron_acceptors must be of type {mibitrans.data.parameter_information.ElectronAcceptors},"
-            f" or alternatively as list, numpy array or dictionary containing electron acceptor "
-            f"concentrations. But is {type(value)} instead."
-        )
-
-
 # Unprotected checking functions
 
 
 def check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
     """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
     if isinstance(electron_acceptors, (list, np.ndarray)):
-        electron_acceptors_out = mibitrans.data.parameter_information.ElectronAcceptors(*electron_acceptors)
+        electron_acceptors_out = mibitrans.data.parameter_information.InstantElectronAcceptors(*electron_acceptors)
     elif isinstance(electron_acceptors, dict):
-        electron_acceptors_out = mibitrans.data.parameter_information.ElectronAcceptors(**electron_acceptors)
-    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.ElectronAcceptors):
+        electron_acceptors_out = mibitrans.data.parameter_information.InstantElectronAcceptors(**electron_acceptors)
+    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.InstantElectronAcceptors):
         electron_acceptors_out = electron_acceptors
     else:
         raise TypeError(

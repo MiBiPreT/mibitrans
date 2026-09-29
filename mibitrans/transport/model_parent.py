@@ -13,7 +13,7 @@ from mibitrans.data.check_input import check_chain_decay_validity
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
 from mibitrans.data.parameter_information import ElectronAcceptors
-from mibitrans.data.parameter_information import FringeElectronAcceptors
+from mibitrans.data.parameter_information import InstantElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
@@ -188,8 +188,8 @@ class Transport3D(ABC):
 
     @property
     def electron_acceptors(self):
-        """Return dictionary of electron acceptor parameters."""
-        return self._electron_acceptors.dictionary
+        """Return the  of electron acceptor parameters."""
+        return self._electron_acceptors
 
     @property
     def utilization_factor(self):
@@ -200,7 +200,16 @@ class Transport3D(ABC):
     def relative_cxyt(self):
         """Compute relative concentration c(x,y,t)/c0, where c0 is the maximum source zone concentration at t=0."""
         maximum_concentration = np.max(self.source_parameters.source_zone_concentration)
-        relative_cxyt = self.cxyt / maximum_concentration
+        # For core-fringe model, relative concentrations for EA uses the stoichiometric concentration
+        if self.mode == "core-fringe":
+            maximum_concentration_ea = self.stoichiometric_concentration_electron_acceptors
+            relative_cxyt = [self.cxyt[0] / maximum_concentration, self.cxyt[1] / maximum_concentration_ea]
+        # For chain-decay, relative concentration of each contaminant is relative to the maximum source concentration
+        # of all sources.
+        elif self.mode == "chain-decay":
+            relative_cxyt = [cxyt / maximum_concentration for cxyt in self.cxyt]
+        else:
+            relative_cxyt = self.cxyt / maximum_concentration
         return relative_cxyt
 
     @abstractmethod
@@ -323,7 +332,7 @@ class Transport3D(ABC):
 
     def fringe_degradation(
         self,
-        electron_acceptor: FringeElectronAcceptors,
+        electron_acceptor: ElectronAcceptors,
         electron_donor_molecular_weight: float,
     ):
         """Add degradation at plume fringes to model based on available electron acceptors.
@@ -335,7 +344,7 @@ class Transport3D(ABC):
         each parameter involved.
 
         Args:
-            electron_acceptor (mibitrans.data.parameter_information.FringeElectronAcceptors): FringeElectronAcceptors
+            electron_acceptor (mibitrans.data.parameter_information.ElectronAcceptors): FringeElectronAcceptors
                 dataclass containing information about electron acceptor concentrations and biodegradation
                 stoichiometry.
             electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.
@@ -346,6 +355,7 @@ class Transport3D(ABC):
         self.stoichiometric_concentration_electron_acceptors = electron_acceptor.calculate_stoichiometric_concentration(
             electron_donor_molecular_weight
         )
+        self._electron_acceptors = electron_acceptor
         self.mode = "core-fringe"
 
     def _calculate_core_fringe(self) -> list[np.ndarray]:
@@ -386,7 +396,7 @@ class Transport3D(ABC):
 
     def instant_reaction(
         self,
-        electron_acceptors: list | np.ndarray | dict | ElectronAcceptors,
+        electron_acceptors: list | np.ndarray | dict | InstantElectronAcceptors,
         utilization_factor: list | np.ndarray | dict | UtilizationFactor = UtilizationFactor(
             util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
         ),

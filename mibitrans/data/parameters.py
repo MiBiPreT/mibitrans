@@ -99,7 +99,7 @@ class AttenuationParameters:
             linear decay models. If given as iterable, interpreted as sequential decay rates for chain decay. Also sets
             corresponding half life. Default is 0.
         half_life (float | list | np.ndarray) : Contaminant half life for 1st order (linear) decay, in [days]. Only
-            required for linear decay models. If given as iterable, interpreted as sequential decay rates for chain
+            required for linear decay models. If given as iterable, interpreted as sequential half-lifes for chain
             decay. Default is 0. Also sets corresponding decay_rate.
         bulk_density (float) : Soil bulk density, in [g/m^3]. Optional if retardation is specified.
         partition_coefficient (float) : Partition coefficient of the transported contaminant to soil organic matter,

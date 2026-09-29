@@ -98,7 +98,7 @@ class UtilizationFactor:
 
 
 @dataclass
-class FringeElectronAcceptors:
+class ElectronAcceptors:
     """Dataclass containing information about electron acceptor concentration and reaction stoichiometry.
 
     Args:
@@ -182,7 +182,7 @@ class FringeElectronAcceptors:
 
 
 @dataclass
-class ElectronAcceptors:
+class InstantElectronAcceptors:
     """Make object with concentrations of electron acceptors.
 
     Dataclass which handles the entry of electron acceptor concentrations used for the instant reaction biodegradation

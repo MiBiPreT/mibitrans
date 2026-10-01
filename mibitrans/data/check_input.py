@@ -152,14 +152,17 @@ def validate_source_zones(boundary, concentration):
     if isinstance(concentration, list):
         concentration = _check_source_concentrations_as_arrays(concentration)
     elif isinstance(concentration, (int, float, np.floating, np.integer)):
-        concentration = np.array([concentration])
+        concentration = np.array([concentration], dtype=float)
+    # Make sure that even if given as array, data types of concentration are floats
+    elif isinstance(concentration, np.ndarray):
+        concentration = np.array(concentration, dtype=float)
 
     # When only a single source zone boundary is given, but multiple source zone concentrations, it could be
     # interpreted as invalid input for a source zone of a single contaminant. However, it could also be considered as
     # multiple single source concentrations for multiple contaminants in chain decay. Therefore, no
     # error will be raised if length of boundary array != length concentration array.
     if len(boundary) != len(concentration) and len(boundary) == 1:
-        concentration = [np.array([conc]) for conc in concentration]
+        concentration = [np.array([conc], dtype=float) for conc in concentration]
 
     # Source zone boundary should be ordered by distance from source center to fringes, to make source zone input
     # less ambiguous
@@ -178,20 +181,20 @@ def validate_source_zones(boundary, concentration):
 def _check_source_boundary_as_array(boundary):
     """Ensure that source zone boundary is of the type np.ndarray."""
     if isinstance(boundary, (float, int, np.floating, np.integer)):
-        return np.array([boundary])
+        return np.array([boundary], dtype=float)
     else:
-        return np.array(boundary)
+        return np.array(boundary, dtype=float)
 
 
 def _check_source_concentrations_as_arrays(concentration):
     """Ensure that source zone concentration is of the type np.ndarray or list(np.ndarray)."""
     if isinstance(concentration[0], (list, np.ndarray)):
         if len(concentration) == 1:
-            concentration = np.array(concentration[0])
+            concentration = np.array(concentration[0], dtype=float)
         else:
-            concentration = [np.array(conc) for conc in concentration]
+            concentration = [np.array(conc, dtype=float) for conc in concentration]
     else:
-        concentration = np.array(concentration)
+        concentration = np.array(concentration, dtype=float)
     return concentration
 
 

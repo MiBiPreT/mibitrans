@@ -256,6 +256,10 @@ class Transport3D(ABC):
             if self._src_pars.total_mass != np.inf:
                 warnings.warn("Source depletion does not work with chain decay. Source depletion rate is set to 0.")
             self.k_source = 0
+        elif self.mode == "core-fringe":
+            self.k_source = calculate_source_depletion(
+                self._hyd_pars, self._src_pars, self.stoichiometric_concentration_electron_acceptors
+            )
         else:
             self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
         self.y_source = self._src_pars.source_zone_boundary
@@ -391,6 +395,9 @@ class Transport3D(ABC):
         self.y_source = self._src_pars.source_zone_boundary
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
+        self.k_source = calculate_source_depletion(
+            self._hyd_pars, self._src_pars, self.stoichiometric_concentration_electron_acceptors
+        )
 
         return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
 

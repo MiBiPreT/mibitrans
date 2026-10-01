@@ -395,9 +395,6 @@ class Transport3D(ABC):
         self.y_source = self._src_pars.source_zone_boundary
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
-        self.k_source = calculate_source_depletion(
-            self._hyd_pars, self._src_pars, self.stoichiometric_concentration_electron_acceptors
-        )
 
         return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
 

@@ -97,6 +97,9 @@ Changelog = "https://github.com/MiBiPreT/mibitrans/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
 
 [tool.coverage.run]
 branch = true

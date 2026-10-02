@@ -16,10 +16,9 @@ class Mibitrans(Transport3D):
     Karanovic (2007) implemented the Wexler (1992) exact analytical solution in the Excel based BIOSCREEN-AT, and added
     source depletion, akin to that implemented in its predecessor BIOSCREEN by Newell et al. (1997). The Mibitrans model
     allows for the same method as used in BIOSCREEN-AT, but expands it by allowing multiple source zones (by means of
-    superposition) and including the instant reaction model. These were present in the original BIOSCREEN, but not
-    reimplemented in BIOSCREEN-AT. Using a single source zone in this model, and not using the instant reaction option
-    will make the Mibitrans solution resolve to the equation described in Karanovic (2007). Which in turn resolves to
-    the Wexler (1992) solution if source depletion is disabled.
+    superposition) and including (core-)fringe degradation. Using a single source zone in this model, and not using
+    fringe degradation will make the Mibitrans solution resolve to the equation described in Karanovic (2007).
+    Which in turn resolves to the Wexler (1992) solution if source depletion is disabled.
 
     Karanovic, M., Neville, C. J., & Andrews, C. B. (2007). BIOSCREEN‐AT: BIOSCREEN with an exact analytical solution.
     Groundwater, 45(2), 242-245.
@@ -53,8 +52,8 @@ class Mibitrans(Transport3D):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
-            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
-                this attribute to switch between 'linear' and 'instant_reaction' models.
+            mode (str) : Current model mode. Is 'linear' by default. Use this attribute to switch between 'linear',
+            'core-fringe' and 'chain_decay' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
             relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
                 zone concentration at t=0. Indexed as [t,y,x].
@@ -70,9 +69,11 @@ class Mibitrans(Transport3D):
         Methods:
             run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
-            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
-                optionally electron acceptor utilization factors. Switch between model modes by using the mode
-                attribute.
+            chain_decay : Enable and set up chain decay model, calculating concentrations for multiple subsequent
+                solutes in a chain of degradation reactions. Requires input of decay rates and source zone
+                concentrations for each contaminant.
+            fringe_degradation : Add fringe degradation to the model by providing electron acceptor concentrations and
+                biodegradation reaction stoichiometry. Switch between model modes by using the mode attribute.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -89,14 +90,6 @@ class Mibitrans(Transport3D):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-
-    @property
-    def short_description(self):
-        """Return short description of model type."""
-        if self.biodegradation_capacity:
-            return "Mibitrans instant reaction"
-        else:
-            return "Mibitrans linear"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
@@ -163,10 +156,12 @@ class Mibitrans(Transport3D):
                 conc_array[sz] = 4 * integral_term * source_term
                 error_array[sz] = error
             concentration = np.sum(conc_array)
+            # Four line below decrepit from version 2.0 onwards
             if self._mode == "instant_reaction":
                 concentration -= self.biodegradation_capacity
                 if concentration < 0:
                     concentration = 0
+            ######
         return concentration
 
     def _pre_run_initialization_parameters(self):
@@ -186,10 +181,12 @@ class Mibitrans(Transport3D):
             cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
             # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
             cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)[:, :, 0]
+        # Four lines below decrepit from version 2.0 onwards
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
+        ######
         return cxyt
 
     def _equation_term_integral(self, sz):
@@ -253,10 +250,11 @@ class Anatrans(Transport3D):
     Under the assumption that C(x,y,z,t) = C(x,t) * C(y,t) * C(z,t), the 3D ADE can be broken up in three separate
     differential equations which can be solved individually. For C(x,t) the solution is given in Bear (1979), C(y,t) and
     C(z,t) can be derived from Crank (1975). The equation used for Anatrans is the combination of these solutions, with
-    addition of source depletion, source superposition and instant reaction model, described in Newell et al. (1997) and
-    implemented in the BIOSCREEN screening model. The solution of Newell et al. (1997) is based of the Domenico (1987)
-    solution, a truncated version of the equation described above, which introduces an error with a size dependent on
-    the ratio of flow velocity and longitudinal dispersivity. Anatrans instead uses the fully untruncated version.
+    addition of source depletion and source superposition described in Newell et al. (1997) and implemented in the
+    BIOSCREEN screening model. The solution of Newell et al. (1997) is based of the Domenico (1987) solution, a
+    truncated version of the equation described above, which introduces an error with a size dependent on the ratio of
+    flow velocity and longitudinal dispersivity. Anatrans instead uses the fully untruncated version. Furthermore,
+    instead of the instant reaction model from BIOSCREEN, this solution uses (core-)fringe degradation.
 
     Bear, J. 1979. Hydraulics of Ground Water. New York: McGraw-Hill.
 
@@ -291,8 +289,8 @@ class Anatrans(Transport3D):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
-            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
-                this attribute to switch between 'linear' and 'instant_reaction' models.
+            mode (str) : Current model mode. Is 'linear' by default. Use this attribute to switch between 'linear',
+            'core-fringe' and 'chain_decay' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
             relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
                 zone concentration at t=0. Indexed as [t,y,x].
@@ -308,14 +306,11 @@ class Anatrans(Transport3D):
         Methods:
             run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
-            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
-                optionally electron acceptor utilization factors. Switch between model modes by using the mode
-                attribute.
-            centerline : Plot center of contaminant plume of this model, at a specified time and y position.
-            transverse : Plot concentration distribution as a line horizontal transverse to the plume extent.
-            breakthrough : Plot contaminant breakthrough curve at given x and y position in model domain.
-            plume_2d : Plot contaminant plume as a 2D colormesh, at a specified time.
-            plume_3d : Plot contaminant plume as a 3D surface, at a specified time.
+            chain_decay : Enable and set up chain decay model, calculating concentrations for multiple subsequent
+                solutes in a chain of degradation reactions. Requires input of decay rates and source zone
+                concentrations for each contaminant.
+            fringe_degradation : Add fringe degradation to the model by providing electron acceptor concentrations and
+                biodegradation reaction stoichiometry. Switch between model modes by using the mode attribute.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -334,14 +329,6 @@ class Anatrans(Transport3D):
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         if self._hyd_pars.diffusion != 0:
             warnings.warn(f"{self.short_description} does not consider molecular diffusion.", UserWarning)
-
-    @property
-    def short_description(self):
-        """Return short description of model type."""
-        if self.biodegradation_capacity:
-            return "Anatrans instant reaction"
-        else:
-            return "Anatrans linear"
 
     def run(self):
         """Calculate the concentration for all discretized x, y and t using the analytical transport model."""
@@ -371,19 +358,28 @@ class Anatrans(Transport3D):
             if par != "self":
                 validate_input_values(par, value)
 
-        if self._mode == "chain_decay" or self._att_pars.chain_decay or self._src_pars.chain_decay_source:
+        if (
+            self._mode == "chain_decay"
+            or self._mode == "core-fringe"
+            or self._att_pars.chain_decay
+            or self._src_pars.chain_decay_source
+        ):
             raise NotImplementedError("The sample method is not (yet) implemented for chain_decay.")
 
         self._pre_run_initialization_parameters()
 
+        # Two lines below decrepit from version 2.0 onwards
         if self.mode == "instant_reaction":
             save_c_noBC = self.cxyt_noBC.copy()
+        #######
         x = np.array([x_position])
         y = np.array([y_position])
         t = np.array([time])
         concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
+        # Two lines below decrepit from version 2.0 onwards
         if self.mode == "instant_reaction":
             self.cxyt_noBC = save_c_noBC
+        #######
         return concentration
 
     def _equation_term_x(self, xxx, ttt, decay_sqrt):
@@ -425,6 +421,7 @@ class Anatrans(Transport3D):
             y_term = self._equation_term_y(i, xxx, yyy)
             cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * (x_term + additional_x) * y_term * z_term
             cxyt += cxyt_step
+        # Four lines below are decrepit in version 2.0 onward
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
@@ -475,8 +472,8 @@ class Bioscreen(Anatrans):
             verbose (bool, optional): Verbose mode. Defaults to False.
 
         Attributes:
-            mode (str) : Current model mode. Is 'linear' by default. Once instant reaction parameters are provided. Use
-                this attribute to switch between 'linear' and 'instant_reaction' models.
+            mode (str) : Current model mode. Is 'linear' by default. Use this attribute to switch between 'linear',
+            'core-fringe' and 'chain_decay' models.
             cxyt (np.ndarray) : Output array containing concentrations in model domain, in [g/m^3]. Indexed as [t,y,x]
             relative_cxyt (np.ndarray) : Output array with concentrations in model domain, divided by the maximum source
                 zone concentration at t=0. Indexed as [t,y,x].
@@ -492,9 +489,11 @@ class Bioscreen(Anatrans):
         Methods:
             run : Run model with current parameters, returns Results object.
             sample : Calculate concentration at any given position and point in time.
-            instant_reaction : Activate the instant reaction model by providing electron acceptor concentrations. And
-                optionally electron acceptor utilization factors. Switch between model modes by using the mode
-                attribute.
+            chain_decay : Enable and set up chain decay model, calculating concentrations for multiple subsequent
+                solutes in a chain of degradation reactions. Requires input of decay rates and source zone
+                concentrations for each contaminant.
+            fringe_degradation : Add fringe degradation to the model by providing electron acceptor concentrations and
+                biodegradation reaction stoichiometry. Switch between model modes by using the mode attribute.
 
         Raises:
             TypeError : If input is not of the correct Dataclass.
@@ -511,14 +510,6 @@ class Bioscreen(Anatrans):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
-
-    @property
-    def short_description(self):
-        """Return short description of model type."""
-        if self.biodegradation_capacity:
-            return "Bioscreen instant reaction"
-        else:
-            return "Bioscreen linear"
 
     def _equation_term_source_depletion(self, xxx, ttt):
         term = np.exp(-self.k_source * (ttt - xxx / self.rv))
@@ -540,9 +531,11 @@ class Bioscreen(Anatrans):
                 y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * x_term * y_term * z_term
                 cxyt += cxyt_step
+        # Four lines below are decrepit form version 2.0 onward
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
+        ######
         self.has_run = True
         return cxyt

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
 from mibitrans.data.check_input import MissingValueError
-from mibitrans.data.parameter_information import FringeElectronAcceptors
+from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import HydrologicalParameters
@@ -177,7 +177,7 @@ def test_attenuationparameters_setattribute(test, value, parameter, error) -> No
     ],
 )
 def test_attenuationparameters_utilization(test, expected, test_att_pars) -> None:
-    """Test set_utilization_factor method of AttenuationParameters dataclass."""
+    """Test UtilizationFactor dataclass input checking."""
     if expected is None:
         UtilizationFactor(**test)
     else:
@@ -419,24 +419,24 @@ def test_calculation_optional_discretization():
 def test_fringe_electron_acceptor(parameters, error) -> None:
     """Test validation of FringeElectronAcceptor dataclass."""
     if error is None:
-        FringeElectronAcceptors(**parameters)
+        ElectronAcceptors(**parameters)
     else:
         with pytest.raises(error):
-            FringeElectronAcceptors(**parameters)
+            ElectronAcceptors(**parameters)
 
 
 @pytest.mark.parametrize(
     "parameters, expected",
     [
-        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=1), 6),
-        (dict(ea=FringeElectronAcceptors(5, 7.5, 32), electron_donor_molecular_weight=78.11), 1.6272916666666666),
+        (dict(ea=ElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=1), 6),
+        (dict(ea=ElectronAcceptors(5, 7.5, 32), electron_donor_molecular_weight=78.11), 1.6272916666666666),
         (
-            dict(ea=FringeElectronAcceptors([5, 6], [7.5, 6], [32, 62]), electron_donor_molecular_weight=78.11),
+            dict(ea=ElectronAcceptors([5, 6], [7.5, 6], [32, 62]), electron_donor_molecular_weight=78.11),
             2.8871303763440856,
         ),
-        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight="heavy"), TypeError),
-        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=[5, 4, 3]), TypeError),
-        (dict(ea=FringeElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=-10), DomainValueError),
+        (dict(ea=ElectronAcceptors(6, 1, 1), electron_donor_molecular_weight="heavy"), TypeError),
+        (dict(ea=ElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=[5, 4, 3]), TypeError),
+        (dict(ea=ElectronAcceptors(6, 1, 1), electron_donor_molecular_weight=-10), DomainValueError),
     ],
 )
 def test_fringe_electron_acceptor_calculate_bc(parameters, expected) -> None:

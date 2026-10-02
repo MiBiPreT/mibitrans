@@ -107,9 +107,31 @@ Here, $F$ is the `Mibitrans`, `Anatrans` or `Bioscreen` model equation, as descr
 $F_{ED}$ uses the source concentration of the ED and the input decay rate.
 $F_{EA}$ uses the source concentration of the EA and does not decay.
 
-Four additional parameters are needed for this implementation of fringe degradation; electron acceptor concentrations, electron acceptor molar weights, electron acceptor stoichiometric ratio and electron donor molar weight.
-Where electron acceptor stoichiometric ratio is referring to stoichiometry of EA:ED of the entire (not half) biodegradation reaction.
+Four additional parameters are needed for this implementation of fringe degradation; electron acceptor concentrations ($C_{EA}^i$), electron acceptor molar weights ($mw_{EA}$), electron acceptor stoichiometric ratio ($\Phi_{EA:ED}$) and electron donor molar weight.
+Where $\Phi_{EA:ED}$ is referring to stoichiometry of EA:ED of the entire (not half) biodegradation reaction.
 Parameters for any number electron acceptors can be given, which are transformed based on the stoichiometric parameters given and subsequently summed to obtain a single $C_{0,EA}$.
+Then, for any n amount of electron acceptors, the EA concentration expressed as the concentration of ED it can degrade is
+$$ \tag{10}
+C_{0,EA} =
+\sum_{i=1}^n
+\frac{C_{EA}^i \cdot mw_{ED}}{\Phi_{EA:ED}^i \cdot mw_{ea}}
+$$
+
+After calculation concentration distribution of $C_{ED}(x,y,t)$ and $C_{EA}(x,y,t)$, concentrations of electron acceptors are converted back to their initial units as
+$C_{EA}^*(x,y,t) = C_{EA}(x,y,t) \frac{C_{0,EA}}{\sum_{i=1}^n C_{EA}^i}$. $C_{EA}^*(x,y,t)$ represents the sum of electron acceptor concentrations in $g/m^3$.
+
+Take the biodegradation reactions of oxygen, nitrate and sulphate for benzene:
+$$ \tag{11}
+C_6H_6 + 7.5O_2 \to 6CO_2 + 3H_2O
+$$
+$$\tag{12}
+6NO_3^- + 6H^+ + C_6H_6 \to 6CO_2 + 6H_2O + 3N_2
+$$
+$$\tag{13}
+7.5H^+ + 3.75SO_4^{2-} + C_6H_6 \to 6CO_2 + 3.75H_2S + 3H_2O
+$$
+Values for $\Phi_{EA:ED}^i$ are $7.5$, $6$ and $3.75$ respectively. 
+Values for other biodegradation reactions are often available in literature.
 
 ### (Source) superposition
 The paper of Gutierrez-Neri et al. (2009) mentions different source conditions (source depletion, pulse-injection), but does not involve multiple source zones (source-superposition), as implemented in _mibitrans_.

@@ -396,6 +396,9 @@ class Transport3D(ABC):
         self.c_source = self._src_pars.source_zone_concentration.copy()
         self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
 
+        electron_acceptor_fringe_cxyt *= np.sum(self._electron_acceptors.electron_acceptor_concentration) / (
+            self.stoichiometric_concentration_electron_acceptors
+        )
         return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
 
     def instant_reaction(

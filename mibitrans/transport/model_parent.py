@@ -12,9 +12,9 @@ from mibitrans.analysis.parameter_calculations import transform_chain_concentrat
 from mibitrans.data.check_input import check_chain_decay_validity
 from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
-from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameter_information import InstantElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
+from mibitrans.data.parameters import ElectronAcceptors
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
 
@@ -348,7 +348,7 @@ class Transport3D(ABC):
         each parameter involved.
 
         Args:
-            electron_acceptor (mibitrans.data.parameter_information.ElectronAcceptors): FringeElectronAcceptors
+            electron_acceptor (mibitrans.data.parameters.ElectronAcceptors): FringeElectronAcceptors
                 dataclass containing information about electron acceptor concentrations and biodegradation
                 stoichiometry.
             electron_donor_molecular_weight (float): Molecular weight of electron donor. In g/mol.

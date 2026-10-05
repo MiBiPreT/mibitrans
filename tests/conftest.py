@@ -1,8 +1,8 @@
 import copy
 import numpy as np
 import pytest
-from mibitrans.data.parameter_information import ElectronAcceptors
 from mibitrans.data.parameters import AttenuationParameters
+from mibitrans.data.parameters import ElectronAcceptors
 from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import ModelParameters
 from mibitrans.data.parameters import SourceParameters

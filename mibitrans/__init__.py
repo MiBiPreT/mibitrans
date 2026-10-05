@@ -8,7 +8,7 @@ from mibitrans.data.parameters import HydrologicalParameters
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.data.parameters import SourceParameters
 from mibitrans.data.parameters import ModelParameters
-from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameters import ElectronAcceptors
 from mibitrans.data.parameter_information import InstantElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.transport.models import Anatrans

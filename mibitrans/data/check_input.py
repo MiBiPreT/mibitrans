@@ -27,7 +27,7 @@ def validate_input_values(parameter, value, expectation=None):
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
         case "electron_acceptor":
-            error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.ElectronAcceptors)
+            error = _check_dataclass(parameter, value, mibitrans.data.parameters.ElectronAcceptors)
         case "hydrological_parameters" | "attenuation_parameters" | "source_parameters" | "model_parameters":
             error = _check_dataclass(parameter, value, expectation)
         # Parameters which can be any float value

@@ -42,9 +42,9 @@ Assumption for modelling the biodegradation as first-order decay is that reactio
 The paper of Gutierrez-Neri et al. (2009) describes an analytical solution for the combination of core degradation and fringe degradation.
 In general, this solution looks like:
 $$ \tag{1}
-C_{ED}(x,y,z,t) = F_{ED}(x,y,z,t, C^0_{ED},\lambda) - (C^0_{EA} - F_{EA}(x,y,z,t,C^0_{EA}))
+C_{ED}(x,y,z,t) = F_{ED}(x,y,z,t, C^0_{ED},\mu) - (C^0_{EA} - F_{EA}(x,y,z,t,C^0_{EA}))
 $$
-where $F_{ED}$ is a transport equation for a linearly decaying species with source concentration of $C^0_{ED}$ and degradation rate $\lambda$, 
+where $F_{ED}$ is a transport equation for a linearly decaying species with source concentration of $C^0_{ED}$ and degradation rate $\mu$, 
 and $F_{EA}$ is that same transport equation for a conservative species with source concentration $C^0_{EA}$.
 All other transport parameters are the same in $F_{ED}$ and $F_{EA}$.
 For $F$, Gutierrez-Neri et al. (2009) uses the solution of Domenico and Robbins (1985), with linear degradations as in Domenico (1987).
@@ -54,8 +54,8 @@ $$ \tag{2}
 C_{ED}(x,y,t) = 
 \left\{ 
     \begin{array}{l}
-        0 \text{ for } C^T_{ED}\cdot \left(K(x,\lambda) \cdot\frac{F_1(x,\lambda,t)}{F_1(x,t)} + \frac{C^0_{EA}}{C^0_{ED}}\right) \leq C_{0,EA}&\\
-         C^T_{ED}\cdot \left(K(x,\lambda) \cdot\frac{F_1(x,\lambda,t)}{F_1(x,t)} + \frac{C^0_{EA}}{C^0_{ED}}\right) - C_{0,EA} \text{ elsewhere}
+        0 \text{ for } C^T_{ED}\cdot \left(K(x,\mu) \cdot\frac{F_1(x,\mu,t)}{F_1(x,t)} + \frac{C^0_{EA}}{C^0_{ED}}\right) \leq C_{0,EA}&\\
+         C^T_{ED}\cdot \left(K(x,\mu) \cdot\frac{F_1(x,\mu,t)}{F_1(x,t)} + \frac{C^0_{EA}}{C^0_{ED}}\right) - C_{0,EA} \text{ elsewhere}
     \end{array}
 \right\}
 $$
@@ -66,7 +66,7 @@ C^T_{ED} = \frac{C^0_{ED}}{4}\cdot F_1(x,t) \cdot F_2(x,y)
 $$
 
 $$\tag{4}
-K(x,\lambda) = \exp\left[ \left( \frac{x}{2\alpha_x} \right) \left( 1-\sqrt{1+\frac{4\lambda \alpha_x}{v}} \right) \right]
+K(x,\mu) = \exp\left[ \left( \frac{x}{2\alpha_x} \right) \left( 1-\sqrt{1+\frac{4\mu \alpha_x}{v}} \right) \right]
 $$
 
 $$\tag{5}
@@ -74,7 +74,7 @@ F_1(x,t) = \text{erfc}\left(\frac{x-vt}{2\sqrt{\alpha_x-vt}} \right)
 $$
 
 $$\tag{6}
-F_1(x,\lambda,t) = \text{erfc}\left(\frac{x-vt\sqrt{(1+4\alpha_x/v)}}{2\sqrt{\alpha_x-vt}} \right)
+F_1(x,\mu,t) = \text{erfc}\left(\frac{x-vt\sqrt{(1+4\mu\alpha_x/v)}}{2\sqrt{\alpha_x-vt}} \right)
 $$
 
 $$\tag{7}

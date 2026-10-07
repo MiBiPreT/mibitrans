@@ -333,10 +333,12 @@ class Transport3D(ABC):
         else:
             core_cxyt = self._calculate_concentration_for_all_xyt(self.xxx, self.yyy, self.ttt)
 
+        # Set source zone and decay rate to conditions for electron acceptor
         self.c_source = np.array([self.stoichiometric_concentration_electron_acceptors])
         self.y_source = np.array([self.y_source[-1]])
         self._decay_rate = 0
 
+        # Calculate concentration distribution for electron acceptor using the adapted source and decay rate
         if self.__class__.__name__ == "Mibitrans":
             electron_acceptor_cxyt = (
                 self.stoichiometric_concentration_electron_acceptors - self._calculate_concentration_for_all_xyt()
@@ -352,6 +354,7 @@ class Transport3D(ABC):
         core_fringe_cxyt = core_cxyt - electron_acceptor_cxyt
         core_fringe_cxyt = np.where(core_fringe_cxyt > 0, core_fringe_cxyt, 0)
 
+        # Return decay rate and source zone to prior conditions
         self._decay_rate = self._att_pars.decay_rate
         self.y_source = self._src_pars.source_zone_boundary
         self.c_source = self._src_pars.source_zone_concentration.copy()

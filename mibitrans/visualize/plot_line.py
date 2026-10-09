@@ -336,7 +336,7 @@ def _check_input_iterable(model, legend_names):
     if not isinstance(model, list):
         model = [model]
     else:
-        if any(isinstance(mod.cxyt, list) for mod in model):
+        if any(mod.mode == "chain_decay" for mod in model):
             raise ValueError(
                 "Input of multiple models is not supported if one of the models uses chain decay. "
                 "Call method multiple times instead."
@@ -349,21 +349,54 @@ def _check_input_iterable(model, legend_names):
 
 def _construct_plot_iterable(model, relative_concentration, plot_index):
     """Generate iterables to use for plotting."""
-    if isinstance(model[0].cxyt, list):
-        if isinstance(plot_index, (list, np.ndarray)):
-            plot_iterable = [model[0].cxyt[i] for i in plot_index]
-        elif isinstance(plot_index, int):
-            plot_iterable = [model[0].cxyt[plot_index]]
-        else:
-            plot_iterable = model[0].cxyt
-        y_label = absolute_conc_ylabel
-        model *= len(plot_iterable)
+    plot_iterable = []
+    if relative_concentration:
+        con = "relative_cxyt"
+        y_label = relative_conc_ylabel
     else:
-        if relative_concentration:
-            plot_iterable = [mod.relative_cxyt for mod in model]
-            y_label = relative_conc_ylabel
+        con = "cxyt"
+        y_label = absolute_conc_ylabel
+    # If single model is given & cxyt has concentrations for multiple species, which species are plotted is
+    # determined by plot_index
+    if len(model) == 1:
+        if isinstance(model[0].cxyt, list):
+            cxyt_list = getattr(model[0], con)
+            if isinstance(plot_index, (list, np.ndarray)):
+                plot_iterable = [cxyt_list[i] for i in plot_index]
+            elif isinstance(plot_index, int):
+                plot_iterable = [cxyt_list[plot_index]]
+            else:
+                plot_iterable = cxyt_list
+            model *= len(plot_iterable)
         else:
-            plot_iterable = [mod.cxyt for mod in model]
-            y_label = absolute_conc_ylabel
+            plot_iterable = [getattr(model[0], con)]
+    # If multiple models are given & cxyt has concentrations for multiple species in some models, only the first species
+    # of the model is plotted, regardless of plot_index, to avoid ambiguity
+    else:
+        for i, mod in enumerate(model):
+            if isinstance(mod.cxyt, list):
+                plot_iterable.append(getattr(mod, con)[0])
+            else:
+                plot_iterable.append(getattr(mod, con))
 
     return model, plot_iterable, y_label
+
+    # if len(model) == 1 and isinstance(model[0].cxyt, list):
+    #     if isinstance(plot_index, (list, np.ndarray)):
+    #         plot_iterable = [model[0].cxyt[i] for i in plot_index]
+    #     elif isinstance(plot_index, int):
+    #         plot_iterable = [model[0].cxyt[plot_index]]
+    #     else:
+    #         plot_iterable = model[0].cxyt
+    #     y_label = absolute_conc_ylabel
+    #     model *= len(plot_iterable)
+    #
+    # else:
+    #     if relative_concentration:
+    #         plot_iterable = [mod.relative_cxyt for mod in model]
+    #         y_label = relative_conc_ylabel
+    #     else:
+    #         plot_iterable = [mod.cxyt for mod in model]
+    #         y_label = absolute_conc_ylabel
+    #
+    # return model, plot_iterable, y_label

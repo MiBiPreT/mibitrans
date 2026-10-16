@@ -73,7 +73,7 @@ class UtilizationFactor:
     def __post_init__(self):
         """Action for after initialization of dataclass."""
         warnings.warn(
-            "This Dataclass will be decrepit from version 2.0 onwards. Reaction stoichiometry for "
+            "This Dataclass is deprecated and will be removed from 2.0 onwards. Reaction stoichiometry for "
             "fringe degradation is handled by ElectronAcceptors dataclass instead.",
             DeprecationWarning,
         )
@@ -131,7 +131,7 @@ class InstantElectronAcceptors:
     def __post_init__(self):
         """Action for after initialization of dataclass."""
         warnings.warn(
-            "This Dataclass will be decrepit from version 2.0 onwards. Use the ElectronAcceptors dataclass "
+            "This Dataclass is deprecated and will be removed from 2.0 onwards. Use the ElectronAcceptors dataclass "
             "for electron acceptor input for fringe degradation instead.",
             DeprecationWarning,
         )

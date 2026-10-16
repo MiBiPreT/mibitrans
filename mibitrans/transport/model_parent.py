@@ -62,7 +62,7 @@ class Transport3D(ABC):
         self._mode = "linear"
         self._electron_acceptors = None
         self._utilization_factor = None
-        # Parameter biodegradation_capacity decrepit from version 2.0 onward, functionality replace by
+        # # Parameter biodegradation_capacity removal from version 2.0 onward, functionality replaced by
         # stoichiometric_concentration_electron_acceptors
         self.biodegradation_capacity = 0
         self.stoichiometric_concentration_electron_acceptors = 0
@@ -154,7 +154,7 @@ class Transport3D(ABC):
         match value:
             case "linear" | "linear decay" | "linear_decay" | 0:
                 self._mode = "linear"
-            # Case below will be decrepit from version 2.0 onward
+            # Case below will be removed from version 2.0 onward
             case "instant" | "instant_reaction" | "instant reaction" | 1:
                 if self._electron_acceptors is None or self._utilization_factor is None:
                     raise ValueError(
@@ -188,7 +188,7 @@ class Transport3D(ABC):
 
     @property
     def electron_acceptors(self):
-        """Return the  of electron acceptor parameters."""
+        """Return the electron acceptor parameters."""
         return self._electron_acceptors
 
     @property
@@ -270,7 +270,7 @@ class Transport3D(ABC):
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         elif not self._src_pars.chain_decay_source:
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
-        # From version 2.0 onward, if condition decrepit, always resolve to else
+        # From version 2.0 onward, if condition is removed, therefore always resolve to else
         if self._mode == "instant_reaction":
             self.c_source[-1] += self.biodegradation_capacity
             self._decay_rate = 0
@@ -426,7 +426,8 @@ class Transport3D(ABC):
                 for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
         """
         warnings.warn(
-            "This method will be decrepit from version 2.0 onwards. Use the fringe_degradation method instead.",
+            "This method is deprecated and will be removed from version 2.0 onwards. "
+            "Use the fringe_degradation method instead.",
             DeprecationWarning,
         )
         self._electron_acceptors, self._utilization_factor = check_instant_reaction_acceptor_input(
@@ -484,7 +485,7 @@ class Results:
             electron_acceptors (ElectronAcceptors): Dataclass holding the electron acceptor concentrations and
                 stoichiometry used to run the model. Only for (core-)fringe degradation, None for other models.
             utilization_factor (UtilizationFactor): Dataclass holding the electron acceptor utilization factors used to
-                run the model. Only for instant reaction, None for other models. Decrepit from version 2.0 onward.
+                run the model. Only for instant reaction, None for other models. To be removed from version 2.0 onward.
             mass_ratios (np.ndarray) : Ratio between masses of sequential decay products for chain decay
             mode (str) : Model mode of the used model. Either 'linear', 'core-fringe' or 'chain_decay'.
             rv (float) : Retarded flow velocity, as v / R [m/day].
@@ -528,7 +529,7 @@ class Results:
         self._source_parameters = copy.copy(model.source_parameters)
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
-        # Line below decrepit from version 2.0 onward
+        # Line below to be removed from version 2.0 onward
         self._utilization_factor = copy.copy(model._utilization_factor)
         ######
         self._mass_ratios = copy.copy(model._mass_ratios)
@@ -537,14 +538,14 @@ class Results:
         self._rv = model.rv
         self._k_source = model.k_source
         self._c_source = model.c_source
-        # Line below decrepit from version 2.0 onward
+        # Line below to be removed from version 2.0 onward
         self._biodegradation_capacity = model.biodegradation_capacity
         ######
         self._stoichiometric_concentration_electron_acceptors = model.stoichiometric_concentration_electron_acceptors
 
         self._cxyt = model.cxyt
         self._relative_cxyt = model.relative_cxyt
-        # Line below decrepit from version 2.0 onward
+        # Line below to be removed from version 2.0 onward
         self._cxyt_noBC = model.cxyt_noBC
 
     @property
@@ -627,7 +628,7 @@ class Results:
         """Nett source zone concentration used in the model."""
         return self._c_source
 
-    # Property below decrepit from version 2.0 onward
+    # Property below to be removed from version 2.0 onward
     @property
     def biodegradation_capacity(self):
         """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
@@ -648,7 +649,7 @@ class Results:
         """Modelled concentration for all x, y and t, divided by the maximum source zone concentration."""
         return self._relative_cxyt
 
-    # Property decrepit from version 2.0 onward
+    # Property to be removed from version 2.0 onward
     @property
     def cxyt_noBC(self):
         """Concentration in domain without subtracting biodegradation capacity, in the instant reaction model."""
@@ -869,9 +870,9 @@ class Results:
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
             instant_reaction_degraded_mass(self): Difference in plume mass instant reaction with and without
-                biodegradation capacity subtracted, in [g]. Decrepit from version 2.0 onward
+                biodegradation capacity subtracted, in [g]. To be removed from version 2.0 onward.
             electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
-                Only for instant reaction. Decrepit from version 2.0 onward.
+                Only for instant reaction. To be removed from version 2.0 onward.
 
         Example::
 

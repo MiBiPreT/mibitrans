@@ -380,23 +380,3 @@ def _construct_plot_iterable(model, relative_concentration, plot_index):
                 plot_iterable.append(getattr(mod, con))
 
     return model, plot_iterable, y_label
-
-    # if len(model) == 1 and isinstance(model[0].cxyt, list):
-    #     if isinstance(plot_index, (list, np.ndarray)):
-    #         plot_iterable = [model[0].cxyt[i] for i in plot_index]
-    #     elif isinstance(plot_index, int):
-    #         plot_iterable = [model[0].cxyt[plot_index]]
-    #     else:
-    #         plot_iterable = model[0].cxyt
-    #     y_label = absolute_conc_ylabel
-    #     model *= len(plot_iterable)
-    #
-    # else:
-    #     if relative_concentration:
-    #         plot_iterable = [mod.relative_cxyt for mod in model]
-    #         y_label = relative_conc_ylabel
-    #     else:
-    #         plot_iterable = [mod.cxyt for mod in model]
-    #         y_label = absolute_conc_ylabel
-    #
-    # return model, plot_iterable, y_label

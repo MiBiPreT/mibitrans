@@ -156,7 +156,7 @@ class Mibitrans(Transport3D):
                 conc_array[sz] = 4 * integral_term * source_term
                 error_array[sz] = error
             concentration = np.sum(conc_array)
-            # Four line below decrepit from version 2.0 onwards
+            # Four lines below to be removed from version 2.0 onwards
             if self._mode == "instant_reaction":
                 concentration -= self.biodegradation_capacity
                 if concentration < 0:
@@ -181,7 +181,7 @@ class Mibitrans(Transport3D):
             cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
             # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
             cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)[:, :, 0]
-        # Four lines below decrepit from version 2.0 onwards
+        # Four lines below to be removed from version 2.0 onwards
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
@@ -368,7 +368,7 @@ class Anatrans(Transport3D):
 
         self._pre_run_initialization_parameters()
 
-        # Two lines below decrepit from version 2.0 onwards
+        # Two lines below to be removed from version 2.0 onwards
         if self.mode == "instant_reaction":
             save_c_noBC = self.cxyt_noBC.copy()
         #######
@@ -376,7 +376,7 @@ class Anatrans(Transport3D):
         y = np.array([y_position])
         t = np.array([time])
         concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
-        # Two lines below decrepit from version 2.0 onwards
+        # Two lines below to be removed from version 2.0 onwards
         if self.mode == "instant_reaction":
             self.cxyt_noBC = save_c_noBC
         #######
@@ -421,7 +421,7 @@ class Anatrans(Transport3D):
             y_term = self._equation_term_y(i, xxx, yyy)
             cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * (x_term + additional_x) * y_term * z_term
             cxyt += cxyt_step
-        # Four lines below are decrepit in version 2.0 onward
+        # Four lines below are to be removed in version 2.0 onward
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity
@@ -531,7 +531,7 @@ class Bioscreen(Anatrans):
                 y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * x_term * y_term * z_term
                 cxyt += cxyt_step
-        # Four lines below are decrepit form version 2.0 onward
+        # Four lines below are to be removed form version 2.0 onward
         if self._mode == "instant_reaction":
             self.cxyt_noBC = cxyt.copy()
             cxyt -= self.biodegradation_capacity

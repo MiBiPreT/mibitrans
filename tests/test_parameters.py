@@ -416,8 +416,8 @@ def test_calculation_optional_discretization():
         ),
     ],
 )
-def test_fringe_electron_acceptor(parameters, error) -> None:
-    """Test validation of FringeElectronAcceptor dataclass."""
+def test_electron_acceptor(parameters, error) -> None:
+    """Test validation of ElectronAcceptor dataclass."""
     if error is None:
         ElectronAcceptors(**parameters)
     else:

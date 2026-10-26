@@ -45,8 +45,10 @@ class MassBalance:
         check_model_type(results, mibitrans.transport.model_parent.Results)
         self.results = results
         self.verbose = verbose
-        if self.results.mode == "chain_decay":
-            raise NotImplementedError("Mass balance for chain decay has not (yet) been implemented.")
+        if self.results.mode in ["chain_decay", "core-fringe"]:
+            raise NotImplementedError(
+                "Mass balance for chain decay and core-fringe degradation has not (yet) been implemented."
+            )
 
         self.t = self._time_check(time)
 

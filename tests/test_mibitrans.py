@@ -20,10 +20,8 @@ def test_transport_equation_numerical_mibitrans(model, expected, request, test_e
     expected_value = getattr(test_example_data, expected)
 
     if model == "test_mibitrans_model_fringe":
-        # Until decision on source depletion fringe degradation solution, skip testing output
-        pass
-        # assert mod.cxyt[0] == pytest.approx(expected_value)
-        # assert results.cxyt[0] == pytest.approx(expected_value)
+        assert mod.cxyt[0] == pytest.approx(expected_value)
+        assert results.cxyt[0] == pytest.approx(expected_value)
     else:
         assert mod.cxyt == pytest.approx(expected_value), f"model {model} did not produce expected value"
         assert results.cxyt == pytest.approx(expected_value), f"model {model} did not produce expected value"

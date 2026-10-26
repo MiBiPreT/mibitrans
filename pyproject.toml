@@ -84,6 +84,7 @@ doc = [
     "mkdocs >=1.4.2",
     "mkdocs-material >=8.2.7",
     "mkdocstrings[python] ==0.27.0",
+    "mkdocs-autorefs == 1.2",
     "mdx-include >=1.4.1",
     "mkdocs-markdownextradata-plugin >=0.2.5",
     "mike >=2.1.3",
@@ -97,6 +98,9 @@ Changelog = "https://github.com/MiBiPreT/mibitrans/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
 
 [tool.coverage.run]
 branch = true

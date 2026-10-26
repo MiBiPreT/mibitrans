@@ -27,7 +27,7 @@ def validate_input_values(parameter, value, expectation=None):
         case "utilization_factor":
             error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.UtilizationFactor)
         case "electron_acceptor":
-            error = _check_dataclass(parameter, value, mibitrans.data.parameter_information.FringeElectronAcceptors)
+            error = _check_dataclass(parameter, value, mibitrans.data.parameters.ElectronAcceptors)
         case "hydrological_parameters" | "attenuation_parameters" | "source_parameters" | "model_parameters":
             error = _check_dataclass(parameter, value, expectation)
         # Parameters which can be any float value
@@ -50,8 +50,6 @@ def validate_input_values(parameter, value, expectation=None):
         # Parameters which are input as single values, lists or numpy arrays, and may contain nested lists/arrays
         case "source_zone_concentration":
             error = _check_array_list_numeric_positive(parameter, value, sublist_allowed=True)
-        case "electron_acceptors":
-            error = _check_electron_acceptor(value)
         # All other parameters are checked as floats on positive domain
         case _:
             error = _check_numeric_positive(parameter, value)
@@ -154,14 +152,17 @@ def validate_source_zones(boundary, concentration):
     if isinstance(concentration, list):
         concentration = _check_source_concentrations_as_arrays(concentration)
     elif isinstance(concentration, (int, float, np.floating, np.integer)):
-        concentration = np.array([concentration])
+        concentration = np.array([concentration], dtype=float)
+    # Make sure that even if given as array, data types of concentration are floats
+    elif isinstance(concentration, np.ndarray):
+        concentration = np.array(concentration, dtype=float)
 
     # When only a single source zone boundary is given, but multiple source zone concentrations, it could be
     # interpreted as invalid input for a source zone of a single contaminant. However, it could also be considered as
     # multiple single source concentrations for multiple contaminants in chain decay. Therefore, no
     # error will be raised if length of boundary array != length concentration array.
     if len(boundary) != len(concentration) and len(boundary) == 1:
-        concentration = [np.array([conc]) for conc in concentration]
+        concentration = [np.array([conc], dtype=float) for conc in concentration]
 
     # Source zone boundary should be ordered by distance from source center to fringes, to make source zone input
     # less ambiguous
@@ -180,20 +181,20 @@ def validate_source_zones(boundary, concentration):
 def _check_source_boundary_as_array(boundary):
     """Ensure that source zone boundary is of the type np.ndarray."""
     if isinstance(boundary, (float, int, np.floating, np.integer)):
-        return np.array([boundary])
+        return np.array([boundary], dtype=float)
     else:
-        return np.array(boundary)
+        return np.array(boundary, dtype=float)
 
 
 def _check_source_concentrations_as_arrays(concentration):
     """Ensure that source zone concentration is of the type np.ndarray or list(np.ndarray)."""
     if isinstance(concentration[0], (list, np.ndarray)):
         if len(concentration) == 1:
-            concentration = np.array(concentration[0])
+            concentration = np.array(concentration[0], dtype=float)
         else:
-            concentration = [np.array(conc) for conc in concentration]
+            concentration = [np.array(conc, dtype=float) for conc in concentration]
     else:
-        concentration = np.array(concentration)
+        concentration = np.array(concentration, dtype=float)
     return concentration
 
 
@@ -256,37 +257,16 @@ def _check_dataclass(parameter, value, expected_type):
         return TypeError(f"{parameter} must be of type {expected_type}, but is {type(value)} instead.")
 
 
-def _check_electron_acceptor(value):
-    """Check if variable is an ElectronAcceptors dataclass, list, array or dictionary, raise an error if it is not."""
-    if isinstance(value, mibitrans.data.parameter_information.ElectronAcceptors):
-        return None
-    elif isinstance(value, (list, np.ndarray, dict)):
-        if len(value) != 5:
-            return ValueError(
-                f"Input for electron_acceptors as list, array or dictionary must have an entry for each electron "
-                f"acceptor, of which there are five utilized by this model. The current input has {len(value)} "
-                f"entries instead."
-            )
-        else:
-            return None
-    else:
-        return TypeError(
-            f"electron_acceptors must be of type {mibitrans.data.parameter_information.ElectronAcceptors},"
-            f" or alternatively as list, numpy array or dictionary containing electron acceptor "
-            f"concentrations. But is {type(value)} instead."
-        )
-
-
 # Unprotected checking functions
 
 
 def check_instant_reaction_acceptor_input(electron_acceptors, utilization_factor):
     """Check if electron acceptor and utilization factor are of correct datatype. Then pass them to dataclasses."""
     if isinstance(electron_acceptors, (list, np.ndarray)):
-        electron_acceptors_out = mibitrans.data.parameter_information.ElectronAcceptors(*electron_acceptors)
+        electron_acceptors_out = mibitrans.data.parameter_information.InstantElectronAcceptors(*electron_acceptors)
     elif isinstance(electron_acceptors, dict):
-        electron_acceptors_out = mibitrans.data.parameter_information.ElectronAcceptors(**electron_acceptors)
-    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.ElectronAcceptors):
+        electron_acceptors_out = mibitrans.data.parameter_information.InstantElectronAcceptors(**electron_acceptors)
+    elif isinstance(electron_acceptors, mibitrans.data.parameter_information.InstantElectronAcceptors):
         electron_acceptors_out = electron_acceptors
     else:
         raise TypeError(

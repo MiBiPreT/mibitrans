@@ -22,26 +22,26 @@ def allowed_model_types():
 
 
 def centerline(
-    model,
-    y_position=0,
-    time=None,
-    relative_concentration=False,
-    legend_names=None,
-    animate=False,
-    plot_index=None,
+    model: mibitrans.transport.model_parent.Results | list[mibitrans.transport.model_parent.Results],
+    y_position: int | float = 0,
+    time: int | float = None,
+    relative_concentration: bool = False,
+    legend_names: list["str"] | None = None,
+    animate: bool = False,
+    plot_index: int | list[int] | None = None,
     **kwargs,
 ):
     """Plot center of contaminant plume of one or multiple models as a line, at a specified time and y position.
 
     Args:
-        model : Model object from mibitrans.transport, or list of model objects.
+        model : Model Results object from mibitrans.transport, or list of objects.
         y_position (float, optional): y-position across the plume (transverse horizontal direction) for the plot.
             By default, the center of the plume at y=0 is plotted.
         time (float, optional): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
         relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
             zone concentrations at t=0. By default, absolute concentrations are shown.
-        legend_names (str | list, optional): List of legend names as strings, in the same order as given models.
+        legend_names (str | list, optional): List of legend names as strings, in the same order as given resultss.
             By default, no legend is shown.
         animate (bool, optional): If True, animation of contaminant plume until given time is shown. If multiple models
             are given as input, dt should be the same for each one to ensure accurate animation. Default is False.
@@ -118,19 +118,19 @@ def centerline(
 
 
 def transverse(
-    model,
-    x_position,
-    time=None,
-    relative_concentration=False,
-    legend_names=None,
-    animate=False,
-    plot_index=None,
+    model: list[mibitrans.transport.model_parent.Results] | mibitrans.transport.model_parent.Results,
+    x_position: int | float,
+    time: int | float = None,
+    relative_concentration: bool = False,
+    legend_names: list["str"] | None = None,
+    animate: bool = False,
+    plot_index: int | list[int] | None = None,
     **kwargs,
 ):
     """Plot concentration distribution as a line horizontal transverse to the plume extent.
 
     Args:
-        model : Model object from mibitrans.transport, or list of model objects.
+        model : Model Results object from mibitrans.transport, or list of objects.
         x_position : x-position along the plume (longitudinal direction) for the plot.
         time (float): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
@@ -212,19 +212,19 @@ def transverse(
 
 
 def breakthrough(
-    model,
-    x_position,
-    y_position=0,
-    relative_concentration=False,
-    legend_names=None,
-    animate=False,
-    plot_index=None,
+    model: list[mibitrans.transport.model_parent.Results] | mibitrans.transport.model_parent.Results,
+    x_position: int | float,
+    y_position: int | float = 0,
+    relative_concentration: bool = False,
+    legend_names: list["str"] | None = None,
+    animate: bool = False,
+    plot_index: int | list[int] | None = None,
     **kwargs,
 ):
     """Plot contaminant breakthrough curve at given x and y position in model domain.
 
     Args:
-        model : Model object from mibitrans.transport, or list of model objects.
+        model : Model Results object from mibitrans.transport, or list of objects.
         x_position : x-position along the plume (longitudinal direction).
         y_position : y-position across the plume (transverse horizontal direction).
             By default, at the center of the plume (at y=0).

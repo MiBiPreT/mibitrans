@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 from matplotlib import animation
+import mibitrans
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.visualize.plot_line import _plot_title_generator
@@ -10,11 +12,93 @@ relative_conc_zlabel = r"Relative concentration ($C/C_0$)"
 absolute_conc_zlabel = r"Concentration [g/$m^{3}$]"
 
 
-def plume_2d(model, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
+def plume_core_fringe(
+    model: mibitrans.transport.model_parent.Results,
+    time: int | float = None,
+    relative_concentration: bool = False,
+    **kwargs,
+):
+    """Plot concentration distribution electron donor and electron acceptor together in a single contour plot.
+
+    Args:
+        model : Model Results object from mibitrans.transport, ran with core-fringe degradation.
+        time (float): Point of time for the plot. Will show the closest time step to given value.
+            By default, last point in time is plotted.
+        relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
+            zone concentrations at t=0. By default, absolute concentrations are shown.
+        **kwargs : Arguments for optional further plot customization:
+            ed_nlevels (int) : Amount of contour levels for electron donor.
+            ea_nlevels (int) : Amount of contour levels for electron acceptor.
+            ed_cmap (str) : Colormap to use for electron donor contours.
+            ea_cmap (str) : Colormap to use for electron acceptor contours.
+            figsize (tuple) : Figure size of plot.
+    """
+    check_model_type(model, allowed_model_types())
+    if model.mode != "core-fringe":
+        raise ValueError(
+            "Combined visualization for electron donor and electron acceptors is only possible for core-fringe models."
+        )
+    t_pos = check_time_in_domain(model, time)
+    x = model.x
+    y = model.y
+    if relative_concentration:
+        ed_cxyt, ea_cxyt = model.relative_cxyt[0], model.relative_cxyt[1]
+    else:
+        ed_cxyt, ea_cxyt = model.cxyt[0], model.cxyt[1]
+
+    combi_plume = np.where(ed_cxyt <= 0, ed_cxyt - ea_cxyt, ed_cxyt)
+
+    # MaxNLocator determines 'neat' intervals for colorbar automatically.
+    tick_determination = ticker.MaxNLocator(nbins=12, steps=[1, 2, 4, 5, 10], min_n_ticks=6)
+    # Can set amount of levels manually by specifying in kwargs
+    if kwargs.get("ed_nlevels", None):
+        ed_levels = np.linspace(0, np.max(ed_cxyt), kwargs["ed_nlevels"])
+    else:
+        ed_levels = np.array(tick_determination.tick_values(0, np.max(ed_cxyt)))
+    if kwargs.get("ea_nlevels", None):
+        ea_levels = np.linspace(-np.max(ea_cxyt), 0, kwargs["ea_nlevels"])
+    else:
+        ea_levels = np.array(tick_determination.tick_values(-np.max(ea_cxyt), 0))
+
+    # Use default colormaps if colormaps not specified in kwargs
+    ed_cmap = kwargs.get("ed_cmap", "YlOrBr")
+    ea_cmap = kwargs.get("ea_cmap", "Greens_r")
+
+    # Will use figsize of (16,9) if not specified differently in kwargs
+    plt.figure(figsize=kwargs.get("figsize", (16, 9)), dpi=300, layout="constrained")
+    plt.xlabel(r"Distance from source [$m$]")
+    plt.ylabel(r"Distance from plume center [$m$]")
+    plt.yticks([int(y[0]), 0, np.ceil(y[-1])], [np.round(y[0]), 0, np.round(y[-1])])
+
+    ed_plume = plt.contourf(x, y, combi_plume[t_pos, :, :], levels=ed_levels, cmap=ed_cmap)
+    ea_plume = plt.contourf(x, y, combi_plume[t_pos, :, :], levels=ea_levels, cmap=ea_cmap)
+    # Line for boundary between ED and EA concentrations
+    plume_max = plt.contour(x, y, combi_plume[t_pos, :, :], levels=[0], linewidths=2, colors="k")
+
+    cbar_ed = plt.colorbar(ed_plume, label=r"Electron donor concentrations [$g/m^3$]", location="bottom", aspect=75)
+    cbar_ea = plt.colorbar(ea_plume, label=r"Electron acceptor concentrations [$g/m^3$]", location="bottom", aspect=75)
+    # Ensure that colorbar values for EA are positive
+    cbar_ea.set_ticklabels([f"{round(abs(level), 5)}" for level in ea_plume.levels])
+
+    bar_height = 0.01
+    bar_width = 0.8
+    bar_x = 0.1
+    cbar_ea.ax.set_position([bar_x, 0, bar_width, bar_height])
+    cbar_ed.ax.set_position([bar_x, 1, bar_width, bar_height])
+
+
+def plume_2d(
+    model: mibitrans.transport.model_parent.Results,
+    time: int | float = None,
+    relative_concentration: bool = False,
+    animate: bool = False,
+    plot_index: int | list[int] | None = None,
+    **kwargs,
+):
     """Plot contaminant plume as a 2D colormesh, at a specified time.
 
     Args:
-        model : Model object from mibitrans.transport.
+        model : Model Results object from mibitrans.transport.
         time (float): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
         relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source
@@ -69,11 +153,18 @@ def plume_2d(model, time=None, relative_concentration=False, animate=False, plot
         return ani
 
 
-def plume_3d(model, time=None, relative_concentration=False, animate=False, plot_index=0, **kwargs):
+def plume_3d(
+    model: mibitrans.transport.model_parent.Results,
+    time: int | float = None,
+    relative_concentration: bool = False,
+    animate: bool = False,
+    plot_index: int | list[int] | None = None,
+    **kwargs,
+):
     """Plot contaminant plume as a 3D surface, at a specified time.
 
     Args:
-        model : Model object from mibitrans.transport.
+        model : Model Results object from mibitrans.transport.
         time (float): Point of time for the plot. Will show the closest time step to given value.
             By default, last point in time is plotted.
         relative_concentration (bool, optional) : If set to True, will plot concentrations relative to maximum source

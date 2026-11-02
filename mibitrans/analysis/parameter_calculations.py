@@ -15,7 +15,7 @@ def calculate_biodegradation_capacity(electron_acceptors, utilization_factor):
 def calculate_discharge_and_average_source_zone_concentration(model):
     """Calculate discharge through source zone and average source zone concentration, returned in respective order."""
     if model.mode == "instant_reaction":
-        bc = model.biodegradation_capacity
+        bc = model._biodegradation_capacity
     else:
         bc = 0
     y_src = np.zeros(len(model.source_parameters.source_zone_boundary) + 1)

@@ -11,10 +11,10 @@ from mibitrans.transport.models import Anatrans
 from mibitrans.transport.models import Bioscreen
 from mibitrans.transport.models import Mibitrans
 from tests.conftest import electron_acceptor_dict
-from tests.test_example_data import testing_massbalance_instant_ana_inf
-from tests.test_example_data import testing_massbalance_instant_mbt
-from tests.test_example_data import testing_massbalance_instant_mbt_inf
+from tests.test_example_data import testing_massbalance_instant_bio
+from tests.test_example_data import testing_massbalance_instant_bio_inf
 from tests.test_example_data import testing_massbalance_lineardecay_ana
+from tests.test_example_data import testing_massbalance_lineardecay_mbt
 from tests.test_example_data import testing_massbalance_nodecay_bio
 
 
@@ -44,7 +44,7 @@ def test_source_pars_inf():
 
 @pytest.fixture(scope="module")
 def test_bioscreen_nodecay_model_mb(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
-    """Bioscreen with linear decay fixture mass balance object for testing."""
+    """Bioscreen without decay fixture mass balance object for testing."""
     obj = Bioscreen(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
     res = obj.run()
     return res.mass_balance()
@@ -59,27 +59,26 @@ def test_anatrans_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_sour
 
 
 @pytest.fixture(scope="module")
-def test_mibitrans_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Mibitrans with instant reaction fixture mass balance object for testing."""
+def test_mibitrans_lineardecay_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans with linear decay fixture mass balance object for testing."""
     obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    res = obj.run()
+    return res.mass_balance()
+
+
+@pytest.fixture(scope="module")
+def test_bioscreen_instantreaction_model_mb(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
+    """Mibitrans with instant reaction fixture mass balance object for testing."""
+    obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
     obj.instant_reaction(electron_acceptor_dict)
     res = obj.run()
     return res.mass_balance()
 
 
 @pytest.fixture(scope="module")
-def test_mibitrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
-    """Mibitrans with instant reaction and infinite source mass fixture mass balance  object for testing."""
-    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
-    obj.instant_reaction(electron_acceptor_dict)
-    res = obj.run()
-    return res.mass_balance()
-
-
-@pytest.fixture(scope="module")
-def test_anatrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
+def test_bioscreen_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars):
     """Anatrans with instant reaction and infinite source mass fixture mass balance object for testing."""
-    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
+    obj = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars_inf, test_model_pars)
     obj.instant_reaction(electron_acceptor_dict)
     res = obj.run()
     return res.mass_balance()
@@ -90,9 +89,9 @@ def test_anatrans_instantreaction_model_mb_inf(test_hydro_pars, test_att_pars, t
     [
         ("test_bioscreen_nodecay_model_mb", testing_massbalance_nodecay_bio),
         ("test_anatrans_lineardecay_model_mb", testing_massbalance_lineardecay_ana),
-        ("test_mibitrans_instantreaction_model_mb", testing_massbalance_instant_mbt),
-        ("test_mibitrans_instantreaction_model_mb_inf", testing_massbalance_instant_mbt_inf),
-        ("test_anatrans_instantreaction_model_mb_inf", testing_massbalance_instant_ana_inf),
+        ("test_mibitrans_lineardecay_model_mb", testing_massbalance_lineardecay_mbt),
+        ("test_bioscreen_instantreaction_model_mb", testing_massbalance_instant_bio),
+        ("test_bioscreen_instantreaction_model_mb_inf", testing_massbalance_instant_bio_inf),
     ],
 )
 @pytest.mark.filterwarnings("ignore:Decay rate was set")

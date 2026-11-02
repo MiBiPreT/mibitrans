@@ -251,12 +251,12 @@ class MassBalance:
         """Calculate difference between input model plume mass and no degradation model for instant reaction model."""
         if isinstance(self.t, np.ndarray):
             plume_mass_t_noBC = np.sum(
-                self.results.cxyt_noBC[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity,
+                self.results._cxyt_noBC[:, :, 1:] * self.cellsize * self.results.hydrological_parameters.porosity,
                 axis=(1, 2),
             )
         else:
             plume_mass_t_noBC = np.sum(
-                self.results.cxyt_noBC[self._t_index, :, 1:]
+                self.results._cxyt_noBC[self._t_index, :, 1:]
                 * self.cellsize
                 * self.results.hydrological_parameters.porosity
             )
@@ -266,7 +266,7 @@ class MassBalance:
 
     def _calculate_electron_acceptor_change(self):
         """Calculate the change in electron acceptor mass for given time(s) for instant reaction model."""
-        mass_fraction_degraded_acceptor = self.results.electron_acceptors.array / self.results.biodegradation_capacity
+        mass_fraction_degraded_acceptor = self.results.electron_acceptors.array / self.results._biodegradation_capacity
         electron_acceptor_change = {}
         electron_acceptors = ["oxygen", "nitrate", "ferrous_iron", "sulfate", "methane"]
         for i, ea in enumerate(electron_acceptors):

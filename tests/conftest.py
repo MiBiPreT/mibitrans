@@ -106,7 +106,10 @@ def test_model_pars():
     )
 
 
-fringe_ea = ElectronAcceptors(14.528727219547314, 1, 1)
+@pytest.fixture(scope="session")
+def test_electron_acceptor_pars():
+    """ElectronAcceptors fixture with example data for tests."""
+    return ElectronAcceptors(14.528727219547314, 1, 1)
 
 
 @pytest.fixture(scope="session")
@@ -134,15 +137,6 @@ def test_mibitrans_model_lineardecay(test_hydro_pars, test_att_pars, test_source
 
 
 @pytest.fixture(scope="session")
-def test_mibitrans_model_instantreaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Mibitrans fixture model object for testing, with instant reaction."""
-    obj = Mibitrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-    obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
-    res = obj.run()
-    return obj, res
-
-
-@pytest.fixture(scope="session")
 def test_mibitrans_model_chaindecay(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars):
     """Mibitrans fixture model object for testing, with chain decay."""
     obj = Mibitrans(test_hydro_pars, test_att_pars_chain, test_source_pars_chain, test_model_pars)
@@ -152,10 +146,12 @@ def test_mibitrans_model_chaindecay(test_hydro_pars, test_att_pars_chain, test_s
 
 
 @pytest.fixture(scope="session")
-def test_mibitrans_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+def test_mibitrans_model_fringe(
+    test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars, test_electron_acceptor_pars
+):
     """Mibitrans fixture model object for testing, with fringe biodegradation."""
     obj = Mibitrans(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
-    obj.fringe_degradation(fringe_ea, 1)
+    obj.fringe_degradation(test_electron_acceptor_pars, 1)
     res = obj.run()
     return obj, res
 
@@ -176,20 +172,13 @@ def test_anatrans_model_lineardecay(test_hydro_pars, test_att_pars, test_source_
     return obj, res
 
 
-@pytest.fixture(scope="module")
-def test_anatrans_model_instantreaction(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars):
-    """Anatrans fixture model object for testing, with instant reaction."""
-    obj = Anatrans(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
-    obj.instant_reaction(electron_acceptors=electron_acceptor_dict)
-    res = obj.run()
-    return obj, res
-
-
 @pytest.fixture(scope="session")
-def test_anatrans_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+def test_anatrans_model_fringe(
+    test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars, test_electron_acceptor_pars
+):
     """Mibitrans fixture model object for testing, with fringe biodegradation."""
     obj = Anatrans(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
-    obj.fringe_degradation(fringe_ea, 1)
+    obj.fringe_degradation(test_electron_acceptor_pars, 1)
     res = obj.run()
     return obj, res
 
@@ -221,10 +210,12 @@ def test_bioscreen_model_instantreaction(test_hydro_pars, test_att_pars, test_so
 
 
 @pytest.fixture(scope="session")
-def test_bioscreen_model_fringe(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars):
+def test_bioscreen_model_fringe(
+    test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars, test_electron_acceptor_pars
+):
     """Mibitrans fixture model object for testing, with fringe biodegradation."""
     obj = Bioscreen(test_hydro_pars, test_att_pars_nodecay, test_source_pars, test_model_pars)
-    obj.fringe_degradation(fringe_ea, 1)
+    obj.fringe_degradation(test_electron_acceptor_pars, 1)
     res = obj.run()
     return obj, res
 

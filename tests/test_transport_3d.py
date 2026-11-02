@@ -132,6 +132,9 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
         model_object.mode = "core-fringe"
     model_object.mode = "linear"
     assert model_object.mode == "linear", "Model mode was not switched to 'linear'."
+    with pytest.raises(ValueError):
+        # Model should raise error if attempting to switch to instant reaction for any other model than Bioscreen
+        model_object.mode = "instant_reaction"
 
 
 def test_model_results_independance(test_mibitrans_model_fringe):

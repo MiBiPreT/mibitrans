@@ -34,8 +34,9 @@ def plume_core_fringe(
     """
     check_model_type(model, allowed_model_types())
     if model.mode != "core-fringe":
-        raise ValueError(
-            "Combined visualization for electron donor and electron acceptors is only possible for core-fringe models."
+        raise TypeError(
+            "Combined visualization for electron donor and electron acceptors is only possible for "
+            f"core-fringe models, but this is a {model.mode} model instead."
         )
     t_pos = check_time_in_domain(model, time)
     x = model.x

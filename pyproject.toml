@@ -83,7 +83,7 @@ publishing = [
 doc = [
     "mkdocs >=1.4.2",
     "mkdocs-material >=8.2.7",
-    "mkdocstrings[python] ==2.0.3",
+    "mkdocstrings[python]",
     "mdx-include >=1.4.1",	
     "mkdocs-markdownextradata-plugin >=0.2.5",
     "mike >=2.1.3",

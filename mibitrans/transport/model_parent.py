@@ -5,15 +5,11 @@ from abc import abstractmethod
 import numpy as np
 import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
-from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
 from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
 from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
 from mibitrans.data.check_input import check_chain_decay_validity
-from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
-from mibitrans.data.parameter_information import InstantElectronAcceptors
-from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import ElectronAcceptors
 from mibitrans.visualize import plot_line as pline
 from mibitrans.visualize import plot_surface as psurf
@@ -61,12 +57,7 @@ class Transport3D(ABC):
         self.verbose = verbose
         self._mode = "linear"
         self._electron_acceptors = None
-        self._utilization_factor = None
-        # # Parameter biodegradation_capacity removal from version 2.0 onward, functionality replaced by
-        # stoichiometric_concentration_electron_acceptors
-        self.biodegradation_capacity = 0
         self.stoichiometric_concentration_electron_acceptors = 0
-        self.cxyt_noBC = None
 
         self._mass_ratios = None
 
@@ -154,8 +145,15 @@ class Transport3D(ABC):
         match value:
             case "linear" | "linear decay" | "linear_decay" | 0:
                 self._mode = "linear"
-            # Case below will be removed from version 2.0 onward
+            # Case below is only valid for Bioscreen model. For other models, 'core-fringe' took over functionality.
             case "instant" | "instant_reaction" | "instant reaction" | 1:
+                class_name = self.__class__.__name__
+                if class_name != "Bioscreen":
+                    raise ValueError(
+                        "Model mode was set to 'instant reaction', but this mode is no longer implemented "
+                        f"in the {class_name} model. Use the core-fringe method instead. If instant "
+                        "reaction is desired regardless, use the Bioscreen model."
+                    )
                 if self._electron_acceptors is None or self._utilization_factor is None:
                     raise ValueError(
                         "Model mode was set to 'instant reaction', but electron acceptor parameters are "
@@ -164,7 +162,7 @@ class Transport3D(ABC):
                     )
                 self._mode = "instant_reaction"
             case "core-fringe" | "fringe":
-                if self.stoichiometric_concentration_electron_acceptors is None:
+                if not self.stoichiometric_concentration_electron_acceptors:
                     raise ValueError(
                         "Model mode was set to 'core-fringe', without electron acceptor parameters being "
                         "provided. Use the fringe_degradation method to supply the missing parameters."
@@ -261,7 +259,8 @@ class Transport3D(ABC):
                 self._hyd_pars, self._src_pars, self.stoichiometric_concentration_electron_acceptors
             )
         else:
-            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
+            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars)
+
         self.y_source = self._src_pars.source_zone_boundary
         # Subtract outer source zones from inner source zones
         self.c_source = self._src_pars.source_zone_concentration.copy()
@@ -270,15 +269,11 @@ class Transport3D(ABC):
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
         elif not self._src_pars.chain_decay_source:
             self.c_source[:-1] = self.c_source[:-1] - self.c_source[1:]
-        # From version 2.0 onward, if condition is removed, therefore always resolve to else
-        if self._mode == "instant_reaction":
-            self.c_source[-1] += self.biodegradation_capacity
-            self._decay_rate = 0
+
+        if isinstance(self._att_pars.decay_rate, (np.ndarray, list)):
+            self._decay_rate = self._att_pars.decay_rate[0]
         else:
-            if isinstance(self._att_pars.decay_rate, (np.ndarray, list)):
-                self._decay_rate = self._att_pars.decay_rate[0]
-            else:
-                self._decay_rate = self._att_pars.decay_rate
+            self._decay_rate = self._att_pars.decay_rate
 
     def _calculate_y_discretization(self):
         """Calculate y-direction discretization."""
@@ -401,60 +396,21 @@ class Transport3D(ABC):
         )
         return [core_fringe_cxyt, electron_acceptor_fringe_cxyt]
 
-    def instant_reaction(
-        self,
-        electron_acceptors: list | np.ndarray | dict | InstantElectronAcceptors,
-        utilization_factor: list | np.ndarray | dict | UtilizationFactor = UtilizationFactor(
-            util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
-        ),
-    ):
-        """Enable and set up parameters for instant reaction model.
-
-        Instant reaction model assumes that biodegradation is an instantaneous process compared to the groundwater flow
-        velocity. The biodegradation is assumed to be governed by the availability of electron acceptors, and quantified
-        using  stoichiometric relations from the degradation reactions. Considered are concentrations of acceptors
-        Oxygen, Nitrate and Sulfate, and reduced species Ferrous Iron and Methane.
-
-        Args:
-            electron_acceptors (ElectronAcceptors): ElectronAcceptor dataclass containing electron acceptor
-                concentrations. Alternatively provided as list, numpy array or dictionary corresponding with
-                delta_oxygen, delta_nitrate, ferrous_iron, delta_sulfate and methane. For more information, see
-                documentation for ElectronAcceptors.
-            utilization_factor (UtilizationFactor, optional): UtilizationFactor dataclass containing electron acceptor
-                utilization factors. Alternatively provided as list, numpy array or dictionary corresponding with
-                information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
-                for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
-        """
-        warnings.warn(
-            "This method is deprecated and will be removed from version 2.0 onwards. "
-            "Use the fringe_degradation method instead.",
-            DeprecationWarning,
-        )
-        self._electron_acceptors, self._utilization_factor = check_instant_reaction_acceptor_input(
-            electron_acceptors, utilization_factor
-        )
-        self._mode = "instant_reaction"
-        self.biodegradation_capacity = calculate_biodegradation_capacity(
-            self._electron_acceptors, self._utilization_factor
-        )
-        self.cxyt_noBC = 0
-        self._pre_run_initialization_parameters()
-
     def _check_model_mode_before_run(self):
-        """Make sure internal parameters are up to date with input."""
+        """Ensure internal parameters are up to date with input."""
         self._pre_run_initialization_parameters()
-        if self._mode == "linear":
-            if self.biodegradation_capacity is not None:
+        if self._mode == "core-fringe":
+            if self.stoichiometric_concentration_electron_acceptors is not None:
                 if self.verbose:
                     print(
                         "Instant reaction parameters are present while model mode is linear. "
                         "Make sure that this is indeed the desired model."
                     )
-        if self._mode == "instant_reaction":
-            if self.biodegradation_capacity is None:
+        if self._mode == "core-fringe":
+            if not self.stoichiometric_concentration_electron_acceptors:
                 raise ValueError(
-                    "Instant reaction parameters are not present. "
-                    "Please provide them with the 'instant_reaction' class method."
+                    "Electron acceptor concentrations are not present for the (core-)fringe degradation model."
+                    "Please provide them with the 'fringe_degradation' class method."
                 )
 
 
@@ -493,8 +449,6 @@ class Results:
                 source depletion takes place.
             c_source (np.ndarray) : Initial nett source zone concentrations. For multiple source zones, nett
                 concentration in nth source zone is original concentration minus concentration in source zone n - 1.
-            biodegradation_capacity (float) : Maximum capacity of biodegradation taking place, based on electron
-                acceptor concentrations and utilization factor.
             cxyt (np.ndarray) : Three-dimensional numpy array with concentrations for all x, y and t positions. Indexed
              as cxyt[t,y,x]. In [g/m3].
             relative_cxyt (np.ndarray) : Three-dimensional numpy array with relative concentrations for all x, y and t
@@ -529,24 +483,18 @@ class Results:
         self._source_parameters = copy.copy(model.source_parameters)
         self._model_parameters = copy.copy(model.model_parameters)
         self._electron_acceptors = copy.copy(model._electron_acceptors)
-        # Line below to be removed from version 2.0 onward
-        self._utilization_factor = copy.copy(model._utilization_factor)
-        ######
         self._mass_ratios = copy.copy(model._mass_ratios)
 
         self._mode = model.mode
         self._rv = model.rv
         self._k_source = model.k_source
         self._c_source = model.c_source
-        # Line below to be removed from version 2.0 onward
-        self._biodegradation_capacity = model.biodegradation_capacity
-        ######
         self._stoichiometric_concentration_electron_acceptors = model.stoichiometric_concentration_electron_acceptors
+        self._biodegradation_capacity = getattr(model, "biodegradation_capacity", None)
 
         self._cxyt = model.cxyt
+        self._cxyt_noBC = getattr(model, "_cxyt_noBC", None)
         self._relative_cxyt = model.relative_cxyt
-        # Line below to be removed from version 2.0 onward
-        self._cxyt_noBC = model.cxyt_noBC
 
     @property
     def model_type(self):
@@ -628,12 +576,6 @@ class Results:
         """Nett source zone concentration used in the model."""
         return self._c_source
 
-    # Property below to be removed from version 2.0 onward
-    @property
-    def biodegradation_capacity(self):
-        """Biodegradation capacity of the model used for the results. Only for instant reaction models."""
-        return self._biodegradation_capacity
-
     @property
     def stoichiometric_concentration_electron_acceptors(self):
         """Concentration of degradable electron donor based on available electron acceptors."""
@@ -648,12 +590,6 @@ class Results:
     def relative_cxyt(self):
         """Modelled concentration for all x, y and t, divided by the maximum source zone concentration."""
         return self._relative_cxyt
-
-    # Property to be removed from version 2.0 onward
-    @property
-    def cxyt_noBC(self):
-        """Concentration in domain without subtracting biodegradation capacity, in the instant reaction model."""
-        return self._cxyt_noBC
 
     @property
     def input_parameters(self):
@@ -934,8 +870,6 @@ class Results:
                 degradation, in [g]. Has no value if model does not consider degradation.
             model_without_degradation: Object of model without degradation. Has no value if model does not consider
                 degradation.
-            instant_reaction_degraded_mass(self): Difference in plume mass instant reaction with and without
-                biodegradation capacity subtracted, in [g]. To be removed from version 2.0 onward.
             electron_acceptor_change(self): Change in electron acceptor/byproduct masses at the given time(s), in [g].
                 Only for instant reaction. To be removed from version 2.0 onward.
 

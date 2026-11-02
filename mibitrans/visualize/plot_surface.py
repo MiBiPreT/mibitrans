@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 from matplotlib import animation
-import mibitrans
 from mibitrans.data.check_input import check_model_type
 from mibitrans.data.check_input import check_time_in_domain
 from mibitrans.visualize.plot_line import _plot_title_generator
@@ -13,7 +12,7 @@ absolute_conc_zlabel = r"Concentration [g/$m^{3}$]"
 
 
 def plume_core_fringe(
-    model: mibitrans.transport.model_parent.Results,
+    model,
     time: int | float = None,
     relative_concentration: bool = False,
     **kwargs,
@@ -73,7 +72,7 @@ def plume_core_fringe(
     ed_plume = plt.contourf(x, y, combi_plume[t_pos, :, :], levels=ed_levels, cmap=ed_cmap)
     ea_plume = plt.contourf(x, y, combi_plume[t_pos, :, :], levels=ea_levels, cmap=ea_cmap)
     # Line for boundary between ED and EA concentrations
-    plume_max = plt.contour(x, y, combi_plume[t_pos, :, :], levels=[0], linewidths=2, colors="k")
+    plt.contour(x, y, combi_plume[t_pos, :, :], levels=[0], linewidths=2, colors="k")
 
     cbar_ed = plt.colorbar(ed_plume, label=r"Electron donor concentrations [$g/m^3$]", location="bottom", aspect=75)
     cbar_ea = plt.colorbar(ea_plume, label=r"Electron acceptor concentrations [$g/m^3$]", location="bottom", aspect=75)
@@ -88,11 +87,11 @@ def plume_core_fringe(
 
 
 def plume_2d(
-    model: mibitrans.transport.model_parent.Results,
+    model,
     time: int | float = None,
     relative_concentration: bool = False,
     animate: bool = False,
-    plot_index: int | list[int] | None = None,
+    plot_index: int | list[int] = 0,
     **kwargs,
 ):
     """Plot contaminant plume as a 2D colormesh, at a specified time.
@@ -154,11 +153,11 @@ def plume_2d(
 
 
 def plume_3d(
-    model: mibitrans.transport.model_parent.Results,
+    model,
     time: int | float = None,
     relative_concentration: bool = False,
     animate: bool = False,
-    plot_index: int | list[int] | None = None,
+    plot_index: int | list[int] = 0,
     **kwargs,
 ):
     """Plot contaminant plume as a 3D surface, at a specified time.

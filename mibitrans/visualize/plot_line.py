@@ -22,11 +22,11 @@ def allowed_model_types():
 
 
 def centerline(
-    model: mibitrans.transport.model_parent.Results | list[mibitrans.transport.model_parent.Results],
+    model,
     y_position: int | float = 0,
     time: int | float = None,
     relative_concentration: bool = False,
-    legend_names: list["str"] | None = None,
+    legend_names: list[str] | None = None,
     animate: bool = False,
     plot_index: int | list[int] | None = None,
     **kwargs,
@@ -118,11 +118,11 @@ def centerline(
 
 
 def transverse(
-    model: list[mibitrans.transport.model_parent.Results] | mibitrans.transport.model_parent.Results,
+    model,
     x_position: int | float,
     time: int | float = None,
     relative_concentration: bool = False,
-    legend_names: list["str"] | None = None,
+    legend_names: list[str] | None = None,
     animate: bool = False,
     plot_index: int | list[int] | None = None,
     **kwargs,
@@ -212,11 +212,11 @@ def transverse(
 
 
 def breakthrough(
-    model: list[mibitrans.transport.model_parent.Results] | mibitrans.transport.model_parent.Results,
+    model,
     x_position: int | float,
     y_position: int | float = 0,
     relative_concentration: bool = False,
-    legend_names: list["str"] | None = None,
+    legend_names: list[str] | None = None,
     animate: bool = False,
     plot_index: int | list[int] | None = None,
     **kwargs,

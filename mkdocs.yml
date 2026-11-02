@@ -84,10 +84,9 @@ plugins:
     default_handler: python
     handlers:
       python:
-        rendering:
-          show_source: true
         options:
           show_submodules: true
+          show_source: true
 - mkdocs-jupyter:
     execute: true
     include_source: true

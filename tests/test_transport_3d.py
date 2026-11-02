@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from mibitrans.data.check_input import DomainValueError
-from mibitrans.data.parameter_information import ElectronAcceptors
+from mibitrans.data.parameter_information import InstantElectronAcceptors
 from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.model_parent import Transport3D
@@ -92,7 +92,7 @@ def test_retardation_calculation(att, expected, test_hydro_pars, test_source_par
         # Test for accepting ElectronAcceptors and UtilizationFactor dataclasses
         (
             {
-                "electron_acceptors": ElectronAcceptors(0.2, 0.4, 1, 0.5, 1),
+                "electron_acceptors": InstantElectronAcceptors(0.2, 0.4, 1, 0.5, 1),
                 "utilization_factor": UtilizationFactor(2.1, 1, 2, 3, 0.2),
             },
             None,

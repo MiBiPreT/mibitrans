@@ -5,7 +5,9 @@ from abc import abstractmethod
 import numpy as np
 import mibitrans.data.parameters as pars
 from mibitrans.analysis.mass_balance import MassBalance
+from mibitrans.analysis.parameter_calculations import _calculate_discharge_and_average_source_zone_concentration
 from mibitrans.analysis.parameter_calculations import calculate_decay_ratios
+from mibitrans.analysis.parameter_calculations import calculate_plume_length
 from mibitrans.analysis.parameter_calculations import calculate_source_depletion
 from mibitrans.analysis.parameter_calculations import transform_chain_concentrations
 from mibitrans.data.check_input import check_chain_decay_validity
@@ -399,11 +401,12 @@ class Transport3D(ABC):
     def _check_model_mode_before_run(self):
         """Ensure internal parameters are up to date with input."""
         self._pre_run_initialization_parameters()
-        if self._mode == "core-fringe":
-            if self.stoichiometric_concentration_electron_acceptors is not None:
+        self.domain_check()
+        if self._mode != "core-fringe":
+            if self.stoichiometric_concentration_electron_acceptors > 0:
                 if self.verbose:
                     print(
-                        "Instant reaction parameters are present while model mode is linear. "
+                        "Core-fringe degradation parameters are present while model mode is not set to 'core-fringe'. "
                         "Make sure that this is indeed the desired model."
                     )
         if self._mode == "core-fringe":
@@ -412,6 +415,70 @@ class Transport3D(ABC):
                     "Electron acceptor concentrations are not present for the (core-)fringe degradation model."
                     "Please provide them with the 'fringe_degradation' class method."
                 )
+
+    def domain_check(self, difference_factor=5) -> float:
+        """Compare plume length and advective front with model dimensions, warn if difference too large.
+
+        Args:
+            difference_factor (float, optional): Factor of difference between plume length or advective front and model
+                dimensions where a warning will be raised.
+
+        Returns:
+            plume_length (float): Estimated length of contaminant plume.
+        """
+        # To avoid making calculations for plume length too complex, no domain check will be done for chain decay.
+        if self._mode == "chain_decay" or self._src_pars.chain_decay_source or self._att_pars.chain_decay:
+            if self.verbose:
+                print("No plume length will be calculated for chain decay.")
+            return np.nan
+        c0_avg = self._src_pars.source_zone_concentration[0]
+        _, c0_avg = _calculate_discharge_and_average_source_zone_concentration(self._hyd_pars, self._src_pars, 0)
+        # Note: Using retarded flow velocity for calculating plume length. For fringe degradation, flow velocity does
+        # not influence the steady state plume length. But it does matter for linear decay.
+        plume_length = calculate_plume_length(
+            self.rv,
+            self._hyd_pars.alpha_x,
+            self._hyd_pars.alpha_y,
+            self._hyd_pars.alpha_z,
+            self._src_pars.source_zone_boundary[-1],
+            self._src_pars.depth,
+            self._decay_rate,
+            c0_avg,
+            self.stoichiometric_concentration_electron_acceptors,
+        )
+        if self.verbose:
+            print("Damkohler number = ", self._decay_rate * self._hyd_pars.alpha_x / self.rv)
+            print("Estimated plume length = ", plume_length)
+        # Factor 5 difference for boundary is arbitrary.
+        if self._mod_pars.model_length / difference_factor > plume_length:
+            warnings.warn(
+                f"Model domain is oversized for the estimated plume length of {plume_length}. "
+                "Decreasing 'model_length' is recommended."
+            )
+
+        if self._decay_rate <= 1e-10 and self.stoichiometric_concentration_electron_acceptors <= 1e-10:
+            if self._mod_pars.model_length * difference_factor < self.rv * self._mod_pars.model_time:
+                warnings.warn(
+                    f"Model domain is undersized for the estimated location of advective front of "
+                    f"{self.rv * self._mod_pars.model_time}. Increasing 'model_length' or decreasing 'model_time' "
+                    "is recommended."
+                )
+        elif self._mod_pars.model_length * difference_factor < plume_length:
+            warnings.warn(
+                f"Model domain is undersized for the estimated plume length of {plume_length}. "
+                f"Increasing 'model_length' is recommended."
+            )
+
+        if self._mod_pars.model_length / difference_factor > self.rv * self._mod_pars.model_time:
+            warnings.warn(
+                f"Model domain is oversized for the estimated location of advective front of "
+                f"{self.rv * self._mod_pars.model_time}. Decreasing 'model_length' or increasing 'model_time' "
+                f"is recommended."
+                # f"Expected location of advective front: {self.rv * self._mod_pars.model_time} in given model time is "
+                # f"small compared to the model length {self._mod_pars.model_length}. Decreasing 'model_length' or "
+                # "increasing 'model_time' is recommended."
+            )
+        return plume_length
 
 
 class Results:

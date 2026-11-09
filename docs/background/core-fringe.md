@@ -70,11 +70,11 @@ K(x,\mu) = \exp\left[ \left( \frac{x}{2\alpha_x} \right) \left( 1-\sqrt{1+\frac{
 $$
 
 $$\tag{5}
-F_1(x,t) = \text{erfc}\left(\frac{x-vt}{2\sqrt{\alpha_x-vt}} \right)
+F_1(x,t) = \text{erfc}\left(\frac{x-vt}{2\sqrt{\alpha_xvt}} \right)
 $$
 
 $$\tag{6}
-F_1(x,\mu,t) = \text{erfc}\left(\frac{x-vt\sqrt{(1+4\mu\alpha_x/v)}}{2\sqrt{\alpha_x-vt}} \right)
+F_1(x,\mu,t) = \text{erfc}\left(\frac{x-vt\sqrt{(1+4\mu\alpha_x/v)}}{2\sqrt{\alpha_xvt}} \right)
 $$
 
 $$\tag{7}

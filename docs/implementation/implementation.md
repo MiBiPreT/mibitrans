@@ -1,5 +1,6 @@
 # Implementation
 
+
 ## Architecture
 
 The code is structured in a modular fashion to ensure easy extension of functionality by the (future) development team as well as outside collaborators. To stimulate embedding in the scientific community, users are encouraged to report bugs and suggest extensions and issues on the GitHub issue tracker, or even self-implemented features, through pull requests.
@@ -24,6 +25,8 @@ The `mibitrans` package provides the feature of calculating the mass balances wi
 
 In the section **examples**, various example workflows, including application examples, provide inside into the application of `mibitrans`-functionality in in the form of commented Jupyter-Notebooks.
 
+---
+
 ## Research Software Management
 
 We wish to reach with `mibitrans` a wide range of academic researchers with their research and education as well as societal stakeholders, like remediation consultants, to quickly evaluate contaminated field sites. To achieve that we follow in the development of `mibitrans`, the three aspects:
@@ -39,4 +42,11 @@ This last publication type enables a single-line installation with the `pip` too
 
 To ensure high quality and consistent code style and scientific correctness, new additions are only integrated after passing automated unit tests and code quality checks and after passing a code review by a second research software engineer. 
 The package has extensive documentation, for both users and developers, which is updated and published with every (minor) software release. 
+
+---
+
+## Transport Model Implementations
+
+Find the specific equations implemented in the section *Background/Transport Model Setup*
+
 

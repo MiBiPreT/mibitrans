@@ -1,9 +1,16 @@
+import warnings
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from mibitrans import AttenuationParameters
+from mibitrans import ElectronAcceptors
+from mibitrans import HydrologicalParameters
+from mibitrans import ModelParameters
+from mibitrans import SourceParameters
 from mibitrans.data.check_input import DomainValueError
-from mibitrans.data.parameters import AttenuationParameters
+
+# from mibitrans.data.parameters import AttenuationParameters
 from mibitrans.transport.model_parent import Transport3D
 
 
@@ -135,6 +142,65 @@ def test_mode_switch(test_hydro_pars, test_att_pars, test_source_pars, test_mode
     with pytest.raises(ValueError):
         # Model should raise error if attempting to switch to instant reaction for any other model than Bioscreen
         model_object.mode = "instant_reaction"
+
+
+@pytest.mark.parametrize(
+    "hydro, att, src, model, ea, expected",
+    [
+        (
+            HydrologicalParameters(velocity=1, porosity=0.3, alpha_x=1, alpha_y=0.2, alpha_z=0.001),
+            AttenuationParameters(decay_rate=0.001),
+            SourceParameters(source_zone_boundary=5, source_zone_concentration=1, depth=3, total_mass=np.inf),
+            ModelParameters(model_length=200, model_width=20, model_time=20 * 365, dx=1, dy=1, dt=365),
+            ElectronAcceptors(0.5, 1, 1),
+            [None, None],
+        ),
+        (
+            HydrologicalParameters(velocity=1, porosity=0.3, alpha_x=1, alpha_y=0.2, alpha_z=0.001),
+            AttenuationParameters(decay_rate=0.001),
+            SourceParameters(source_zone_boundary=5, source_zone_concentration=1, depth=3, total_mass=np.inf),
+            ModelParameters(model_length=2000, model_width=20, model_time=20 * 365, dx=1, dy=1, dt=365),
+            ElectronAcceptors(0.5, 1, 1),
+            [UserWarning, "Model domain is oversized for the estimated plume length"],
+        ),
+        (
+            HydrologicalParameters(velocity=1, porosity=0.3, alpha_x=1, alpha_y=0.2, alpha_z=0.001),
+            AttenuationParameters(decay_rate=0.001),
+            SourceParameters(source_zone_boundary=5, source_zone_concentration=1, depth=3, total_mass=np.inf),
+            ModelParameters(model_length=10, model_width=20, model_time=20 * 365, dx=1, dy=1, dt=365),
+            ElectronAcceptors(0.5, 1, 1),
+            [UserWarning, "Model domain is undersized for the estimated plume length"],
+        ),
+        (
+            HydrologicalParameters(velocity=1, porosity=0.3, alpha_x=1, alpha_y=0.2, alpha_z=0.001),
+            AttenuationParameters(decay_rate=0),
+            SourceParameters(source_zone_boundary=5, source_zone_concentration=1, depth=3, total_mass=np.inf),
+            ModelParameters(model_length=200, model_width=20, model_time=20 * 365, dx=1, dy=1, dt=365),
+            None,
+            [UserWarning, "Model domain is undersized for the estimated location of advective front"],
+        ),
+        (
+            HydrologicalParameters(velocity=1, porosity=0.3, alpha_x=1, alpha_y=0.2, alpha_z=0.001),
+            AttenuationParameters(decay_rate=0.001),
+            SourceParameters(source_zone_boundary=5, source_zone_concentration=1, depth=3, total_mass=np.inf),
+            ModelParameters(model_length=2000, model_width=20, model_time=365, dx=1, dy=1, dt=365),
+            None,
+            [UserWarning, "Model domain is oversized for the estimated location of advective front"],
+        ),
+    ],
+)
+def test_domain_check(hydro, att, src, model, ea, expected):
+    """Test if domain check gives the correct warning if model domain is too small or too long."""
+    model_obj = Transport3DConcrete(hydro, att, src, model)
+    if ea is not None:
+        model_obj.fringe_degradation(ea, 1)
+    if expected[0] is UserWarning:
+        with pytest.warns(UserWarning, match=expected[1]):
+            model_obj.domain_check()
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            model_obj.domain_check()
 
 
 def test_model_results_independance(test_mibitrans_model_fringe):

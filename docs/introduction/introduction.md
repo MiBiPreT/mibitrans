@@ -2,17 +2,19 @@
 
 ## General
 
-Contaminated sites pose a risk to humans and the environment. Innovative cleaning technologies are needed to remediate these sites and remove contaminants such as petroleum hydrocarbons (PHC), cyanides and hexachlorocyclohexane (HCH).
+Contaminated sites pose a risk to humans and the environment. Innovative cleaning technologies are needed to remediate these sites and remove contaminants such as petroleum hydrocarbons (PHC), chlorinated solvent, cyanides and hexachlorocyclohexane (HCH).
 
 Conventional methods of contaminated site remediation are often costly and upkeep intensive. Bioremediation is an alternative of particular interest, as it degrades contaminants on-site. Assessment of ongoing biodegradation is an important step to check the feasibility for bioremediation. Similarly, modeling the fate of contaminants is key for understanding the processes involved and predicting bioremediation in the field. 
 
 **Estimating the extend of a contaminant plume** through modelling is highly valuable for designing monitoring and site remediation strategies. Predicting the fate of contaminant in the subsurface requires combining simulations on groundwater flow, contaminant transport and chemical reactions. Simulations allows making predictions on amounts, locations and time scales of biodegradation as well as measures of bioremediation. Complex numerical models can provide a detailed picture by taking site geometry, complex flow pattern and contaminant source distrubution into account. But they require sufficient data and detailed knowledge of site conditions and come at high computational cost and expert knowledge for setup. Simple models, based on analytical and semi-analytical solutions of the subsurface transport equation do not necessarily provide a realistic distribution of the contaminant, but they allow a quick estimate of plume travel distances, plume extend and mass balance. They are thus a good first transport screening option.
 
 The **purpose of the `mibitrans` package** is to provide such as transport screening model based on hydrogeological field data for biodegredation and bioremediation. 
+The development of `mibitrans` has been supported through funding of the EU project *MIBIREM*.
+
 
 ## MIBIREM
 
-[MIBIREM - Innovative technological toolbox for bioremediation](https://www.mibirem.eu/) is a EU funded consortium project by 12 international partners all over Europe working together to develop an *Innovative technological toolbox for bioremediation*. The project will develop molecular methods for the monitoring, isolation, cultivation and subsequent deposition of whole microbiomes. The toolbox will also include the methodology for the improvement of specific microbiome functions, including evolution and enrichment. The performance of selected microbiomes will be tested under real field conditions. The `mibitrans` package is part of this toolbox.
+[MIBIREM - Innovative technological toolbox for bioremediation](https://www.mibirem.eu/) is a EU funded consortium project by 12 international partners all over Europe working together to develop an *Innovative technological toolbox for bioremediation*. The project develops molecular methods for the monitoring, isolation, cultivation and subsequent deposition of whole microbiomes. The project also works on improvement of specific microbiome functions, including evolution and enrichment with testing the performance of selected microbiomes under real field conditions. Central to the project is field site analysis and pilot operation at contaminated sites. This is combined with computational methods for bioremediation prediction, where `mibitrans` is part of.
 
 ## Bioremediation
 
@@ -29,10 +31,5 @@ Modeling all these processes at the same time, requires a high level of model de
 
 ## Purpose
 
-`mibitrans` is supposed to serve as hydrogeological transport screening model based on field data for biodegredation and bioremediation. In parts `mibitrans` reproduces - and extends- the functionality of the *Excel*-based screening tool [`BIOSCREEN`](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system) [Newell et al., 1996]. Thus, transport is modelled based on the 3D advection dispersion equation considering linear equilibrium adsorption and various options for biodegradation. The option of no decay is also available. `mibitrans` is validated by comparing example field data with results from `BIOSCREEN`. 
+`mibitrans` is supposed to serve as hydrogeological transport screening model based on field data for biodegredation and bioremediation. Intially, `mibitrans` focuses on reactive transport of petroleum hydrocarbons, but now also includes functionality to calculate chain decay, e.g. for chlorinated solvents. `mibitrans` reproduces - and extends- the functionality of the *Excel*-based screening tool [`BIOSCREEN`](https://www.epa.gov/water-research/bioscreen-natural-attenuation-decision-support-system). Transport is modelled based on the 3D advection dispersion equation considering linear equilibrium adsorption and various options for biodegradation. `mibitrans` is validated by comparing example field data with results from `BIOSCREEN`. 
 
-## References
-
-[Newell, C. J., R. K. Mcleod, J. R. Gonzales, and J. T. Wilson, BIOSCREEN natural attenuation decision support system user’s manual version 1.3, Tech. rep., U.S. EPA, 1996.](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P1007K50.TXT)
-
-[Newell, C. J., R. K. McLeod, and J. R. Gonzales, BIOSCREEN natural attenuation decision support system version 1.4 revisions, Tech. rep., U.S. EPA, 1997.](https://d3pcsg2wjq9izr.cloudfront.net/files/6377/download/651291/0-3.pdf)

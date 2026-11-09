@@ -844,7 +844,7 @@ class Results:
         time: int | float = None,
         relative_concentration: bool = False,
         animate: bool = False,
-        plot_index: int | list[int] | None = None,
+        plot_index: int | list[int] = 0,
         **kwargs,
     ):
         """Plot contaminant plume as a 2D colormesh, at a specified time.
@@ -879,7 +879,7 @@ class Results:
         time: int | float = None,
         relative_concentration: bool = False,
         animate: bool = False,
-        plot_index: int | list[int] | None = None,
+        plot_index: int | list[int] = 0,
         **kwargs,
     ):
         """Plot contaminant plume as a 3D surface, at a specified time.

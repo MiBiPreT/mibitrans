@@ -134,13 +134,13 @@ def calculate_plume_length(
 
     # Equation used is t->infinity for Anatrans core-fringe degradation equation at plume center. Reminicent of equation
     # 23 of Gutierrez-Neri et al. (2009), but corrected for critiques of Hunkeler et al. (2010).
-    def residual(L):
+    def residual(pl):
         """Calculate for which plume length equation is 0 at t->infinity."""
-        degradation_term = np.exp((L / (2 * alpha_x)) * (1 - np.sqrt(1 + 4 * decay_rate * alpha_x / velocity))) + (
+        degradation_term = np.exp((pl / (2 * alpha_x)) * (1 - np.sqrt(1 + 4 * decay_rate * alpha_x / velocity))) + (
             stoichiometric_ea_concentration / c0
         )
-        horizontal_transverse_term = erf(width / (2 * np.sqrt(alpha_y * L))) if alpha_y > 0 else 1
-        vertical_transverse_term = erf(depth / (2 * np.sqrt(alpha_z * L))) if alpha_z > 0 else 1
+        horizontal_transverse_term = erf(width / (2 * np.sqrt(alpha_y * pl))) if alpha_y > 0 else 1
+        vertical_transverse_term = erf(depth / (2 * np.sqrt(alpha_z * pl))) if alpha_z > 0 else 1
 
         return c0 * degradation_term * horizontal_transverse_term * vertical_transverse_term - limit
 

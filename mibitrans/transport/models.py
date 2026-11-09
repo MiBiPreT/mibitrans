@@ -488,7 +488,7 @@ class Bioscreen(Anatrans):
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
         self.biodegradation_capacity = 0
-        self._cxyt_noBC = None
+        self._cxyt_nobc = None
 
     def _pre_run_initialization_parameters(self):
         Anatrans._pre_run_initialization_parameters(self)
@@ -528,7 +528,7 @@ class Bioscreen(Anatrans):
         self.biodegradation_capacity = calculate_biodegradation_capacity(
             self._electron_acceptors, self._utilization_factor
         )
-        self.cxyt_noBC = 0
+        self.cxyt_nobc = 0
         self._pre_run_initialization_parameters()
 
     def _equation_term_source_depletion(self, xxx, ttt):
@@ -552,7 +552,7 @@ class Bioscreen(Anatrans):
                 cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * x_term * y_term * z_term
                 cxyt += cxyt_step
         if self._mode == "instant_reaction":
-            self._cxyt_noBC = cxyt.copy()
+            self._cxyt_nobc = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True

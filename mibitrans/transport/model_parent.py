@@ -431,7 +431,6 @@ class Transport3D(ABC):
             if self.verbose:
                 print("No plume length will be calculated for chain decay.")
             return np.nan
-        c0_avg = self._src_pars.source_zone_concentration[0]
         _, c0_avg = _calculate_discharge_and_average_source_zone_concentration(self._hyd_pars, self._src_pars, 0)
         # Note: Using retarded flow velocity for calculating plume length. For fringe degradation, flow velocity does
         # not influence the steady state plume length. But it does matter for linear decay.
@@ -474,9 +473,6 @@ class Transport3D(ABC):
                 f"Model domain is oversized for the estimated location of advective front of "
                 f"{self.rv * self._mod_pars.model_time}. Decreasing 'model_length' or increasing 'model_time' "
                 f"is recommended."
-                # f"Expected location of advective front: {self.rv * self._mod_pars.model_time} in given model time is "
-                # f"small compared to the model length {self._mod_pars.model_length}. Decreasing 'model_length' or "
-                # "increasing 'model_time' is recommended."
             )
         return plume_length
 
@@ -560,7 +556,7 @@ class Results:
         self._biodegradation_capacity = getattr(model, "biodegradation_capacity", None)
 
         self._cxyt = model.cxyt
-        self._cxyt_noBC = getattr(model, "_cxyt_noBC", None)
+        self._cxyt_nobc = getattr(model, "_cxyt_nobc", None)
         self._relative_cxyt = model.relative_cxyt
 
     @property

@@ -1,11 +1,18 @@
-## Core-fringe degradation model
+# Core-fringe Degradation
 
-The concept of a combined core and fringe analytical degradation model is first introduced in Gutierrez-Neri et al. (2009).
-Distinction is made between processes happening at the plume fringes, and in the plume interior (core).
+## Concept
+Reactive behavior of contaminants in the context of biodegradation is typically divided into two categories depending on the location at which it occurs: in the plume interior (core) or at the plume fringe. 
 
+Plume core degradation is the result of anaerobic processes involving manganese reduction, iron reduction sulphate reduction and methanogenesis. Electron acceptors for these processes are available for overall plume degradation, but reactions are generally slow. 
 
-### Background
-Borden et al. (1986), uses a numerical model of the 2D-ADE for a non-degrading, non-reactive tracer to model transport of both electron acceptor (EA) and electron donor (ED). 
+Processes such as aerobic respiration, denitrification, and sulphate reduction are reflected through reactions taking place at the plume fringes. Within the plume, electron acceptors such as oxygen and nitrate are quickly consumed. Supply of electron acceptors from background groundwater into the plume is limited by dispersion at the plume fringes.
+
+Both degradation processes can be included to a reactive transport model. Core degradation can be reflected through linear decay that is part of the transport solutions in to the ADE where the decay term controlls the magnitude by the decay rate $\mu$. Fringe-degradation can be included through superposition (details specified below). *Gutierrez-Neri et al.*, 2009 first presented an analytical approach combining both reactive processes, core and fringe degradation, in contaminant plume modeling. Hunkeler et al., *2010* suggested a correction to parts of the solution. We make use of this corrected analytical model of the core-fringe degradation approach for implementation in `mibitrans`.
+
+---
+
+## Background
+*Borden et al.* (1986), used a numerical model of the 2D-ADE for a non-degrading, non-reactive tracer to model transport of both electron acceptor (EA) and electron donor (ED). 
 Provided velocity field and transport coefficients are the same, a superposition method can be used to determine resulting concentration distribution of a degradation reaction between EA and ED. 
 Defined as $C_{ED} = C_{ED}^T - \frac{C_{EA}^T}{f}$.
 Where $C_{ED}$ is the electron donor concentration after biodegradation, 
@@ -21,7 +28,9 @@ Under this assumption, the biodegradation reaction is considered as an 'instanta
 Furthermore, for multiple EA species, it is assumed that there is no preference in the order in which they occur.
 And that there is no preference for a specific pair of ED and EA.
 
-### Analytical solution fringe degradation
+---
+
+## Analytical solution for fringe degradation
 
 This approach was included in the BIOPLUME software, and later as the instantaneous reaction model in BIOSCREEN, where the same principle was applied to an analytical solution.
 The paper of Koussis et al. (2003) investigates the validity of the instantaneous reaction model, by comparing it to a kinetic numerical model.
@@ -33,7 +42,9 @@ Due to the latter boundary condition, the derived analytical equation is for ste
 Later in the paper, considerations are discussed for a non-steady state plume. For transient cases, the approach only valid where the retardation factor of the ED is equal to that of the EA.
 Though, as the retardation factor only affects transient development of contaminant plume, this assumption is not required for the steady state solution (Ham et al., 2004).
 
-### Combined core-fringe degradation
+---
+
+## Combined core-fringe degradation
 In the case that reaction rate is considered the limiting factor instead of the electron acceptor concentration, the assumption of an instant reaction no longer holds.
 Specifically for anaerobic degradation like interactions with metal oxides or fermentation, this can be the case, usually in the plume center, where oxygen is largely absent.
 These processes can then be approximated by first-order, linear decay.
@@ -41,9 +52,11 @@ These processes can then be approximated by first-order, linear decay.
 Assumption for modelling the biodegradation as first-order decay is that reaction rate is indeed dependent on electron donor concentration, and that the electron acceptor does not deplete.
 The paper of Gutierrez-Neri et al. (2009) describes an analytical solution for the combination of core degradation and fringe degradation.
 In general, this solution looks like:
+
 $$ \tag{1}
 C_{ED}(x,y,z,t) = F_{ED}(x,y,z,t, C^0_{ED},\mu) - (C^0_{EA} - F_{EA}(x,y,z,t,C^0_{EA}))
 $$
+
 where $F_{ED}$ is a transport equation for a linearly decaying species with source concentration of $C^0_{ED}$ and degradation rate $\mu$, 
 and $F_{EA}$ is that same transport equation for a conservative species with source concentration $C^0_{EA}$.
 All other transport parameters are the same in $F_{ED}$ and $F_{EA}$.
@@ -59,6 +72,7 @@ C_{ED}(x,y,t) =
     \end{array}
 \right\}
 $$
+
 Where
 
 $$\tag{3}
@@ -81,8 +95,10 @@ $$\tag{7}
 F_2(x,y) = \left[ \text{erf}\left(\frac{y + Y/2}{2 \sqrt{\alpha_yx}}\right) - \text{erf}\left( \frac{y - Y/2}{2\sqrt{\alpha_yx}} \right) \right]
 $$
 
-### Biodegradation stoichiometry
-As is, equation 1 is only valid if 1g of EA is used to degrade 1g of ED, which is not the case in any degradation reaction.
+---
+
+## Biodegradation stoichiometry
+As is, equation (1) is only valid if 1g of EA is used to degrade 1g of ED, which is not the case in any degradation reaction.
 For any equation relating EA and ED concentrations to be valid, there has to be unit stoichiometry.
 In case of BIOSCREEN, this is encapsuled in the Biodegradation Capacity (BC). 
 Here electron acceptor concentrations are divided by their respective utilization factor, which is the mass ratio in the biodegradation reaction between the specific EA and ED. i.e. grams of EA required to degrade 1g of ED.
@@ -92,13 +108,17 @@ The approach taken by Gutierrez-Neri et al. (2009) instead considers $C_{ED}$ an
 This then also causes unit stoichiometry, as for each electron donated, an electron is accepted.
 Conversion to mol electrons per volume is achieved by considering the half-reactions of the ED and EA. 
 
-### Implementation to _mibitrans_
-While Gutierrez-Neri et al. (2009) and Hunkeler et al. (2010) use the Domenico solution for the core-fringe model, the governing principles apply to the exact (Mibitrans) solution as well.
+---
+
+## Implementation to _mibitrans_
+While *Gutierrez-Neri et al. (2009)* and *Hunkeler et al. (2010)* use the *Domenico, (1987)* solution for the core-fringe model, the governing principles apply to the exact (Mibitrans) solution as well.
 However, due to the integral involved in the exact solution, it does not resolve to the form of equation 2, like the fully analytical solutions would.
 Instead, _mibitrans_ uses the implemented transport equations as is, and calculates ED and EA concentrations as follows:
+
 $$ \tag{8}
 C_{ED}(x,y,t)  = \operatorname{max} \left[F_{ED}(x,y,t) -  \left(C_{0,EA} - F_{EA}(x,y,t)\right),0 \right] \\
 $$
+
 $$ \tag{9}
 C_{EA}(x,y,t)  = \operatorname{max} \left[  \left(C_{0,EA} - F_{EA}(x,y,t) \right) - F_{ED}(x,y,t),0 \right]
 $$
@@ -111,6 +131,7 @@ Four additional parameters are needed for this implementation of fringe degradat
 Where $\Phi_{EA:ED}$ is referring to stoichiometry of EA:ED of the entire (not half) biodegradation reaction.
 Parameters for any number electron acceptors can be given, which are transformed based on the stoichiometric parameters given and subsequently summed to obtain a single $C_{0,EA}$.
 Then, for any n amount of electron acceptors, the EA concentration expressed as the concentration of ED it can degrade is
+
 $$ \tag{10}
 C_{0,EA} =
 \sum_{i=1}^n
@@ -121,27 +142,34 @@ After calculation concentration distribution of $C_{ED}(x,y,t)$ and $C_{EA}(x,y,
 $C_{EA}^*(x,y,t) = C_{EA}(x,y,t) \frac{C_{0,EA}}{\sum_{i=1}^n C_{EA}^i}$. $C_{EA}^*(x,y,t)$ represents the sum of electron acceptor concentrations in $g/m^3$.
 
 Take the biodegradation reactions of oxygen, nitrate and sulphate for benzene:
+
 $$ \tag{11}
 C_6H_6 + 7.5O_2 \to 6CO_2 + 3H_2O
 $$
+
 $$\tag{12}
 6NO_3^- + 6H^+ + C_6H_6 \to 6CO_2 + 6H_2O + 3N_2
 $$
+
 $$\tag{13}
 7.5H^+ + 3.75SO_4^{2-} + C_6H_6 \to 6CO_2 + 3.75H_2S + 3H_2O
 $$
+
 Values for $\Phi_{EA:ED}^i$ are $7.5$, $6$ and $3.75$ respectively. 
 Values for other biodegradation reactions are often available in literature.
 
-### (Source) superposition
-The paper of Gutierrez-Neri et al. (2009) mentions different source conditions (source depletion, pulse-injection), but does not involve multiple source zones (source-superposition), as implemented in _mibitrans_.
-As both core-fringe degradation and multiple source zones are based on the principle of superposition, and are linear.
-Therefore, it can be argued that (at least in the mathematical sense), it is valid to combine these methods.
-However, no mathematical evidence to support this has been found in literature.
+---
 
-### Sources
+## (Source) superposition
+The paper of *Gutierrez-Neri et al. (2009)* mentions different source conditions (source depletion, pulse-injection), but does not involve multiple source zones (source-superposition), as implemented in _mibitrans_. As both core-fringe degradation and multiple source zones are based on the principle of superposition, and are linear. Therefore, it can be argued that (at least in the mathematical sense), it is valid to combine these methods. However, no mathematical evidence to support this has been found in literature.
+
+---
+
+## References
 
 Borden, R. C., Bedient, P. B., Lee, M. D., Ward, C. H., & Wilson, J. T. (1986). Transport of dissolved hydrocarbons influenced by oxygen-limited biodegradation: 2. Field application. Water Resources Research, 22(13), 1983–1990. https://doi.org/10.1029/WR022i013p01983
+
+Domenico, P. A., *An analytical model for multidimensional transport of a decaying contaminant species*, Journal of Hydrology, 91 (1), 49–58, doi:10.1016/0022-1694(87)90127-2, 1987.
 
 Gutierrez-Neri, M., Ham, P. A. S., Schotting, R. J., & Lerner, D. N. (2009). Analytical modelling of fringe and core biodegradation in groundwater plumes. Journal of Contaminant Hydrology, 107(1), 1–9. https://doi.org/10.1016/j.jconhyd.2009.02.007
 

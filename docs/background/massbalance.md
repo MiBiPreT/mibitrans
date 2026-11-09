@@ -1,12 +1,10 @@
 # Mass Balance
 
-Mass balance is calculated based on determined concentrations based on the model choice. At any point in time $t$, the current mass of pure phase contaminant in the source zone is calculated via
+Mass balance is calculated based on determined concentrations based on the transport model choice. At any point in time $t$, the current mass of pure phase contaminant in the source zone is calculated via
 
 $$
 m_{\mathrm{s}}(t) = m_\mathrm{s,0}\cdot e^{-\gamma_s \cdot t}
 $$
-
-This Equations uses $\gamma_{s}^{inst}$ for the model option *Instant reaction* (find definition of $\gamma_{s}^{inst}$ in the particular section).
 
 The mass of contaminant that has left the source zone is thus:
 
@@ -30,5 +28,5 @@ $$
 m^\mathrm{no \, decay}_{\mathrm{p}} (t)= \Delta m_{s}(t)
 $$
 
-In case of linear decay or instant reaction, contaminant mass in the plume is reduced due to degradation. Consequently, the mass that left the source zone $\Delta m_{s}(t)$ is the sum of the degraded mass and the plume mass. 
+In case of linear decay or fringe-degradation, contaminant mass in the plume is reduced due to degradation. Consequently, the mass that left the source zone $\Delta m_{s}(t)$ is the sum of the degraded mass and the plume mass. 
 

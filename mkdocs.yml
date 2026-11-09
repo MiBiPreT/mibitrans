@@ -10,29 +10,26 @@ copyright: Copyright &copy; 2026 Alraune Zech, Jorrit Bakker, Robin Richardson, 
 nav:
   - Home: index.md
   - Introduction: introduction/introduction.md
+  - Getting Started: examples/basic_use_of_mibitrans.ipynb
   - Background:
     - Transport Theory: background/transporttheory.md
-    - Parameter Overview: background/parameters.md
     - Transport Model Setup: background/modelsetup.md
-    - Model implementations: background/modelimplementations.md
-    - Instant Reaction Model: background/instantreaction.md
     - Core-fringe Degradation: background/core-fringe.md
-    - Chain Decay: background/chaindecay.md
     - Mass Balance: background/massbalance.md
+    - Chain Decay: background/chaindecay.md
     - BIOSCREEN: background/bioscreen.md
   - Implementation: 
     - Implementation: implementation/implementation.md
-    - Example data: implementation/exampledata.md
-  - Examples:
-    - Walkthrough: examples/basic_use_of_mibitrans.ipynb
-    - Walkthrough animations: examples/animate_plume_plots.py
-    - Bemidji oil pipeline burst: examples/example_bemidji.ipynb
+    - Example Data: implementation/exampledata.md
+    - Parameter Overview: background/parameters.md
+  - Examples & Benchmarking:
+    - Bemidji Oil Pipeline Burst: examples/example_bemidji.ipynb
     - Keesler Air-Force Base: examples/example_keesler.ipynb
     - Ghent fieldsite: examples/example_ghent.ipynb
-    - Comparison Mibitrans with Anatrans: examples/example_mibitrans_anatrans.ipynb
     - Comparison with BIOSCREEN: examples/benchmarking_BIOSCREEN.ipynb
     - Comparison with BIOCHLOR: examples/benchmarking_BIOCHLOR.ipynb
-
+    - Comparison Mibitrans with Anatrans: examples/example_mibitrans_anatrans.ipynb
+    - Animations: examples/animate_plume_plots.py
   - Development: development/development.md
   - API Reference:
     - Data: reference/reference_data.md

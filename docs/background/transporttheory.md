@@ -1,8 +1,10 @@
-# Transport Theory
+# Reactive Transport Model
 
-## Contaminant Transport Equation
+## Transport Model Definition
 
-Transport of contaminants in the subsurface is modeled based on the three-dimensional advection–dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in the $x$-direction within a homogeneous isotropic porous medium:
+### Contaminant Transport Equation
+
+Transport of degrading contaminants in the subsurface is modeled based on the three-dimensional advection–dispersion equation (ADE) with linear equilibrium adsorption for uniform flow in the $x$-direction within a homogeneous isotropic porous medium:
 
 $$
 \begin{equation}\tag{1}
@@ -18,11 +20,14 @@ R\frac{\partial C}{\partial t}
 \end{equation}
 $$
 
-Here $C(x,y,z,t)$ is the contaminant concentration in space $(x \in [0,\infty],y \in [-\infty,\infty],z \in [-\infty,\infty])$ and time $t\geq 0$, $R$ is the linear equilibrium retardation factor, $v$ is the uniform groundwater velocity in $x$-direction. $r_{sinks} = -\mu C$ represents a sink term as result to decay/degradation assuming linear decay at the rate  $\mu$. Note that no decay is naturally included by $\mu = 0$.
+Here $C(x,y,z,t)$ is the contaminant concentration in space $(x \in [0,\infty),y \in (-\infty,\infty),z \in (-\infty,\infty))$ and time $t\geq 0$, $R$ is the linear equilibrium retardation factor, $v$ is the uniform groundwater velocity in $x$-direction. 
+
+First order (bio-)degradation is modeled via the sink term $-\mu C$ where $\mu$ is the linear decay/first-order degradation rate. Note that no decay is naturally included by $\mu = 0$.
 
 $D_{x}$, $D_{y}$ and $D_{y}$ are the longitudinal, transverse horizontal and transverse vertical dispersion coefficients, respectively. Dispersion is modeled following the law of *Scheidegger, [1961]*, simplified to the main flow directions, with $D_i = \alpha_i v$ ($i \in \{x,y,z\}$) where $\alpha_x$, $\alpha_y$ and $\alpha_z$ represent longitudinal, transverse horizontal and transverse vertical dispersivity, respectively.
 
----
+Find a tabular overview of all parameter used for transport modeling in `mibitrans` in section *Implementation/Parameter Overview*. 
+
 
 ### Boundary Conditions
 
@@ -38,7 +43,7 @@ Far-field condition:
 
 $$
 \begin{equation}\tag{3}
-\lim_{\sqrt{x^2+y^2+z^2}\to\infty} C(r,t) = 0
+\lim_{r\to\infty} C(r=\sqrt{x^2+y^2+z^2},t) = 0
 \end{equation}
 $$
 
@@ -72,9 +77,14 @@ $$
 
 ## Solutions to the Transport Equation
 
+The transport Eq. (1) can be solved exactly under the specified initial and boundary conditions given in Eqs. (2-6).
+
+
 ### Exact Solution
 
-*Wexler, [1992]* presented an exact analytical solution to the transport equation (ADE) under the given boundary conditions without adsorption and without source depletion. *West et al, [2007]* reports the solution including linear equilibrium adsorption with:
+*Wexler, [1992]* was one of the first to present an exact analytical solution to Eq. (1) without adsorption and without source depletion. 
+*West et al, [2007]* reports the solution to the transport equation (ADE) under the given boundary conditions 
+ including linear equilibrium adsorption with:
 
 $$
 \begin{equation}\tag{7}
@@ -185,9 +195,9 @@ The equation provides a closed-form analytical, but approximate solution to the 
 
 ### Bioscreen Solution
 
-*Bioscreen* *[Newell et al, 1996, 1997]* makes use of the approximate analytical solution of *Domenico, [1987]* in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.
+*BIOSCREEN* *[Newell et al, 1996, 1997]* makes use of the approximate analytical solution of *Domenico, [1987]* in various adaptions. Note that the Domenico-solution has not been derived mathematically rigorous as analytical solution of the ADE, but has been composed of analytical solutions for the individual processes.
 
-The equation of use in *Bioscreen* for the case of linear decay of the contaminant within the plume  is given by:
+The equation of use in *BIOSCREEN* for the case of linear decay of the contaminant within the plume  is given by:
 
 $$
 \begin{equation}\tag{9}
@@ -238,7 +248,9 @@ $$
 P = \sqrt{1 + \frac{4\mu R\alpha_x}{v}}
 $$
 
-The *Bioscreen*-Equation is a simplification of the Integral Solution as it truncates the second term in the sum that describes transport in horizontal direction due to advection and dispersion. Truncating the horizontal transport term was presented by *Sauty, [1980]* in the context of the one-dimensional ADE with constant input. He showed that the approximation is close to the non-truncated solution for Peclet-numbers greater then 100, but deviates for Peclet numbers $\lt 100$ which becomes significant with reducing Peclet numbers. Given that macrodispersion due to aquifer heterogeneity can have significant effect the amount of dispersion, Peclet numbers of $>100$ are not guaranteed in field situation, making the approximation questionable as also discussed by *West et al., [2007]*. Modern options of computation also make it unnecessary.
+The *BIOSCREEN*-Equation is a simplification of the Integral Solution as it truncates the second term in the sum that describes transport in horizontal direction due to advection and dispersion. Truncating the horizontal transport term was presented by *Sauty, [1980]* in the context of the one-dimensional ADE with constant input. He showed that the approximation is close to the non-truncated solution for Peclet-numbers greater then 100, but deviates for Peclet numbers $\lt 100$ which becomes significant with reducing Peclet numbers. Given that macrodispersion due to aquifer heterogeneity can have significant effect the amount of dispersion, Peclet numbers of $>100$ are not guaranteed in field situation, making the approximation questionable as also discussed by *West et al., [2007]*. Modern options of computation also make it unnecessary.
+
+
 
 ---
 

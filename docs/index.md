@@ -1,6 +1,6 @@
 # Documention for `mibitrans` python package
 
-`mibitrans` is an open-source Python-based modeling tool designed for rapid screening of contaminant transport at field sites impacted by petroleum hydrocarbons under natural flow conditions. The tool implements a suite of analytical solutions to the advection–dispersion equation, offering flexible model configurations, multiple representations of (bio)degradation processes, streamlined data handling and visualization capabilities. Its modular architecture allows for straightforward extension and adaptation to site-specific needs.
+`mibitrans` is an open-source Python-based modeling tool designed for rapid screening of solute transport at contaminated field sites under natural flow conditions, with a focus on subsurface contamination with petroleum hydrocarbons. The tool implements a suite of (semi-)analytical solutions to the advection–dispersion equation, offering flexible model configurations, multiple representations of (bio)degradation processes, streamlined data handling and visualization capabilities. Its modular architecture allows for straightforward extension and adaptation to site-specific needs.
 
 `mibitrans` can be used to address key questions in contaminated site management, including the feasibility of natural attenuation, expected plume development and spatial extent, and the relative importance of governing transport and degradation processes. It is particularly suited for early-stage site assessment, where fast and robust estimates of plume behavior, mass balances, and parameter sensitivity are required. In addition, the tool allows performing parameter calibration based on field observations and provides a benchmark for more complex numerical models.
 
@@ -8,17 +8,17 @@ Compared to conventional numerical approaches, `mibitrans` enables fast model se
 
 ## How to use mibitrans
 
-Using your preferred Python IDE, install Mibitrans, specify the field conditions and visualize the contaminant distribution.
+Using your preferred Python IDE, install `mibitrans`, specify the field conditions and visualize the contaminant distribution.
 
 ![Comparison between different mibitrans models](assets/model_comparison_trans.svg)
 
 ![Plume animation of Mibitrans model](assets/plume_animation.gif)
 
-Look at the examples section for detailed explanation on how to use mibitrans.
+Look at the section *Getting Started* and the *Examples* section for detailed explanation on how to use `mibitrans`.
 
 ## Installation
 
-To install mibitrans from GitHub repository, do:
+To install `mibitrans` from GitHub repository, do:
 
 ```console
 git clone git@github.com:MiBiPreT/mibitrans.git

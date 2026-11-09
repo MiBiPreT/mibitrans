@@ -39,13 +39,15 @@ model = mbt.ModelParameters(
     dt=182,  # Model time discretization step size, in [days]
 )
 
+ea = mbt.ElectronAcceptors([9, 6, 8, 5, 4], [1, 1, 1, 1, 1], [3.14, 4.9, 21.8, 4.7, 0.78])
 # Make and run some models, everything shown here also works for anatrans and bioscreen models
 
 mbt_model = mbt.Mibitrans(hydro, att, source, model)
 mbt_results_nodecay = mbt_model.run()
 mbt_model.attenuation_parameters.half_life = 10 * 365
 mbt_results_lindecay = mbt_model.run()
-mbt_model.instant_reaction(electron_acceptors=[9, 6, 8, 5, 4], utilization_factor=[3.14, 4.9, 21.8, 4.7, 0.78])
+
+mbt_model.fringe_degradation(ea, 1)
 mbt_results_instant = mbt_model.run()
 
 

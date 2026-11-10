@@ -65,7 +65,7 @@ def plume_core_fringe(
     ea_cmap = kwargs.get("ea_cmap", "Greens_r")
 
     # Will use figsize of (16,9) if not specified differently in kwargs
-    plt.figure(figsize=kwargs.get("figsize", (16, 9)), dpi=300, layout="constrained")
+    plt.figure(figsize=kwargs.get("figsize", (10, 6)), dpi=300, layout="constrained")
     plt.xlabel(r"Distance from source [$m$]")
     plt.ylabel(r"Distance from plume center [$m$]")
     plt.yticks([int(y[0]), 0, np.ceil(y[-1])], [np.round(y[0]), 0, np.round(y[-1])])

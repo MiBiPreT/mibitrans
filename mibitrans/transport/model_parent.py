@@ -462,7 +462,9 @@ class Transport3D(ABC):
                     f"{self.rv * self._mod_pars.model_time}. Increasing 'model_length' or decreasing 'model_time' "
                     "is recommended."
                 )
-        elif self._mod_pars.model_length * difference_factor < plume_length:
+        elif (self._mod_pars.model_length * difference_factor < plume_length) and (
+            self._mod_pars.model_length * difference_factor < self.rv * self._mod_pars.model_time
+        ):
             warnings.warn(
                 f"Model domain is undersized for the estimated plume length of {plume_length}. "
                 f"Increasing 'model_length' is recommended."

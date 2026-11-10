@@ -230,8 +230,15 @@ class Mibitrans(Transport3D):
         )
 
     def _equation_term_source_x_is_zero(self, sz):
+        """Function to manually calculate source zone concentrations (x=0) over time for source zone sz .
+
+        For a small x slightly larger than 0, i.e. 0.0001, the exact equation in total still resolves to C0. But with
+        limit x -> 0, the equation resolves to c=0, due to the term C0 * x / (8*sqrt(pi*ax*v)) = 0 at x=0). Thus, it
+        does not abide the boundary condition that C(x=0,y,t) = C0(y). To make sure that concentrations at the source
+        are presented correctly regardless, they are set manually.
+        """
         # Select y-positions of current source zone
-        zone_location = np.where(abs(self.yyy) <= self.y_source[sz], 1, 0)
+        zone_location = np.where(abs(self.yyy) < self.y_source[sz], 1, 0)
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt)
 
 

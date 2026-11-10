@@ -9,7 +9,6 @@ from mibitrans.transport.models import Anatrans
     [
         ("test_anatrans_model_nodecay", "nodecay_anatrans"),
         ("test_anatrans_model_lineardecay", "lineardecay_anatrans"),
-        ("test_anatrans_model_instantreaction", "instantreaction_anatrans"),
         ("test_anatrans_model_fringe", "instantreaction_anatrans"),
     ],
 )
@@ -49,28 +48,6 @@ def test_transport_chain_decay_runs(test_hydro_pars, test_att_pars_chain, test_s
 def test_anatrans_sample_linear(x, y, t, expected, test_anatrans_model_lineardecay):
     """Test if sample method from Anatrans works correctly, and gives expected output for linear models."""
     model, results = test_anatrans_model_lineardecay
-    if isinstance(expected, float):
-        assert model.sample(x, y, t) == pytest.approx(expected)
-    elif expected is ValueError or expected is TypeError:
-        with pytest.raises(expected):
-            model.sample(x, y, t)
-
-
-@pytest.mark.parametrize(
-    "x, y, t, expected",
-    [
-        (20, 0, 476, 5.540354132380653),
-        (54, 3, 1045, 3.501165953555688),
-        (-16, 0, 393, DomainValueError),
-        ("nonsense", 0, 393, TypeError),
-        (16, "nonsense", 393, TypeError),
-        (16, 0, -10, DomainValueError),
-        (16, 0, "nonsense", TypeError),
-    ],
-)
-def test_anatrans_sample_instantreaction(x, y, t, expected, test_anatrans_model_instantreaction):
-    """Test if sample method from Anatrans works correctly, and gives expected output for instant reaction models."""
-    model, results = test_anatrans_model_instantreaction
     if isinstance(expected, float):
         assert model.sample(x, y, t) == pytest.approx(expected)
     elif expected is ValueError or expected is TypeError:

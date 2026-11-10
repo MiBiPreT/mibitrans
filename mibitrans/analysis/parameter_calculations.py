@@ -4,7 +4,10 @@ Module containing various methods that takes a dictionary of parameters as input
 can be used in transport equations.
 """
 
+import warnings
 import numpy as np
+from scipy.optimize import brentq
+from scipy.special import erf
 
 
 def calculate_biodegradation_capacity(electron_acceptors, utilization_factor):
@@ -15,7 +18,7 @@ def calculate_biodegradation_capacity(electron_acceptors, utilization_factor):
 def calculate_discharge_and_average_source_zone_concentration(model):
     """Calculate discharge through source zone and average source zone concentration, returned in respective order."""
     if model.mode == "instant_reaction":
-        bc = model.biodegradation_capacity
+        bc = model._biodegradation_capacity
     else:
         bc = 0
     y_src = np.zeros(len(model.source_parameters.source_zone_boundary) + 1)
@@ -101,3 +104,52 @@ def transform_chain_concentrations(concentration_iterable: list[np.ndarray], dec
         transformed_concentrations[k + 1] = concentration_iterable[k + 1] + transform_total
 
     return transformed_concentrations
+
+
+def calculate_plume_length(
+    velocity, alpha_x, alpha_y, alpha_z, width, depth, decay_rate, c0, stoichiometric_ea_concentration
+) -> float:
+    """Estimate plume length based on flow, transport and degradation.
+
+    Args:
+        velocity (float): Flow velocity in the direction of the groundwater gradient.
+        alpha_x (float): Longitudinal dispersivity.
+        alpha_y (float): Horizontal transverse dispersivity.
+        alpha_z (float): Vertical transverse dispersivity.
+        width (float): Contaminant source width (from 0 to Y).
+        depth (float): Contaminant source depth.
+        decay_rate (float): First order (linear) decay coefficient.
+        c0 (float): Contaminant source concentration (for multiple source zones, use average source zone concentration).
+        stoichiometric_ea_concentration (float): Electron acceptor concentration stoichiometrically equal to
+            electron donor. In case no fringe degradation is modelled, it is equal to 0.
+
+    Returns:
+        plume_length (float): Estimated plume length at model steady state.
+    """
+    max_length = 100 * width
+    if stoichiometric_ea_concentration > 0:
+        limit = stoichiometric_ea_concentration
+    else:
+        limit = c0 * 0.01
+
+    # Equation used is t->infinity for Anatrans core-fringe degradation equation at plume center. Reminicent of equation
+    # 23 of Gutierrez-Neri et al. (2009), but corrected for critiques of Hunkeler et al. (2010).
+    def residual(pl):
+        """Calculate for which plume length equation is 0 at t->infinity."""
+        degradation_term = np.exp((pl / (2 * alpha_x)) * (1 - np.sqrt(1 + 4 * decay_rate * alpha_x / velocity))) + (
+            stoichiometric_ea_concentration / c0
+        )
+        horizontal_transverse_term = erf(width / (2 * np.sqrt(alpha_y * pl))) if alpha_y > 0 else 1
+        vertical_transverse_term = erf(depth / (2 * np.sqrt(alpha_z * pl))) if alpha_z > 0 else 1
+
+        return c0 * degradation_term * horizontal_transverse_term * vertical_transverse_term - limit
+
+    i = 0
+    while residual(max_length) > 0:
+        i += 1
+        max_length *= 2
+        if i > 100:
+            warnings.warn("Failed to determine plume length. Returning nan.")
+            return np.nan
+
+    return brentq(residual, 0.001, max_length)

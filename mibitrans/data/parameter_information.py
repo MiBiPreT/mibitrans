@@ -4,7 +4,6 @@ File containing various dictionaries used for evaluation of names, value types a
 
 """
 
-import warnings
 from dataclasses import dataclass
 import numpy as np
 from mibitrans.data.check_input import validate_input_values
@@ -70,14 +69,6 @@ class UtilizationFactor:
             validate_input_values(parameter, value)
         super().__setattr__(parameter, value)
 
-    def __post_init__(self):
-        """Action for after initialization of dataclass."""
-        warnings.warn(
-            "This Dataclass is deprecated and will be removed from 2.0 onwards. Reaction stoichiometry for "
-            "fringe degradation is handled by ElectronAcceptors dataclass instead.",
-            DeprecationWarning,
-        )
-
     @property
     def dictionary(self):
         """Returns utilization factors in the form of a dictionary."""
@@ -127,14 +118,6 @@ class InstantElectronAcceptors:
         """Override parent method to validate input when attribute is set."""
         validate_input_values(parameter, value)
         super().__setattr__(parameter, value)
-
-    def __post_init__(self):
-        """Action for after initialization of dataclass."""
-        warnings.warn(
-            "This Dataclass is deprecated and will be removed from 2.0 onwards. Use the ElectronAcceptors dataclass "
-            "for electron acceptor input for fringe degradation instead.",
-            DeprecationWarning,
-        )
 
     @property
     def dictionary(self):

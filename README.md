@@ -2,6 +2,8 @@
 
 `mibitrans` is an analytical subsurface contaminant transport modelling tool based on the three-dimensional advection–dispersion equation. `mibitrans` has a clear and quick parameter input and various model options, which allow for easy visualization of contaminant transport under various field conditions. The package is designed to be modular and well documented, to allow users to adapt a model to their liking. `mibitrans` is develloped as a screening tool to gain insights into field site contaminant distribution, which then can be used in development of more involved numerical models. The package is also well suited in contaminant transport visualization for educational purposes.
 
+![core-fringe degradation plot](docs/assets/readme_figure.svg)
+
 ## Installation of stable release
 
 Use `pip` to install the most recent stable release of `mibitrans` as follows:

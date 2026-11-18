@@ -87,7 +87,6 @@ plugins:
         options:
           show_source: true
           show_submodules: true
-          show_source: true
 - mkdocs-jupyter:
     execute: true
     include_source: true

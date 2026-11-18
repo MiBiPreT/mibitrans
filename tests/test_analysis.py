@@ -12,6 +12,7 @@ from mibitrans.analysis.differences import mean_sum_absolute_difference
 from mibitrans.analysis.differences import relative_error
 from mibitrans.analysis.differences import rmse
 from mibitrans.analysis.differences import sensitivity_models
+from mibitrans.analysis.parameter_calculations import calculate_plume_length
 from mibitrans.transport.model_parent import Results
 
 
@@ -185,3 +186,21 @@ def test_comparison_plot(test_sensitivty_models):
         )
         assert isinstance(plt.gca(), matplotlib.axes._axes.Axes)
         plt.clf()
+
+
+@pytest.mark.parametrize(
+    "v, ax, ay, az, wdt, dpt, mu, c0, c_ea, expected",
+    [
+        (1, 1, 0.5, 0.001, 5, 3, 0, 1, 0.5, 134.7519956389039),
+        (1, 1, 0.5, 0.001, 5, 3, 0.001, 1, 0, 2033.032116882854),
+        (1, 1, 0.5, 0, 5, 3, 0.001, 1, 0, 2151.962052382301),
+        (1, 1, 0.5, 0.001, 5, 3, 0.001, 1, 0.5, 114.78163286551684),
+        (1, 1, 0, 0.001, 5, 3, 0.001, 1, 0.5, 2323.834626832957),
+    ],
+)
+def test_plume_length_calculation(v, ax, ay, az, wdt, dpt, mu, c0, c_ea, expected):
+    """Test calculation of plume length for different scenarios."""
+    # Order of input: velocity, longitudinal dispersivity, horizontal transverse dispersivity, source width (0, Y),
+    # source depth, decay rate, source concentrations, stoichiometric ea concentration
+    plume_length = calculate_plume_length(v, ax, ay, az, wdt, dpt, mu, c0, c_ea)
+    assert plume_length == pytest.approx(expected)

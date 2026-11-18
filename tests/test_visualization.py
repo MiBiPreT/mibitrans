@@ -9,6 +9,7 @@ from mibitrans.visualize.plot_line import centerline
 from mibitrans.visualize.plot_line import transverse
 from mibitrans.visualize.plot_surface import plume_2d
 from mibitrans.visualize.plot_surface import plume_3d
+from mibitrans.visualize.plot_surface import plume_core_fringe
 
 matplotlib.use("Agg")  # Fixes tkinter.TclError in local tests
 
@@ -278,7 +279,7 @@ def test_source_depletion(test_hydro_pars, test_source_pars):
     ],
 )
 def test_input_plotting(plottable, expected, request):
-    """Test if input validation plotting function."""
+    """Test input validation plotting function."""
     if isinstance(plottable, str):
         plottable = request.getfixturevalue(plottable)
     with pytest.raises(expected):
@@ -291,6 +292,20 @@ def test_input_plotting(plottable, expected, request):
         plume_2d(plottable)
     with pytest.raises(expected):
         plume_3d(plottable)
+
+
+def test_plotting_core_fringe(test_mibitrans_model_fringe, test_mibitrans_model_chaindecay):
+    """Test plotting of combined ed and ea concentrations. And if it gives error when other type of model uses it."""
+    model, results = test_mibitrans_model_fringe
+    plume_core_fringe(results)
+    assert plt.gca(), matplotlib.axes._axes.Axes
+    plt.clf()
+    plume_core_fringe(results, relative_concentration=True)
+    assert plt.gca(), matplotlib.axes._axes.Axes
+    plt.clf()
+    model1, results1 = test_mibitrans_model_chaindecay
+    with pytest.raises(TypeError):
+        plume_core_fringe(results1)
 
 
 @pytest.mark.parametrize(

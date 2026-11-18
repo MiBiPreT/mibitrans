@@ -1,7 +1,57 @@
 import pytest
 from mibitrans.data.check_input import DomainValueError
+from mibitrans.data.parameter_information import InstantElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.transport.model_parent import Results
 from mibitrans.transport.models import Bioscreen
+
+
+@pytest.mark.parametrize(
+    "pars, expected",
+    [
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1]}, None),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}, None),
+        # Test for accepting ElectronAcceptors and UtilizationFactor dataclasses
+        (
+            {
+                "electron_acceptors": InstantElectronAcceptors(0.2, 0.4, 1, 0.5, 1),
+                "utilization_factor": UtilizationFactor(2.1, 1, 2, 3, 0.2),
+            },
+            None,
+        ),
+        # Test for accepting dictionaries
+        (
+            {
+                "electron_acceptors": dict(
+                    delta_oxygen=0.2, delta_nitrate=0.4, ferrous_iron=1, delta_sulfate=0.5, methane=1
+                ),
+                "utilization_factor": dict(
+                    util_oxygen=2.1, util_nitrate=1, util_ferrous_iron=2, util_sulfate=3, util_methane=0.2
+                ),
+            },
+            None,
+        ),
+        ({"utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": "No ea for you", "utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": 3}, TypeError),
+        ({"electron_acceptors": [0.2, "horseradish", 1, 0.5, 1], "utilization_factor": [2.1, 1, 2, 3, 0.2]}, TypeError),
+        ({"electron_acceptors": [0.2, 0.4, 1, 0.5, 1], "utilization_factor": [2.1, 1, -2, 3, 0.2]}, DomainValueError),
+    ],
+)
+def test_instant_reaction_setup(
+    pars, expected, test_hydro_pars, test_att_pars, test_source_pars, test_model_pars
+) -> None:
+    """Test if the instant reaction method accepts correct data and raises the intended errors if not."""
+    model_object = Bioscreen(test_hydro_pars, test_att_pars, test_source_pars, test_model_pars)
+    if expected is None:
+        model_object.instant_reaction(**pars)
+        assert model_object.mode == "instant_reaction", (
+            f"Model mode should be 'instant_reaction', but is '{model_object.mode}' instead."
+        )
+        assert model_object.biodegradation_capacity is not None, "No biodegradation capacity was calculated."
+    elif expected in [TypeError, ValueError]:
+        with pytest.raises(expected):
+            model_object.instant_reaction(**pars)
 
 
 @pytest.mark.parametrize(

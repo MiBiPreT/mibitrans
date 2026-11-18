@@ -5,7 +5,12 @@ from scipy.integrate import quad_vec
 from scipy.special import erf
 from scipy.special import erfc
 from scipy.special import erfcx
+from mibitrans.analysis.parameter_calculations import calculate_biodegradation_capacity
+from mibitrans.analysis.parameter_calculations import calculate_source_depletion
+from mibitrans.data.check_input import check_instant_reaction_acceptor_input
 from mibitrans.data.check_input import validate_input_values
+from mibitrans.data.parameter_information import InstantElectronAcceptors
+from mibitrans.data.parameter_information import UtilizationFactor
 from mibitrans.transport.model_parent import Results
 from mibitrans.transport.model_parent import Transport3D
 
@@ -63,8 +68,6 @@ class Mibitrans(Transport3D):
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
             k_source (float) : Source zone decay rate, in [1/days].
-            biodegradation_capacity (float) : Maximum capacity of biodegradation given provided electron acceptor
-            concentrations, in [g/m^3].
 
         Methods:
             run : Run model with current parameters, returns Results object.
@@ -156,12 +159,6 @@ class Mibitrans(Transport3D):
                 conc_array[sz] = 4 * integral_term * source_term
                 error_array[sz] = error
             concentration = np.sum(conc_array)
-            # Four lines below to be removed from version 2.0 onwards
-            if self._mode == "instant_reaction":
-                concentration -= self.biodegradation_capacity
-                if concentration < 0:
-                    concentration = 0
-            ######
         return concentration
 
     def _pre_run_initialization_parameters(self):
@@ -181,12 +178,6 @@ class Mibitrans(Transport3D):
             cxyt[:, :, 1:] += integral_sum[:, :, 1:] * source_term
             # If x=0, equation resolves to c=0, therefore, x=0 needs to be evaluated separately
             cxyt[:, :, 0] += self._equation_term_source_x_is_zero(sz)[:, :, 0]
-        # Four lines below to be removed from version 2.0 onwards
-        if self._mode == "instant_reaction":
-            self.cxyt_noBC = cxyt.copy()
-            cxyt -= self.biodegradation_capacity
-            cxyt = np.where(cxyt < 0, 0, cxyt)
-        ######
         return cxyt
 
     def _equation_term_integral(self, sz):
@@ -239,8 +230,15 @@ class Mibitrans(Transport3D):
         )
 
     def _equation_term_source_x_is_zero(self, sz):
+        """Function to manually calculate source zone concentrations (x=0) over time for source zone sz .
+
+        For a small x slightly larger than 0, i.e. 0.0001, the exact equation in total still resolves to C0. But with
+        limit x -> 0, the equation resolves to c=0, due to the term C0 * x / (8*sqrt(pi*ax*v)) = 0 at x=0). Thus, it
+        does not abide the boundary condition that C(x=0,y,t) = C0(y). To make sure that concentrations at the source
+        are presented correctly regardless, they are set manually.
+        """
         # Select y-positions of current source zone
-        zone_location = np.where(abs(self.yyy) <= self.y_source[sz], 1, 0)
+        zone_location = np.where(abs(self.yyy) < self.y_source[sz], 1, 0)
         return self.c_source[sz] * zone_location * np.exp(-self.k_source * self.ttt)
 
 
@@ -300,8 +298,6 @@ class Anatrans(Transport3D):
             c_source (np.ndarray) : Nett source zone concentrations, accounting for source superposition, in [g/m^3].
             vr (float) : Retarded groundwater flow velocity, in [m/d].
             k_source (float) : Source zone decay rate, in [1/days].
-            biodegradation_capacity (float) : Maximum capacity of biodegradation given provided electron acceptor
-            concentrations, in [g/m^3].
 
         Methods:
             run : Run model with current parameters, returns Results object.
@@ -368,18 +364,11 @@ class Anatrans(Transport3D):
 
         self._pre_run_initialization_parameters()
 
-        # Two lines below to be removed from version 2.0 onwards
-        if self.mode == "instant_reaction":
-            save_c_noBC = self.cxyt_noBC.copy()
-        #######
         x = np.array([x_position])
         y = np.array([y_position])
         t = np.array([time])
         concentration = self._calculate_concentration_for_all_xyt(x, y, t)[0]
-        # Two lines below to be removed from version 2.0 onwards
-        if self.mode == "instant_reaction":
-            self.cxyt_noBC = save_c_noBC
-        #######
+
         return concentration
 
     def _equation_term_x(self, xxx, ttt, decay_sqrt):
@@ -421,11 +410,6 @@ class Anatrans(Transport3D):
             y_term = self._equation_term_y(i, xxx, yyy)
             cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * (x_term + additional_x) * y_term * z_term
             cxyt += cxyt_step
-        # Four lines below are to be removed in version 2.0 onward
-        if self._mode == "instant_reaction":
-            self.cxyt_noBC = cxyt.copy()
-            cxyt -= self.biodegradation_capacity
-            cxyt = np.where(cxyt < 0, 0, cxyt)
         self.has_run = True
         return cxyt
 
@@ -510,6 +494,49 @@ class Bioscreen(Anatrans):
 
         """
         super().__init__(hydrological_parameters, attenuation_parameters, source_parameters, model_parameters, verbose)
+        self.biodegradation_capacity = 0
+        self._cxyt_nobc = None
+
+    def _pre_run_initialization_parameters(self):
+        Anatrans._pre_run_initialization_parameters(self)
+        if self._mode == "instant_reaction":
+            self.c_source[-1] += self.biodegradation_capacity
+            self._decay_rate = 0
+            self.k_source = calculate_source_depletion(self._hyd_pars, self._src_pars, self.biodegradation_capacity)
+
+    def instant_reaction(
+        self,
+        electron_acceptors: list | np.ndarray | dict | InstantElectronAcceptors,
+        utilization_factor: list | np.ndarray | dict | UtilizationFactor = UtilizationFactor(
+            util_oxygen=3.14, util_nitrate=4.9, util_ferrous_iron=21.8, util_sulfate=4.7, util_methane=0.78
+        ),
+    ):
+        """Enable and set up parameters for instant reaction model.
+
+        Instant reaction model assumes that biodegradation is an instantaneous process compared to the groundwater flow
+        velocity. The biodegradation is assumed to be governed by the availability of electron acceptors, and quantified
+        using  stoichiometric relations from the degradation reactions. Considered are concentrations of acceptors
+        Oxygen, Nitrate and Sulfate, and reduced species Ferrous Iron and Methane.
+
+        Args:
+            electron_acceptors (ElectronAcceptors): ElectronAcceptor dataclass containing electron acceptor
+                concentrations. Alternatively provided as list, numpy array or dictionary corresponding with
+                delta_oxygen, delta_nitrate, ferrous_iron, delta_sulfate and methane. For more information, see
+                documentation for ElectronAcceptors.
+            utilization_factor (UtilizationFactor, optional): UtilizationFactor dataclass containing electron acceptor
+                utilization factors. Alternatively provided as list, numpy array or dictionary corresponding with
+                information, see documentation of UtilizationFactor. By default, electron acceptor utilization factors
+                for a BTEX mixture are used, based on values by Wiedemeier et al. (1995).
+        """
+        self._electron_acceptors, self._utilization_factor = check_instant_reaction_acceptor_input(
+            electron_acceptors, utilization_factor
+        )
+        self._mode = "instant_reaction"
+        self.biodegradation_capacity = calculate_biodegradation_capacity(
+            self._electron_acceptors, self._utilization_factor
+        )
+        self.cxyt_nobc = 0
+        self._pre_run_initialization_parameters()
 
     def _equation_term_source_depletion(self, xxx, ttt):
         term = np.exp(-self.k_source * (ttt - xxx / self.rv))
@@ -531,11 +558,9 @@ class Bioscreen(Anatrans):
                 y_term = self._equation_term_y(i, xxx, yyy)
                 cxyt_step = 1 / 8 * self.c_source[i] * source_depletion * x_term * y_term * z_term
                 cxyt += cxyt_step
-        # Four lines below are to be removed form version 2.0 onward
         if self._mode == "instant_reaction":
-            self.cxyt_noBC = cxyt.copy()
+            self._cxyt_nobc = cxyt.copy()
             cxyt -= self.biodegradation_capacity
             cxyt = np.where(cxyt < 0, 0, cxyt)
-        ######
         self.has_run = True
         return cxyt
